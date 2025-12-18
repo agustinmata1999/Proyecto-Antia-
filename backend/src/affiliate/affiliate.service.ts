@@ -69,59 +69,123 @@ export class AffiliateService {
   }
 
   async updateBettingHouse(id: string, dto: UpdateBettingHouseDto) {
-    const house = await this.prisma.bettingHouse.findUnique({ where: { id } });
-    if (!house) {
+    // Check house exists
+    const houseResult = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter: { _id: { $oid: id } },
+      limit: 1,
+    }) as any;
+
+    if (!houseResult.cursor?.firstBatch?.length) {
       throw new NotFoundException('Casa de apuestas no encontrada');
     }
 
-    return this.prisma.bettingHouse.update({
-      where: { id },
-      data: {
-        ...(dto.name && { name: dto.name }),
-        ...(dto.logoUrl !== undefined && { logoUrl: dto.logoUrl }),
-        ...(dto.status && { status: dto.status }),
-        ...(dto.masterAffiliateUrl && { masterAffiliateUrl: dto.masterAffiliateUrl }),
-        ...(dto.trackingParamName && { trackingParamName: dto.trackingParamName }),
-        ...(dto.commissionPerReferralCents !== undefined && { commissionPerReferralCents: dto.commissionPerReferralCents }),
-        ...(dto.allowedCountries && { allowedCountries: dto.allowedCountries }),
-        ...(dto.blockedCountries && { blockedCountries: dto.blockedCountries }),
-        ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.websiteUrl !== undefined && { websiteUrl: dto.websiteUrl }),
-        ...(dto.csvColumnMapping !== undefined && { csvColumnMapping: dto.csvColumnMapping }),
-      },
+    const now = new Date().toISOString();
+    const updateFields: any = { updated_at: { $date: now } };
+
+    if (dto.name) updateFields.name = dto.name;
+    if (dto.logoUrl !== undefined) updateFields.logo_url = dto.logoUrl;
+    if (dto.status) updateFields.status = dto.status;
+    if (dto.masterAffiliateUrl) updateFields.master_affiliate_url = dto.masterAffiliateUrl;
+    if (dto.trackingParamName) updateFields.tracking_param_name = dto.trackingParamName;
+    if (dto.commissionPerReferralCents !== undefined) updateFields.commission_per_referral_cents = dto.commissionPerReferralCents;
+    if (dto.allowedCountries) updateFields.allowed_countries = dto.allowedCountries;
+    if (dto.blockedCountries) updateFields.blocked_countries = dto.blockedCountries;
+    if (dto.description !== undefined) updateFields.description = dto.description;
+    if (dto.websiteUrl !== undefined) updateFields.website_url = dto.websiteUrl;
+    if (dto.csvColumnMapping !== undefined) updateFields.csv_column_mapping = dto.csvColumnMapping;
+
+    await this.prisma.$runCommandRaw({
+      update: 'betting_houses',
+      updates: [{
+        q: { _id: { $oid: id } },
+        u: { $set: updateFields },
+      }],
     });
+
+    return this.getBettingHouse(id);
   }
 
   async getAllBettingHouses(includeInactive = false) {
-    const where = includeInactive ? {} : { status: 'ACTIVE' };
-    const houses = await this.prisma.bettingHouse.findMany({
-      where,
-      orderBy: { name: 'asc' },
-    });
-    
-    return houses.map(h => ({
-      ...h,
-      commissionPerReferralEur: h.commissionPerReferralCents / 100,
+    const filter = includeInactive ? {} : { status: 'ACTIVE' };
+    const result = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter,
+      sort: { name: 1 },
+    }) as any;
+
+    const houses = result.cursor?.firstBatch || [];
+    return houses.map((h: any) => ({
+      id: h._id.$oid || h._id.toString(),
+      name: h.name,
+      slug: h.slug,
+      logoUrl: h.logo_url,
+      status: h.status,
+      masterAffiliateUrl: h.master_affiliate_url,
+      trackingParamName: h.tracking_param_name,
+      commissionPerReferralCents: h.commission_per_referral_cents,
+      commissionPerReferralEur: h.commission_per_referral_cents / 100,
+      allowedCountries: h.allowed_countries || [],
+      blockedCountries: h.blocked_countries || [],
+      description: h.description,
+      websiteUrl: h.website_url,
+      createdAt: h.created_at,
     }));
   }
 
   async getBettingHouse(id: string) {
-    const house = await this.prisma.bettingHouse.findUnique({ where: { id } });
+    const result = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter: { _id: { $oid: id } },
+      limit: 1,
+    }) as any;
+
+    const house = result.cursor?.firstBatch?.[0];
     if (!house) {
       throw new NotFoundException('Casa de apuestas no encontrada');
     }
+
     return {
-      ...house,
-      commissionPerReferralEur: house.commissionPerReferralCents / 100,
+      id: house._id.$oid || house._id.toString(),
+      name: house.name,
+      slug: house.slug,
+      logoUrl: house.logo_url,
+      status: house.status,
+      masterAffiliateUrl: house.master_affiliate_url,
+      trackingParamName: house.tracking_param_name,
+      commissionPerReferralCents: house.commission_per_referral_cents,
+      commissionPerReferralEur: house.commission_per_referral_cents / 100,
+      allowedCountries: house.allowed_countries || [],
+      blockedCountries: house.blocked_countries || [],
+      description: house.description,
+      websiteUrl: house.website_url,
     };
   }
 
   async getBettingHouseBySlug(slug: string) {
-    const house = await this.prisma.bettingHouse.findUnique({ where: { slug } });
+    const result = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter: { slug: slug.toLowerCase() },
+      limit: 1,
+    }) as any;
+
+    const house = result.cursor?.firstBatch?.[0];
     if (!house) {
       throw new NotFoundException('Casa de apuestas no encontrada');
     }
-    return house;
+    
+    return {
+      id: house._id.$oid || house._id.toString(),
+      name: house.name,
+      slug: house.slug,
+      logoUrl: house.logo_url,
+      status: house.status,
+      masterAffiliateUrl: house.master_affiliate_url,
+      trackingParamName: house.tracking_param_name,
+      commissionPerReferralCents: house.commission_per_referral_cents,
+      allowedCountries: house.allowed_countries || [],
+      blockedCountries: house.blocked_countries || [],
+    };
   }
 
   // Filter houses by country
