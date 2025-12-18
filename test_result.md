@@ -1,8 +1,45 @@
 # Test Results - Antia Platform
 
-## Last Updated: 2025-12-17
+## Last Updated: 2025-12-18
 
-## Latest Feature: Sistema de Liquidaciones + Dashboard Corregido
+## Latest Feature: Control de Módulos por Tipster (SuperAdmin)
+### Status: ✅ IMPLEMENTED AND TESTED
+
+**Implementado:**
+- SuperAdmin puede habilitar/deshabilitar módulos para cada tipster
+- Módulos disponibles:
+  - 🎯 Pronósticos (AntiaPay): Venta de productos/pronósticos
+  - 🤝 Afiliación: Ganancias por referidos a casas de apuestas
+- Cambios aplican en tiempo real
+- Dashboard del tipster se adapta dinámicamente
+
+**Panel Admin (/dashboard/admin):**
+- Lista de todos los tipsters con toggles para cada módulo
+- Estadísticas de módulos habilitados
+- UI intuitiva con switches para activar/desactivar
+
+**API Endpoints:**
+- GET /api/admin/tipsters - Lista todos los tipsters con sus módulos
+- GET /api/admin/tipsters/:id - Detalle de un tipster
+- PATCH /api/admin/tipsters/:id/modules - Actualizar módulos
+- GET /api/users/me/modules - Obtener módulos habilitados (tipster)
+
+**Dashboard Tipster Dinámico:**
+- Menú lateral muestra solo módulos habilitados
+- Stats cards se ajustan según módulos activos
+- Secciones de contenido condicionadas por módulos
+- Pronósticos deshabilitado = oculta Productos, Telegram, Ventas
+- Afiliación deshabilitado = oculta sección de afiliados
+
+**Campos DB (TipsterProfile):**
+- moduleForecasts: Boolean (default true)
+- moduleAffiliate: Boolean (default false)
+- modulesUpdatedAt: DateTime
+- modulesUpdatedBy: String
+
+---
+
+## Previous Feature: Sistema de Liquidaciones + Dashboard Corregido
 ### Status: ✅ IMPLEMENTED AND TESTED
 
 **Corrección Dashboard:**
