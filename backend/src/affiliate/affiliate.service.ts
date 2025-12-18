@@ -395,22 +395,25 @@ export class AffiliateService {
     const links = result.cursor?.firstBatch || [];
 
     // Enrich with house details
-    const houseIds = links.map(l => l.houseId);
-    const houses = await this.prisma.bettingHouse.findMany({
-      where: { id: { in: houseIds } },
-    });
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const houseIds = links.map((l: any) => l.house_id);
+    const allHouses = await this.getAllBettingHouses(true);
+    const housesMap = new Map(allHouses.map(h => [h.id, h]));
 
-    return links.map(link => {
-      const house = housesMap.get(link.houseId);
+    return links.map((link: any) => {
+      const house = housesMap.get(link.house_id);
       return {
-        ...link,
+        id: link._id.$oid || link._id.toString(),
+        tipsterId: link.tipster_id,
+        houseId: link.house_id,
+        redirectCode: link.redirect_code,
+        totalClicks: link.total_clicks || 0,
+        totalReferrals: link.total_referrals || 0,
         house: house ? {
           id: house.id,
           name: house.name,
           slug: house.slug,
           logoUrl: house.logoUrl,
-          commissionPerReferralEur: house.commissionPerReferralCents / 100,
+          commissionPerReferralEur: house.commissionPerReferralEur,
         } : null,
       };
     });
@@ -418,9 +421,7 @@ export class AffiliateService {
 
   async getTipsterHousesWithLinks(tipsterId: string, countryCode?: string) {
     // Get all active houses (optionally filtered by country)
-    let houses = await this.prisma.bettingHouse.findMany({
-      where: { status: 'ACTIVE' },
-    });
+    let houses = await this.getAllBettingHouses(false);
 
     if (countryCode) {
       houses = houses.filter(house => {
@@ -445,7 +446,7 @@ export class AffiliateService {
           name: house.name,
           slug: house.slug,
           logoUrl: house.logoUrl,
-          commissionPerReferralEur: house.commissionPerReferralCents / 100,
+          commissionPerReferralEur: house.commissionPerReferralEur,
         },
         link: {
           id: link.id,
