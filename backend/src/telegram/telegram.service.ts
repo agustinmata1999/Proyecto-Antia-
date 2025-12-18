@@ -28,8 +28,11 @@ export class TelegramService implements OnModuleInit {
       const botInfo = await this.bot.telegram.getMe();
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
       
-      // Configurar webhook en lugar de polling
-      const webhookUrl = `${this.config.get('APP_URL')}/api/telegram/webhook`;
+      // Usar la URL correcta del proyecto
+      const appUrl = process.env.APP_URL || 'https://bet-dashboard-11.preview.emergentagent.com';
+      const webhookUrl = `${appUrl}/api/telegram/webhook`;
+      
+      this.logger.log(`🔧 Setting webhook with APP_URL from env: ${appUrl}`);
       await this.bot.telegram.setWebhook(webhookUrl);
       this.logger.log(`✅ Webhook configured: ${webhookUrl}`);
       this.logger.log('✅ TelegramService initialized (webhook mode)');
