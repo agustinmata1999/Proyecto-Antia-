@@ -19,6 +19,7 @@ import { SettlementsModule } from './settlements/settlements.module';
 import { AdminModule } from './admin/admin.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ReportsModule } from './reports/reports.module';
+import { AffiliateModule } from './affiliate/affiliate.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -48,6 +49,7 @@ import { HealthController } from './health.controller';
     AdminModule,
     CurrencyModule,
     ReportsModule,
+    AffiliateModule,
   ],
   controllers: [HealthController],
 })
