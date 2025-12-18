@@ -281,18 +281,111 @@ Para cada proveedor, necesitas:
 
 ---
 
-## 🔗 SISTEMA DE REFERIDOS
+## 🤝 MÓDULO DE AFILIACIÓN (REFERIDOS)
+
+### ¿Qué es Afiliación?
+Los tipsters comparten links de casas de apuestas (Bwin, Betway, etc.). Si un usuario se registra usando ese link, la casa paga una comisión y el tipster gana un monto fijo en EUR por cada referido válido.
+
+**Importante:** La ganancia por afiliación se liquida mensualmente y NO lleva comisión de Antiapay.
 
 ### Casas de Apuestas Configuradas
 
-1. **Bwin** (Método: API)
-   - CPA: €50 por registro, €150 por FTD
-   - RevShare: 25% de comisión
-   - Tipo: Híbrido
+| Casa | Comisión/Referido | Países Permitidos | Países Bloqueados |
+|------|-------------------|-------------------|-------------------|
+| **Bwin** | €50 | ES, DE, IT, AT, PT, GR, BE, NL | US, UK, FR |
+| **Betway** | €45 | ES, MX, CO, AR, CL, PE | US |
 
-2. **Bet365** (Método: CSV)
-   - CPA: €30 por registro, €100 por FTD
-   - Tipo: CPA
+### Flujo Completo
+
+```
+1. Admin crea casa de apuestas con link maestro
+2. Tipster ve casas disponibles en su panel
+3. Sistema genera link único: /r/{tipsterId}-{houseSlug}
+4. Tipster comparte link con su audiencia
+5. Usuario hace click → sistema detecta país → redirige a la casa
+6. Casa reporta conversiones (CSV mensual)
+7. Admin importa CSV → sistema asigna referidos a tipsters
+8. Fin de mes: se generan liquidaciones
+9. Admin marca como pagado
+```
+
+### Tracking de Links
+
+El sistema usa **links redirect propios**:
+- URL: `https://antia.com/r/{redirectCode}`
+- Al hacer click:
+  1. Se registra el click (IP, país, user agent, timestamp)
+  2. Se detecta país por IP (ip-api.com)
+  3. Si país permitido → redirige al link maestro con `?subid={tipsterId}`
+  4. Si país bloqueado → muestra mensaje con alternativas
+
+### Panel Admin (Afiliación)
+
+**Tabs disponibles:**
+- 🏠 **Casas de Apuestas** - CRUD completo con geolocalización
+- 📢 **Campañas** - Agrupar casas en campañas
+- 📤 **Importar CSV** - Cargar conversiones mensuales
+- 💵 **Liquidaciones** - Generar y pagar
+
+**Formato CSV estándar:**
+```csv
+tipster_tracking_id,event_type,status,occurred_at,external_ref_id,amount
+abc123-bwin,REGISTER,APPROVED,2025-01-15,REF001,
+abc123-bwin,DEPOSIT,PENDING,2025-01-16,REF002,100
+```
+
+### Panel Tipster (Afiliación)
+
+**Funcionalidades:**
+- Ver casas disponibles con comisión por referido
+- Copiar links personalizados
+- Ver métricas: clicks, referidos (pendientes/validados/rechazados), ganancias
+- Ver liquidaciones mensuales y su estado
+
+### API Endpoints de Afiliación
+
+**Admin:**
+```
+GET    /api/admin/affiliate/houses         - Listar casas
+POST   /api/admin/affiliate/houses         - Crear casa
+PATCH  /api/admin/affiliate/houses/:id     - Actualizar casa
+GET    /api/admin/affiliate/campaigns      - Listar campañas
+POST   /api/admin/affiliate/campaigns      - Crear campaña
+POST   /api/admin/affiliate/import-csv     - Importar CSV
+GET    /api/admin/affiliate/payouts        - Ver liquidaciones
+POST   /api/admin/affiliate/payouts/generate - Generar liquidaciones
+PATCH  /api/admin/affiliate/payouts/:id/pay - Marcar como pagado
+```
+
+**Tipster:**
+```
+GET    /api/affiliate/houses               - Casas con mis links
+POST   /api/affiliate/houses/:id/link      - Generar link
+GET    /api/affiliate/metrics              - Mis métricas
+GET    /api/affiliate/payouts              - Mis liquidaciones
+```
+
+**Público:**
+```
+GET    /api/r/:redirectCode                - Redirect (tracking + redirige)
+GET    /api/r/:redirectCode/info           - Info del link sin redirigir
+```
+
+### Modelo de Datos
+
+```
+betting_houses         - Casas de apuestas
+affiliate_campaigns    - Campañas
+tipster_affiliate_links - Links por tipster/casa
+affiliate_click_events - Eventos de click
+affiliate_conversions  - Conversiones importadas
+affiliate_import_batches - Historial de imports
+affiliate_payouts      - Liquidaciones mensuales
+```
+
+---
+
+## 🔗 SISTEMA DE REFERIDOS (Legacy)
 
 ### Eventos Rastreados
 
