@@ -143,13 +143,25 @@ export class AffiliateRedirectController {
       };
     }
 
-    const houseResult = await this.prisma.$runCommandRaw({
+    // Try to find house by ObjectId or string
+    let houseResult = await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: { $oid: linkDoc.house_id } },
       limit: 1,
     }) as any;
 
-    const house = houseResult.cursor?.firstBatch?.[0];
+    let house = houseResult.cursor?.firstBatch?.[0];
+    
+    // If not found, try as string
+    if (!house) {
+      houseResult = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: linkDoc.house_id },
+        limit: 1,
+      }) as any;
+      house = houseResult.cursor?.firstBatch?.[0];
+    }
+
     if (!house || house.status !== 'ACTIVE') {
       return {
         valid: false,
