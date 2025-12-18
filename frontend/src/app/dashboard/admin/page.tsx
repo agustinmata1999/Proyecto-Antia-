@@ -49,6 +49,7 @@ interface ExchangeRate {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { formatPrice, symbol } = useCurrency();
   const [activeView, setActiveView] = useState<AdminView>('tipsters');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
