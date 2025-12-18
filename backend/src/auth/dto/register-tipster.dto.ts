@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsPhoneNumber, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterTipsterDto {
@@ -11,8 +11,9 @@ export class RegisterTipsterDto {
   email: string;
 
   @ApiProperty({ example: '+34611111111' })
-  @IsPhoneNumber()
-  phone: string;
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @ApiProperty({ example: 'Password123!' })
   @IsString()
@@ -24,10 +25,13 @@ export class RegisterTipsterDto {
   @IsString()
   telegramUsername?: string;
 
-  @ApiProperty({ example: 'ES' })
+  @ApiProperty({ example: 'ES', required: false })
+  @IsOptional()
   @IsString()
-  countryIso: string;
+  countryIso?: string;
 
-  @ApiProperty({ example: true })
-  acceptTerms: boolean;
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  acceptTerms?: boolean;
 }
