@@ -63,7 +63,7 @@ bot.command('mis_compras', async (ctx) => {
       '🛒 Mis Compras:\n\n' +
       'No tienes compras registradas aún.\n\n' +
       'Para comprar pronósticos visita:\n' +
-      'https://antia-tipster.preview.emergentagent.com'
+      'https://bet-dashboard-11.preview.emergentagent.com'
     );
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -75,7 +75,7 @@ bot.command('renovar', (ctx) => {
   ctx.reply(
     '🔄 Renovar Suscripción:\n\n' +
     'Para renovar tu suscripción, visita tu panel de cliente en:\n' +
-    'https://antia-tipster.preview.emergentagent.com/dashboard/client'
+    'https://bet-dashboard-11.preview.emergentagent.com/dashboard/client'
   );
 });
 
@@ -85,7 +85,7 @@ bot.command('mi_cuenta', (ctx) => {
     `Telegram ID: ${ctx.from.id}\n` +
     `Usuario: @${ctx.from.username || 'Sin username'}\n\n` +
     'Gestiona tu cuenta en:\n' +
-    'https://antia-tipster.preview.emergentagent.com/dashboard/client/profile'
+    'https://bet-dashboard-11.preview.emergentagent.com/dashboard/client/profile'
   );
 });
 

@@ -811,7 +811,7 @@ export class TelegramService implements OnModuleInit {
       const username = ctx.from.username || ctx.from.first_name;
 
       // Generar link de checkout con parámetros de Telegram
-      const appUrl = this.config.get('APP_URL') || 'https://antia-tipster.preview.emergentagent.com';
+      const appUrl = this.config.get('APP_URL') || 'https://bet-dashboard-11.preview.emergentagent.com';
       const checkoutUrl = `${appUrl}/checkout/${productId}?telegram_user_id=${userId}&telegram_username=${encodeURIComponent(username || '')}`;
 
       await ctx.reply(
