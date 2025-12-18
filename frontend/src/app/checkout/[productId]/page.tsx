@@ -37,6 +37,7 @@ interface GatewayInfo {
 export default function CheckoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const { formatPrice, currency, symbol } = useCurrency();
   const productId = params.productId as string;
   const telegramUserId = searchParams.get('telegram_user_id') || '';
   const telegramUsername = searchParams.get('telegram_username') || '';
