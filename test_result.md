@@ -257,6 +257,32 @@
 - Product creation
 - Checkout flow
 
+### Admin Panel Tests (NEW - 2025-12-18)
+**Test Scenario 1: Commissions Panel**
+- Login as admin ⏳ TESTING
+- Navigate to /dashboard/admin ⏳ TESTING
+- Click on "💰 Comisiones" in sidebar ⏳ TESTING
+- Verify "Tipos de Cambio" section shows EUR→USD and USD→EUR rates ⏳ TESTING
+- Verify "Comisiones por Tipster" table shows required columns ⏳ TESTING
+- Click "Editar" on Fausto Perez ⏳ TESTING
+- Verify commission editing modal ⏳ TESTING
+
+**Test Scenario 2: Reports Panel**
+- Click on "📊 Reportes" in sidebar ⏳ TESTING
+- Verify filters appear ⏳ TESTING
+- Test "Resumen General" stats cards ⏳ TESTING
+- Change to "Ventas" report type ⏳ TESTING
+- Verify "Exportar CSV" button ⏳ TESTING
+- Test "Ranking Tipsters" report ⏳ TESTING
+
+**Test Scenario 3: Currency Switch**
+- Change Moneda to "$ USD" ⏳ TESTING
+- Verify amounts display with $ symbol ⏳ TESTING
+
+**Test Scenario 4: Module Management**
+- Click on "👥 Gestión Tipsters" ⏳ TESTING
+- Verify toggles for Pronósticos and Afiliación work ⏳ TESTING
+
 ## Known Issues
 - **MongoDB Transaction Error**: DELETE /api/telegram/channels/:id fails due to MongoDB replica set requirement for transactions
 - **Missing Test Data**: Some checkout tests fail because test product IDs don't exist in current database
