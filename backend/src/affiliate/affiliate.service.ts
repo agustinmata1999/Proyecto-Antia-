@@ -115,22 +115,25 @@ export class AffiliateService {
     }) as any;
 
     const houses = result.cursor?.firstBatch || [];
-    return houses.map((h: any) => ({
-      id: h._id.$oid || h._id.toString(),
-      name: h.name,
-      slug: h.slug,
-      logoUrl: h.logo_url,
-      status: h.status,
-      masterAffiliateUrl: h.master_affiliate_url,
-      trackingParamName: h.tracking_param_name,
-      commissionPerReferralCents: h.commission_per_referral_cents,
-      commissionPerReferralEur: h.commission_per_referral_cents / 100,
-      allowedCountries: h.allowed_countries || [],
-      blockedCountries: h.blocked_countries || [],
-      description: h.description,
-      websiteUrl: h.website_url,
-      createdAt: h.created_at,
-    }));
+    return houses.map((h: any) => {
+      const houseId = h._id.$oid || h._id.toString?.() || h._id;
+      return {
+        id: houseId,
+        name: h.name,
+        slug: h.slug,
+        logoUrl: h.logo_url,
+        status: h.status,
+        masterAffiliateUrl: h.master_affiliate_url,
+        trackingParamName: h.tracking_param_name,
+        commissionPerReferralCents: h.commission_per_referral_cents,
+        commissionPerReferralEur: h.commission_per_referral_cents / 100,
+        allowedCountries: h.allowed_countries || [],
+        blockedCountries: h.blocked_countries || [],
+        description: h.description,
+        websiteUrl: h.website_url,
+        createdAt: h.created_at,
+      };
+    });
   }
 
   async getBettingHouse(id: string) {
