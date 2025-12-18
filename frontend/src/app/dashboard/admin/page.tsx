@@ -850,6 +850,11 @@ export default function AdminDashboard() {
             )}
           </>
         )}
+
+        {/* AFFILIATE VIEW */}
+        {activeView === 'affiliate' && (
+          <AffiliateAdminPanel />
+        )}
       </main>
 
       {/* Commission Modal */}
