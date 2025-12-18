@@ -17,6 +17,8 @@ import { CheckoutModule } from './checkout/checkout.module';
 import { CommissionsModule } from './commissions/commissions.module';
 import { SettlementsModule } from './settlements/settlements.module';
 import { AdminModule } from './admin/admin.module';
+import { CurrencyModule } from './currency/currency.module';
+import { ReportsModule } from './reports/reports.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -44,6 +46,8 @@ import { HealthController } from './health.controller';
     CommissionsModule,
     SettlementsModule,
     AdminModule,
+    CurrencyModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })
