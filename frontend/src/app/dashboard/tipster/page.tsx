@@ -543,7 +543,7 @@ export default function TipsterDashboard() {
                 <span>💵 Liquidaciones</span>
                 {(salesStats?.netEarningsCents || 0) > 0 && (
                   <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                    €{((salesStats?.netEarningsCents || 0) / 100).toFixed(0)}
+                    {formatPrice(salesStats?.netEarningsCents || 0)}
                   </span>
                 )}
               </span>
