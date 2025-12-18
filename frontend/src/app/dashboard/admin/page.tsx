@@ -296,6 +296,12 @@ export default function AdminDashboard() {
               👥 Gestión Tipsters
             </button>
             <button
+              onClick={() => setActiveView('affiliate')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'affiliate' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              🤝 Afiliación
+            </button>
+            <button
               onClick={() => setActiveView('commissions')}
               className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'commissions' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
             >
