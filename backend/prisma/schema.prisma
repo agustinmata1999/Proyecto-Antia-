@@ -170,7 +170,7 @@ model House {
 model BettingHouse {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
   name                    String                                    // Nombre: "Bwin", "Betway"
-  slug                    String   @unique                          // Identificador único: "bwin", "betway"
+  slug                    String                                    // Identificador único: "bwin", "betway"
   logoUrl                 String?  @map("logo_url")                 // URL del logo
   status                  String   @default("ACTIVE")               // ACTIVE, INACTIVE
   
@@ -202,7 +202,7 @@ model BettingHouse {
 model AffiliateCampaign {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   name              String                                          // "Campaña Verano 2025"
-  slug              String   @unique
+  slug              String
   description       String?
   status            String   @default("ACTIVE")                     // ACTIVE, INACTIVE, ARCHIVED
   
@@ -230,7 +230,7 @@ model TipsterAffiliateLink {
   houseId         String   @map("house_id")                         // ID de BettingHouse
   
   // URL de redirect propia: /r/{tipsterId}/{houseSlug}
-  redirectCode    String   @unique @map("redirect_code")            // Código único para el redirect
+  redirectCode    String   @map("redirect_code")                    // Código único para el redirect
   
   // Stats acumuladas (cache para performance)
   totalClicks     Int      @default(0) @map("total_clicks")
