@@ -470,8 +470,8 @@ export class AffiliateService {
     userAgent?: string,
     referer?: string,
   ) {
-    const house = await this.prisma.bettingHouse.findUnique({ where: { id: houseId } });
-    if (!house || house.status !== 'ACTIVE') {
+    const house = await this.getBettingHouse(houseId);
+    if (house.status !== 'ACTIVE') {
       throw new NotFoundException('Casa de apuestas no encontrada o inactiva');
     }
 
@@ -500,27 +500,37 @@ export class AffiliateService {
     // Get link
     const link = await this.getOrCreateTipsterLink(tipsterId, houseId);
 
-    // Record click event
-    const clickEvent = await this.prisma.affiliateClickEvent.create({
-      data: {
-        tipsterId,
-        houseId,
-        linkId: link.id,
-        ipAddress,
-        countryCode,
-        userAgent,
-        referer,
-        wasBlocked,
-        blockReason,
-        redirectedTo,
-      },
+    // Record click event using raw MongoDB
+    const now = new Date().toISOString();
+    const clickId = new ObjectId();
+
+    await this.prisma.$runCommandRaw({
+      insert: 'affiliate_click_events',
+      documents: [{
+        _id: clickId,
+        tipster_id: tipsterId,
+        house_id: houseId,
+        link_id: link.id,
+        ip_address: ipAddress || null,
+        country_code: countryCode || null,
+        user_agent: userAgent || null,
+        referer: referer || null,
+        was_blocked: wasBlocked,
+        block_reason: blockReason,
+        redirected_to: redirectedTo,
+        clicked_at: { $date: now },
+        created_at: { $date: now },
+      }],
     });
 
     // Update click count on link
     if (!wasBlocked) {
-      await this.prisma.tipsterAffiliateLink.update({
-        where: { id: link.id },
-        data: { totalClicks: { increment: 1 } },
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_links',
+        updates: [{
+          q: { _id: { $oid: link.id } },
+          u: { $inc: { total_clicks: 1 } },
+        }],
       });
     }
 
