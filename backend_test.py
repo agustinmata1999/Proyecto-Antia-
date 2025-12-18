@@ -1511,6 +1511,373 @@ class AntiaAPITester:
             self.log(f"❌ Delete telegram channel test failed: {str(e)}", "ERROR")
             return False
 
+    # ===== AFFILIATE MODULE TESTS =====
+    
+    def test_admin_login(self) -> bool:
+        """Test authentication with admin credentials"""
+        self.log("=== Testing Admin Authentication ===")
+        
+        login_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                
+                # Check if access_token is in response
+                if "access_token" in response_data:
+                    self.admin_access_token = response_data["access_token"]
+                    self.log("✅ Admin login successful - JWT token received")
+                    return True
+                else:
+                    self.log("❌ Admin login response missing access_token", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Admin login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin login test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_get_betting_houses(self) -> bool:
+        """Test GET /api/admin/affiliate/houses - List all betting houses"""
+        self.log("=== Testing Admin Get Betting Houses ===")
+        
+        if not self.admin_access_token:
+            self.log("❌ No admin token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("GET", "/admin/affiliate/houses")
+            
+            if response.status_code == 200:
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} betting houses")
+                
+                # Check if Bwin and Betway exist as mentioned in review request
+                house_names = [house.get('name', '').lower() for house in houses]
+                
+                if any('bwin' in name for name in house_names):
+                    self.log("✅ Found Bwin betting house")
+                else:
+                    self.log("⚠️ Bwin betting house not found", "WARN")
+                
+                if any('betway' in name for name in house_names):
+                    self.log("✅ Found Betway betting house")
+                else:
+                    self.log("⚠️ Betway betting house not found", "WARN")
+                
+                # Log house details for debugging
+                for i, house in enumerate(houses):
+                    self.log(f"House {i+1}: {house.get('name', 'No name')} - €{house.get('commissionPerReferralEur', 0)}/ref")
+                    
+                return True
+            else:
+                self.log(f"❌ Get betting houses failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get betting houses test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_admin_create_betting_house(self) -> bool:
+        """Test POST /api/admin/affiliate/houses - Create a new betting house"""
+        self.log("=== Testing Admin Create Betting House ===")
+        
+        if not self.admin_access_token:
+            self.log("❌ No admin token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        house_data = {
+            "name": "Test House API",
+            "slug": "test-house-api",
+            "websiteUrl": "https://testbetting.com",
+            "logoUrl": "https://testbetting.com/logo.png",
+            "commissionPerReferralEur": 25.0,
+            "allowedCountries": ["ES", "FR", "IT"],
+            "blockedCountries": ["US", "UK"],
+            "masterUrl": "https://testbetting.com/register?ref={TRACKING_ID}",
+            "description": "Test betting house created via API"
+        }
+        
+        try:
+            response = self.make_request("POST", "/admin/affiliate/houses", house_data)
+            
+            if response.status_code == 201:
+                house = response.json()
+                self.test_house_id = house.get("id")
+                self.log(f"✅ Betting house created successfully with ID: {self.test_house_id}")
+                
+                # Verify house fields
+                if house.get("name") == house_data["name"]:
+                    self.log("✅ House name matches")
+                else:
+                    self.log("❌ House name mismatch", "ERROR")
+                    
+                if house.get("commissionPerReferralEur") == house_data["commissionPerReferralEur"]:
+                    self.log("✅ House commission matches")
+                else:
+                    self.log("❌ House commission mismatch", "ERROR")
+                    
+                return True
+            else:
+                self.log(f"❌ Create betting house failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Create betting house test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_tipster_get_houses(self) -> bool:
+        """Test GET /api/affiliate/houses - Get houses with personal affiliate links"""
+        self.log("=== Testing Tipster Get Houses ===")
+        
+        try:
+            response = self.make_request("GET", "/affiliate/houses")
+            
+            if response.status_code == 200:
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} houses for tipster")
+                
+                # Log house details for debugging
+                for i, house in enumerate(houses):
+                    house_info = house.get('house', {})
+                    link_info = house.get('link', {})
+                    self.log(f"House {i+1}: {house_info.get('name', 'No name')} - Link: {link_info.get('redirectCode', 'No code')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Get tipster houses failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get tipster houses test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_tipster_generate_affiliate_link(self) -> bool:
+        """Test POST /api/affiliate/houses/:houseId/link - Generate link for house"""
+        self.log("=== Testing Tipster Generate Affiliate Link ===")
+        
+        # First get available houses to get a house ID
+        try:
+            houses_response = self.make_request("GET", "/affiliate/houses")
+            if houses_response.status_code != 200:
+                self.log("❌ Could not get houses to test link generation", "ERROR")
+                return False
+            
+            houses = houses_response.json()
+            if not houses:
+                self.log("❌ No houses available for link generation", "ERROR")
+                return False
+            
+            # Use the first house
+            first_house = houses[0]
+            house_id = first_house.get('house', {}).get('id')
+            
+            if not house_id:
+                self.log("❌ No house ID found in first house", "ERROR")
+                return False
+            
+            self.log(f"Using house ID: {house_id}")
+            
+            response = self.make_request("POST", f"/affiliate/houses/{house_id}/link")
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Affiliate link generated successfully")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Link generation marked as successful")
+                    
+                    link_info = result.get("link", {})
+                    if link_info.get("redirectCode"):
+                        self.log(f"✅ Redirect code generated: {link_info['redirectCode']}")
+                        
+                        if link_info.get("redirectUrl"):
+                            self.log(f"✅ Redirect URL: {link_info['redirectUrl']}")
+                        else:
+                            self.log("❌ No redirect URL in response", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ No redirect code in response", "ERROR")
+                        return False
+                        
+                    house_info = result.get("house", {})
+                    if house_info.get("name"):
+                        self.log(f"✅ House info included: {house_info['name']}")
+                    else:
+                        self.log("❌ No house info in response", "ERROR")
+                        return False
+                        
+                    return True
+                else:
+                    self.log("❌ Link generation marked as failed", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Generate affiliate link failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Generate affiliate link test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_tipster_get_affiliate_metrics(self) -> bool:
+        """Test GET /api/affiliate/metrics - Get affiliate metrics"""
+        self.log("=== Testing Tipster Get Affiliate Metrics ===")
+        
+        try:
+            response = self.make_request("GET", "/affiliate/metrics")
+            
+            if response.status_code == 200:
+                metrics = response.json()
+                self.log("✅ Successfully retrieved affiliate metrics")
+                
+                # Check expected metrics fields
+                expected_fields = ["totalClicks", "totalReferrals", "pendingReferrals", "approvedReferrals", "totalEarningsCents"]
+                for field in expected_fields:
+                    if field in metrics:
+                        self.log(f"✅ Metrics has {field}: {metrics[field]}")
+                    else:
+                        self.log(f"⚠️ Metrics missing {field}", "WARN")
+                
+                return True
+            else:
+                self.log(f"❌ Get affiliate metrics failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get affiliate metrics test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_public_redirect_info(self) -> bool:
+        """Test GET /api/r/:redirectCode/info - Get redirect info without redirecting"""
+        self.log("=== Testing Public Redirect Info ===")
+        
+        # First generate a link to get a redirect code
+        try:
+            houses_response = self.make_request("GET", "/affiliate/houses")
+            if houses_response.status_code != 200:
+                self.log("❌ Could not get houses to test redirect info", "ERROR")
+                return False
+            
+            houses = houses_response.json()
+            if not houses:
+                self.log("❌ No houses available for redirect info test", "ERROR")
+                return False
+            
+            # Use the first house and get its redirect code
+            first_house = houses[0]
+            link_info = first_house.get('link', {})
+            redirect_code = link_info.get('redirectCode')
+            
+            if not redirect_code:
+                self.log("❌ No redirect code found in first house", "ERROR")
+                return False
+            
+            self.log(f"Using redirect code: {redirect_code}")
+            
+            response = self.make_request("GET", f"/r/{redirect_code}/info", use_auth=False)
+            
+            if response.status_code == 200:
+                info = response.json()
+                self.log("✅ Successfully retrieved redirect info")
+                
+                # Check response structure
+                if info.get("valid"):
+                    self.log("✅ Redirect link is valid")
+                    
+                    house_info = info.get("house", {})
+                    if house_info.get("name"):
+                        self.log(f"✅ House name: {house_info['name']}")
+                    
+                    if "countryCode" in info:
+                        self.log(f"✅ Country detected: {info['countryCode']}")
+                    
+                    if "isAllowed" in info:
+                        self.log(f"✅ Access allowed: {info['isAllowed']}")
+                        
+                        if not info["isAllowed"] and info.get("blockReason"):
+                            self.log(f"ℹ️ Block reason: {info['blockReason']}")
+                    
+                    return True
+                else:
+                    self.log(f"❌ Redirect link is invalid: {info.get('error', 'No error message')}", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Get redirect info failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get redirect info test failed: {str(e)}", "ERROR")
+            return False
+
+    def run_affiliate_tests(self) -> bool:
+        """Run all affiliate module tests"""
+        self.log("=" * 50)
+        self.log("🏆 STARTING AFFILIATE MODULE TESTS")
+        self.log("=" * 50)
+        
+        tests = [
+            ("Admin Login", self.test_admin_login),
+            ("Admin Get Betting Houses", self.test_admin_get_betting_houses),
+            ("Admin Create Betting House", self.test_admin_create_betting_house),
+            ("Tipster Get Houses", self.test_tipster_get_houses),
+            ("Tipster Generate Affiliate Link", self.test_tipster_generate_affiliate_link),
+            ("Tipster Get Affiliate Metrics", self.test_tipster_get_affiliate_metrics),
+            ("Public Redirect Info", self.test_public_redirect_info),
+        ]
+        
+        passed = 0
+        failed = 0
+        
+        for test_name, test_func in tests:
+            self.log(f"\n--- Running: {test_name} ---")
+            try:
+                if test_func():
+                    passed += 1
+                    self.log(f"✅ {test_name} PASSED")
+                else:
+                    failed += 1
+                    self.log(f"❌ {test_name} FAILED")
+            except Exception as e:
+                failed += 1
+                self.log(f"❌ {test_name} FAILED with exception: {str(e)}")
+        
+        self.log("\n" + "=" * 50)
+        self.log("🏆 AFFILIATE MODULE TESTS SUMMARY")
+        self.log("=" * 50)
+        self.log(f"✅ PASSED: {passed}")
+        self.log(f"❌ FAILED: {failed}")
+        self.log(f"📊 TOTAL: {passed + failed}")
+        
+        if failed == 0:
+            self.log("🎉 ALL AFFILIATE TESTS PASSED!")
+            return True
+        else:
+            self.log(f"⚠️ {failed} AFFILIATE TESTS FAILED")
+            return False
+
     def run_all_tests(self) -> Dict[str, bool]:
         """Run all API tests"""
         self.log("🚀 Starting Antia Platform Backend API Tests")
