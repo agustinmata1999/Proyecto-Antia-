@@ -346,7 +346,7 @@ export default function AffiliateSection() {
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-bold text-green-600">
-                            €{payout.totalAmountEur.toFixed(2)}
+                            {formatPrice(payout.totalAmountCents)}
                           </div>
                           <div className="text-sm text-gray-500">
                             {payout.totalReferrals} referidos
