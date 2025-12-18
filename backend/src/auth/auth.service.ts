@@ -57,12 +57,14 @@ export class AuthService {
   }
 
   async registerTipster(dto: RegisterTipsterDto) {
-    // Check if email exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    // Check if email exists using raw query
+    const existingResult = await this.prisma.$runCommandRaw({
+      find: 'users',
+      filter: { email: dto.email },
+      limit: 1,
+    }) as any;
 
-    if (existingUser) {
+    if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new ConflictException('Email already registered');
     }
 
@@ -70,32 +72,46 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     try {
-      // Create user first
-      const user = await this.prisma.user.create({
-        data: {
+      const now = new Date().toISOString();
+      const userId = new ObjectId();
+      const tipsterProfileId = new ObjectId();
+
+      // Create user using raw MongoDB
+      await this.prisma.$runCommandRaw({
+        insert: 'users',
+        documents: [{
+          _id: userId,
           email: dto.email,
           phone: dto.phone,
-          passwordHash: passwordHash,
+          password_hash: passwordHash,
           role: 'TIPSTER',
-          status: 'ACTIVE', // Changed to ACTIVE for demo
-        },
+          status: 'ACTIVE',
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
 
-      // Create tipster profile separately
-      await this.prisma.tipsterProfile.create({
-        data: {
-          userId: user.id,
-          publicName: dto.name,
-          telegramUsername: dto.telegramUsername,
+      // Create tipster profile using raw MongoDB
+      await this.prisma.$runCommandRaw({
+        insert: 'tipster_profiles',
+        documents: [{
+          _id: tipsterProfileId,
+          user_id: userId.toHexString(),
+          public_name: dto.name,
+          telegram_username: dto.telegramUsername || null,
           locale: 'es',
           timezone: 'Europe/Madrid',
-        },
+          module_pronosticos_enabled: true,
+          module_affiliate: false,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
 
       return {
         message: 'Tipster registered successfully.',
-        userId: user.id,
-        status: user.status,
+        userId: userId.toHexString(),
+        status: 'ACTIVE',
       };
     } catch (error) {
       console.error('Error registering tipster:', error);
