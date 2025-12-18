@@ -134,19 +134,33 @@ export class AffiliateService {
   }
 
   async getBettingHouse(id: string) {
-    const result = await this.prisma.$runCommandRaw({
+    // Try to find by _id as ObjectId or as string
+    let result = await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: { $oid: id } },
       limit: 1,
     }) as any;
 
-    const house = result.cursor?.firstBatch?.[0];
+    let house = result.cursor?.firstBatch?.[0];
+    
+    // If not found with $oid, try as string
+    if (!house) {
+      result = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: id },
+        limit: 1,
+      }) as any;
+      house = result.cursor?.firstBatch?.[0];
+    }
+
     if (!house) {
       throw new NotFoundException('Casa de apuestas no encontrada');
     }
 
+    const houseId = house._id.$oid || house._id.toString?.() || house._id;
+
     return {
-      id: house._id.$oid || house._id.toString(),
+      id: houseId,
       name: house.name,
       slug: house.slug,
       logoUrl: house.logo_url,
