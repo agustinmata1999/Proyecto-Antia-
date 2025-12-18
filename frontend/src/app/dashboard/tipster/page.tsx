@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi } from '@/lib/api';
+import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi } from '@/lib/api';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
