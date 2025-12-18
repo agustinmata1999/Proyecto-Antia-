@@ -246,7 +246,7 @@ export default function AffiliateSection() {
                           <div>
                             <h3 className="font-semibold text-gray-900">{house.name}</h3>
                             <p className="text-sm text-green-600 font-medium">
-                              €{house.commissionPerReferralEur} / referido
+                              {formatPrice(house.commissionPerReferralEur * 100)} / referido
                             </p>
                           </div>
                         </div>
