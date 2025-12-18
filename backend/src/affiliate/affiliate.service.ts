@@ -753,16 +753,19 @@ export class AffiliateService {
       byTipster[conv.tipsterId].push(conv);
     }
 
-    const houses = await this.prisma.bettingHouse.findMany();
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const allHouses = await this.getAllBettingHouses(true);
+    const housesMap = new Map(allHouses.map(h => [h.id, h]));
 
     const payouts = [];
     for (const [tipsterId, tipsterConvs] of Object.entries(byTipster)) {
-      // Check if payout already exists
-      const existing = await this.prisma.affiliatePayout.findUnique({
-        where: { tipsterId_periodMonth: { tipsterId, periodMonth } },
-      });
-      if (existing) continue;
+      // Check if payout already exists using raw query
+      const existingResult = await this.prisma.$runCommandRaw({
+        find: 'affiliate_payouts',
+        filter: { tipster_id: tipsterId, period_month: periodMonth },
+        limit: 1,
+      }) as any;
+      
+      if (existingResult.cursor?.firstBatch?.length > 0) continue;
 
       // Build house breakdown
       const breakdown: Record<string, any> = {};
@@ -783,17 +786,34 @@ export class AffiliateService {
       const totalReferrals = tipsterConvs.length;
       const totalAmountCents = tipsterConvs.reduce((sum, c) => sum + (c.commissionCents || 0), 0);
 
-      const payout = await this.prisma.affiliatePayout.create({
-        data: {
-          tipsterId,
-          periodMonth,
-          houseBreakdown: Object.values(breakdown),
-          totalReferrals,
-          totalAmountCents,
-        },
+      // Create payout using raw MongoDB
+      const now = new Date().toISOString();
+      const payoutId = new ObjectId();
+
+      await this.prisma.$runCommandRaw({
+        insert: 'affiliate_payouts',
+        documents: [{
+          _id: payoutId,
+          tipster_id: tipsterId,
+          period_month: periodMonth,
+          house_breakdown: Object.values(breakdown),
+          total_referrals: totalReferrals,
+          total_amount_cents: totalAmountCents,
+          currency: 'EUR',
+          status: 'PENDING',
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
 
-      payouts.push(payout);
+      payouts.push({
+        id: payoutId.toHexString(),
+        tipsterId,
+        periodMonth,
+        totalReferrals,
+        totalAmountCents,
+        status: 'PENDING',
+      });
     }
 
     return payouts;
