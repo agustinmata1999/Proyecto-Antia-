@@ -527,8 +527,10 @@ export default function TipsterDashboard() {
                 onClick={() => setActiveView('referrals')}
                 className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'referrals' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
               >
-              Afiliación
-            </button>
+                🤝 Afiliación
+              </button>
+            )}
+            
             <button
               onClick={() => setActiveView('payouts')}
               className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'payouts' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
@@ -546,13 +548,13 @@ export default function TipsterDashboard() {
               onClick={() => setActiveView('profile')}
               className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'profile' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
             >
-              Perfil
+              ⚙️ Perfil
             </button>
             <button
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50"
             >
-              Cerrar Sesión
+              🚪 Cerrar Sesión
             </button>
           </nav>
         </div>
