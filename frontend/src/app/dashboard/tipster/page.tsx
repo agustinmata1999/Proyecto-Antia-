@@ -1086,7 +1086,7 @@ export default function TipsterDashboard() {
                           <tr>
                             <td className="py-4 text-gray-600">Ingresos Brutos</td>
                             <td className="py-4 text-right font-semibold text-gray-900">
-                              €{((salesStats?.grossEarningsCents || 0) / 100).toFixed(2)}
+                              {formatPrice(salesStats?.grossEarningsCents || 0)}
                             </td>
                           </tr>
                           <tr className="bg-red-50">
