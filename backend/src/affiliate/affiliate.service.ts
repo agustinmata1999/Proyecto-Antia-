@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
 import {
   CreateBettingHouseDto,
   UpdateBettingHouseDto,
@@ -17,30 +17,55 @@ export class AffiliateService {
   // ==================== BETTING HOUSES ====================
 
   async createBettingHouse(dto: CreateBettingHouseDto, adminId: string) {
-    // Check slug is unique
-    const existing = await this.prisma.bettingHouse.findUnique({
-      where: { slug: dto.slug },
-    });
-    if (existing) {
+    // Check slug is unique using raw query
+    const existingResult = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter: { slug: dto.slug.toLowerCase() },
+      limit: 1,
+    }) as any;
+
+    if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new BadRequestException(`Ya existe una casa con el slug "${dto.slug}"`);
     }
 
-    return this.prisma.bettingHouse.create({
-      data: {
+    const now = new Date().toISOString();
+    const newId = new ObjectId();
+
+    await this.prisma.$runCommandRaw({
+      insert: 'betting_houses',
+      documents: [{
+        _id: newId,
         name: dto.name,
         slug: dto.slug.toLowerCase(),
-        logoUrl: dto.logoUrl,
-        masterAffiliateUrl: dto.masterAffiliateUrl,
-        trackingParamName: dto.trackingParamName || 'subid',
-        commissionPerReferralCents: dto.commissionPerReferralCents,
-        allowedCountries: dto.allowedCountries || [],
-        blockedCountries: dto.blockedCountries || [],
-        description: dto.description,
-        websiteUrl: dto.websiteUrl,
-        csvColumnMapping: dto.csvColumnMapping || null,
-        createdBy: adminId,
-      },
+        logo_url: dto.logoUrl || null,
+        status: 'ACTIVE',
+        master_affiliate_url: dto.masterAffiliateUrl,
+        tracking_param_name: dto.trackingParamName || 'subid',
+        commission_per_referral_cents: dto.commissionPerReferralCents,
+        allowed_countries: dto.allowedCountries || [],
+        blocked_countries: dto.blockedCountries || [],
+        csv_column_mapping: dto.csvColumnMapping || null,
+        description: dto.description || null,
+        website_url: dto.websiteUrl || null,
+        created_by: adminId,
+        created_at: { $date: now },
+        updated_at: { $date: now },
+      }],
     });
+
+    return {
+      id: newId.toHexString(),
+      name: dto.name,
+      slug: dto.slug.toLowerCase(),
+      logoUrl: dto.logoUrl,
+      status: 'ACTIVE',
+      masterAffiliateUrl: dto.masterAffiliateUrl,
+      trackingParamName: dto.trackingParamName || 'subid',
+      commissionPerReferralCents: dto.commissionPerReferralCents,
+      commissionPerReferralEur: dto.commissionPerReferralCents / 100,
+      allowedCountries: dto.allowedCountries || [],
+      blockedCountries: dto.blockedCountries || [],
+    };
   }
 
   async updateBettingHouse(id: string, dto: UpdateBettingHouseDto) {
