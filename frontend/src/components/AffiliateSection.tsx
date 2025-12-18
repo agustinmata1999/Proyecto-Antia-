@@ -310,7 +310,7 @@ export default function AffiliateSection() {
                           <td className="px-4 py-3 text-center text-sm text-green-600">{item.approved}</td>
                           <td className="px-4 py-3 text-center text-sm text-red-600">{item.rejected}</td>
                           <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">
-                            €{(item.totalEarningsCents / 100).toFixed(2)}
+                            {formatPrice(item.totalEarningsCents)}
                           </td>
                         </tr>
                       ))}
