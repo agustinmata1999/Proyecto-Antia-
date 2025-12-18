@@ -363,7 +363,7 @@ export default function AffiliateSection() {
                               <div key={idx} className="bg-gray-50 rounded px-3 py-2 text-sm">
                                 <div className="font-medium text-gray-700">{item.houseName}</div>
                                 <div className="text-gray-500">
-                                  {item.referrals} ref. · €{(item.amountCents / 100).toFixed(2)}
+                                  {item.referrals} ref. · {formatPrice(item.amountCents)}
                                 </div>
                               </div>
                             ))}
