@@ -59,6 +59,7 @@ interface Payout {
 }
 
 export default function AffiliateSection() {
+  const { formatPrice, symbol } = useCurrency();
   const [houses, setHouses] = useState<HouseWithLink[]>([]);
   const [metrics, setMetrics] = useState<AffiliateMetrics | null>(null);
   const [payouts, setPayouts] = useState<Payout[]>([]);
