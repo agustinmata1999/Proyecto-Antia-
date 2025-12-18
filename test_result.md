@@ -259,29 +259,76 @@
 
 ### Admin Panel Tests (NEW - 2025-12-18)
 **Test Scenario 1: Commissions Panel**
-- Login as admin ⏳ TESTING
-- Navigate to /dashboard/admin ⏳ TESTING
-- Click on "💰 Comisiones" in sidebar ⏳ TESTING
-- Verify "Tipos de Cambio" section shows EUR→USD and USD→EUR rates ⏳ TESTING
-- Verify "Comisiones por Tipster" table shows required columns ⏳ TESTING
-- Click "Editar" on Fausto Perez ⏳ TESTING
-- Verify commission editing modal ⏳ TESTING
+- Login as admin ✅ PASSED
+- Navigate to /dashboard/admin ✅ PASSED
+- Click on "💰 Comisiones" in sidebar ✅ PASSED
+- Verify "Tipos de Cambio" section shows EUR→USD and USD→EUR rates ✅ PASSED
+- Verify "Comisiones por Tipster" table shows required columns ✅ PASSED
+- Click "Editar" on Fausto Perez ✅ PASSED
+- Verify commission editing modal ✅ PASSED
 
 **Test Scenario 2: Reports Panel**
-- Click on "📊 Reportes" in sidebar ⏳ TESTING
-- Verify filters appear ⏳ TESTING
-- Test "Resumen General" stats cards ⏳ TESTING
-- Change to "Ventas" report type ⏳ TESTING
-- Verify "Exportar CSV" button ⏳ TESTING
-- Test "Ranking Tipsters" report ⏳ TESTING
+- Click on "📊 Reportes" in sidebar ✅ PASSED
+- Verify filters appear ✅ PASSED
+- Test "Resumen General" stats cards ✅ PASSED
+- Change to "Ventas" report type ✅ PASSED
+- Verify "Exportar CSV" button ✅ PASSED
+- Test "Ranking Tipsters" report ✅ PASSED
 
 **Test Scenario 3: Currency Switch**
-- Change Moneda to "$ USD" ⏳ TESTING
-- Verify amounts display with $ symbol ⏳ TESTING
+- Change Moneda to "$ USD" ✅ PASSED
+- Verify amounts display with $ symbol ✅ PASSED
 
 **Test Scenario 4: Module Management**
-- Click on "👥 Gestión Tipsters" ⏳ TESTING
-- Verify toggles for Pronósticos and Afiliación work ⏳ TESTING
+- Click on "👥 Gestión Tipsters" ✅ PASSED
+- Verify toggles for Pronósticos and Afiliación work ✅ PASSED
+
+**DETAILED TEST RESULTS (2025-12-18 04:17 UTC):**
+
+✅ **Admin Authentication & Navigation**
+- Successfully logged in with admin@antia.com / SuperAdmin123!
+- Redirected to /dashboard/admin correctly
+- All sidebar navigation elements present and functional
+
+✅ **Module Management (Scenario 4)**
+- Found 4 stats cards: Total Tipsters (1), Con Pronósticos (0), Con Afiliación (1)
+- Tipsters table with all required headers: Tipster, Email, Pronósticos, Afiliación, Estado
+- Found 2 module toggle switches working correctly
+- Successfully tested toggle functionality for Fausto Perez
+
+✅ **Commissions Panel (Scenario 1)**
+- "💰 Comisiones" navigation working
+- "Tipos de Cambio" section displaying EUR→USD (1.1700) and USD→EUR (0.8520) rates
+- "Comisiones por Tipster" table with all required columns
+- Found 1 "Editar" button for Fausto Perez
+- Commission editing modal opens correctly with:
+  - 2 checkboxes (custom fee, auto-tier)
+  - 1 number input (percentage)
+  - 1 textarea (notes)
+- Modal closes properly
+
+✅ **Reports Panel (Scenario 2)**
+- "📊 Reportes" navigation working
+- All filters present: Tipo de Reporte, Moneda, Desde, Hasta
+- "Resumen General" showing stats cards:
+  - Ventas (30 días): 12
+  - Bruto (30 días): €133.00
+  - Comisión Antia (30 días): €0.61
+  - Liquidaciones Pendientes: €0.00
+- "Ventas" report type shows "Exportar CSV" button and "Por Tipster" table
+- "Ranking Tipsters" report shows ranking table with Fausto Perez data
+
+✅ **Currency Switch (Scenario 3)**
+- Successfully changed currency from EUR to USD
+- Found 49 $ symbols in page content after switch
+- Amounts correctly display with $ symbol instead of €
+
+**COMMISSION DATA VERIFIED:**
+- Fausto Perez: €133.00 monthly volume, CUSTOM tier, 8% effective rate, Auto-tier enabled
+
+**EXCHANGE RATES VERIFIED:**
+- EUR → USD: 1.1700 (API source)
+- USD → EUR: 0.8520 (API source)
 
 ## Known Issues
 - **MongoDB Transaction Error**: DELETE /api/telegram/channels/:id fails due to MongoDB replica set requirement for transactions
