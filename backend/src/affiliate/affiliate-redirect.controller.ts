@@ -129,21 +129,27 @@ export class AffiliateRedirectController {
     @Param('redirectCode') redirectCode: string,
     @Req() req: Request,
   ) {
-    const link = await this.prisma.tipsterAffiliateLink.findUnique({
-      where: { redirectCode },
-    });
+    const linkResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_links',
+      filter: { redirect_code: redirectCode },
+      limit: 1,
+    }) as any;
 
-    if (!link || link.status !== 'ACTIVE') {
+    const linkDoc = linkResult.cursor?.firstBatch?.[0];
+    if (!linkDoc || linkDoc.status !== 'ACTIVE') {
       return {
         valid: false,
         error: 'Link no encontrado o inactivo',
       };
     }
 
-    const house = await this.prisma.bettingHouse.findUnique({
-      where: { id: link.houseId },
-    });
+    const houseResult = await this.prisma.$runCommandRaw({
+      find: 'betting_houses',
+      filter: { _id: { $oid: linkDoc.house_id } },
+      limit: 1,
+    }) as any;
 
+    const house = houseResult.cursor?.firstBatch?.[0];
     if (!house || house.status !== 'ACTIVE') {
       return {
         valid: false,
