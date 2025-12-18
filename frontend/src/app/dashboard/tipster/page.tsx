@@ -983,32 +983,7 @@ export default function TipsterDashboard() {
         )}
 
         {activeView === 'referrals' && (
-          <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Afiliación</h1>
-              <p className="text-gray-600 mt-1">Gestiona tus enlaces de afiliado y comisiones</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">Clicks Totales</div>
-                <div className="text-3xl font-bold text-gray-900">{metrics?.clicks || 0}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">Registros</div>
-                <div className="text-3xl font-bold text-gray-900">{metrics?.registers || 0}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">FTDs</div>
-                <div className="text-3xl font-bold text-gray-900">{metrics?.ftds || 0}</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Enlaces de Afiliado</h2>
-              <p className="text-gray-500">Funcionalidad en desarrollo</p>
-            </div>
-          </>
+          <AffiliateSection />
         )}
 
         {activeView === 'payouts' && (
