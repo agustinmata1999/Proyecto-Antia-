@@ -190,134 +190,209 @@ export class AffiliateService {
 
   // Filter houses by country
   async getHousesForCountry(countryCode: string) {
-    const houses = await this.prisma.bettingHouse.findMany({
-      where: { status: 'ACTIVE' },
-    });
+    const allHouses = await this.getAllBettingHouses(false);
 
-    return houses.filter(house => {
-      // If allowedCountries is set and not empty, country must be in it
+    return allHouses.filter(house => {
       if (house.allowedCountries.length > 0) {
         return house.allowedCountries.includes(countryCode);
       }
-      // If blockedCountries is set, country must NOT be in it
       if (house.blockedCountries.length > 0) {
         return !house.blockedCountries.includes(countryCode);
       }
-      // Default: allow all
       return true;
-    }).map(h => ({
-      ...h,
-      commissionPerReferralEur: h.commissionPerReferralCents / 100,
-    }));
+    });
   }
 
   // ==================== CAMPAIGNS ====================
 
   async createCampaign(dto: CreateCampaignDto, adminId: string) {
-    const existing = await this.prisma.affiliateCampaign.findUnique({
-      where: { slug: dto.slug },
-    });
-    if (existing) {
+    const existingResult = await this.prisma.$runCommandRaw({
+      find: 'affiliate_campaigns',
+      filter: { slug: dto.slug.toLowerCase() },
+      limit: 1,
+    }) as any;
+
+    if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new BadRequestException(`Ya existe una campaña con el slug "${dto.slug}"`);
     }
 
-    return this.prisma.affiliateCampaign.create({
-      data: {
+    const now = new Date().toISOString();
+    const newId = new ObjectId();
+
+    await this.prisma.$runCommandRaw({
+      insert: 'affiliate_campaigns',
+      documents: [{
+        _id: newId,
         name: dto.name,
         slug: dto.slug.toLowerCase(),
-        description: dto.description,
-        houseIds: dto.houseIds,
-        targetCountries: dto.targetCountries || [],
-        startDate: dto.startDate,
-        endDate: dto.endDate,
-        createdBy: adminId,
-      },
+        description: dto.description || null,
+        status: 'ACTIVE',
+        house_ids: dto.houseIds,
+        target_countries: dto.targetCountries || [],
+        start_date: dto.startDate ? { $date: dto.startDate.toISOString() } : null,
+        end_date: dto.endDate ? { $date: dto.endDate.toISOString() } : null,
+        created_by: adminId,
+        created_at: { $date: now },
+        updated_at: { $date: now },
+      }],
     });
+
+    return {
+      id: newId.toHexString(),
+      name: dto.name,
+      slug: dto.slug.toLowerCase(),
+      status: 'ACTIVE',
+      houseIds: dto.houseIds,
+    };
   }
 
   async updateCampaign(id: string, dto: UpdateCampaignDto) {
-    const campaign = await this.prisma.affiliateCampaign.findUnique({ where: { id } });
-    if (!campaign) {
+    const campaignResult = await this.prisma.$runCommandRaw({
+      find: 'affiliate_campaigns',
+      filter: { _id: { $oid: id } },
+      limit: 1,
+    }) as any;
+
+    if (!campaignResult.cursor?.firstBatch?.length) {
       throw new NotFoundException('Campaña no encontrada');
     }
 
-    return this.prisma.affiliateCampaign.update({
-      where: { id },
-      data: {
-        ...(dto.name && { name: dto.name }),
-        ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.status && { status: dto.status }),
-        ...(dto.houseIds && { houseIds: dto.houseIds }),
-        ...(dto.targetCountries && { targetCountries: dto.targetCountries }),
-        ...(dto.startDate !== undefined && { startDate: dto.startDate }),
-        ...(dto.endDate !== undefined && { endDate: dto.endDate }),
-      },
+    const now = new Date().toISOString();
+    const updateFields: any = { updated_at: { $date: now } };
+
+    if (dto.name) updateFields.name = dto.name;
+    if (dto.description !== undefined) updateFields.description = dto.description;
+    if (dto.status) updateFields.status = dto.status;
+    if (dto.houseIds) updateFields.house_ids = dto.houseIds;
+    if (dto.targetCountries) updateFields.target_countries = dto.targetCountries;
+
+    await this.prisma.$runCommandRaw({
+      update: 'affiliate_campaigns',
+      updates: [{
+        q: { _id: { $oid: id } },
+        u: { $set: updateFields },
+      }],
     });
+
+    return this.getCampaign(id);
   }
 
   async getAllCampaigns(includeInactive = false) {
-    const where = includeInactive ? {} : { status: 'ACTIVE' };
-    const campaigns = await this.prisma.affiliateCampaign.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    const filter = includeInactive ? {} : { status: 'ACTIVE' };
+    const result = await this.prisma.$runCommandRaw({
+      find: 'affiliate_campaigns',
+      filter,
+      sort: { created_at: -1 },
+    }) as any;
 
-    // Enrich with house details
-    const allHouses = await this.prisma.bettingHouse.findMany();
+    const campaigns = result.cursor?.firstBatch || [];
+    const allHouses = await this.getAllBettingHouses(true);
     const housesMap = new Map(allHouses.map(h => [h.id, h]));
 
-    return campaigns.map(c => ({
-      ...c,
-      houses: c.houseIds.map(id => housesMap.get(id)).filter(Boolean),
+    return campaigns.map((c: any) => ({
+      id: c._id.$oid || c._id.toString(),
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      status: c.status,
+      houseIds: c.house_ids || [],
+      targetCountries: c.target_countries || [],
+      houses: (c.house_ids || []).map((id: string) => housesMap.get(id)).filter(Boolean),
+      createdAt: c.created_at,
     }));
   }
 
   async getCampaign(id: string) {
-    const campaign = await this.prisma.affiliateCampaign.findUnique({ where: { id } });
+    const result = await this.prisma.$runCommandRaw({
+      find: 'affiliate_campaigns',
+      filter: { _id: { $oid: id } },
+      limit: 1,
+    }) as any;
+
+    const campaign = result.cursor?.firstBatch?.[0];
     if (!campaign) {
       throw new NotFoundException('Campaña no encontrada');
     }
 
-    const houses = await this.prisma.bettingHouse.findMany({
-      where: { id: { in: campaign.houseIds } },
-    });
+    const houses = await this.getAllBettingHouses(true);
+    const houseIds = campaign.house_ids || [];
 
-    return { ...campaign, houses };
+    return {
+      id: campaign._id.$oid || campaign._id.toString(),
+      name: campaign.name,
+      slug: campaign.slug,
+      description: campaign.description,
+      status: campaign.status,
+      houseIds,
+      targetCountries: campaign.target_countries || [],
+      houses: houses.filter(h => houseIds.includes(h.id)),
+    };
   }
 
   // ==================== TIPSTER LINKS ====================
 
   async getOrCreateTipsterLink(tipsterId: string, houseId: string) {
     // Check if link exists
-    let link = await this.prisma.tipsterAffiliateLink.findUnique({
-      where: { tipsterId_houseId: { tipsterId, houseId } },
-    });
+    const existingResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_links',
+      filter: { tipster_id: tipsterId, house_id: houseId },
+      limit: 1,
+    }) as any;
 
-    if (!link) {
-      // Create new link with unique redirect code
-      const house = await this.prisma.bettingHouse.findUnique({ where: { id: houseId } });
-      if (!house) {
-        throw new NotFoundException('Casa de apuestas no encontrada');
-      }
+    let linkDoc = existingResult.cursor?.firstBatch?.[0];
 
-      const redirectCode = `${tipsterId.slice(-6)}-${house.slug}`;
+    if (!linkDoc) {
+      // Get house for slug
+      const house = await this.getBettingHouse(houseId);
       
-      link = await this.prisma.tipsterAffiliateLink.create({
-        data: {
-          tipsterId,
-          houseId,
-          redirectCode,
-        },
+      const now = new Date().toISOString();
+      const newId = new ObjectId();
+      const redirectCode = `${tipsterId.slice(-6)}-${house.slug}`;
+
+      await this.prisma.$runCommandRaw({
+        insert: 'tipster_affiliate_links',
+        documents: [{
+          _id: newId,
+          tipster_id: tipsterId,
+          house_id: houseId,
+          redirect_code: redirectCode,
+          total_clicks: 0,
+          total_referrals: 0,
+          status: 'ACTIVE',
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
+
+      linkDoc = {
+        _id: newId,
+        tipster_id: tipsterId,
+        house_id: houseId,
+        redirect_code: redirectCode,
+        total_clicks: 0,
+        total_referrals: 0,
+        status: 'ACTIVE',
+      };
     }
 
-    return link;
+    return {
+      id: linkDoc._id.$oid || linkDoc._id.toHexString?.() || linkDoc._id.toString(),
+      tipsterId: linkDoc.tipster_id,
+      houseId: linkDoc.house_id,
+      redirectCode: linkDoc.redirect_code,
+      totalClicks: linkDoc.total_clicks || 0,
+      totalReferrals: linkDoc.total_referrals || 0,
+      status: linkDoc.status || 'ACTIVE',
+    };
   }
 
   async getTipsterLinks(tipsterId: string) {
-    const links = await this.prisma.tipsterAffiliateLink.findMany({
-      where: { tipsterId },
-    });
+    const result = await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_links',
+      filter: { tipster_id: tipsterId },
+    }) as any;
+
+    const links = result.cursor?.firstBatch || [];
 
     // Enrich with house details
     const houseIds = links.map(l => l.houseId);
