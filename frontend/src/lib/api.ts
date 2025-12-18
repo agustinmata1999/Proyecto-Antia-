@@ -204,3 +204,73 @@ export const currencyApi = {
       api.get(`/currency/admin/history/${base}/${target}`, { params: { limit } }),
   },
 };
+
+// Affiliate API (Tipster)
+export const affiliateApi = {
+  // Tipster endpoints
+  getHousesWithLinks: (countryCode?: string) => 
+    api.get('/affiliate/houses', { params: { countryCode } }),
+  getHouseWithLink: (houseId: string) => api.get(`/affiliate/houses/${houseId}`),
+  getMyLinks: () => api.get('/affiliate/my-links'),
+  generateLink: (houseId: string) => api.post(`/affiliate/houses/${houseId}/link`),
+  getCampaigns: () => api.get('/affiliate/campaigns'),
+  getCampaign: (id: string) => api.get(`/affiliate/campaigns/${id}`),
+  getMetrics: () => api.get('/affiliate/metrics'),
+  getPayouts: () => api.get('/affiliate/payouts'),
+  getPayoutDetails: (id: string) => api.get(`/affiliate/payouts/${id}`),
+
+  // Admin endpoints
+  admin: {
+    // Houses
+    getHouses: (includeInactive = false) => 
+      api.get('/admin/affiliate/houses', { params: { includeInactive } }),
+    getHouse: (id: string) => api.get(`/admin/affiliate/houses/${id}`),
+    createHouse: (data: {
+      name: string;
+      slug: string;
+      logoUrl?: string;
+      masterAffiliateUrl: string;
+      trackingParamName?: string;
+      commissionPerReferralCents: number;
+      allowedCountries?: string[];
+      blockedCountries?: string[];
+      description?: string;
+      websiteUrl?: string;
+    }) => api.post('/admin/affiliate/houses', data),
+    updateHouse: (id: string, data: any) => api.patch(`/admin/affiliate/houses/${id}`, data),
+
+    // Campaigns
+    getCampaigns: (includeInactive = false) => 
+      api.get('/admin/affiliate/campaigns', { params: { includeInactive } }),
+    getCampaign: (id: string) => api.get(`/admin/affiliate/campaigns/${id}`),
+    createCampaign: (data: {
+      name: string;
+      slug: string;
+      description?: string;
+      houseIds: string[];
+      targetCountries?: string[];
+    }) => api.post('/admin/affiliate/campaigns', data),
+    updateCampaign: (id: string, data: any) => api.patch(`/admin/affiliate/campaigns/${id}`, data),
+
+    // CSV Import
+    importCsv: (formData: FormData) => api.post('/admin/affiliate/import-csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+    getImportBatches: (houseId?: string) => 
+      api.get('/admin/affiliate/import-batches', { params: { houseId } }),
+
+    // Conversions
+    getConversions: (params?: { houseId?: string; tipsterId?: string; status?: string; periodMonth?: string }) =>
+      api.get('/admin/affiliate/conversions', { params }),
+    updateConversionStatus: (id: string, status: string, rejectionReason?: string) =>
+      api.patch(`/admin/affiliate/conversions/${id}/status`, { status, rejectionReason }),
+
+    // Payouts
+    getPayouts: (params?: { tipsterId?: string; status?: string; periodMonth?: string }) =>
+      api.get('/admin/affiliate/payouts', { params }),
+    generatePayouts: (periodMonth: string) => 
+      api.post('/admin/affiliate/payouts/generate', { periodMonth }),
+    markPayoutPaid: (id: string, data: { paymentMethod: string; paymentReference?: string; notes?: string }) =>
+      api.patch(`/admin/affiliate/payouts/${id}/pay`, data),
+  },
+};
