@@ -166,12 +166,14 @@ export class AffiliateRedirectController {
     // Check if country is allowed
     let isAllowed = true;
     let blockReason: string | null = null;
+    const allowedCountries = house.allowed_countries || [];
+    const blockedCountries = house.blocked_countries || [];
 
     if (countryCode) {
-      if (house.allowedCountries.length > 0 && !house.allowedCountries.includes(countryCode)) {
+      if (allowedCountries.length > 0 && !allowedCountries.includes(countryCode)) {
         isAllowed = false;
         blockReason = `Esta casa de apuestas no está disponible en tu país (${countryCode})`;
-      } else if (house.blockedCountries.includes(countryCode)) {
+      } else if (blockedCountries.includes(countryCode)) {
         isAllowed = false;
         blockReason = `Esta casa de apuestas no está disponible en tu país (${countryCode})`;
       }
@@ -182,8 +184,8 @@ export class AffiliateRedirectController {
       house: {
         name: house.name,
         slug: house.slug,
-        logoUrl: house.logoUrl,
-        websiteUrl: house.websiteUrl,
+        logoUrl: house.logo_url,
+        websiteUrl: house.website_url,
       },
       countryCode,
       isAllowed,
