@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { ObjectId } from 'mongodb';
 import { RegisterTipsterDto, RegisterClientDto, LoginDto } from './dto';
 import { UserPayload } from '../common/interfaces/user-payload.interface';
 
