@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi } from '@/lib/api';
 import AffiliateSection from '@/components/AffiliateSection';
+import CurrencySelector from '@/components/CurrencySelector';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
