@@ -73,7 +73,7 @@ export class TelegramService implements OnModuleInit {
     // Command /start - FLUJO SIMPLIFICADO POST-PAGO
     this.bot.command('start', async (ctx) => {
       try {
-        this.logger.log('📥 Received /start command');
+        this.logger.log('📥 Received /start command from user: ' + ctx.from?.id);
         const startPayload = ctx.message.text.split(' ')[1];
         this.logger.log(`📦 Start payload: ${startPayload || 'NONE'}`);
         const telegramUserId = ctx.from.id.toString();
