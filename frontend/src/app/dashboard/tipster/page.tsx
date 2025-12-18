@@ -1108,7 +1108,7 @@ export default function TipsterDashboard() {
                               </span>
                             </td>
                             <td className="py-4 text-right font-semibold text-orange-600">
-                              -€{((salesStats?.platformFeesCents || 0) / 100).toFixed(2)}
+                              -{formatPrice(salesStats?.platformFeesCents || 0)}
                             </td>
                           </tr>
                           <tr className="bg-green-50 border-t-2 border-green-200">
