@@ -39,6 +39,13 @@ model TipsterProfile {
   payoutFields          Json?     @map("payout_fields")
   locale                String    @default("es")
   timezone              String    @default("Europe/Madrid")
+  
+  // Módulos habilitados (controlados por SuperAdmin)
+  moduleForecasts       Boolean   @default(true) @map("module_forecasts")   // AntiaPay / Pronósticos
+  moduleAffiliate       Boolean   @default(false) @map("module_affiliate")  // Afiliación casas apuestas
+  modulesUpdatedAt      DateTime? @map("modules_updated_at")
+  modulesUpdatedBy      String?   @map("modules_updated_by")  // ID del admin que modificó
+  
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
