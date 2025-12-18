@@ -111,6 +111,12 @@ model Order {
   platformFeePercent  Float?   @map("platform_fee_percent")   // % aplicado de Antia (10% o 7%)
   netAmountCents      Int?     @map("net_amount_cents")       // Neto para el tipster
   
+  // Campos de multi-moneda
+  originalCurrency    String?  @map("original_currency")      // Moneda elegida por el cliente
+  originalAmountCents Int?     @map("original_amount_cents")  // Monto en moneda original
+  exchangeRate        Float?   @map("exchange_rate")          // Tipo de cambio usado
+  baseCurrency        String   @default("EUR") @map("base_currency") // Moneda base de la plataforma
+  
   meta             Json?
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
