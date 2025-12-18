@@ -1130,8 +1130,9 @@ export class TelegramService implements OnModuleInit {
    */
   async handleUpdate(update: any) {
     try {
-      this.logger.log('Processing webhook update');
+      this.logger.log(`Processing webhook update: ${JSON.stringify(update).substring(0, 200)}`);
       await this.bot.handleUpdate(update);
+      this.logger.log('Webhook update processed successfully');
     } catch (error) {
       this.logger.error('Error handling update:', error);
       throw error;
