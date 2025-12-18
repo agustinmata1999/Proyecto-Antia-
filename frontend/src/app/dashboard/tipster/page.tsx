@@ -587,7 +587,7 @@ export default function TipsterDashboard() {
                     <div className="text-sm text-gray-500">💰 Ingresos Brutos</div>
                   </div>
                   <div className="text-3xl font-bold text-blue-600">
-                    €{((salesStats?.grossEarningsCents || salesStats?.totalEarningsCents || 0) / 100).toFixed(2)}
+                    {formatPrice(salesStats?.grossEarningsCents || salesStats?.totalEarningsCents || 0)}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">Total facturado este mes</div>
                 </div>
@@ -616,7 +616,7 @@ export default function TipsterDashboard() {
                 <>
                   <div className="bg-white rounded-lg shadow p-6 border-2 border-purple-100">
                     <div className="text-sm text-gray-500 mb-2">🤝 Ganancias Afiliación</div>
-                    <div className="text-3xl font-bold text-purple-600">€{((metrics?.totalEarnings || 0) / 100).toFixed(2)}</div>
+                    <div className="text-3xl font-bold text-purple-600">{formatPrice(metrics?.totalEarnings || 0)}</div>
                     <div className="text-xs text-gray-500 mt-1">Comisiones pendientes</div>
                   </div>
                   <div className="bg-white rounded-lg shadow p-6">
