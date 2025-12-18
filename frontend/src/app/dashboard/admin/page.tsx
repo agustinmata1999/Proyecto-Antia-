@@ -328,6 +328,10 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="ml-64 p-8">
+        {/* Currency Selector - Fixed top right */}
+        <div className="fixed top-4 right-8 z-50">
+          <CurrencySelector variant="pill" />
+        </div>
         {/* TIPSTERS VIEW */}
         {activeView === 'tipsters' && (
           <>
