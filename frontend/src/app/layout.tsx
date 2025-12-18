@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
 
 export const metadata: Metadata = {
   title: 'Antia - Plataforma de Pronósticos',
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <CurrencyProvider>
+          {children}
+        </CurrencyProvider>
+      </body>
     </html>
   );
 }
