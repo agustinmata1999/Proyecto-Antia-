@@ -771,7 +771,7 @@ export class AffiliateService {
       const breakdown: Record<string, any> = {};
       for (const conv of tipsterConvs) {
         if (!breakdown[conv.houseId]) {
-          const house = housesMap.get(conv.houseId);
+          const house = housesMap.get(conv.houseId) as any;
           breakdown[conv.houseId] = {
             houseId: conv.houseId,
             houseName: house?.name || 'Unknown',
