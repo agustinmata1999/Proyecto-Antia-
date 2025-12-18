@@ -14,10 +14,10 @@ Sistema completo implementado con:
 ## 🌐 ACCESO A LA PLATAFORMA
 
 ### URLs de Acceso
-- **Frontend**: https://betguru-7.preview.emergentagent.com
-- **API Backend**: https://betguru-7.preview.emergentagent.com/api
-- **Swagger Docs**: https://betguru-7.preview.emergentagent.com/api/docs
-- **Health Check**: https://betguru-7.preview.emergentagent.com/api/health
+- **Frontend**: https://antia-tipster.preview.emergentagent.com
+- **API Backend**: https://antia-tipster.preview.emergentagent.com/api
+- **Swagger Docs**: https://antia-tipster.preview.emergentagent.com/api/docs
+- **Health Check**: https://antia-tipster.preview.emergentagent.com/api/health
 
 ### Credenciales de Prueba
 
@@ -474,7 +474,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
 
 2. **Login Tipster:**
    ```
-   https://betguru-7.preview.emergentagent.com/login
+   https://antia-tipster.preview.emergentagent.com/login
    → Accede con fausto.perez@antia.com / Tipster123!
    ```
 
@@ -496,7 +496,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
    ```
    Simular webhook de pago con curl:
    
-   curl -X POST https://betguru-7.preview.emergentagent.com/api/webhooks/payments/confirm \
+   curl -X POST https://antia-tipster.preview.emergentagent.com/api/webhooks/payments/confirm \
      -H "Content-Type: application/json" \
      -d '{
        "product_id": "PRODUCT_ID",
@@ -593,7 +593,7 @@ Propietario - Todos los derechos reservados © 2025 Antia
 
 El sistema está completamente operativo y listo para usar.
 
-**Accede ahora:** https://betguru-7.preview.emergentagent.com
+**Accede ahora:** https://antia-tipster.preview.emergentagent.com
 
 **Credenciales:**
 - Tipster: fausto.perez@antia.com / Tipster123!
