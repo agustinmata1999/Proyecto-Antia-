@@ -1,0 +1,264 @@
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { Telegraf } from 'telegraf';
+
+export interface CreateChannelDto {
+  channelId: string;
+  channelName?: string;
+  channelTitle: string;
+  channelType: 'public' | 'private';
+  inviteLink?: string;
+}
+
+export interface UpdateChannelDto {
+  channelTitle?: string;
+  inviteLink?: string;
+  isActive?: boolean;
+}
+
+@Injectable()
+export class TelegramChannelsService {
+  private bot: Telegraf;
+  private readonly logger = new Logger(TelegramChannelsService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+  ) {
+    const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
+    if (token) {
+      this.bot = new Telegraf(token);
+    }
+  }
+
+  /**
+   * Obtener todos los canales de un tipster
+   */
+  async findAllByTipster(tipsterId: string) {
+    return this.prisma.telegramChannel.findMany({
+      where: { tipsterId, isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Obtener un canal por ID
+   */
+  async findOne(id: string, tipsterId: string) {
+    const channel = await this.prisma.telegramChannel.findUnique({
+      where: { id },
+    });
+
+    if (!channel) {
+      throw new NotFoundException('Canal no encontrado');
+    }
+
+    if (channel.tipsterId !== tipsterId) {
+      throw new ForbiddenException('No tienes acceso a este canal');
+    }
+
+    return channel;
+  }
+
+  /**
+   * Crear/conectar un nuevo canal
+   */
+  async create(tipsterId: string, dto: CreateChannelDto) {
+    // Verificar si el canal ya existe para este tipster
+    const existing = await this.prisma.telegramChannel.findFirst({
+      where: { 
+        tipsterId, 
+        channelId: dto.channelId 
+      },
+    });
+
+    if (existing) {
+      // Si existe pero está inactivo, reactivarlo
+      if (!existing.isActive) {
+        return this.prisma.telegramChannel.update({
+          where: { id: existing.id },
+          data: { 
+            isActive: true,
+            channelTitle: dto.channelTitle,
+            channelName: dto.channelName,
+            inviteLink: dto.inviteLink,
+            updatedAt: new Date(),
+          },
+        });
+      }
+      throw new BadRequestException('Este canal ya está conectado');
+    }
+
+    // Crear nuevo canal usando $runCommandRaw para evitar transacciones
+    const now = new Date().toISOString();
+    const channelData = {
+      tipster_id: tipsterId,
+      channel_id: dto.channelId,
+      channel_name: dto.channelName || null,
+      channel_title: dto.channelTitle,
+      channel_type: dto.channelType,
+      invite_link: dto.inviteLink || null,
+      member_count: null,
+      is_active: true,
+      connected_at: { $date: now },
+      created_at: { $date: now },
+      updated_at: { $date: now },
+    };
+
+    await this.prisma.$runCommandRaw({
+      insert: 'telegram_channels',
+      documents: [channelData],
+    });
+
+    // Obtener el canal recién creado
+    const channels = await this.prisma.telegramChannel.findMany({
+      where: { tipsterId, channelId: dto.channelId },
+      orderBy: { createdAt: 'desc' },
+      take: 1,
+    });
+
+    return channels[0];
+  }
+
+  /**
+   * Actualizar un canal
+   */
+  async update(id: string, tipsterId: string, dto: UpdateChannelDto) {
+    const channel = await this.findOne(id, tipsterId);
+
+    // Build update object for MongoDB raw command
+    const updateSet: any = { updated_at: { $date: new Date().toISOString() } };
+    if (dto.channelTitle) updateSet.channel_title = dto.channelTitle;
+    if (dto.inviteLink !== undefined) updateSet.invite_link = dto.inviteLink;
+    if (dto.isActive !== undefined) updateSet.is_active = dto.isActive;
+
+    await this.prisma.$runCommandRaw({
+      update: 'telegram_channels',
+      updates: [
+        {
+          q: { _id: { $oid: channel.id } },
+          u: { $set: updateSet },
+        },
+      ],
+    });
+
+    // Return updated channel
+    return this.findOne(id, tipsterId);
+  }
+
+  /**
+   * Eliminar (desactivar) un canal
+   */
+  async remove(id: string, tipsterId: string) {
+    const channel = await this.findOne(id, tipsterId);
+
+    // En lugar de eliminar, desactivamos usando raw command para evitar transacciones
+    const now = new Date().toISOString();
+    await this.prisma.$runCommandRaw({
+      update: 'telegram_channels',
+      updates: [
+        {
+          q: { _id: { $oid: channel.id } },
+          u: { $set: { is_active: false, updated_at: { $date: now } } },
+        },
+      ],
+    });
+
+    return { ...channel, isActive: false };
+  }
+
+  /**
+   * Verificar información del canal desde Telegram API
+   */
+  async verifyChannel(channelId: string): Promise<{
+    valid: boolean;
+    title?: string;
+    username?: string;
+    type?: string;
+    memberCount?: number;
+    error?: string;
+  }> {
+    if (!this.bot) {
+      return { valid: false, error: 'Bot no configurado' };
+    }
+
+    try {
+      const chat = await this.bot.telegram.getChat(channelId) as any;
+      
+      return {
+        valid: true,
+        title: chat.title || 'Canal',
+        username: chat.username || undefined,
+        type: chat.type === 'channel' ? 'channel' : 
+              chat.type === 'supergroup' ? 'supergroup' : chat.type,
+        memberCount: chat.members_count || undefined,
+      };
+    } catch (error) {
+      this.logger.warn(`Error verifying channel ${channelId}:`, error);
+      return { 
+        valid: false, 
+        error: 'No se pudo verificar el canal. Asegúrate de que el bot sea administrador.' 
+      };
+    }
+  }
+
+  /**
+   * Obtener enlace de invitación para un canal privado
+   */
+  async getInviteLink(channelId: string): Promise<string | null> {
+    if (!this.bot) {
+      return null;
+    }
+
+    try {
+      const link = await this.bot.telegram.exportChatInviteLink(channelId);
+      return link;
+    } catch (error) {
+      this.logger.warn(`Error getting invite link for ${channelId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Actualizar contador de miembros
+   */
+  async updateMemberCount(id: string, tipsterId: string) {
+    const channel = await this.findOne(id, tipsterId);
+    
+    const verification = await this.verifyChannel(channel.channelId);
+    
+    if (verification.valid && verification.memberCount !== undefined) {
+      await this.prisma.$runCommandRaw({
+        update: 'telegram_channels',
+        updates: [
+          {
+            q: { _id: { $oid: channel.id } },
+            u: { 
+              $set: { 
+                member_count: verification.memberCount, 
+                updated_at: { $date: new Date().toISOString() } 
+              } 
+            },
+          },
+        ],
+      });
+      return this.findOne(id, tipsterId);
+    }
+
+    return channel;
+  }
+
+  /**
+   * Obtener canal por channelId de Telegram
+   */
+  async findByChannelId(tipsterId: string, channelId: string) {
+    return this.prisma.telegramChannel.findFirst({
+      where: { 
+        tipsterId, 
+        channelId,
+        isActive: true,
+      },
+    });
+  }
+}

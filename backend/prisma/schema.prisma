@@ -1,0 +1,369 @@
+// Prisma Schema for Antia Platform - MongoDB
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Main Models
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  email         String   @unique
+  phone         String?
+  passwordHash  String   @map("password_hash")
+  role          String   @default("CLIENT") // CLIENT, TIPSTER, ADMIN, SUPERADMIN, SUPPORT
+  status        String   @default("PENDING") // ACTIVE, SUSPENDED, REJECTED, PENDING
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model TipsterProfile {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String    @unique @map("user_id")
+  publicName            String    @map("public_name")
+  avatarUrl             String?   @map("avatar_url")
+  telegramUsername      String?   @map("telegram_username")
+  telegramUserId        String?   @map("telegram_user_id")
+  telegramChannelId     String?   @map("telegram_channel_id")     // ID del canal de Telegram
+  telegramChannelName   String?   @map("telegram_channel_name")   // @username del canal
+  telegramChannelTitle  String?   @map("telegram_channel_title")  // Título del canal
+  telegramConnectedAt   DateTime? @map("telegram_connected_at")   // Cuándo se conectó el canal
+  telegramConnectionType String?  @map("telegram_connection_type") // "manual" o "auto"
+  botLinkedAt           DateTime? @map("bot_linked_at")
+  payoutMethod          String?   @map("payout_method") // IBAN, PAYPAL, USDT
+  payoutFields          Json?     @map("payout_fields")
+  locale                String    @default("es")
+  timezone              String    @default("Europe/Madrid")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@map("tipster_profiles")
+}
+
+model ClientProfile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @map("user_id")
+  countryIso      String   @map("country_iso")
+  telegramUserId  String?  @map("telegram_user_id")
+  consent18       Boolean  @default(false) @map("consent_18")
+  consentTerms    Boolean  @default(false) @map("consent_terms")
+  consentPrivacy  Boolean  @default(false) @map("consent_privacy")
+  locale          String   @default("es")
+  timezone        String   @default("Europe/Madrid")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("client_profiles")
+}
+
+model Product {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String   @map("tipster_id")
+  title             String
+  description       String?
+  priceCents        Int      @map("price_cents")
+  currency          String   @default("EUR")
+  billingType       String   @map("billing_type") // ONE_TIME, SUBSCRIPTION
+  billingPeriod     String?  @map("billing_period") // DAY, WEEK, MONTH, YEAR
+  capacityLimit     Int?     @map("capacity_limit")
+  active            Boolean  @default(true)
+  telegramChannelId String?  @map("telegram_channel_id")
+  accessMode        String   @default("AUTO_JOIN") @map("access_mode")
+  validityDays      Int?     @map("validity_days")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+model Order {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId        String   @map("product_id")
+  tipsterId        String?  @map("tipster_id")
+  clientUserId     String?  @map("client_user_id")
+  telegramUserId   String?  @map("telegram_user_id")    // ID de Telegram del cliente
+  telegramUsername String?  @map("telegram_username")   // Username de Telegram
+  emailBackup      String?  @map("email_backup")
+  phoneBackup      String?  @map("phone_backup")
+  amountCents      Int?     @map("amount_cents")        // Monto bruto pagado por cliente
+  currency         String   @default("EUR")
+  paymentProvider  String?  @map("payment_provider")
+  paymentMethod    String?  @map("payment_method")
+  providerOrderId  String?  @map("provider_order_id")
+  status           String   @default("PENDING") // PENDING, CREATED, PAGADA, PAGADA_SIN_ACCESO, ACCESS_GRANTED, REFUNDED, EXPIRED
+  
+  // Campos de comisiones (calculados automáticamente)
+  gatewayFeeCents     Int?     @map("gateway_fee_cents")      // Comisión de la pasarela (Stripe/Redsys)
+  gatewayFeePercent   Float?   @map("gateway_fee_percent")    // % aplicado de pasarela
+  platformFeeCents    Int?     @map("platform_fee_cents")     // Comisión Antia
+  platformFeePercent  Float?   @map("platform_fee_percent")   // % aplicado de Antia (10% o 7%)
+  netAmountCents      Int?     @map("net_amount_cents")       // Neto para el tipster
+  
+  meta             Json?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+model Receipt {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId  String   @map("order_id")
+  pdfUrl   String?  @map("pdf_url")
+  issuedAt DateTime @default(now()) @map("issued_at")
+
+  @@map("receipts")
+}
+
+model ChannelAccessGrant {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderId      String    @map("order_id")
+  clientUserId String    @map("client_user_id")
+  channelId    String    @map("channel_id")
+  status       String    @default("PENDING") // PENDING, GRANTED, EXPIRED
+  joinedAt     DateTime? @map("joined_at")
+  leftAt       DateTime? @map("left_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@map("channel_access_grants")
+}
+
+model House {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  method               String // API, CSV, EMAIL
+  timezone             String   @default("Europe/Madrid")
+  currency             String   @default("EUR")
+  apiBaseUrl           String?  @map("api_base_url")
+  credentials          Json?
+  commissionRules      Json     @map("commission_rules")
+  validationWindowDays Int      @default(30) @map("validation_window_days")
+  attributionModel     String   @default("LAST_CLICK") @map("attribution_model")
+  status               String   @default("ACTIVE")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("houses")
+}
+
+model ReferralLink {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId      String   @map("tipster_id")
+  houseId        String   @map("house_id")
+  urlTemplate    String   @map("url_template")
+  subidParamName String   @map("subid_param_name")
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("referral_links")
+}
+
+model ReferralEvent {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  houseId     String   @map("house_id")
+  tipsterId   String?  @map("tipster_id")
+  subid       String?
+  userExtId   String?  @map("user_ext_id")
+  type        String // CLICK, REGISTER, FTD, DEPOSIT
+  amountCents Int?     @map("amount_cents")
+  currency    String?
+  eventAt     DateTime @map("event_at")
+  source      String // API, CSV, EMAIL
+  status      String   @default("RAW") // RAW, STANDARDIZED, PENDING, VALID, REJECTED
+  rawPayload  Json     @map("raw_payload")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("referral_events")
+}
+
+model Commission {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId      String   @map("tipster_id")
+  houseId        String   @map("house_id")
+  periodMonth    String   @map("period_month")
+  type           String // CPA, REVSHARE, HYBRID
+  estimatedCents Int      @map("estimated_cents")
+  finalCents     Int?     @map("final_cents")
+  currency       String   @default("EUR")
+  fxRate         Float?   @map("fx_rate")
+  status         String   @default("ESTIMATED") // ESTIMATED, FINAL, PAID
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("commissions")
+}
+
+model Payout {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId        String   @map("tipster_id")
+  periodStart      DateTime @map("period_start")
+  periodEnd        DateTime @map("period_end")
+  grossCents       Int      @map("gross_cents")
+  platformFeeBps   Int      @map("platform_fee_bps")
+  platformFeeCents Int      @map("platform_fee_cents")
+  netCents         Int      @map("net_cents")
+  currency         String   @default("EUR")
+  status           String   @default("IN_PROCESS") // IN_PROCESS, APPROVED, PAID
+  methodSnapshot   Json     @map("method_snapshot")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("payouts")
+}
+
+// Configuración de comisiones por tipster
+model TipsterCommissionConfig {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId             String   @unique @map("tipster_id")       // ID del tipster
+  platformFeePercent    Float    @default(10) @map("platform_fee_percent") // % comisión Antia (default 10%)
+  customFeePercent      Float?   @map("custom_fee_percent")       // % personalizado (si SuperAdmin lo modifica)
+  useCustomFee          Boolean  @default(false) @map("use_custom_fee")
+  autoTierEnabled       Boolean  @default(true) @map("auto_tier_enabled") // Si aplica auto-tier (10%/<100k, 7%/>=100k)
+  notes                 String?                                    // Notas del admin
+  lastModifiedBy        String?  @map("last_modified_by")         // ID del admin que modificó
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("tipster_commission_configs")
+}
+
+// Histórico de cambios de comisión
+model CommissionChangeHistory {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String   @map("tipster_id")
+  changeType        String   @map("change_type")        // MANUAL_OVERRIDE, TIER_CHANGE, RESET_TO_DEFAULT
+  previousPercent   Float    @map("previous_percent")
+  newPercent        Float    @map("new_percent")
+  reason            String?                              // Motivo del cambio
+  changedBy         String   @map("changed_by")         // ID del admin
+  changedByEmail    String?  @map("changed_by_email")   // Email del admin
+  monthlyVolume     Int?     @map("monthly_volume")     // Volumen mensual al momento del cambio
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("commission_change_history")
+}
+
+// Resumen mensual de facturación por tipster
+model TipsterMonthlySummary {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String   @map("tipster_id")
+  yearMonth         String   @map("year_month")         // Formato: "2025-01"
+  grossAmountCents  Int      @map("gross_amount_cents") // Total bruto
+  gatewayFeesCents  Int      @map("gateway_fees_cents") // Total comisiones pasarela
+  platformFeesCents Int      @map("platform_fees_cents")// Total comisiones Antia
+  netAmountCents    Int      @map("net_amount_cents")   // Total neto
+  orderCount        Int      @map("order_count")        // Número de órdenes
+  appliedTier       String   @map("applied_tier")       // "STANDARD" (10%) o "HIGH_VOLUME" (7%)
+  calculatedAt      DateTime @default(now()) @map("calculated_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@unique([tipsterId, yearMonth])
+  @@map("tipster_monthly_summaries")
+}
+
+// Liquidaciones (Settlements)
+model Settlement {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String   @map("tipster_id")
+  type              String   @map("type")              // "FORECASTS" (pronósticos) o "AFFILIATE" (afiliación)
+  periodStart       DateTime @map("period_start")     // Inicio del período
+  periodEnd         DateTime @map("period_end")       // Fin del período
+  grossAmountCents  Int      @map("gross_amount_cents")
+  gatewayFeesCents  Int      @default(0) @map("gateway_fees_cents")
+  platformFeesCents Int      @default(0) @map("platform_fees_cents")
+  netAmountCents    Int      @map("net_amount_cents")
+  orderCount        Int      @default(0) @map("order_count")
+  status            String   @default("PENDING") @map("status") // PENDING, PROCESSING, PAID, CANCELLED
+  paidAt            DateTime? @map("paid_at")
+  paymentMethod     String?  @map("payment_method")   // BANK_TRANSFER, PAYPAL, etc
+  paymentReference  String?  @map("payment_reference") // Referencia de transferencia
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([tipsterId, type, status])
+  @@map("settlements")
+}
+
+// Ingresos de Afiliación (sin comisión Antia)
+model AffiliateEarning {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String   @map("tipster_id")
+  houseId           String?  @map("house_id")         // ID de la casa de apuestas
+  houseName         String   @map("house_name")       // Nombre de la casa
+  clientCount       Int      @default(0) @map("client_count") // Clientes traídos
+  earningsPerClient Int      @default(0) @map("earnings_per_client") // EUR/cliente en centavos
+  totalEarningsCents Int     @map("total_earnings_cents")
+  periodMonth       String   @map("period_month")     // "2025-01"
+  status            String   @default("PENDING") @map("status") // PENDING, CONFIRMED, PAID
+  confirmedAt       DateTime? @map("confirmed_at")
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([tipsterId, periodMonth])
+  @@map("affiliate_earnings")
+}
+
+model Ticket {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  requesterId String   @map("requester_id")
+  role        String // CLIENT, TIPSTER
+  topic       String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
+  context     Json?
+  messages    Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("tickets")
+}
+
+model OtpToken {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?   @map("user_id")
+  kind      String // EMAIL, PHONE
+  delivery  String // EMAIL, SMS
+  codeHash  String    @map("code_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("otp_tokens")
+}
+
+model Config {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  valueJson Json     @map("value_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("configs")
+}
+
+// Canales de Telegram del tipster (multi-canal)
+model TelegramChannel {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId       String   @map("tipster_id")          // ID del tipster (referencia a TipsterProfile)
+  channelId       String   @map("channel_id")          // ID numérico del canal en Telegram
+  channelName     String?  @map("channel_name")        // @username del canal (si es público)
+  channelTitle    String   @map("channel_title")       // Título/nombre del canal
+  channelType     String   @default("private") @map("channel_type") // "public" o "private"
+  inviteLink      String?  @map("invite_link")         // Enlace de invitación (para canales privados)
+  memberCount     Int?     @map("member_count")        // Número de miembros
+  isActive        Boolean  @default(true) @map("is_active")
+  connectedAt     DateTime @default(now()) @map("connected_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([tipsterId, channelId])
+  @@map("telegram_channels")
+}
