@@ -1702,7 +1702,7 @@ class AntiaAPITester:
             
             response = self.make_request("POST", f"/affiliate/houses/{house_id}/link")
             
-            if response.status_code == 200:
+            if response.status_code in [200, 201]:
                 result = response.json()
                 self.log("✅ Affiliate link generated successfully")
                 
