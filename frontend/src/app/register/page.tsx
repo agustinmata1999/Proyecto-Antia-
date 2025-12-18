@@ -32,7 +32,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!formData.consent18 || !formData.consentTerms || !formData.consentPrivacy) {
+    // Solo validar consentimientos para clientes
+    if (userType === 'client' && (!formData.consent18 || !formData.consentTerms || !formData.consentPrivacy)) {
       setError('Debes aceptar todos los consentimientos');
       return;
     }
