@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { CreditCard, Lock, User, Mail, Phone, ChevronRight, Loader2 } from 'lucide-react';
+import CurrencySelector from '@/components/CurrencySelector';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Product {
   id: string;
