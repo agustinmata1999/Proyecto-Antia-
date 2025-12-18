@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
+import CurrencySelector from '@/components/CurrencySelector';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 type AdminView = 'tipsters' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
