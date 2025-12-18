@@ -29,7 +29,7 @@ export class TelegramService implements OnModuleInit {
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
       
       // Usar la URL correcta del proyecto
-      const appUrl = process.env.APP_URL || 'https://bet-dashboard-11.preview.emergentagent.com';
+      const appUrl = process.env.APP_URL || 'https://affiliate-hub-170.preview.emergentagent.com';
       const webhookUrl = `${appUrl}/api/telegram/webhook`;
       
       this.logger.log(`🔧 Setting webhook with APP_URL from env: ${appUrl}`);
@@ -814,7 +814,7 @@ export class TelegramService implements OnModuleInit {
       const username = ctx.from.username || ctx.from.first_name;
 
       // Generar link de checkout con parámetros de Telegram
-      const appUrl = this.config.get('APP_URL') || 'https://bet-dashboard-11.preview.emergentagent.com';
+      const appUrl = this.config.get('APP_URL') || 'https://affiliate-hub-170.preview.emergentagent.com';
       const checkoutUrl = `${appUrl}/checkout/${productId}?telegram_user_id=${userId}&telegram_username=${encodeURIComponent(username || '')}`;
 
       await ctx.reply(

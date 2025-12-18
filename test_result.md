@@ -223,7 +223,7 @@
 - `GET /api/checkout/feature-flags` ✅ Working
 
 ### Environment Configuration
-- APP_URL: https://bet-dashboard-11.preview.emergentagent.com
+- APP_URL: https://affiliate-hub-170.preview.emergentagent.com
 - Telegram Bot: @Antiabetbot
 - Stripe: Test mode (sk_test_emergent)
 - Redsys: Sandbox mode
