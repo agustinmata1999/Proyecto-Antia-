@@ -230,7 +230,7 @@ export default function CheckoutPage() {
           <h1 className="text-xl font-semibold text-center text-gray-900">Antia</h1>
           <div className="text-center mt-4">
             <p className="text-4xl font-bold text-gray-900">
-              {product && formatPrice(product.priceCents, product.currency)}
+              {product && formatPrice(product.priceCents)}
             </p>
             <p className="text-gray-500 mt-1">{product?.title}</p>
           </div>
