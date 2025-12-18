@@ -43,6 +43,7 @@ import { HealthController } from './health.controller';
     CheckoutModule,
     CommissionsModule,
     SettlementsModule,
+    AdminModule,
   ],
   controllers: [HealthController],
 })
