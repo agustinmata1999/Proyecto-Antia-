@@ -2006,6 +2006,15 @@ class AntiaAPITester:
         
         # Test 5: Verify products endpoint still works
         results["verify_products_my"] = self.test_get_my_products()
+        
+        # ===== AFFILIATE MODULE TESTS =====
+        self.log("\n" + "="*50)
+        self.log("🏆 AFFILIATE MODULE TESTS")
+        self.log("="*50)
+        
+        # Run affiliate tests
+        affiliate_success = self.run_affiliate_tests()
+        results["affiliate_module"] = affiliate_success
             
         return results
         
