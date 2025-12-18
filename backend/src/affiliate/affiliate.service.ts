@@ -400,7 +400,7 @@ export class AffiliateService {
     const housesMap = new Map(allHouses.map(h => [h.id, h]));
 
     return links.map((link: any) => {
-      const house = housesMap.get(link.house_id);
+      const house = housesMap.get(link.house_id) as any;
       return {
         id: link._id.$oid || link._id.toString(),
         tipsterId: link.tipster_id,
