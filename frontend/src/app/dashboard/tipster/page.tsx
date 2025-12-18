@@ -683,7 +683,7 @@ export default function TipsterDashboard() {
                               <h3 className="font-medium text-gray-900">{product.title}</h3>
                               <div className="flex items-center gap-3 mt-1">
                                 <span className="text-sm font-medium text-green-600">
-                                  €{(product.priceCents / 100).toFixed(2)}
+                                  {formatPrice(product.priceCents)}
                                 </span>
                                 <span className={`text-xs px-2 py-1 rounded ${product.active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                                   {product.active ? 'Activo' : 'Pausado'}
