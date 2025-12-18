@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { adminApi, authApi, currencyApi } from '@/lib/api';
+import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
+import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 
-type AdminView = 'tipsters' | 'commissions' | 'reports';
+type AdminView = 'tipsters' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
 
 interface Tipster {
