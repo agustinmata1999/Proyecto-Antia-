@@ -158,6 +158,16 @@ export default function TipsterDashboard() {
       } catch (error) {
         console.error('Error loading settlements:', error);
       }
+
+      // Load enabled modules (controlled by SuperAdmin)
+      try {
+        const modulesRes = await userModulesApi.getMyModules();
+        if (modulesRes.data.modules) {
+          setEnabledModules(modulesRes.data.modules);
+        }
+      } catch (error) {
+        console.error('Error loading modules:', error);
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
