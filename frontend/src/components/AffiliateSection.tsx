@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { affiliateApi } from '@/lib/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface HouseWithLink {
   house: {
