@@ -120,39 +120,63 @@ export class AuthService {
   }
 
   async registerClient(dto: RegisterClientDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    // Check if email exists using raw query
+    const existingResult = await this.prisma.$runCommandRaw({
+      find: 'users',
+      filter: { email: dto.email },
+      limit: 1,
+    }) as any;
 
-    if (existingUser) {
+    if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new ConflictException('Email already registered');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     try {
-      const user = await this.prisma.user.create({
-        data: {
+      const now = new Date().toISOString();
+      const userId = new ObjectId();
+      const clientProfileId = new ObjectId();
+
+      // Create user using raw MongoDB
+      await this.prisma.$runCommandRaw({
+        insert: 'users',
+        documents: [{
+          _id: userId,
           email: dto.email,
-          phone: dto.phone,
-          passwordHash: passwordHash,
+          phone: dto.phone || null,
+          password_hash: passwordHash,
           role: 'CLIENT',
           status: 'ACTIVE',
-        },
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
 
-      // Create client profile separately
-      await this.prisma.clientProfile.create({
-        data: {
-          userId: user.id,
-          countryIso: dto.countryIso,
-          consent18: dto.consent18,
-          consentTerms: dto.consentTerms,
-          consentPrivacy: dto.consentPrivacy,
+      // Create client profile using raw MongoDB
+      await this.prisma.$runCommandRaw({
+        insert: 'client_profiles',
+        documents: [{
+          _id: clientProfileId,
+          user_id: userId.toHexString(),
+          country_iso: dto.countryIso,
+          consent_18: dto.consent18 || false,
+          consent_terms: dto.consentTerms || false,
+          consent_privacy: dto.consentPrivacy || false,
           locale: 'es',
           timezone: 'Europe/Madrid',
-        },
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        }],
       });
+
+      // Return login data
+      const user = {
+        id: userId.toHexString(),
+        email: dto.email,
+        role: 'CLIENT',
+        status: 'ACTIVE',
+      };
 
       return this.login(user);
     } catch (error) {
