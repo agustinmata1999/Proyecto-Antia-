@@ -2,7 +2,41 @@
 
 ## Last Updated: 2025-12-18
 
-## Latest Feature: Control de Módulos por Tipster (SuperAdmin)
+## Latest Feature: Comisiones, Reportes y Multi-Moneda
+### Status: ✅ IMPLEMENTED
+
+**💰 Panel de Comisiones:**
+- Ver/modificar % de comisión por tipster
+- Histórico de cambios
+- Auto-tier (10% < €100k, 7% >= €100k)
+- Comisiones personalizadas por tipster
+
+**💱 Multi-Moneda (EUR/USD):**
+- API externa para tipos de cambio (exchangerate-api.com)
+- Override manual por SuperAdmin
+- Visualización de reportes en EUR o USD
+- Conversión automática
+
+**📊 Reportes:**
+- Resumen General
+- Ventas (por tipster, por producto, por período)
+- Ingresos de Plataforma
+- Liquidaciones
+- Ranking de Tipsters
+- Exportación a CSV
+
+**API Endpoints:**
+- GET /api/currency/rates - Tipos de cambio
+- POST /api/currency/admin/rate - Establecer manual
+- GET /api/admin/reports/summary - Resumen
+- GET /api/admin/reports/sales - Ventas
+- GET /api/admin/reports/platform - Ingresos plataforma
+- GET /api/admin/reports/tipsters - Ranking
+- GET /api/admin/reports/export/:type - CSV
+
+---
+
+## Previous Feature: Control de Módulos por Tipster (SuperAdmin)
 ### Status: ✅ IMPLEMENTED AND FULLY TESTED
 
 **Implementado:**
