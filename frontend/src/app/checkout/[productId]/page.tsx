@@ -97,12 +97,8 @@ export default function CheckoutPage() {
     }
   };
 
-  const formatPrice = (cents: number, currency: string) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: currency,
-    }).format(cents / 100);
-  };
+  // Use the formatPrice from context instead of local function
+  // The context already handles currency conversion
 
   const handleSubmit = async () => {
     setError('');
