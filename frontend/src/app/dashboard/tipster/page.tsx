@@ -30,6 +30,12 @@ export default function TipsterDashboard() {
   const [salesStats, setSalesStats] = useState<any>(null);
   const [recentSales, setRecentSales] = useState<any[]>([]);
   const [settlementsData, setSettlementsData] = useState<any>(null);
+  
+  // Módulos habilitados (controlados por SuperAdmin)
+  const [enabledModules, setEnabledModules] = useState<{ forecasts: boolean; affiliate: boolean }>({
+    forecasts: true,
+    affiliate: false,
+  });
   const [loading, setLoading] = useState(true);
   const [showProductForm, setShowProductForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
