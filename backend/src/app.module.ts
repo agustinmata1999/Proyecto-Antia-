@@ -16,6 +16,7 @@ import { TelegramModule } from './telegram/telegram.module';
 import { CheckoutModule } from './checkout/checkout.module';
 import { CommissionsModule } from './commissions/commissions.module';
 import { SettlementsModule } from './settlements/settlements.module';
+import { AdminModule } from './admin/admin.module';
 import { HealthController } from './health.controller';
 
 @Module({
