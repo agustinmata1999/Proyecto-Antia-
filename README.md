@@ -687,7 +687,15 @@ Propietario - Todos los derechos reservados © 2025 Antia
 - [x] Autenticación y roles funcionando
 - [x] Sistema de productos completo
 - [x] Sistema de órdenes
-- [x] Sistema de referidos
+- [x] Sistema de referidos (legacy)
+- [x] **Sistema de Afiliación completo (NUEVO)**
+  - [x] CRUD Casas de Apuestas con geolocalización
+  - [x] Sistema de Campañas
+  - [x] Links únicos por tipster con tracking
+  - [x] Importación de CSV
+  - [x] Liquidaciones mensuales
+  - [x] Panel Admin completo
+  - [x] Panel Tipster completo
 - [x] Sistema de liquidaciones
 - [x] Webhooks de pago
 - [x] API documentada con Swagger
@@ -704,6 +712,10 @@ El sistema está completamente operativo y listo para usar.
 **Accede ahora:** https://bet-dashboard-11.preview.emergentagent.com
 
 **Credenciales:**
+- SuperAdmin: admin@antia.com / SuperAdmin123!
 - Tipster: fausto.perez@antia.com / Tipster123!
 - Cliente: cliente@example.com / Client123!
-- Admin: admin@antia.com / Admin123!
+
+### Casas de Apuestas de Ejemplo
+- **Bwin** - €50/referido (ES, DE, IT, AT, PT, GR, BE, NL)
+- **Betway** - €45/referido (ES, MX, CO, AR, CL, PE)
