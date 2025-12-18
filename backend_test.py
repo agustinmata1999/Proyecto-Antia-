@@ -16,6 +16,8 @@ API_BASE = f"{BASE_URL}/api"
 # Test credentials
 TIPSTER_EMAIL = "fausto.perez@antia.com"
 TIPSTER_PASSWORD = "Tipster123!"
+ADMIN_EMAIL = "admin@antia.com"
+ADMIN_PASSWORD = "SuperAdmin123!"
 
 class AntiaAPITester:
     def __init__(self):
