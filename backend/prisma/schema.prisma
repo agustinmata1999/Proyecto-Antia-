@@ -164,6 +164,216 @@ model House {
   @@map("houses")
 }
 
+// ==================== MÓDULO DE AFILIACIÓN ====================
+
+// Casas de Apuestas para Afiliación
+model BettingHouse {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String                                    // Nombre: "Bwin", "Betway"
+  slug                    String   @unique                          // Identificador único: "bwin", "betway"
+  logoUrl                 String?  @map("logo_url")                 // URL del logo
+  status                  String   @default("ACTIVE")               // ACTIVE, INACTIVE
+  
+  // Link maestro de afiliación (proporcionado por la casa)
+  masterAffiliateUrl      String   @map("master_affiliate_url")     // Ej: https://bwin.com/affiliate?ref=antia
+  trackingParamName       String   @default("subid") @map("tracking_param_name") // Parámetro para tracking: subid, aff_sub, etc.
+  
+  // Comisión para el tipster (lo que GANA el tipster por referido válido)
+  commissionPerReferralCents Int   @map("commission_per_referral_cents") // EUR en centavos por referido
+  
+  // Geolocalización por licencias
+  allowedCountries        String[] @default([]) @map("allowed_countries")  // Países donde opera (ISO codes)
+  blockedCountries        String[] @default([]) @map("blocked_countries")  // Países bloqueados
+  
+  // Mapeo de columnas CSV (para importación)
+  csvColumnMapping        Json?    @map("csv_column_mapping")       // { "tipster_id": "subid", "event": "tipo", ... }
+  
+  // Metadata
+  description             String?
+  websiteUrl              String?  @map("website_url")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+  createdBy               String?  @map("created_by")               // Admin que la creó
+
+  @@map("betting_houses")
+}
+
+// Campañas de Afiliación (agrupan casas)
+model AffiliateCampaign {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String                                          // "Campaña Verano 2025"
+  slug              String   @unique
+  description       String?
+  status            String   @default("ACTIVE")                     // ACTIVE, INACTIVE, ARCHIVED
+  
+  // Casas incluidas en la campaña (array de IDs de BettingHouse)
+  houseIds          String[] @map("house_ids")
+  
+  // Países objetivo (opcional, si vacío = todos)
+  targetCountries   String[] @default([]) @map("target_countries")
+  
+  // Fechas de la campaña (opcional)
+  startDate         DateTime? @map("start_date")
+  endDate           DateTime? @map("end_date")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdBy         String?  @map("created_by")
+
+  @@map("affiliate_campaigns")
+}
+
+// Links de Afiliación por Tipster y Casa
+model TipsterAffiliateLink {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId       String   @map("tipster_id")                       // ID del tipster
+  houseId         String   @map("house_id")                         // ID de BettingHouse
+  
+  // URL de redirect propia: /r/{tipsterId}/{houseSlug}
+  redirectCode    String   @unique @map("redirect_code")            // Código único para el redirect
+  
+  // Stats acumuladas (cache para performance)
+  totalClicks     Int      @default(0) @map("total_clicks")
+  totalReferrals  Int      @default(0) @map("total_referrals")      // Referidos validados
+  
+  status          String   @default("ACTIVE")                       // ACTIVE, PAUSED
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([tipsterId, houseId])
+  @@map("tipster_affiliate_links")
+}
+
+// Eventos de Click (Tracking)
+model AffiliateClickEvent {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId       String   @map("tipster_id")
+  houseId         String   @map("house_id")
+  linkId          String?  @map("link_id")                          // ID de TipsterAffiliateLink
+  
+  // Info del click
+  ipAddress       String?  @map("ip_address")
+  countryCode     String?  @map("country_code")                     // ISO code detectado por IP
+  userAgent       String?  @map("user_agent")
+  referer         String?
+  
+  // Si fue bloqueado por geolocalización
+  wasBlocked      Boolean  @default(false) @map("was_blocked")
+  blockReason     String?  @map("block_reason")
+  
+  // Tracking
+  redirectedTo    String?  @map("redirected_to")                    // URL final con subid
+  
+  clickedAt       DateTime @default(now()) @map("clicked_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([tipsterId, houseId])
+  @@index([clickedAt])
+  @@map("affiliate_click_events")
+}
+
+// Conversiones de Afiliación (importadas por CSV o API)
+model AffiliateConversion {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  houseId             String    @map("house_id")                    // ID de BettingHouse
+  tipsterId           String?   @map("tipster_id")                  // ID del tipster (asignado por subid)
+  
+  // Datos del CSV/API
+  externalRefId       String?   @map("external_ref_id")             // ID externo de la casa
+  tipsterTrackingId   String    @map("tipster_tracking_id")         // subid que vino en el CSV
+  
+  // Tipo de evento
+  eventType           String    @map("event_type")                  // REGISTER, DEPOSIT, QUALIFIED
+  
+  // Estado de validación
+  status              String    @default("PENDING")                 // PENDING, APPROVED, REJECTED
+  rejectionReason     String?   @map("rejection_reason")
+  
+  // Monto (si aplica, para depósitos)
+  amountCents         Int?      @map("amount_cents")
+  currency            String?
+  
+  // Comisión asignada (lo que gana el tipster)
+  commissionCents     Int?      @map("commission_cents")            // Se calcula al aprobar
+  
+  // Fechas
+  occurredAt          DateTime  @map("occurred_at")                 // Fecha del evento original
+  approvedAt          DateTime? @map("approved_at")
+  
+  // Metadata de importación
+  importBatchId       String?   @map("import_batch_id")             // ID del batch de importación
+  importedAt          DateTime  @default(now()) @map("imported_at")
+  rawData             Json?     @map("raw_data")                    // Datos originales del CSV
+  
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@index([tipsterId, houseId])
+  @@index([tipsterTrackingId])
+  @@index([status])
+  @@map("affiliate_conversions")
+}
+
+// Batch de Importación CSV
+model AffiliateImportBatch {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  houseId         String   @map("house_id")                         // Casa de apuestas
+  periodMonth     String   @map("period_month")                     // "2025-01"
+  
+  // Stats del batch
+  fileName        String   @map("file_name")
+  totalRows       Int      @default(0) @map("total_rows")
+  processedRows   Int      @default(0) @map("processed_rows")
+  errorRows       Int      @default(0) @map("error_rows")
+  
+  // Estado
+  status          String   @default("PROCESSING")                   // PROCESSING, COMPLETED, FAILED
+  errors          Json?                                             // Lista de errores
+  
+  // Mapeo usado
+  columnMapping   Json?    @map("column_mapping")
+  
+  importedBy      String   @map("imported_by")                      // Admin ID
+  importedAt      DateTime @default(now()) @map("imported_at")
+  completedAt     DateTime? @map("completed_at")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("affiliate_import_batches")
+}
+
+// Liquidaciones de Afiliación (mensuales, SIN comisión Antia)
+model AffiliatePayout {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String    @map("tipster_id")
+  periodMonth       String    @map("period_month")                  // "2025-01"
+  
+  // Desglose por casa
+  houseBreakdown    Json      @map("house_breakdown")               // [{ houseId, houseName, referrals, amountCents }]
+  
+  // Totales
+  totalReferrals    Int       @map("total_referrals")               // Total referidos validados
+  totalAmountCents  Int       @map("total_amount_cents")            // Total EUR a pagar (sin comisión Antia)
+  currency          String    @default("EUR")
+  
+  // Estado
+  status            String    @default("PENDING")                   // PENDING, PROCESSING, PAID
+  
+  // Pago
+  paidAt            DateTime? @map("paid_at")
+  paidBy            String?   @map("paid_by")                       // Admin que marcó como pagado
+  paymentMethod     String?   @map("payment_method")                // BANK_TRANSFER, PAYPAL, etc
+  paymentReference  String?   @map("payment_reference")
+  notes             String?
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([tipsterId, periodMonth])
+  @@index([status])
+  @@map("affiliate_payouts")
+}
+
 model ReferralLink {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   tipsterId      String   @map("tipster_id")
