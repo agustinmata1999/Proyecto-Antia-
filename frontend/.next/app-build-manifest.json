@@ -12,16 +12,16 @@
       "static/chunks/fd9d1056-dedae1143ad02591.js",
       "static/chunks/117-f5ac5686eb132f9f.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/css/e11a4196e8b5fb1b.css",
+      "static/css/ef441ff24679fa98.css",
       "static/chunks/app/layout-24c68d297ba85064.js"
     ],
-    "/dashboard/admin/page": [
+    "/checkout/[productId]/page": [
       "static/chunks/webpack-a3c37fcbf859f6f9.js",
       "static/chunks/fd9d1056-dedae1143ad02591.js",
       "static/chunks/117-f5ac5686eb132f9f.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/301-e16b19fb699bdeac.js",
-      "static/chunks/app/dashboard/admin/page-a0b3897ef2c5c11e.js"
+      "static/chunks/app/checkout/[productId]/page-e9196388ce0edfed.js"
     ],
     "/checkout/cancel/page": [
       "static/chunks/webpack-a3c37fcbf859f6f9.js",
@@ -40,21 +40,13 @@
       "static/chunks/648-1b51b8f95416e782.js",
       "static/chunks/app/checkout/success/page-d433728df35f8843.js"
     ],
-    "/checkout/[productId]/page": [
+    "/dashboard/admin/page": [
       "static/chunks/webpack-a3c37fcbf859f6f9.js",
       "static/chunks/fd9d1056-dedae1143ad02591.js",
       "static/chunks/117-f5ac5686eb132f9f.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/301-e16b19fb699bdeac.js",
-      "static/chunks/app/checkout/[productId]/page-e9196388ce0edfed.js"
-    ],
-    "/dashboard/tipster/page": [
-      "static/chunks/webpack-a3c37fcbf859f6f9.js",
-      "static/chunks/fd9d1056-dedae1143ad02591.js",
-      "static/chunks/117-f5ac5686eb132f9f.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/301-e16b19fb699bdeac.js",
-      "static/chunks/app/dashboard/tipster/page-fd8f5a2f21b08928.js"
+      "static/chunks/app/dashboard/admin/page-a0b3897ef2c5c11e.js"
     ],
     "/dashboard/client/page": [
       "static/chunks/webpack-a3c37fcbf859f6f9.js",
@@ -81,6 +73,14 @@
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/648-1b51b8f95416e782.js",
       "static/chunks/app/page-c24a810aed58f30e.js"
+    ],
+    "/dashboard/tipster/page": [
+      "static/chunks/webpack-a3c37fcbf859f6f9.js",
+      "static/chunks/fd9d1056-dedae1143ad02591.js",
+      "static/chunks/117-f5ac5686eb132f9f.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/301-e16b19fb699bdeac.js",
+      "static/chunks/app/dashboard/tipster/page-f2d5fdf68a88c015.js"
     ],
     "/register/page": [
       "static/chunks/webpack-a3c37fcbf859f6f9.js",
