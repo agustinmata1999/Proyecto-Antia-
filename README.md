@@ -89,7 +89,18 @@ Dashboard: /dashboard/client
 │   │   ├── houses/      # Casas de apuestas
 │   │   ├── webhooks/    # Webhooks de pago
 │   │   ├── tickets/     # Sistema de soporte
-│   │   └── bot/         # API para Telegram bot
+│   │   ├── bot/         # API para Telegram bot
+│   │   ├── admin/       # Panel SuperAdmin
+│   │   ├── affiliate/   # ✨ Módulo Afiliación (NUEVO)
+│   │   │   ├── dto/                    # DTOs
+│   │   │   ├── affiliate.service.ts    # Lógica de negocio
+│   │   │   ├── affiliate.module.ts     # Módulo NestJS
+│   │   │   ├── affiliate-admin.controller.ts    # API Admin
+│   │   │   ├── affiliate-tipster.controller.ts  # API Tipster
+│   │   │   └── affiliate-redirect.controller.ts # Redirect público
+│   │   ├── currency/    # Gestión de monedas
+│   │   ├── reports/     # Reportes
+│   │   └── settlements/ # Liquidaciones
 │   └── dist/            # Código compilado
 │
 ├── frontend/            # Next.js App
@@ -99,11 +110,15 @@ Dashboard: /dashboard/client
 │   │   │   ├── login/                # Login
 │   │   │   ├── register/             # Registro
 │   │   │   └── dashboard/
+│   │   │       ├── admin/            # Panel Admin
 │   │   │       ├── tipster/          # Panel Tipster
 │   │   │       └── client/           # Panel Cliente
 │   │   ├── components/               # Componentes UI
+│   │   │   ├── AffiliateSection.tsx      # ✨ Panel Afiliación Tipster
+│   │   │   ├── AffiliateAdminPanel.tsx   # ✨ Panel Afiliación Admin
+│   │   │   └── ui/                       # Componentes Shadcn
 │   │   └── lib/
-│   │       ├── api.ts                # API client
+│   │       ├── api.ts                # API client (incluye affiliateApi)
 │   │       └── utils.ts              # Utilidades
 │   └── .next/                        # Build de Next.js
 │
