@@ -227,7 +227,10 @@ export default function CheckoutPage() {
 
         {/* Header */}
         <div className="bg-white rounded-t-2xl p-6 border-b">
-          <h1 className="text-xl font-semibold text-center text-gray-900">Antia</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900">Antia</h1>
+            <CurrencySelector variant="pill" />
+          </div>
           <div className="text-center mt-4">
             <p className="text-4xl font-bold text-gray-900">
               {product && formatPrice(product.priceCents)}
