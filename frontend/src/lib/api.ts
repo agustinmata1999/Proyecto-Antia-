@@ -140,3 +140,19 @@ export const settlementsApi = {
   getHistory: () => api.get('/settlements/history'),
   getTotalPaid: () => api.get('/settlements/total-paid'),
 };
+
+// User Modules (Tipster)
+export const userModulesApi = {
+  getMyModules: () => api.get('/users/me/modules'),
+};
+
+// Admin API
+export const adminApi = {
+  // Tipsters management
+  tipsters: {
+    getAll: () => api.get('/admin/tipsters'),
+    getOne: (id: string) => api.get(`/admin/tipsters/${id}`),
+    updateModules: (id: string, modules: { moduleForecasts?: boolean; moduleAffiliate?: boolean }) =>
+      api.patch(`/admin/tipsters/${id}/modules`, modules),
+  },
+};
