@@ -369,7 +369,7 @@ model AffiliatePayout {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  @@unique([tipsterId, periodMonth])
+  @@index([tipsterId, periodMonth])
   @@index([status])
   @@map("affiliate_payouts")
 }
