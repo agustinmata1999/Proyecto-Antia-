@@ -491,7 +491,7 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">{product.title}</span>
-                <span className="font-medium">{formatPrice(product.priceCents, product.currency)}</span>
+                <span className="font-medium">{formatPrice(product.priceCents)}</span>
               </div>
               {product.validityDays && (
                 <div className="flex justify-between text-sm">
@@ -507,7 +507,7 @@ export default function CheckoutPage() {
               )}
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-semibold text-gray-900">Total</span>
-                <span className="font-bold text-lg">{formatPrice(product.priceCents, product.currency)}</span>
+                <span className="font-bold text-lg">{formatPrice(product.priceCents)}</span>
               </div>
             </div>
           </div>
