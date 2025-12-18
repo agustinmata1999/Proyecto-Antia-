@@ -52,17 +52,23 @@ export class AffiliateRedirectController {
     @Headers('referer') referer?: string,
   ) {
     try {
-      // Find the link
-      const link = await this.prisma.tipsterAffiliateLink.findUnique({
-        where: { redirectCode },
-      });
+      // Find the link using raw query (redirectCode is not unique in Prisma)
+      const linkResult = await this.prisma.$runCommandRaw({
+        find: 'tipster_affiliate_links',
+        filter: { redirect_code: redirectCode },
+        limit: 1,
+      }) as any;
 
-      if (!link || link.status !== 'ACTIVE') {
+      const linkDoc = linkResult.cursor?.firstBatch?.[0];
+      if (!linkDoc || linkDoc.status !== 'ACTIVE') {
         return res.status(404).json({
           error: 'Link no encontrado o inactivo',
           code: 'LINK_NOT_FOUND',
         });
       }
+
+      const tipsterId = linkDoc.tipster_id;
+      const houseId = linkDoc.house_id;
 
       // Get IP
       const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
@@ -74,8 +80,8 @@ export class AffiliateRedirectController {
 
       // Record click and get redirect info
       const result = await this.affiliateService.recordClick(
-        link.tipsterId,
-        link.houseId,
+        tipsterId,
+        houseId,
         ip,
         countryCode || undefined,
         userAgent,
