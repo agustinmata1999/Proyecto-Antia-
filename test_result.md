@@ -357,6 +357,38 @@
 - **MongoDB Transaction Error**: DELETE /api/telegram/channels/:id fails due to MongoDB replica set requirement for transactions
 - **Missing Test Data**: Some checkout tests fail because test product IDs don't exist in current database
 
+## Latest Implementation: Affiliate Module (Dec 18, 2025)
+
+### Completed Features:
+1. **Backend:**
+   - CRUD Casas de Apuestas (BettingHouse) with geolocation
+   - Campaigns management
+   - Tipster affiliate links generation (/r/:redirectCode)
+   - Click tracking with country detection
+   - CSV import for conversions
+   - Monthly payouts generation
+
+2. **Frontend Tipster:**
+   - View houses with personal links
+   - Copy affiliate links
+   - Metrics (clicks, referrals pending/approved, earnings)
+   - Payouts view
+
+3. **Frontend Admin:**
+   - CRUD Casas de Apuestas
+   - Campaigns management
+   - CSV import interface
+   - Payouts management (generate, mark as paid)
+
+### Test Credentials:
+- Admin: admin@antia.com / SuperAdmin123!
+- Tipster: fausto.perez@antia.com / Tipster123!
+
+### Key Endpoints:
+- GET /api/affiliate/houses (tipster)
+- POST /api/admin/affiliate/houses (admin)
+- GET /api/r/:redirectCode (public redirect)
+
 ## Mocked/Sandbox Integrations
 - **Stripe**: Using test API key (sk_test_emergent)
 - **Redsys**: Using sandbox credentials
