@@ -569,32 +569,54 @@ export default function TipsterDashboard() {
               <p className="text-gray-600 mt-1">Aquí está un resumen de tu actividad</p>
             </div>
 
-            {/* Stats Cards - Solo BRUTO en Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Ingresos Brutos - Principal */}
-              <div className="bg-white rounded-lg shadow p-6 border-2 border-blue-100">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-gray-500">💰 Ingresos Brutos</div>
+            {/* Stats Cards - Dinámicos según módulos habilitados */}
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${enabledModules.forecasts ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8`}>
+              {/* Ingresos Brutos - Solo si Pronósticos habilitado */}
+              {enabledModules.forecasts && (
+                <div className="bg-white rounded-lg shadow p-6 border-2 border-blue-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-gray-500">💰 Ingresos Brutos</div>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    €{((salesStats?.grossEarningsCents || salesStats?.totalEarningsCents || 0) / 100).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Total facturado este mes</div>
                 </div>
-                <div className="text-3xl font-bold text-blue-600">
-                  €{((salesStats?.grossEarningsCents || salesStats?.totalEarningsCents || 0) / 100).toFixed(2)}
+              )}
+
+              {/* Ventas - Solo si Pronósticos habilitado */}
+              {enabledModules.forecasts && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="text-sm text-gray-500 mb-2">💵 Ventas</div>
+                  <div className="text-3xl font-bold text-gray-900">{salesStats?.totalSales || 0}</div>
+                  <div className="text-xs text-gray-500 mt-1">Total de ventas</div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">Total facturado este mes</div>
-              </div>
+              )}
 
-              {/* Ventas */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">💵 Ventas</div>
-                <div className="text-3xl font-bold text-gray-900">{salesStats?.totalSales || 0}</div>
-                <div className="text-xs text-gray-500 mt-1">Total de ventas</div>
-              </div>
+              {/* Productos - Solo si Pronósticos habilitado */}
+              {enabledModules.forecasts && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="text-sm text-gray-500 mb-2">📦 Productos</div>
+                  <div className="text-3xl font-bold text-gray-900">{products.length}</div>
+                  <div className="text-xs text-gray-500 mt-1">{products.filter((p: any) => p.active).length} activos</div>
+                </div>
+              )}
 
-              {/* Productos */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">📦 Productos</div>
-                <div className="text-3xl font-bold text-gray-900">{products.length}</div>
-                <div className="text-xs text-gray-500 mt-1">{products.filter((p: any) => p.active).length} activos</div>
-              </div>
+              {/* Stats de Afiliación - Solo si Afiliación habilitado */}
+              {enabledModules.affiliate && (
+                <>
+                  <div className="bg-white rounded-lg shadow p-6 border-2 border-purple-100">
+                    <div className="text-sm text-gray-500 mb-2">🤝 Ganancias Afiliación</div>
+                    <div className="text-3xl font-bold text-purple-600">€{((metrics?.totalEarnings || 0) / 100).toFixed(2)}</div>
+                    <div className="text-xs text-gray-500 mt-1">Comisiones pendientes</div>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <div className="text-sm text-gray-500 mb-2">👥 Referidos FTD</div>
+                    <div className="text-3xl font-bold text-gray-900">{metrics?.ftds || 0}</div>
+                    <div className="text-xs text-gray-500 mt-1">First Time Deposits</div>
+                  </div>
+                </>
+              )}
 
               {/* Próxima Liquidación */}
               <div className="bg-white rounded-lg shadow p-6">
