@@ -620,91 +620,126 @@ export default function TipsterDashboard() {
               </div>
             </div>
 
-            {/* Recent Products and Sales */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow">
-                <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-gray-900">Mis Productos</h2>
-                  <button 
-                    onClick={handleCreateProduct}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-                  >
-                    + Crear Producto
-                  </button>
-                </div>
-                <div className="p-6">
-                  {products.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">No tienes productos aún</p>
-                      <button 
-                        onClick={handleCreateProduct}
-                        className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-                      >
-                        Crear tu primer producto
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {products.slice(0, 5).map((product: any) => (
-                        <div key={product.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900">{product.title}</h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sm font-medium text-green-600">
-                                €{(product.priceCents / 100).toFixed(2)}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded ${product.active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                {product.active ? 'Activo' : 'Pausado'}
-                              </span>
-                              {product.telegramChannelId && (
-                                <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700">
-                                  📱 {getChannelNameForProduct(product.telegramChannelId)}
+            {/* Recent Products and Sales - Solo si Pronósticos está habilitado */}
+            {enabledModules.forecasts && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-900">Mis Productos</h2>
+                    <button 
+                      onClick={handleCreateProduct}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                    >
+                      + Crear Producto
+                    </button>
+                  </div>
+                  <div className="p-6">
+                    {products.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 mb-4">No tienes productos aún</p>
+                        <button 
+                          onClick={handleCreateProduct}
+                          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+                        >
+                          Crear tu primer producto
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {products.slice(0, 5).map((product: any) => (
+                          <div key={product.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900">{product.title}</h3>
+                              <div className="flex items-center gap-3 mt-1">
+                                <span className="text-sm font-medium text-green-600">
+                                  €{(product.priceCents / 100).toFixed(2)}
                                 </span>
-                              )}
+                                <span className={`text-xs px-2 py-1 rounded ${product.active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                  {product.active ? 'Activo' : 'Pausado'}
+                                </span>
+                                {product.telegramChannelId && (
+                                  <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700">
+                                    📱 {getChannelNameForProduct(product.telegramChannelId)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => handleViewProduct(product)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                            >
+                              Ver
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent Sales */}
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900">Ventas Recientes</h2>
+                  </div>
+                  <div className="p-6">
+                    {recentSales.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No hay ventas aún</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {recentSales.slice(0, 5).map((sale: any) => (
+                          <div key={sale.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-900">{sale.productTitle || 'Producto'}</p>
+                              <p className="text-sm text-gray-500">{sale.emailBackup || 'Cliente'}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-green-600">€{((sale.amountCents || 0) / 100).toFixed(2)}</p>
+                              <p className="text-xs text-gray-500">{new Date(sale.createdAt).toLocaleDateString('es-ES')}</p>
                             </div>
                           </div>
-                          <button 
-                            onClick={() => handleViewProduct(product)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                          >
-                            Ver
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              {/* Recent Sales */}
+            )}
+            
+            {/* Afiliación Summary - Solo si Afiliación está habilitado y Pronósticos deshabilitado */}
+            {enabledModules.affiliate && !enabledModules.forecasts && (
               <div className="bg-white rounded-lg shadow">
                 <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900">Ventas Recientes</h2>
+                  <h2 className="text-xl font-bold text-gray-900">🤝 Resumen de Afiliación</h2>
                 </div>
                 <div className="p-6">
-                  {recentSales.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500">No hay ventas aún</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <p className="text-sm text-gray-600">Clics</p>
+                      <p className="text-2xl font-bold text-purple-600">{metrics?.clicks || 0}</p>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {recentSales.slice(0, 5).map((sale: any) => (
-                        <div key={sale.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">{sale.productTitle || 'Producto'}</p>
-                            <p className="text-sm text-gray-500">{sale.emailBackup || 'Cliente'}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium text-green-600">€{((sale.amountCents || 0) / 100).toFixed(2)}</p>
-                            <p className="text-xs text-gray-500">{new Date(sale.createdAt).toLocaleDateString('es-ES')}</p>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <p className="text-sm text-gray-600">Registros</p>
+                      <p className="text-2xl font-bold text-purple-600">{metrics?.registers || 0}</p>
                     </div>
-                  )}
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <p className="text-sm text-gray-600">FTDs</p>
+                      <p className="text-2xl font-bold text-purple-600">{metrics?.ftds || 0}</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 text-center">
+                    <button
+                      onClick={() => setActiveView('referrals')}
+                      className="text-purple-600 hover:underline"
+                    >
+                      Ver detalle de afiliación →
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
