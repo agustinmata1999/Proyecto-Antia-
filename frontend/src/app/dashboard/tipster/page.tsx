@@ -727,7 +727,7 @@ export default function TipsterDashboard() {
                               <p className="text-sm text-gray-500">{sale.emailBackup || 'Cliente'}</p>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium text-green-600">€{((sale.amountCents || 0) / 100).toFixed(2)}</p>
+                              <p className="font-medium text-green-600">{formatPrice(sale.amountCents || 0)}</p>
                               <p className="text-xs text-gray-500">{new Date(sale.createdAt).toLocaleDateString('es-ES')}</p>
                             </div>
                           </div>
