@@ -155,4 +155,52 @@ export const adminApi = {
     updateModules: (id: string, modules: { moduleForecasts?: boolean; moduleAffiliate?: boolean }) =>
       api.patch(`/admin/tipsters/${id}/modules`, modules),
   },
+  
+  // Commissions management
+  commissions: {
+    getAll: () => api.get('/admin/commissions'),
+    getOne: (tipsterId: string) => api.get(`/admin/commissions/${tipsterId}`),
+    getHistory: (tipsterId: string) => api.get(`/admin/commissions/${tipsterId}/history`),
+    update: (tipsterId: string, data: {
+      customFeePercent?: number;
+      useCustomFee?: boolean;
+      autoTierEnabled?: boolean;
+      notes?: string;
+    }) => api.patch(`/admin/commissions/${tipsterId}`, data),
+  },
+  
+  // Reports
+  reports: {
+    getSummary: (currency?: string) => api.get('/admin/reports/summary', { params: { currency } }),
+    getSales: (params: { startDate?: string; endDate?: string; tipsterId?: string; currency?: string }) =>
+      api.get('/admin/reports/sales', { params }),
+    getPlatform: (params: { startDate?: string; endDate?: string; currency?: string }) =>
+      api.get('/admin/reports/platform', { params }),
+    getSettlements: (params: { startDate?: string; endDate?: string; tipsterId?: string; status?: string; currency?: string }) =>
+      api.get('/admin/reports/settlements', { params }),
+    getTipsters: (params: { startDate?: string; endDate?: string; currency?: string }) =>
+      api.get('/admin/reports/tipsters', { params }),
+    exportCSV: (type: string, params: any) => api.get(`/admin/reports/export/${type}`, { 
+      params,
+      responseType: 'blob',
+    }),
+  },
+};
+
+// Currency API (public)
+export const currencyApi = {
+  getRates: () => api.get('/currency/rates'),
+  getRate: (base: string, target: string) => api.get(`/currency/rate/${base}/${target}`),
+  convert: (amount: number, from: string, to: string) => 
+    api.get('/currency/convert', { params: { amount, from, to } }),
+  
+  // Admin functions
+  admin: {
+    setRate: (baseCurrency: string, targetCurrency: string, rate: number) =>
+      api.post('/currency/admin/rate', { baseCurrency, targetCurrency, rate }),
+    removeOverride: (base: string, target: string) =>
+      api.delete(`/currency/admin/rate/${base}/${target}`),
+    getHistory: (base: string, target: string, limit?: number) =>
+      api.get(`/currency/admin/history/${base}/${target}`, { params: { limit } }),
+  },
 };
