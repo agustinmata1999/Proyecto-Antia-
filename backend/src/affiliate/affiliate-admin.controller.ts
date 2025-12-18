@@ -293,15 +293,23 @@ export class AffiliateAdminController {
       updateData.commissionCents = house?.commissionPerReferralCents || 0;
       updateData.rejectionReason = null;
       
-      // Update tipster link referral count
+      // Update tipster link referral count using raw query
       if (conversion.tipsterId) {
-        const link = await this.prisma.tipsterAffiliateLink.findUnique({
-          where: { tipsterId_houseId: { tipsterId: conversion.tipsterId, houseId: conversion.houseId } },
-        });
-        if (link) {
-          await this.prisma.tipsterAffiliateLink.update({
-            where: { id: link.id },
-            data: { totalReferrals: { increment: 1 } },
+        const linkResult = await this.prisma.$runCommandRaw({
+          find: 'tipster_affiliate_links',
+          filter: { tipster_id: conversion.tipsterId, house_id: conversion.houseId },
+          limit: 1,
+        }) as any;
+        
+        const linkDoc = linkResult.cursor?.firstBatch?.[0];
+        if (linkDoc) {
+          const linkId = linkDoc._id.$oid || linkDoc._id.toString();
+          await this.prisma.$runCommandRaw({
+            update: 'tipster_affiliate_links',
+            updates: [{
+              q: { _id: { $oid: linkId } },
+              u: { $inc: { total_referrals: 1 } },
+            }],
           });
         }
       }
