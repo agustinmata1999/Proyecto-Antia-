@@ -1610,10 +1610,10 @@ class AntiaAPITester:
             "slug": "test-house-api",
             "websiteUrl": "https://testbetting.com",
             "logoUrl": "https://testbetting.com/logo.png",
-            "commissionPerReferralEur": 25.0,
+            "commissionPerReferralCents": 2500,
             "allowedCountries": ["ES", "FR", "IT"],
             "blockedCountries": ["US", "UK"],
-            "masterUrl": "https://testbetting.com/register?ref={TRACKING_ID}",
+            "masterAffiliateUrl": "https://testbetting.com/register?ref={TRACKING_ID}",
             "description": "Test betting house created via API"
         }
         
