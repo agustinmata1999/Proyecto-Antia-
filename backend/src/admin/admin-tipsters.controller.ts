@@ -1,15 +1,12 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Param,
   Body,
-  Query,
   UseGuards,
   Request,
   ForbiddenException,
-  Logger,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,12 +14,6 @@ import { PrismaService } from '../prisma/prisma.service';
 interface UpdateModulesDto {
   moduleForecasts?: boolean;
   moduleAffiliate?: boolean;
-}
-
-interface ReviewApplicationDto {
-  action: 'APPROVE' | 'REJECT';
-  rejectionReason?: string;
-  notes?: string;
 }
 
 @Controller('admin/tipsters')
