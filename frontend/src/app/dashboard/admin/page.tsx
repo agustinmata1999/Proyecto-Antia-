@@ -422,6 +422,150 @@ export default function AdminDashboard() {
         <div className="fixed top-4 right-8 z-50">
           <CurrencySelector variant="pill" />
         </div>
+
+        {/* APPLICATIONS VIEW */}
+        {activeView === 'applications' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">📋 Solicitudes de Registro</h1>
+              <p className="text-gray-600 mt-1">Revisa y aprueba las solicitudes de nuevos tipsters</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div 
+                onClick={() => setApplicationFilter('PENDING')}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${applicationFilter === 'PENDING' ? 'border-yellow-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">⏳ Pendientes</div>
+                <div className="text-3xl font-bold text-yellow-600">{applicationStats.pending}</div>
+              </div>
+              <div 
+                onClick={() => setApplicationFilter('APPROVED')}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${applicationFilter === 'APPROVED' ? 'border-green-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">✅ Aprobadas</div>
+                <div className="text-3xl font-bold text-green-600">{applicationStats.approved}</div>
+              </div>
+              <div 
+                onClick={() => setApplicationFilter('REJECTED')}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${applicationFilter === 'REJECTED' ? 'border-red-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">❌ Rechazadas</div>
+                <div className="text-3xl font-bold text-red-600">{applicationStats.rejected}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="text-sm text-gray-500 mb-2">📊 Total</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {applicationStats.pending + applicationStats.approved + applicationStats.rejected}
+                </div>
+              </div>
+            </div>
+
+            {/* Applications List */}
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {applicationFilter === 'PENDING' && '⏳ Solicitudes Pendientes'}
+                  {applicationFilter === 'APPROVED' && '✅ Solicitudes Aprobadas'}
+                  {applicationFilter === 'REJECTED' && '❌ Solicitudes Rechazadas'}
+                </h2>
+              </div>
+
+              {applications.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="text-5xl mb-4">📭</div>
+                  <p className="text-gray-500">No hay solicitudes {applicationFilter.toLowerCase()}</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {applications.map((app) => (
+                    <div key={app.id} className="p-6 hover:bg-gray-50 transition">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-semibold text-gray-900 text-lg">{app.publicName}</h3>
+                            {app.applicationStatus === 'PENDING' && (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">⏳ Pendiente</span>
+                            )}
+                            {app.applicationStatus === 'APPROVED' && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">✅ Aprobado</span>
+                            )}
+                            {app.applicationStatus === 'REJECTED' && (
+                              <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">❌ Rechazado</span>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                            <div>
+                              <span className="text-gray-400">📧 Email:</span>
+                              <p className="font-medium">{app.email || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">📱 Telegram:</span>
+                              <p className="font-medium">{app.telegramUsername || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">🌍 País:</span>
+                              <p className="font-medium">{app.country || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">📅 Fecha:</span>
+                              <p className="font-medium">{new Date(app.createdAt).toLocaleDateString('es-ES')}</p>
+                            </div>
+                          </div>
+                          {app.experience && (
+                            <p className="text-sm text-gray-500 mt-2 line-clamp-1">
+                              <span className="font-medium">Experiencia:</span> {app.experience}
+                            </p>
+                          )}
+                          {app.rejectionReason && (
+                            <p className="text-sm text-red-500 mt-2">
+                              <span className="font-medium">Motivo rechazo:</span> {app.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => {
+                              setSelectedApplication(app);
+                              setShowApplicationModal(true);
+                            }}
+                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+                          >
+                            Ver Detalles
+                          </button>
+                          {app.applicationStatus === 'PENDING' && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setSelectedApplication(app);
+                                  handleReviewApplication('APPROVE');
+                                }}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                              >
+                                ✅ Aprobar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedApplication(app);
+                                  setShowApplicationModal(true);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                              >
+                                ❌ Rechazar
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {/* TIPSTERS VIEW */}
         {activeView === 'tipsters' && (
           <>
