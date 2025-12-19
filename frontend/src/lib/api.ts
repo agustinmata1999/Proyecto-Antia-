@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+// Use relative URL for same-origin requests, fallback to env variable for development
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: use relative URL to go through the same origin
+    return '/api';
+  }
+  // Server-side: use the full URL
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+};
+
+const API_URL = getApiUrl();
 
 export const api = axios.create({
   baseURL: API_URL,
