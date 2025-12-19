@@ -161,6 +161,7 @@ export default function TipsterDashboard() {
       // Load publication channel info
       try {
         const pubChannelRes = await telegramApi.publicationChannel.get();
+        console.log('Loaded publication channel:', pubChannelRes.data);
         setPublicationChannel(pubChannelRes.data);
       } catch (error) {
         console.error('Error loading publication channel:', error);
