@@ -149,6 +149,14 @@ export default function TipsterDashboard() {
         console.error('Error loading Telegram info:', error);
       }
 
+      // Load publication channel info
+      try {
+        const pubChannelRes = await telegramApi.publicationChannel.get();
+        setPublicationChannel(pubChannelRes.data);
+      } catch (error) {
+        console.error('Error loading publication channel:', error);
+      }
+
       // Load sales stats
       try {
         const statsRes = await ordersApi.getMyStats();
