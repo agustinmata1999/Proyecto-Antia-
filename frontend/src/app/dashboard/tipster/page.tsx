@@ -79,6 +79,18 @@ export default function TipsterDashboard() {
   const [publishingProduct, setPublishingProduct] = useState<string | null>(null);
   const [premiumChannelLink, setPremiumChannelLink] = useState('');
   const [savingPremiumChannel, setSavingPremiumChannel] = useState(false);
+  
+  // Publication channel state (for sharing products)
+  const [publicationChannel, setPublicationChannel] = useState<{ configured: boolean; channelId: string | null; channelTitle: string | null }>({
+    configured: false,
+    channelId: null,
+    channelTitle: null,
+  });
+  const [showPublicationChannelForm, setShowPublicationChannelForm] = useState(false);
+  const [publicationChannelInput, setPublicationChannelInput] = useState('');
+  const [publicationChannelTitle, setPublicationChannelTitle] = useState('');
+  const [savingPublicationChannel, setSavingPublicationChannel] = useState(false);
+  const [publicationChannelError, setPublicationChannelError] = useState('');
 
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
