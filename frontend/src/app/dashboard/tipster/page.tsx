@@ -753,7 +753,7 @@ export default function TipsterDashboard() {
         {activeView === 'dashboard' && (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Hola Fausto, Bienvenido de nuevo!</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Hola {user?.tipsterProfile?.publicName?.split(' ')[0] || 'Tipster'}, Bienvenido de nuevo!</h1>
               <p className="text-gray-600 mt-1">Aquí está un resumen de tu actividad</p>
             </div>
 
