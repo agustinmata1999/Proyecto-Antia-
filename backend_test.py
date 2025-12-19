@@ -33,6 +33,7 @@ class AntiaAPITester:
         self.test_house_id = None
         self.test_campaign_id = None
         self.test_ticket_id = None
+        self.test_application_id = None
         
     def log(self, message: str, level: str = "INFO"):
         """Log test messages"""
