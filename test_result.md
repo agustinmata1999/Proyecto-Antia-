@@ -2,6 +2,96 @@
 
 ## Last Updated: 2025-12-18
 
+---
+
+## YAML Test Structure
+
+```yaml
+backend:
+  - task: "GET /api/telegram/publication-channel - Get current publication channel config"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New Telegram Publication Channel feature - needs testing"
+
+  - task: "POST /api/telegram/publication-channel - Set publication channel"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New Telegram Publication Channel feature - needs testing"
+
+  - task: "DELETE /api/telegram/publication-channel - Remove publication channel"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New Telegram Publication Channel feature - needs testing"
+
+  - task: "POST /api/products/:id/publish-telegram - Publish product to Telegram"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New Telegram Publication Channel feature - needs testing"
+
+frontend:
+  - task: "Telegram Publication Channel UI"
+    implemented: true
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Frontend UI for publication channel - not testing per instructions"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "GET /api/telegram/publication-channel - Get current publication channel config"
+    - "POST /api/telegram/publication-channel - Set publication channel"
+    - "DELETE /api/telegram/publication-channel - Remove publication channel"
+    - "POST /api/products/:id/publish-telegram - Publish product to Telegram"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Starting backend testing for Telegram Publication Channel feature"
+```
+
+---
+
 ## Latest Feature: Comisiones, Reportes y Multi-Moneda
 ### Status: ✅ IMPLEMENTED
 
