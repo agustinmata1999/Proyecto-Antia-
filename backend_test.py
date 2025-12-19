@@ -2406,6 +2406,505 @@ class AntiaAPITester:
             self.log(f"❌ Get redirect info test failed: {str(e)}", "ERROR")
             return False
 
+    # ===== CLIENT PANEL TESTS =====
+    
+    def test_client_login(self) -> bool:
+        """Test authentication with client credentials"""
+        self.log("=== Testing Client Authentication ===")
+        
+        login_data = {
+            "email": CLIENT_EMAIL,
+            "password": CLIENT_PASSWORD
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                
+                # Check if access_token is in response
+                if "access_token" in response_data:
+                    self.client_access_token = response_data["access_token"]
+                    self.log("✅ Client login successful - JWT token received")
+                    return True
+                else:
+                    self.log("❌ Client login response missing access_token", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Client login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Client login test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_client_get_profile(self) -> bool:
+        """Test GET /api/client/profile - Get client profile"""
+        self.log("=== Testing Client Get Profile ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            response = self.make_request("GET", "/client/profile")
+            
+            if response.status_code == 200:
+                profile_data = response.json()
+                self.log("✅ Successfully retrieved client profile")
+                
+                # Check response structure
+                expected_fields = ["profile", "user"]
+                for field in expected_fields:
+                    if field in profile_data:
+                        self.log(f"✅ Profile response has {field}")
+                        
+                        if field == "user":
+                            user = profile_data[field]
+                            self.log(f"  - User ID: {user.get('id', 'N/A')}")
+                            self.log(f"  - User Email: {user.get('email', 'N/A')}")
+                            self.log(f"  - User Name: {user.get('name', 'N/A')}")
+                        elif field == "profile":
+                            profile = profile_data[field]
+                            if profile:
+                                self.log(f"  - Country ISO: {profile.get('countryIso', 'N/A')}")
+                                self.log(f"  - Telegram User ID: {profile.get('telegramUserId', 'N/A')}")
+                                self.log(f"  - Locale: {profile.get('locale', 'N/A')}")
+                            else:
+                                self.log("  - Profile is null (new client)")
+                    else:
+                        self.log(f"❌ Profile response missing {field}", "ERROR")
+                        return False
+                
+                return True
+            else:
+                self.log(f"❌ Get client profile failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get client profile test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_update_profile(self) -> bool:
+        """Test PUT /api/client/profile - Update client profile"""
+        self.log("=== Testing Client Update Profile ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        update_data = {
+            "countryIso": "ES",
+            "telegramUserId": "123456789",
+            "locale": "es-ES",
+            "timezone": "Europe/Madrid"
+        }
+        
+        try:
+            response = self.make_request("PUT", "/client/profile", update_data)
+            
+            if response.status_code == 200:
+                updated_profile = response.json()
+                self.log("✅ Client profile updated successfully")
+                
+                # Verify the updates
+                if updated_profile.get("countryIso") == update_data["countryIso"]:
+                    self.log("✅ Country ISO updated correctly")
+                else:
+                    self.log("❌ Country ISO update failed", "ERROR")
+                    
+                if updated_profile.get("telegramUserId") == update_data["telegramUserId"]:
+                    self.log("✅ Telegram User ID updated correctly")
+                else:
+                    self.log("❌ Telegram User ID update failed", "ERROR")
+                    
+                if updated_profile.get("locale") == update_data["locale"]:
+                    self.log("✅ Locale updated correctly")
+                else:
+                    self.log("❌ Locale update failed", "ERROR")
+                    
+                return True
+            else:
+                self.log(f"❌ Update client profile failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Update client profile test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_get_purchases(self) -> bool:
+        """Test GET /api/client/purchases - Get all purchases"""
+        self.log("=== Testing Client Get Purchases ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            response = self.make_request("GET", "/client/purchases")
+            
+            if response.status_code == 200:
+                purchases = response.json()
+                self.log(f"✅ Successfully retrieved {len(purchases)} purchases")
+                
+                # Log purchase details for debugging
+                for i, purchase in enumerate(purchases):
+                    self.log(f"Purchase {i+1}:")
+                    self.log(f"  - ID: {purchase.get('id', 'N/A')}")
+                    self.log(f"  - Status: {purchase.get('status', 'N/A')}")
+                    self.log(f"  - Amount: {purchase.get('amountCents', 'N/A')} cents")
+                    self.log(f"  - Currency: {purchase.get('currency', 'N/A')}")
+                    self.log(f"  - Created: {purchase.get('createdAt', 'N/A')}")
+                    
+                    # Check if product info is included
+                    if 'product' in purchase and purchase['product']:
+                        product = purchase['product']
+                        self.log(f"  - Product: {product.get('title', 'N/A')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Get client purchases failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get client purchases test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_get_purchase_details(self) -> bool:
+        """Test GET /api/client/purchases/:id - Get purchase details"""
+        self.log("=== Testing Client Get Purchase Details ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            # First get purchases to get a purchase ID
+            purchases_response = self.make_request("GET", "/client/purchases")
+            
+            if purchases_response.status_code != 200:
+                self.log("❌ Could not get purchases list for details test", "ERROR")
+                return False
+            
+            purchases = purchases_response.json()
+            if not purchases or len(purchases) == 0:
+                self.log("ℹ️ No purchases available for details test - this is expected for new client")
+                return True
+            
+            # Use the first purchase
+            purchase_id = purchases[0].get("id")
+            if not purchase_id:
+                self.log("❌ Purchase missing ID field", "ERROR")
+                return False
+            
+            self.log(f"Using purchase ID: {purchase_id} for details test")
+            
+            response = self.make_request("GET", f"/client/purchases/{purchase_id}")
+            
+            if response.status_code == 200:
+                details = response.json()
+                self.log("✅ Successfully retrieved purchase details")
+                
+                # Check if it's an error response
+                if "error" in details:
+                    self.log(f"ℹ️ Purchase not found: {details['error']} (this might be expected)")
+                    return True
+                
+                # Check response structure for valid purchase
+                expected_fields = ["id", "status", "amountCents", "currency"]
+                for field in expected_fields:
+                    if field in details:
+                        self.log(f"✅ Purchase details has {field}: {details[field]}")
+                    else:
+                        self.log(f"❌ Purchase details missing {field}", "ERROR")
+                        return False
+                
+                # Check for product and tipster info
+                if "product" in details and details["product"]:
+                    product = details["product"]
+                    self.log(f"✅ Product info included: {product.get('title', 'No title')}")
+                
+                if "tipster" in details and details["tipster"]:
+                    tipster = details["tipster"]
+                    self.log(f"✅ Tipster info included: {tipster.get('publicName', 'No name')}")
+                
+                return True
+            else:
+                self.log(f"❌ Get purchase details failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get purchase details test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_get_payments(self) -> bool:
+        """Test GET /api/client/payments - Get payment history"""
+        self.log("=== Testing Client Get Payment History ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            response = self.make_request("GET", "/client/payments")
+            
+            if response.status_code == 200:
+                payments = response.json()
+                self.log(f"✅ Successfully retrieved {len(payments)} payment records")
+                
+                # Log payment details for debugging
+                for i, payment in enumerate(payments):
+                    self.log(f"Payment {i+1}:")
+                    self.log(f"  - ID: {payment.get('id', 'N/A')}")
+                    self.log(f"  - Status: {payment.get('status', 'N/A')}")
+                    self.log(f"  - Amount: {payment.get('amountCents', 'N/A')} cents")
+                    self.log(f"  - Currency: {payment.get('currency', 'N/A')}")
+                    self.log(f"  - Provider: {payment.get('paymentProvider', 'N/A')}")
+                    self.log(f"  - Paid At: {payment.get('paidAt', 'N/A')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Get client payments failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get client payments test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_create_support_ticket(self) -> bool:
+        """Test POST /api/support/tickets - Create support ticket"""
+        self.log("=== Testing Client Create Support Ticket ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        ticket_data = {
+            "category": "access",
+            "subject": "Test ticket from API",
+            "description": "This is a test support ticket created via API testing",
+            "orderId": None  # Optional field
+        }
+        
+        try:
+            response = self.make_request("POST", "/support/tickets", ticket_data)
+            
+            if response.status_code in [200, 201]:
+                ticket = response.json()
+                self.test_ticket_id = ticket.get("id")
+                self.log(f"✅ Support ticket created successfully with ID: {self.test_ticket_id}")
+                
+                # Verify ticket fields
+                if ticket.get("category") == ticket_data["category"]:
+                    self.log("✅ Ticket category matches")
+                else:
+                    self.log("❌ Ticket category mismatch", "ERROR")
+                    
+                if ticket.get("subject") == ticket_data["subject"]:
+                    self.log("✅ Ticket subject matches")
+                else:
+                    self.log("❌ Ticket subject mismatch", "ERROR")
+                    
+                if ticket.get("description") == ticket_data["description"]:
+                    self.log("✅ Ticket description matches")
+                else:
+                    self.log("❌ Ticket description mismatch", "ERROR")
+                
+                # Check default status
+                if ticket.get("status"):
+                    self.log(f"✅ Ticket status: {ticket.get('status')}")
+                
+                return True
+            else:
+                self.log(f"❌ Create support ticket failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Create support ticket test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_get_my_tickets(self) -> bool:
+        """Test GET /api/support/tickets/my - Get my support tickets"""
+        self.log("=== Testing Client Get My Tickets ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            response = self.make_request("GET", "/support/tickets/my")
+            
+            if response.status_code == 200:
+                tickets = response.json()
+                self.log(f"✅ Successfully retrieved {len(tickets)} support tickets")
+                
+                # Log ticket details for debugging
+                for i, ticket in enumerate(tickets):
+                    self.log(f"Ticket {i+1}:")
+                    self.log(f"  - ID: {ticket.get('id', 'N/A')}")
+                    self.log(f"  - Category: {ticket.get('category', 'N/A')}")
+                    self.log(f"  - Subject: {ticket.get('subject', 'N/A')}")
+                    self.log(f"  - Status: {ticket.get('status', 'N/A')}")
+                    self.log(f"  - Priority: {ticket.get('priority', 'N/A')}")
+                    self.log(f"  - Created: {ticket.get('createdAt', 'N/A')}")
+                
+                # Verify our test ticket appears in the list
+                if self.test_ticket_id:
+                    found_test_ticket = any(ticket.get('id') == self.test_ticket_id for ticket in tickets)
+                    if found_test_ticket:
+                        self.log("✅ Test ticket appears in my tickets list")
+                    else:
+                        self.log("❌ Test ticket NOT found in my tickets list", "ERROR")
+                        return False
+                
+                return True
+            else:
+                self.log(f"❌ Get my tickets failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get my tickets test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_client_get_ticket_details(self) -> bool:
+        """Test GET /api/support/tickets/my/:id - Get ticket details"""
+        self.log("=== Testing Client Get Ticket Details ===")
+        
+        if not self.client_access_token:
+            self.log("❌ No client token available", "ERROR")
+            return False
+        
+        if not self.test_ticket_id:
+            self.log("❌ No test ticket ID available", "ERROR")
+            return False
+        
+        # Temporarily store current token and use client token
+        original_token = self.access_token
+        self.access_token = self.client_access_token
+        
+        try:
+            response = self.make_request("GET", f"/support/tickets/my/{self.test_ticket_id}")
+            
+            if response.status_code == 200:
+                ticket_details = response.json()
+                self.log("✅ Successfully retrieved ticket details")
+                
+                # Check if it's an error response
+                if "error" in ticket_details:
+                    self.log(f"❌ Ticket not found: {ticket_details['error']}", "ERROR")
+                    return False
+                
+                # Check response structure
+                expected_fields = ["id", "category", "subject", "description", "status"]
+                for field in expected_fields:
+                    if field in ticket_details:
+                        self.log(f"✅ Ticket details has {field}: {ticket_details[field]}")
+                    else:
+                        self.log(f"❌ Ticket details missing {field}", "ERROR")
+                        return False
+                
+                # Verify it's our test ticket
+                if ticket_details.get("id") == self.test_ticket_id:
+                    self.log("✅ Ticket ID matches test ticket")
+                else:
+                    self.log("❌ Ticket ID mismatch", "ERROR")
+                    return False
+                
+                return True
+            else:
+                self.log(f"❌ Get ticket details failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get ticket details test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def run_client_panel_tests(self) -> Dict[str, bool]:
+        """Run all client panel tests"""
+        self.log("=" * 50)
+        self.log("👤 STARTING CLIENT PANEL TESTS")
+        self.log("=" * 50)
+        
+        results = {}
+        
+        # Test client authentication first
+        results["client_login"] = self.test_client_login()
+        if not results["client_login"]:
+            self.log("❌ Client authentication failed - stopping client tests", "ERROR")
+            return results
+        
+        # Client Profile API tests
+        results["client_get_profile"] = self.test_client_get_profile()
+        results["client_update_profile"] = self.test_client_update_profile()
+        
+        # Purchases API tests
+        results["client_get_purchases"] = self.test_client_get_purchases()
+        results["client_get_purchase_details"] = self.test_client_get_purchase_details()
+        
+        # Payments API tests
+        results["client_get_payments"] = self.test_client_get_payments()
+        
+        # Support Tickets API tests
+        results["client_create_support_ticket"] = self.test_client_create_support_ticket()
+        results["client_get_my_tickets"] = self.test_client_get_my_tickets()
+        results["client_get_ticket_details"] = self.test_client_get_ticket_details()
+        
+        return results
+
     def run_affiliate_tests(self) -> bool:
         """Run all affiliate module tests"""
         self.log("=" * 50)
