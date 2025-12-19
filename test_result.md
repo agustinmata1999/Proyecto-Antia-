@@ -119,10 +119,10 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 2
   run_ui: false
-  last_tested: "2025-12-19T00:14:36Z"
+  last_tested: "2025-12-19T00:35:53Z"
   test_status: "COMPLETED"
 
 test_plan:
@@ -136,6 +136,10 @@ agent_communication:
     message: "Starting backend testing for Telegram Publication Channel feature"
   - agent: "testing"
     message: "✅ COMPLETED - All Telegram Publication Channel backend tests PASSED (6/6). All endpoints working correctly with proper validation and error handling. Feature is ready for production use."
+  - agent: "testing"
+    message: "🔄 RETESTING - Telegram Publication Channel feature with CONFIGURED scenario (tipster has publication channel: -1003329431615 @pruebabotantia)"
+  - agent: "testing"
+    message: "✅ CONFIGURED SCENARIO COMPLETED - 8/9 tests PASSED. All API endpoints work correctly. One minor text formatting issue in Telegram message publishing (special character escaping) but core functionality is solid. Publication channel can be configured, removed, and restored successfully."
 ```
 
 ---
