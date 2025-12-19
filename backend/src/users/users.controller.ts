@@ -18,7 +18,31 @@ export class UsersController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   async getMe(@CurrentUser() user: any) {
-    return this.usersService.findById(user.id);
+    const userData = await this.usersService.findById(user.id);
+    
+    // If user is a tipster, include tipster profile
+    if (userData?.role === 'TIPSTER') {
+      const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
+        where: { userId: user.id },
+      });
+      return {
+        ...userData,
+        tipsterProfile,
+      };
+    }
+    
+    // If user is a client, include client profile
+    if (userData?.role === 'CLIENT') {
+      const clientProfile = await this.prisma.clientProfile.findUnique({
+        where: { userId: user.id },
+      });
+      return {
+        ...userData,
+        clientProfile,
+      };
+    }
+    
+    return userData;
   }
 
   @Patch('me')
