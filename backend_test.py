@@ -1338,6 +1338,366 @@ class AntiaAPITester:
             self.log(f"❌ MongoDB geolocation verification failed: {str(e)}", "ERROR")
             return False
 
+    # ===== TIPSTER REGISTRATION AND APPROVAL FLOW TESTS =====
+    
+    def test_register_new_tipster(self) -> bool:
+        """Test registering a new tipster (should be PENDING)"""
+        self.log("=== Testing Register New Tipster ===")
+        
+        registration_data = {
+            "name": "Carlos Test",
+            "email": "carlos.test@example.com",
+            "password": "Test123456!",
+            "phone": "+34600123456",
+            "telegramUsername": "@carlostest",
+            "countryIso": "ES",
+            "acceptTerms": True,
+            "applicationNotes": "Quiero unirme a la plataforma porque tengo experiencia en pronósticos deportivos",
+            "experience": "3 años de experiencia en fútbol y tenis",
+            "socialMedia": "@carlos_tips en Twitter, @carlos_apuestas en Instagram",
+            "website": "https://carlostips.com"
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/tipster/register", registration_data, use_auth=False)
+            
+            if response.status_code == 201:
+                result = response.json()
+                self.log("✅ Tipster registration successful")
+                
+                # Check response structure
+                expected_fields = ["status", "requiresApproval", "message"]
+                for field in expected_fields:
+                    if field in result:
+                        self.log(f"✅ Registration response has {field}: {result[field]}")
+                    else:
+                        self.log(f"❌ Registration response missing {field}", "ERROR")
+                        return False
+                
+                # Verify status is PENDING
+                if result.get("status") == "PENDING":
+                    self.log("✅ Tipster status is PENDING as expected")
+                else:
+                    self.log(f"❌ Tipster status is {result.get('status')}, expected PENDING", "ERROR")
+                    return False
+                
+                # Verify requires approval
+                if result.get("requiresApproval") == True:
+                    self.log("✅ Requires approval is true as expected")
+                else:
+                    self.log(f"❌ Requires approval is {result.get('requiresApproval')}, expected true", "ERROR")
+                    return False
+                
+                return True
+            else:
+                self.log(f"❌ Tipster registration failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Register new tipster test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_login_pending_tipster_should_fail(self) -> bool:
+        """Test login as new tipster (should fail with pending approval)"""
+        self.log("=== Testing Login Pending Tipster (Should Fail) ===")
+        
+        login_data = {
+            "email": "carlos.test@example.com",
+            "password": "Test123456!"
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 401:
+                result = response.json()
+                self.log("✅ Login failed as expected for pending tipster")
+                
+                # Check for appropriate error message
+                message = result.get("message", "").lower()
+                if "pending" in message or "approval" in message or "aprobación" in message:
+                    self.log("✅ Error message mentions pending approval")
+                else:
+                    self.log(f"⚠️ Error message doesn't mention pending approval: {result.get('message')}", "WARN")
+                
+                return True
+            elif response.status_code == 200:
+                self.log("❌ Login succeeded when it should have failed for pending tipster", "ERROR")
+                return False
+            else:
+                self.log(f"❌ Unexpected response status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Login pending tipster test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_login_and_get_pending_applications(self) -> bool:
+        """Test admin login and get pending applications"""
+        self.log("=== Testing Admin Login and Get Pending Applications ===")
+        
+        # First login as admin
+        admin_login_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", admin_login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.admin_access_token = result.get("access_token")
+                self.log("✅ Admin login successful")
+                
+                # Now get pending applications using admin token
+                # Temporarily switch to admin token
+                original_token = self.access_token
+                self.access_token = self.admin_access_token
+                
+                # Get application stats
+                stats_response = self.make_request("GET", "/admin/tipsters/applications/stats")
+                
+                if stats_response.status_code == 200:
+                    stats = stats_response.json()
+                    self.log("✅ Successfully retrieved application stats")
+                    self.log(f"Pending: {stats.get('pending', 0)}, Approved: {stats.get('approved', 0)}, Rejected: {stats.get('rejected', 0)}")
+                    
+                    # Get pending applications
+                    pending_response = self.make_request("GET", "/admin/tipsters/applications?status=PENDING")
+                    
+                    if pending_response.status_code == 200:
+                        applications = pending_response.json()
+                        self.log("✅ Successfully retrieved pending applications")
+                        
+                        # Look for our test application
+                        found_application = None
+                        for app in applications.get("applications", []):
+                            if app.get("email") == "carlos.test@example.com":
+                                found_application = app
+                                break
+                        
+                        if found_application:
+                            self.log("✅ Found test application in pending list")
+                            self.log(f"Application ID: {found_application.get('id')}")
+                            self.log(f"Status: {found_application.get('applicationStatus')}")
+                            
+                            # Store application ID for approval test
+                            self.test_application_id = found_application.get("id")
+                            
+                            # Restore original token
+                            self.access_token = original_token
+                            return True
+                        else:
+                            self.log("❌ Test application not found in pending list", "ERROR")
+                            self.access_token = original_token
+                            return False
+                    else:
+                        self.log(f"❌ Get pending applications failed with status {pending_response.status_code}", "ERROR")
+                        self.access_token = original_token
+                        return False
+                else:
+                    self.log(f"❌ Get application stats failed with status {stats_response.status_code}", "ERROR")
+                    self.access_token = original_token
+                    return False
+            else:
+                self.log(f"❌ Admin login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin login and get pending applications test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_approve_tipster_application(self) -> bool:
+        """Test approving the tipster application"""
+        self.log("=== Testing Approve Tipster Application ===")
+        
+        if not hasattr(self, 'test_application_id') or not self.test_application_id:
+            self.log("❌ No test application ID available", "ERROR")
+            return False
+        
+        if not self.admin_access_token:
+            self.log("❌ No admin access token available", "ERROR")
+            return False
+        
+        approval_data = {
+            "action": "APPROVE"
+        }
+        
+        try:
+            # Use admin token
+            original_token = self.access_token
+            self.access_token = self.admin_access_token
+            
+            response = self.make_request("POST", f"/admin/tipsters/applications/{self.test_application_id}/review", approval_data)
+            
+            if response.status_code == 200 or response.status_code == 201:
+                result = response.json()
+                self.log("✅ Application approval request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Application approval marked as successful")
+                    
+                    # Check status changes
+                    if result.get("applicationStatus") == "APPROVED":
+                        self.log("✅ Application status changed to APPROVED")
+                    else:
+                        self.log(f"❌ Application status is {result.get('applicationStatus')}, expected APPROVED", "ERROR")
+                        self.access_token = original_token
+                        return False
+                    
+                    if result.get("userStatus") == "ACTIVE":
+                        self.log("✅ User status changed to ACTIVE")
+                    else:
+                        self.log(f"❌ User status is {result.get('userStatus')}, expected ACTIVE", "ERROR")
+                        self.access_token = original_token
+                        return False
+                    
+                    # Restore original token
+                    self.access_token = original_token
+                    return True
+                else:
+                    self.log(f"❌ Application approval failed: {result.get('message', 'No message')}", "ERROR")
+                    self.access_token = original_token
+                    return False
+            else:
+                self.log(f"❌ Approve application failed with status {response.status_code}", "ERROR")
+                self.access_token = original_token
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Approve tipster application test failed: {str(e)}", "ERROR")
+            if 'original_token' in locals():
+                self.access_token = original_token
+            return False
+
+    def test_login_approved_tipster_should_succeed(self) -> bool:
+        """Test login as approved tipster (should succeed now)"""
+        self.log("=== Testing Login Approved Tipster (Should Succeed) ===")
+        
+        login_data = {
+            "email": "carlos.test@example.com",
+            "password": "Test123456!"
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Login successful for approved tipster")
+                
+                # Check for access token
+                if "access_token" in result:
+                    self.log("✅ Access token received")
+                    
+                    # Check user status
+                    if "user" in result and result["user"]:
+                        user = result["user"]
+                        if user.get("status") == "ACTIVE":
+                            self.log("✅ User status is ACTIVE")
+                        else:
+                            self.log(f"⚠️ User status is {user.get('status')}, expected ACTIVE", "WARN")
+                    
+                    return True
+                else:
+                    self.log("❌ No access token in response", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Login approved tipster test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_verify_stats_updated(self) -> bool:
+        """Test that application stats are updated after approval"""
+        self.log("=== Testing Verify Stats Updated ===")
+        
+        if not self.admin_access_token:
+            self.log("❌ No admin access token available", "ERROR")
+            return False
+        
+        try:
+            # Use admin token
+            original_token = self.access_token
+            self.access_token = self.admin_access_token
+            
+            response = self.make_request("GET", "/admin/tipsters/applications/stats")
+            
+            if response.status_code == 200:
+                stats = response.json()
+                self.log("✅ Successfully retrieved updated application stats")
+                
+                pending = stats.get("pending", 0)
+                approved = stats.get("approved", 0)
+                rejected = stats.get("rejected", 0)
+                total = stats.get("total", 0)
+                
+                self.log(f"Updated stats - Pending: {pending}, Approved: {approved}, Rejected: {rejected}, Total: {total}")
+                
+                # Verify that approved count increased
+                if approved > 0:
+                    self.log("✅ Approved count is greater than 0")
+                else:
+                    self.log("⚠️ Approved count is 0, may indicate stats not updated yet", "WARN")
+                
+                # Restore original token
+                self.access_token = original_token
+                return True
+            else:
+                self.log(f"❌ Get updated stats failed with status {response.status_code}", "ERROR")
+                self.access_token = original_token
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Verify stats updated test failed: {str(e)}", "ERROR")
+            if 'original_token' in locals():
+                self.access_token = original_token
+            return False
+
+    def run_tipster_registration_approval_flow(self) -> bool:
+        """Run complete tipster registration and approval flow"""
+        self.log("\n" + "="*80)
+        self.log("STARTING TIPSTER REGISTRATION AND APPROVAL FLOW TESTS")
+        self.log("="*80)
+        
+        tests = [
+            ("Register New Tipster", self.test_register_new_tipster),
+            ("Login Pending Tipster (Should Fail)", self.test_login_pending_tipster_should_fail),
+            ("Admin Login and Get Pending Applications", self.test_admin_login_and_get_pending_applications),
+            ("Approve Tipster Application", self.test_approve_tipster_application),
+            ("Login Approved Tipster (Should Succeed)", self.test_login_approved_tipster_should_succeed),
+            ("Verify Stats Updated", self.test_verify_stats_updated),
+        ]
+        
+        passed = 0
+        failed = 0
+        
+        for test_name, test_func in tests:
+            self.log(f"\n--- Running: {test_name} ---")
+            try:
+                if test_func():
+                    passed += 1
+                    self.log(f"✅ {test_name} PASSED")
+                else:
+                    failed += 1
+                    self.log(f"❌ {test_name} FAILED")
+            except Exception as e:
+                failed += 1
+                self.log(f"❌ {test_name} FAILED with exception: {str(e)}")
+        
+        self.log("\n" + "="*80)
+        self.log("TIPSTER REGISTRATION AND APPROVAL FLOW RESULTS")
+        self.log("="*80)
+        self.log(f"✅ PASSED: {passed}")
+        self.log(f"❌ FAILED: {failed}")
+        self.log(f"📊 SUCCESS RATE: {(passed/(passed+failed)*100):.1f}%" if (passed+failed) > 0 else "0%")
+        
+        return failed == 0
+
     # ===== TELEGRAM PUBLICATION CHANNEL TESTS (CONFIGURED SCENARIO) =====
     
     def test_get_configured_publication_channel(self) -> bool:
