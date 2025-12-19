@@ -371,13 +371,18 @@ export default function TipsterDashboard() {
   };
 
   const handlePublishToTelegram = async (productId: string) => {
+    console.log('handlePublishToTelegram called', { productId, publicationChannel });
+    
     if (!publicationChannel.configured) {
       alert('Primero debes configurar tu Canal de Publicación en la sección de Telegram');
       setActiveView('telegram');
       return;
     }
 
-    if (!confirm('¿Deseas publicar este producto en tu canal de Telegram?')) {
+    const userConfirmed = window.confirm('¿Deseas publicar este producto en tu canal de Telegram?');
+    console.log('User confirmed:', userConfirmed);
+    
+    if (!userConfirmed) {
       return;
     }
 
