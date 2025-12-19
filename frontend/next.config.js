@@ -9,17 +9,8 @@ const nextConfig = {
   },
   
   async rewrites() {
-    // In production (Kubernetes), the ingress handles /api/* routing
-    // In development, we proxy to the local backend
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    if (isProduction) {
-      // Let the ingress handle API routing in production
-      // The backend is accessible at the same domain via /api path
-      return [];
-    }
-    
-    // Development: proxy to local backend
+    // Backend URL for API proxying
+    // In Kubernetes: backend service is accessible as 'backend:8001' or 'localhost:8001'
     const backendUrl = process.env.BACKEND_INTERNAL_URL || 'http://localhost:8001';
     
     return [
