@@ -1233,6 +1233,147 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Modal: Detalle de Solicitud */}
+      {showApplicationModal && selectedApplication && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => { setShowApplicationModal(false); setRejectionReason(''); }}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white sticky top-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold">Solicitud de Registro</h3>
+                  <p className="text-blue-200 text-sm">{selectedApplication.email}</p>
+                </div>
+                <button onClick={() => { setShowApplicationModal(false); setRejectionReason(''); }} className="text-white/70 hover:text-white text-2xl">×</button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-6">
+              {/* Info del Tipster */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Nombre Público</div>
+                  <div className="font-semibold text-gray-900">{selectedApplication.publicName}</div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Telegram</div>
+                  <div className="font-semibold text-gray-900">{selectedApplication.telegramUsername || 'No proporcionado'}</div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Email</div>
+                  <div className="font-semibold text-gray-900">{selectedApplication.email || 'N/A'}</div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Teléfono</div>
+                  <div className="font-semibold text-gray-900">{selectedApplication.phone || 'No proporcionado'}</div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">País</div>
+                  <div className="font-semibold text-gray-900">{selectedApplication.country || 'No especificado'}</div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Fecha Solicitud</div>
+                  <div className="font-semibold text-gray-900">{new Date(selectedApplication.createdAt).toLocaleString('es-ES')}</div>
+                </div>
+              </div>
+
+              {/* Información adicional */}
+              {selectedApplication.experience && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">💼 Experiencia como Tipster</div>
+                  <div className="bg-blue-50 p-4 rounded-lg text-gray-700">{selectedApplication.experience}</div>
+                </div>
+              )}
+
+              {selectedApplication.socialMedia && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">📱 Redes Sociales</div>
+                  <div className="bg-purple-50 p-4 rounded-lg text-gray-700">{selectedApplication.socialMedia}</div>
+                </div>
+              )}
+
+              {selectedApplication.website && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">🌐 Sitio Web</div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <a href={selectedApplication.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      {selectedApplication.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {selectedApplication.applicationNotes && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">📝 Notas del Solicitante</div>
+                  <div className="bg-yellow-50 p-4 rounded-lg text-gray-700">{selectedApplication.applicationNotes}</div>
+                </div>
+              )}
+
+              {/* Motivo de rechazo - solo si está pendiente */}
+              {selectedApplication.applicationStatus === 'PENDING' && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">❌ Motivo de Rechazo (requerido para rechazar)</div>
+                  <textarea
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="Indica el motivo por el cual se rechaza esta solicitud..."
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+              )}
+
+              {/* Motivo de rechazo mostrado si ya fue rechazado */}
+              {selectedApplication.applicationStatus === 'REJECTED' && selectedApplication.rejectionReason && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">❌ Motivo del Rechazo</div>
+                  <div className="bg-red-50 p-4 rounded-lg text-red-700 border border-red-200">{selectedApplication.rejectionReason}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {selectedApplication.applicationStatus === 'PENDING' && (
+              <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 sticky bottom-0 border-t">
+                <button
+                  onClick={() => { setShowApplicationModal(false); setRejectionReason(''); }}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleReviewApplication('REJECT')}
+                  disabled={reviewingApplication || !rejectionReason.trim()}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  {reviewingApplication ? '...' : '❌ Rechazar'}
+                </button>
+                <button
+                  onClick={() => handleReviewApplication('APPROVE')}
+                  disabled={reviewingApplication}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {reviewingApplication ? '...' : '✅ Aprobar'}
+                </button>
+              </div>
+            )}
+
+            {selectedApplication.applicationStatus !== 'PENDING' && (
+              <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
+                <button
+                  onClick={() => { setShowApplicationModal(false); setRejectionReason(''); }}
+                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Cerrar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
