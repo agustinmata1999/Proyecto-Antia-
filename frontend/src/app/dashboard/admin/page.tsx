@@ -114,12 +114,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeView === 'tipsters') loadTipsters();
+    if (activeView === 'applications') {
+      loadApplications();
+      loadApplicationStats();
+    }
     if (activeView === 'commissions') {
       loadCommissions();
       loadExchangeRates();
     }
     if (activeView === 'reports') loadReport();
-  }, [activeView, reportType, reportCurrency]);
+  }, [activeView, reportType, reportCurrency, applicationFilter]);
 
   const checkAuth = async () => {
     const token = localStorage.getItem('access_token');
