@@ -42,6 +42,17 @@ model TipsterProfile {
   locale                String    @default("es")
   timezone              String    @default("Europe/Madrid")
   
+  // Información de la solicitud de registro
+  applicationStatus     String    @default("PENDING") @map("application_status") // PENDING, APPROVED, REJECTED
+  applicationNotes      String?   @map("application_notes")       // Notas del tipster en su solicitud
+  applicationCountry    String?   @map("application_country")     // País desde donde aplica
+  applicationExperience String?   @map("application_experience")  // Experiencia como tipster
+  applicationSocialMedia String?  @map("application_social_media") // Redes sociales
+  applicationWebsite    String?   @map("application_website")     // Sitio web
+  reviewedBy            String?   @map("reviewed_by")             // Admin que revisó
+  reviewedAt            DateTime? @map("reviewed_at")             // Fecha de revisión
+  rejectionReason       String?   @map("rejection_reason")        // Razón de rechazo
+  
   // Módulos habilitados (controlados por SuperAdmin)
   moduleForecasts       Boolean   @default(true) @map("module_forecasts")   // AntiaPay / Pronósticos
   moduleAffiliate       Boolean   @default(false) @map("module_affiliate")  // Afiliación casas apuestas
