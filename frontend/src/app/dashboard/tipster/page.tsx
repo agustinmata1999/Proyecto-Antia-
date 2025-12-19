@@ -380,23 +380,19 @@ export default function TipsterDashboard() {
       return;
     }
 
-    const userConfirmed = window.confirm('¿Deseas publicar este producto en tu canal de Telegram?');
-    console.log('User confirmed:', userConfirmed);
-    
-    if (!userConfirmed) {
-      return;
-    }
-
+    // Publicar directamente sin confirmación (mejor UX)
     setPublishingProduct(productId);
     try {
       const response = await telegramApi.publishProduct(productId);
+      console.log('Publish response:', response.data);
       
       if (response.data.success) {
-        alert('✅ Producto publicado en Telegram exitosamente');
+        alert('✅ ¡Publicado! Tu producto ya está en tu canal de Telegram');
       } else {
         alert('❌ ' + (response.data.message || 'Error al publicar'));
       }
     } catch (error: any) {
+      console.error('Publish error:', error);
       alert('❌ Error: ' + (error.response?.data?.message || 'Error al publicar en Telegram'));
     } finally {
       setPublishingProduct(null);
