@@ -1673,29 +1673,47 @@ export default function TipsterDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Público</label>
                   <input 
                     type="text" 
-                    defaultValue="Fausto Perez"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={user?.tipsterProfile?.publicName || ''}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input 
                     type="email" 
-                    defaultValue="fausto.perez@antia.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={user?.email || ''}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input 
+                    type="text" 
+                    value={user?.phone || 'No configurado'}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Usuario de Telegram</label>
                   <input 
                     type="text" 
-                    placeholder="@tu_usuario"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={user?.tipsterProfile?.telegramUsername || 'No configurado'}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                   />
                 </div>
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                  Guardar Cambios
-                </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado de la cuenta</label>
+                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${user?.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {user?.status === 'ACTIVE' ? '✓ Activa' : user?.status}
+                  </span>
+                </div>
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-gray-500">Para modificar tu información de perfil, contacta con el administrador.</p>
+                </div>
               </div>
             </div>
           </>
