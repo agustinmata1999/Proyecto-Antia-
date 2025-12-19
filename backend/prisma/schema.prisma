@@ -34,6 +34,8 @@ model TipsterProfile {
   telegramChannelTitle  String?   @map("telegram_channel_title")  // Título del canal
   telegramConnectedAt   DateTime? @map("telegram_connected_at")   // Cuándo se conectó el canal
   telegramConnectionType String?  @map("telegram_connection_type") // "manual" o "auto"
+  publicationChannelId  String?   @map("publication_channel_id")  // Canal para publicar productos (marketing)
+  publicationChannelTitle String? @map("publication_channel_title") // Título del canal de publicación
   botLinkedAt           DateTime? @map("bot_linked_at")
   payoutMethod          String?   @map("payout_method") // IBAN, PAYPAL, USDT
   payoutFields          Json?     @map("payout_fields")
