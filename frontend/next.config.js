@@ -9,8 +9,18 @@ const nextConfig = {
   },
   
   async rewrites() {
-    // Use environment variable for backend URL, fallback to relative path in production
-    const backendUrl = process.env.BACKEND_INTERNAL_URL || 'http://backend:8001';
+    // In production (Kubernetes), the ingress handles /api/* routing
+    // In development, we proxy to the local backend
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    if (isProduction) {
+      // Let the ingress handle API routing in production
+      // The backend is accessible at the same domain via /api path
+      return [];
+    }
+    
+    // Development: proxy to local backend
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || 'http://localhost:8001';
     
     return [
       {
