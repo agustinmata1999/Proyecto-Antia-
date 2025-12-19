@@ -1058,108 +1058,217 @@ export default function TipsterDashboard() {
                     <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded">Para marketing</span>
                   </h2>
                   <p className="text-sm text-gray-600 mt-1">
-                    Este es tu canal público donde publicas tus productos para que la gente los compre.
+                    Conecta tu canal de Telegram donde promocionas tus productos. Usa el botón "📱 Compartir" en cada producto para publicar automáticamente.
                   </p>
                 </div>
               </div>
 
+              {/* Estado: Canal configurado */}
               {publicationChannel.configured ? (
-                <div className="bg-white rounded-lg p-4 border border-green-200">
+                <div className="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-2xl">📢</span>
+                      <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow">
+                        <span className="text-2xl">✅</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{publicationChannel.channelTitle || 'Canal de Publicación'}</h3>
-                        <p className="text-sm text-gray-500">ID: {publicationChannel.channelId}</p>
-                        <p className="text-xs text-green-600 mt-1">✅ Configurado - Puedes publicar productos desde "Mis Productos"</p>
+                        <h3 className="font-bold text-lg text-gray-900">{publicationChannel.channelTitle || 'Canal de Publicación'}</h3>
+                        {publicationChannel.channelUsername && (
+                          <p className="text-sm text-blue-600 font-medium">{publicationChannel.channelUsername}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">ID: {publicationChannel.channelId}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={handleRemovePublicationChannel}
-                      className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
-                    >
-                      Cambiar Canal
-                    </button>
+                    <div className="text-right">
+                      <p className="text-sm text-green-600 font-medium mb-2">🎉 ¡Listo para publicar!</p>
+                      <button
+                        onClick={handleRemovePublicationChannel}
+                        className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Cambiar Canal
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800">
+                      <strong>✨ ¡Todo listo!</strong> Ve a "Mis Productos" y usa el botón <span className="font-semibold">📱 Compartir</span> para publicar tus productos en este canal.
+                    </p>
                   </div>
                 </div>
-              ) : showPublicationChannelForm ? (
-                <div className="bg-white rounded-lg p-4 border border-green-200">
-                  <h3 className="font-medium text-gray-900 mb-3">Configurar Canal de Publicación</h3>
-                  
-                  {publicationChannelError && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-3">
-                      <p className="text-sm text-red-600">{publicationChannelError}</p>
+              ) : linkingMethod === 'auto' || publicationChannel.pending ? (
+                /* Estado: Esperando conexión automática */
+                <div className="bg-white rounded-lg p-5 border-2 border-yellow-300">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4 animate-pulse">
+                      <span className="text-3xl">⏳</span>
                     </div>
-                  )}
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Esperando conexión...</h3>
+                    <p className="text-gray-600 mb-4">Sigue estos pasos en Telegram:</p>
+                    
+                    <div className="bg-yellow-50 rounded-lg p-4 text-left mb-4 max-w-md mx-auto">
+                      <ol className="space-y-3">
+                        <li className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                          <span className="text-sm text-gray-700">Abre tu canal de Telegram</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                          <span className="text-sm text-gray-700">Ve a <strong>Configuración del canal</strong> → <strong>Administradores</strong></span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                          <div className="text-sm text-gray-700">
+                            Busca y añade a <a href="https://t.me/Antiabetbot" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline">@Antiabetbot</a> como administrador
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">✓</span>
+                          <span className="text-sm text-gray-700">¡Listo! Se conectará automáticamente</span>
+                        </li>
+                      </ol>
+                    </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        ID del Canal <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={publicationChannelInput}
-                        onChange={(e) => setPublicationChannelInput(e.target.value)}
-                        placeholder="Ej: -1001234567890 o @mi_canal"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Puedes obtener el ID reenviando un mensaje del canal a @userinfobot
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nombre del Canal (opcional)
-                      </label>
-                      <input
-                        type="text"
-                        value={publicationChannelTitle}
-                        onChange={(e) => setPublicationChannelTitle(e.target.value)}
-                        placeholder="Ej: Mi Canal de Pronósticos"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        onClick={handleSetPublicationChannel}
-                        disabled={savingPublicationChannel}
-                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    <div className="flex justify-center gap-3">
+                      <a
+                        href="https://t.me/Antiabetbot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
                       >
-                        {savingPublicationChannel ? 'Guardando...' : 'Guardar Canal'}
-                      </button>
+                        Abrir @Antiabetbot
+                      </a>
                       <button
-                        onClick={() => {
-                          setShowPublicationChannelForm(false);
-                          setPublicationChannelError('');
-                        }}
-                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        onClick={handleCancelLinking}
+                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
                       >
                         Cancelar
                       </button>
                     </div>
                   </div>
                 </div>
+              ) : linkingMethod === 'manual' ? (
+                /* Estado: Formulario manual */
+                <div className="bg-white rounded-lg p-5 border border-green-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xl">✍️</span>
+                    <h3 className="font-bold text-gray-900">Configuración Manual</h3>
+                  </div>
+                  
+                  {publicationChannelError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                      <p className="text-sm text-red-600">❌ {publicationChannelError}</p>
+                    </div>
+                  )}
+
+                  <div className="bg-blue-50 rounded-lg p-3 mb-4 text-sm text-blue-800">
+                    <strong>⚠️ Importante:</strong> Antes de continuar, asegúrate de haber añadido a <strong>@Antiabetbot</strong> como administrador del canal.
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Canal de Telegram <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={publicationChannelInput}
+                        onChange={(e) => setPublicationChannelInput(e.target.value)}
+                        placeholder="@micanal o -1001234567890"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-lg"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        💡 Si tu canal es público, usa <strong>@nombredelcanal</strong>. Si es privado, usa el ID numérico.
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={handleSetPublicationChannel}
+                        disabled={savingPublicationChannel || !publicationChannelInput.trim()}
+                        className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
+                      >
+                        {savingPublicationChannel ? '⏳ Verificando...' : '✓ Conectar Canal'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setLinkingMethod(null);
+                          setPublicationChannelError('');
+                          setPublicationChannelInput('');
+                        }}
+                        className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Volver
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600">
+                      <strong>¿Cómo obtener el ID del canal privado?</strong><br />
+                      Reenvía cualquier mensaje del canal a <a href="https://t.me/userinfobot" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">@userinfobot</a> y te dará el ID.
+                    </p>
+                  </div>
+                </div>
               ) : (
-                <div className="bg-white rounded-lg p-4 border border-dashed border-green-300 text-center">
-                  <p className="text-gray-500 mb-3">No tienes un canal de publicación configurado</p>
-                  <button
-                    onClick={() => setShowPublicationChannelForm(true)}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                /* Estado: Selección de método */
+                <div className="space-y-4">
+                  <p className="text-center text-gray-600 mb-2">Elige cómo quieres vincular tu canal:</p>
+                  
+                  {/* Opción 1: Automático (Recomendado) */}
+                  <div 
+                    onClick={handleStartAutoLinking}
+                    className="bg-white rounded-lg p-5 border-2 border-green-300 hover:border-green-500 cursor-pointer transition-all hover:shadow-md"
                   >
-                    + Configurar Canal de Publicación
-                  </button>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">🚀</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-gray-900">Conexión Automática</h3>
+                          <span className="text-xs px-2 py-0.5 bg-green-500 text-white rounded-full">Recomendado</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Solo añade @Antiabetbot como admin a tu canal y se conectará automáticamente.
+                        </p>
+                        <p className="text-xs text-green-600 font-medium">✓ Sin configuración manual • ✓ Más rápido • ✓ Sin errores</p>
+                      </div>
+                      <div className="text-green-500 text-2xl">→</div>
+                    </div>
+                  </div>
+
+                  {/* Opción 2: Manual */}
+                  <div 
+                    onClick={() => setLinkingMethod('manual')}
+                    className="bg-white rounded-lg p-5 border border-gray-200 hover:border-gray-400 cursor-pointer transition-all hover:shadow-sm"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">✍️</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 mb-1">Configuración Manual</h3>
+                        <p className="text-sm text-gray-600">
+                          Introduce el @username o ID de tu canal manualmente.
+                        </p>
+                      </div>
+                      <div className="text-gray-400 text-2xl">→</div>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              <div className="mt-4 p-3 bg-green-100 rounded-lg">
-                <p className="text-sm text-green-800">
-                  <strong>💡 Tip:</strong> El canal de publicación es donde compartes tus productos con el botón "📱 Publicar" 
-                  que aparece en cada producto. Asegúrate de que @Antiabetbot sea administrador del canal.
-                </p>
-              </div>
+              {/* Tip informativo (solo cuando no está configurado ni en proceso) */}
+              {!publicationChannel.configured && !linkingMethod && !publicationChannel.pending && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">💡 ¿Qué es el Canal de Publicación?</h4>
+                  <p className="text-sm text-blue-800">
+                    Es el canal de Telegram donde compartes tus pronósticos con tu audiencia. 
+                    Una vez conectado, podrás usar el botón <strong>"📱 Compartir"</strong> en cada producto 
+                    para publicarlo directamente en tu canal con un solo clic.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Canales Premium - Para dar acceso a clientes */}
