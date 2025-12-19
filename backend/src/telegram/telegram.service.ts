@@ -35,14 +35,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       await this.bot.telegram.deleteWebhook({ drop_pending_updates: false });
       this.logger.log(`✅ Webhook removed`);
       
-      // Iniciar polling
-      this.bot.launch().then(() => {
-        this.logger.log('✅ Bot started in polling mode');
+      // Iniciar polling en background (no bloqueante)
+      // Note: launch() nunca resuelve normalmente - mantiene el polling activo
+      this.bot.launch({
+        allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
       }).catch((err) => {
-        this.logger.error('Failed to start bot polling:', err);
+        this.logger.error('Bot polling error:', err);
       });
       
-      this.logger.log('✅ TelegramService initialized (polling mode)');
+      this.logger.log('✅ TelegramService initialized (polling mode - running in background)');
     } catch (error) {
       this.logger.error('Failed to initialize Telegram bot:', error);
       this.logger.warn('⚠️  Telegram features may not work correctly');
