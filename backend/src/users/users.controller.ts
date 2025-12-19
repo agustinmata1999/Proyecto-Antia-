@@ -20,13 +20,18 @@ export class UsersController {
   async getMe(@CurrentUser() user: any) {
     const userData = await this.usersService.findById(user.id);
     
+    if (!userData) return null;
+    
+    // Remove sensitive data
+    const { passwordHash, ...safeUserData } = userData as any;
+    
     // If user is a tipster, include tipster profile
     if (userData?.role === 'TIPSTER') {
       const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
         where: { userId: user.id },
       });
       return {
-        ...userData,
+        ...safeUserData,
         tipsterProfile,
       };
     }
@@ -37,12 +42,12 @@ export class UsersController {
         where: { userId: user.id },
       });
       return {
-        ...userData,
+        ...safeUserData,
         clientProfile,
       };
     }
     
-    return userData;
+    return safeUserData;
   }
 
   @Patch('me')
