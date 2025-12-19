@@ -125,7 +125,7 @@ export default function TipsterDashboard() {
     try {
       // Load user profile first
       try {
-        const userRes = await authApi.getMe();
+        const userRes = await usersApi.getMe();
         setUser(userRes.data);
         console.log('Loaded user profile:', userRes.data);
       } catch (error) {
