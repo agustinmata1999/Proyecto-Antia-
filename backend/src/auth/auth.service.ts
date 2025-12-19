@@ -175,12 +175,14 @@ export class AuthService {
       const now = new Date().toISOString();
       const userId = new ObjectId();
       const clientProfileId = new ObjectId();
+      const userIdHex = userId.toHexString();
+      const profileIdHex = clientProfileId.toHexString();
 
       // Create user using raw MongoDB
       await this.prisma.$runCommandRaw({
         insert: 'users',
         documents: [{
-          _id: userId,
+          _id: { $oid: userIdHex },
           email: dto.email,
           phone: dto.phone || null,
           password_hash: passwordHash,
@@ -195,8 +197,8 @@ export class AuthService {
       await this.prisma.$runCommandRaw({
         insert: 'client_profiles',
         documents: [{
-          _id: clientProfileId,
-          user_id: userId.toHexString(),
+          _id: { $oid: profileIdHex },
+          user_id: userIdHex,
           country_iso: dto.countryIso,
           consent_18: dto.consent18 || false,
           consent_terms: dto.consentTerms || false,
@@ -210,7 +212,7 @@ export class AuthService {
 
       // Return login data
       const user = {
-        id: userId.toHexString(),
+        id: userIdHex,
         email: dto.email,
         role: 'CLIENT',
         status: 'ACTIVE',
