@@ -1166,4 +1166,129 @@ export class TelegramService implements OnModuleInit {
       connectionType: tipster.telegramConnectionType,
     };
   }
+
+  /**
+   * Verificar acceso al canal (si el bot es admin)
+   */
+  async verifyChannelAccess(channelId: string): Promise<{
+    valid: boolean;
+    title?: string;
+    username?: string;
+    type?: string;
+    error?: string;
+  }> {
+    try {
+      const chat = await this.bot.telegram.getChat(channelId);
+      
+      // Verify bot is admin
+      const botInfo = await this.bot.telegram.getMe();
+      const admins = await this.bot.telegram.getChatAdministrators(channelId);
+      const isAdmin = admins.some(admin => admin.user.id === botInfo.id);
+
+      if (!isAdmin) {
+        return {
+          valid: false,
+          error: 'El bot no es administrador de este canal. Por favor, añade @Antiabetbot como administrador.',
+        };
+      }
+
+      return {
+        valid: true,
+        title: 'title' in chat ? chat.title : undefined,
+        username: 'username' in chat ? chat.username : undefined,
+        type: chat.type,
+      };
+    } catch (error) {
+      this.logger.error('Error verifying channel access:', error);
+      return {
+        valid: false,
+        error: 'No se pudo acceder al canal. Verifica que el ID sea correcto y que el bot sea administrador.',
+      };
+    }
+  }
+
+  /**
+   * Publicar producto en el canal de publicación del tipster
+   */
+  async publishProductToChannel(
+    tipsterId: string,
+    productId: string,
+    targetChannelId?: string,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get product
+      const product = await this.prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        return { success: false, message: 'Producto no encontrado' };
+      }
+
+      // Get tipster profile with publication channel
+      const tipsterResult = await this.prisma.$runCommandRaw({
+        find: 'tipster_profiles',
+        filter: { _id: { $oid: tipsterId } },
+        projection: { 
+          publication_channel_id: 1, 
+          publication_channel_title: 1,
+          public_name: 1,
+        },
+        limit: 1,
+      }) as any;
+
+      const tipsterProfile = tipsterResult.cursor?.firstBatch?.[0];
+
+      if (!tipsterProfile) {
+        return { success: false, message: 'Perfil de tipster no encontrado' };
+      }
+
+      // Determine which channel to use
+      const channelId = targetChannelId || tipsterProfile.publication_channel_id;
+
+      if (!channelId) {
+        return { 
+          success: false, 
+          message: 'No tienes un canal de publicación configurado. Configúralo en la sección de Telegram.',
+        };
+      }
+
+      // Format and send message
+      const price = (product.priceCents / 100).toFixed(2);
+      const appUrl = process.env.APP_URL || 'https://affiliate-hub-170.preview.emergentagent.com';
+      const checkoutUrl = `${appUrl}/checkout/${product.id}`;
+      
+      const message = `
+🎯 *${this.escapeMarkdown(product.title)}*
+
+${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}💰 *Precio:* €${price}
+📅 *Validez:* ${product.validityDays || 30} días
+👤 *Por:* ${tipsterProfile.public_name || 'Tipster'}
+
+🛒 *¡Compra ahora y accede al contenido premium\\!*
+      `.trim();
+
+      await this.bot.telegram.sendMessage(channelId, message, {
+        parse_mode: 'MarkdownV2',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '💳 Comprar Ahora', url: checkoutUrl }],
+          ],
+        },
+      });
+
+      this.logger.log(`✅ Published product ${productId} to channel ${channelId}`);
+
+      return {
+        success: true,
+        message: '¡Producto publicado exitosamente en tu canal de Telegram!',
+      };
+    } catch (error) {
+      this.logger.error('Error publishing product to channel:', error);
+      return {
+        success: false,
+        message: 'Error al publicar: ' + (error.message || 'Error desconocido'),
+      };
+    }
+  }
 }
