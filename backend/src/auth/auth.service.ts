@@ -18,9 +18,15 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+    } catch (error) {
+      this.logger.error(`Database error during login for ${email}:`, error.message);
+      throw new Error(`Database connection error: ${error.message}`);
+    }
 
     if (!user) {
       return null;
