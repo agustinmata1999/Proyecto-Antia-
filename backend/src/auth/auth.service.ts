@@ -76,7 +76,7 @@ export class AuthService {
       const userId = new ObjectId();
       const tipsterProfileId = new ObjectId();
 
-      // Create user using raw MongoDB
+      // Create user using raw MongoDB with PENDING status (requires admin approval)
       await this.prisma.$runCommandRaw({
         insert: 'users',
         documents: [{
@@ -85,13 +85,13 @@ export class AuthService {
           phone: dto.phone,
           password_hash: passwordHash,
           role: 'TIPSTER',
-          status: 'ACTIVE',
+          status: 'PENDING', // Requires admin approval
           created_at: { $date: now },
           updated_at: { $date: now },
         }],
       });
 
-      // Create tipster profile using raw MongoDB
+      // Create tipster profile with application details
       await this.prisma.$runCommandRaw({
         insert: 'tipster_profiles',
         documents: [{
@@ -101,17 +101,27 @@ export class AuthService {
           telegram_username: dto.telegramUsername || null,
           locale: 'es',
           timezone: 'Europe/Madrid',
-          module_pronosticos_enabled: true,
+          module_forecasts: true,
           module_affiliate: false,
+          // Application details
+          application_status: 'PENDING',
+          application_notes: dto.applicationNotes || null,
+          application_country: dto.countryIso || null,
+          application_experience: dto.experience || null,
+          application_social_media: dto.socialMedia || null,
+          application_website: dto.website || null,
           created_at: { $date: now },
           updated_at: { $date: now },
         }],
       });
 
+      this.logger.log(`New tipster application received: ${dto.email}`);
+
       return {
-        message: 'Tipster registered successfully.',
+        message: 'Solicitud de registro enviada correctamente. Un administrador revisará tu solicitud.',
         userId: userId.toHexString(),
-        status: 'ACTIVE',
+        status: 'PENDING',
+        requiresApproval: true,
       };
     } catch (error) {
       console.error('Error registering tipster:', error);
