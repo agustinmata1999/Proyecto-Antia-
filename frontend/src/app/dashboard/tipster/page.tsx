@@ -968,10 +968,123 @@ export default function TipsterDashboard() {
           <>
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900">📱 Canales de Telegram</h1>
-              <p className="text-gray-600 mt-1">Gestiona los canales donde tus clientes recibirán acceso</p>
+              <p className="text-gray-600 mt-1">Gestiona tus canales de Telegram</p>
             </div>
 
-            {/* Canales Conectados */}
+            {/* Canal de Publicación - Para compartir productos */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 mb-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    📢 Canal de Publicación
+                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded">Para marketing</span>
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Este es tu canal público donde publicas tus productos para que la gente los compre.
+                  </p>
+                </div>
+              </div>
+
+              {publicationChannel.configured ? (
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">📢</span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{publicationChannel.channelTitle || 'Canal de Publicación'}</h3>
+                        <p className="text-sm text-gray-500">ID: {publicationChannel.channelId}</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Configurado - Puedes publicar productos desde "Mis Productos"</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleRemovePublicationChannel}
+                      className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
+                    >
+                      Cambiar Canal
+                    </button>
+                  </div>
+                </div>
+              ) : showPublicationChannelForm ? (
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <h3 className="font-medium text-gray-900 mb-3">Configurar Canal de Publicación</h3>
+                  
+                  {publicationChannelError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-3">
+                      <p className="text-sm text-red-600">{publicationChannelError}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        ID del Canal <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={publicationChannelInput}
+                        onChange={(e) => setPublicationChannelInput(e.target.value)}
+                        placeholder="Ej: -1001234567890 o @mi_canal"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Puedes obtener el ID reenviando un mensaje del canal a @userinfobot
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre del Canal (opcional)
+                      </label>
+                      <input
+                        type="text"
+                        value={publicationChannelTitle}
+                        onChange={(e) => setPublicationChannelTitle(e.target.value)}
+                        placeholder="Ej: Mi Canal de Pronósticos"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={handleSetPublicationChannel}
+                        disabled={savingPublicationChannel}
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {savingPublicationChannel ? 'Guardando...' : 'Guardar Canal'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowPublicationChannelForm(false);
+                          setPublicationChannelError('');
+                        }}
+                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg p-4 border border-dashed border-green-300 text-center">
+                  <p className="text-gray-500 mb-3">No tienes un canal de publicación configurado</p>
+                  <button
+                    onClick={() => setShowPublicationChannelForm(true)}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    + Configurar Canal de Publicación
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>💡 Tip:</strong> El canal de publicación es donde compartes tus productos con el botón "📱 Publicar" 
+                  que aparece en cada producto. Asegúrate de que @Antiabetbot sea administrador del canal.
+                </p>
+              </div>
+            </div>
+
+            {/* Canales Premium - Para dar acceso a clientes */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Mis Canales</h2>
