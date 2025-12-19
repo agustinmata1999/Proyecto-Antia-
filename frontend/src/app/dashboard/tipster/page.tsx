@@ -907,16 +907,21 @@ export default function TipsterDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            {telegramConnected && (
-                              <button 
-                                onClick={() => handlePublishToTelegram(product.id)}
-                                disabled={publishingProduct === product.id}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-2 disabled:opacity-50"
-                                title="Publicar en Telegram"
-                              >
-                                {publishingProduct === product.id ? 'Publicando...' : '📱 Publicar'}
-                              </button>
-                            )}
+                            <button 
+                              onClick={() => handlePublishToTelegram(product.id)}
+                              disabled={publishingProduct === product.id}
+                              className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 disabled:opacity-50 ${
+                                publicationChannel.configured 
+                                  ? 'bg-green-600 hover:bg-green-700' 
+                                  : 'bg-gray-400 hover:bg-gray-500'
+                              }`}
+                              title={publicationChannel.configured 
+                                ? `Publicar en ${publicationChannel.channelTitle || 'Telegram'}` 
+                                : 'Configura primero tu Canal de Publicación'
+                              }
+                            >
+                              {publishingProduct === product.id ? 'Publicando...' : '📱 Compartir'}
+                            </button>
                             <button 
                               onClick={() => handleEditProduct(product)}
                               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
