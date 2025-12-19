@@ -6,8 +6,9 @@
   "private": true,
   "license": "PROPRIETARY",
   "scripts": {
+    "postinstall": "prisma generate",
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
