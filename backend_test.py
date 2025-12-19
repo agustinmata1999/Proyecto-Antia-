@@ -2261,6 +2261,29 @@ class AntiaAPITester:
         
         # Test 5: Verify products endpoint still works
         results["verify_products_my"] = self.test_get_my_products()
+
+        # Telegram Publication Channel Tests
+        self.log("\n" + "="*50)
+        self.log("📢 TELEGRAM PUBLICATION CHANNEL TESTS")
+        self.log("="*50)
+        
+        # Test 1: Get publication channel (should be unconfigured initially)
+        results["get_publication_channel"] = self.test_get_publication_channel()
+        
+        # Test 2: Set publication channel
+        results["set_publication_channel"] = self.test_set_publication_channel()
+        
+        # Test 3: Verify publication channel is set
+        results["verify_publication_channel_set"] = self.test_verify_publication_channel_set()
+        
+        # Test 4: Publish product to Telegram (uses publication channel)
+        results["publish_product_to_telegram"] = self.test_publish_product_to_telegram()
+        
+        # Test 5: Delete publication channel
+        results["delete_publication_channel"] = self.test_delete_publication_channel()
+        
+        # Test 6: Verify publication channel is deleted
+        results["verify_publication_channel_deleted"] = self.test_verify_publication_channel_deleted()
         
         # ===== AFFILIATE MODULE TESTS =====
         self.log("\n" + "="*50)
