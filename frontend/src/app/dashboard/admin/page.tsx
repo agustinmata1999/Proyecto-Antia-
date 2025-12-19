@@ -7,7 +7,7 @@ import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
-type AdminView = 'tipsters' | 'commissions' | 'reports' | 'affiliate';
+type AdminView = 'tipsters' | 'applications' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
 
 interface Tipster {
