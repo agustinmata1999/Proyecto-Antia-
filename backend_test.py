@@ -2681,7 +2681,8 @@ def main():
     tester = AntiaAPITester()
     
     try:
-        results = tester.run_all_tests()
+        # Run the specific Telegram Publication Channel tests for the configured scenario
+        results = tester.run_telegram_publication_channel_tests()
         success = tester.print_summary(results)
         
         # Exit with appropriate code
