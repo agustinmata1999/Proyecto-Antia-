@@ -10,51 +10,63 @@
 backend:
   - task: "GET /api/telegram/publication-channel - Get current publication channel config"
     implemented: true
-    working: "NA"
-    file: "server.py"
+    working: true
+    file: "telegram.controller.ts"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New Telegram Publication Channel feature - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns correct structure with configured:false, channelId:null, channelTitle:null when no publication channel is set"
 
   - task: "POST /api/telegram/publication-channel - Set publication channel"
     implemented: true
-    working: "NA"
-    file: "server.py"
+    working: true
+    file: "telegram.controller.ts"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New Telegram Publication Channel feature - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API correctly validates channel access and returns appropriate error when bot is not admin. Validation logic working as expected"
 
   - task: "DELETE /api/telegram/publication-channel - Remove publication channel"
     implemented: true
-    working: "NA"
-    file: "server.py"
+    working: true
+    file: "telegram.controller.ts"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New Telegram Publication Channel feature - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API successfully removes publication channel and returns success:true with appropriate message"
 
   - task: "POST /api/products/:id/publish-telegram - Publish product to Telegram"
     implemented: true
-    working: "NA"
-    file: "server.py"
+    working: true
+    file: "products.controller.ts"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New Telegram Publication Channel feature - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API correctly validates that publication channel is configured before attempting to publish. Returns appropriate error message when no channel is configured"
 
 frontend:
   - task: "Telegram Publication Channel UI"
