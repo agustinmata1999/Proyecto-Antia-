@@ -667,8 +667,8 @@ export default function TipsterDashboard() {
           <div className="text-2xl font-bold text-blue-600 mb-8">Antia</div>
           
           <div className="mb-6 pb-6 border-b border-gray-200">
-            <div className="text-sm text-gray-500">Fausto Perez</div>
-            <div className="text-xs text-gray-400">#5203</div>
+            <div className="text-sm text-gray-500">{user?.tipsterProfile?.publicName || user?.email || 'Cargando...'}</div>
+            <div className="text-xs text-gray-400">#{user?.tipsterProfile?.id?.slice(-4) || '----'}</div>
           </div>
 
           <nav className="space-y-2">
