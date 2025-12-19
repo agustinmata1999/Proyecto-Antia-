@@ -281,14 +281,14 @@ export class AdminApplicationsController {
       }],
     });
 
-    // Update user status - user_id might be string or ObjectId
+    // Update user status - try both formats since _id could be string or ObjectId
     const userId = profile.user_id;
-    const userFilter = /^[0-9a-fA-F]{24}$/.test(userId) ? { _id: { $oid: userId } } : { _id: userId };
     
-    await this.prisma.$runCommandRaw({
+    // First try ObjectId format
+    let updateResult = await this.prisma.$runCommandRaw({
       update: 'users',
       updates: [{
-        q: userFilter,
+        q: { _id: { $oid: userId } },
         u: {
           $set: {
             status: userStatus,
@@ -296,7 +296,23 @@ export class AdminApplicationsController {
           },
         },
       }],
-    });
+    }) as any;
+    
+    // If no document was modified, try string format
+    if (updateResult.nModified === 0 && updateResult.n === 0) {
+      await this.prisma.$runCommandRaw({
+        update: 'users',
+        updates: [{
+          q: { _id: userId },
+          u: {
+            $set: {
+              status: userStatus,
+              updated_at: { $date: now },
+            },
+          },
+        }],
+      });
+    }
 
     this.logger.log(`Application ${id} ${dto.action}D by admin ${admin.email}`);
 
