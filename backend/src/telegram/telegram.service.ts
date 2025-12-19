@@ -424,7 +424,59 @@ export class TelegramService implements OnModuleInit {
     channelTitle: string,
     channelUsername?: string,
   ) {
-    // Buscar un tipster que tenga este canal registrado por username
+    this.logger.log(`🔗 Processing channel connection: ${channelTitle} (${channelId})`);
+    
+    // 1. Buscar tipsters que están esperando vincular un canal de publicación
+    const pendingResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: { 
+        publication_channel_pending: true,
+      },
+      projection: { 
+        _id: 1, 
+        public_name: 1,
+        user_id: 1,
+      },
+    }) as any;
+
+    const pendingTipsters = pendingResult.cursor?.firstBatch || [];
+    
+    if (pendingTipsters.length > 0) {
+      // Vincular al primer tipster que está esperando (FIFO)
+      const tipster = pendingTipsters[0];
+      const tipsterId = tipster._id.$oid || tipster._id;
+      
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_profiles',
+        updates: [{
+          q: { _id: { $oid: tipsterId } },
+          u: {
+            $set: {
+              publication_channel_id: channelId,
+              publication_channel_title: channelTitle,
+              publication_channel_username: channelUsername ? `@${channelUsername}` : null,
+              publication_channel_pending: false,
+              updated_at: { $date: new Date().toISOString() },
+            },
+          },
+        }],
+      });
+
+      this.logger.log(`✅ Auto-configured publication channel for tipster: ${tipster.public_name}`);
+      
+      // Enviar mensaje de confirmación al canal
+      await this.bot.telegram.sendMessage(
+        channelId,
+        `✅ *¡Canal de Publicación Configurado\\!*\n\n` +
+        `Este canal ha sido vinculado como canal de publicación para *${this.escapeMarkdownV2(tipster.public_name || 'Tipster')}*\\.\n\n` +
+        `Ahora puedes usar el botón "📱 Compartir" en tus productos para publicarlos aquí automáticamente\\.`,
+        { parse_mode: 'MarkdownV2' }
+      );
+      
+      return;
+    }
+
+    // 2. Buscar un tipster que tenga este canal registrado por username (legacy)
     if (channelUsername) {
       const tipster = await this.prisma.tipsterProfile.findFirst({
         where: {
@@ -462,6 +514,13 @@ export class TelegramService implements OnModuleInit {
         );
       }
     }
+  }
+  
+  /**
+   * Escapar caracteres para MarkdownV2
+   */
+  private escapeMarkdownV2(text: string): string {
+    return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
   }
 
   /**
