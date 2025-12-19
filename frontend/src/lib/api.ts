@@ -96,6 +96,8 @@ export const telegramApi = {
     set: (channelId: string, channelTitle?: string) => 
       api.post('/telegram/publication-channel', { channelId, channelTitle }),
     remove: () => api.delete('/telegram/publication-channel'),
+    startLinking: () => api.post('/telegram/publication-channel/start-linking'),
+    cancelLinking: () => api.post('/telegram/publication-channel/cancel-linking'),
   },
   
   // Canales múltiples (premium para clientes)
