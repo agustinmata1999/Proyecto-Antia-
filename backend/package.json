@@ -8,7 +8,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "prebuild": "rimraf dist",
-    "build": "prisma generate && nest build",
+    "build": "prisma generate && nest build && node -e \"require('fs').writeFileSync('dist/main.js', 'module.exports = require(\\\"./src/main\\\");')\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
