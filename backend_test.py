@@ -2743,31 +2743,20 @@ class AntiaAPITester:
             response = self.make_request("POST", "/support/tickets", ticket_data)
             
             if response.status_code in [200, 201]:
-                ticket = response.json()
-                self.test_ticket_id = ticket.get("id")
-                self.log(f"✅ Support ticket created successfully with ID: {self.test_ticket_id}")
+                ticket_response = response.json()
                 
-                # Verify ticket fields
-                if ticket.get("category") == ticket_data["category"]:
-                    self.log("✅ Ticket category matches")
-                else:
-                    self.log("❌ Ticket category mismatch", "ERROR")
+                # Check if the response indicates success
+                if ticket_response.get("success"):
+                    self.test_ticket_id = ticket_response.get("ticketId")
+                    self.log(f"✅ Support ticket created successfully with ID: {self.test_ticket_id}")
                     
-                if ticket.get("subject") == ticket_data["subject"]:
-                    self.log("✅ Ticket subject matches")
-                else:
-                    self.log("❌ Ticket subject mismatch", "ERROR")
+                    if ticket_response.get("message"):
+                        self.log(f"✅ Success message: {ticket_response.get('message')}")
                     
-                if ticket.get("description") == ticket_data["description"]:
-                    self.log("✅ Ticket description matches")
+                    return True
                 else:
-                    self.log("❌ Ticket description mismatch", "ERROR")
-                
-                # Check default status
-                if ticket.get("status"):
-                    self.log(f"✅ Ticket status: {ticket.get('status')}")
-                
-                return True
+                    self.log(f"❌ Ticket creation failed: {ticket_response.get('message', 'No message')}", "ERROR")
+                    return False
             else:
                 self.log(f"❌ Create support ticket failed with status {response.status_code}", "ERROR")
                 return False
