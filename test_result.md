@@ -298,7 +298,10 @@ metadata:
 
 test_plan:
   current_focus: []
-  stuck_tasks: []
+  stuck_tasks: 
+    - "GET /api/admin/tipsters/applications/stats - Get application stats"
+    - "GET /api/admin/tipsters/applications - Get pending applications" 
+    - "POST /api/admin/tipsters/applications/:id/review - Approve/reject application"
   test_all: false
   test_priority: "high_first"
 
