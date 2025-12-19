@@ -100,6 +100,10 @@ export default function TipsterDashboard() {
   const [savingPublicationChannel, setSavingPublicationChannel] = useState(false);
   const [publicationChannelError, setPublicationChannelError] = useState('');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // Modal de confirmación para compartir en Telegram
+  const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
+  const [productToShare, setProductToShare] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
