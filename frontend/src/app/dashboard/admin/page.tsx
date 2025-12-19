@@ -148,6 +148,57 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadApplications = async () => {
+    try {
+      const response = await adminApi.applications.getAll(applicationFilter);
+      setApplications(response.data.applications || []);
+    } catch (err) {
+      console.error('Error loading applications:', err);
+    }
+  };
+
+  const loadApplicationStats = async () => {
+    try {
+      const response = await adminApi.applications.getStats();
+      setApplicationStats(response.data);
+    } catch (err) {
+      console.error('Error loading application stats:', err);
+    }
+  };
+
+  const handleReviewApplication = async (action: 'APPROVE' | 'REJECT') => {
+    if (!selectedApplication) return;
+    
+    if (action === 'REJECT' && !rejectionReason.trim()) {
+      alert('Por favor, indica el motivo del rechazo');
+      return;
+    }
+
+    setReviewingApplication(true);
+    try {
+      const response = await adminApi.applications.review(selectedApplication.id, {
+        action,
+        rejectionReason: action === 'REJECT' ? rejectionReason : undefined,
+      });
+
+      if (response.data.success) {
+        alert(action === 'APPROVE' 
+          ? '✅ Solicitud aprobada. El tipster ya puede acceder.' 
+          : '❌ Solicitud rechazada.'
+        );
+        setShowApplicationModal(false);
+        setSelectedApplication(null);
+        setRejectionReason('');
+        loadApplications();
+        loadApplicationStats();
+      }
+    } catch (err: any) {
+      alert('Error: ' + (err.response?.data?.message || 'Error al procesar'));
+    } finally {
+      setReviewingApplication(false);
+    }
+  };
+
   const loadCommissions = async () => {
     try {
       const response = await adminApi.commissions.getAll();
