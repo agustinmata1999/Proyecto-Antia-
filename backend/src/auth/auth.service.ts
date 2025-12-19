@@ -104,8 +104,11 @@ export class AuthService {
       const userIdHex = userId.toHexString();
       const profileIdHex = tipsterProfileId.toHexString();
 
+      this.logger.log(`[REGISTER] Starting tipster registration for: ${dto.email}`);
+      this.logger.log(`[REGISTER] User ID: ${userIdHex}, Profile ID: ${profileIdHex}`);
+
       // Create user using raw MongoDB with PENDING status (requires admin approval)
-      await this.prisma.$runCommandRaw({
+      const userResult = await this.prisma.$runCommandRaw({
         insert: 'users',
         documents: [{
           _id: { $oid: userIdHex },
@@ -117,10 +120,12 @@ export class AuthService {
           created_at: { $date: now },
           updated_at: { $date: now },
         }],
-      });
+      }) as any;
+      
+      this.logger.log(`[REGISTER] User insert result: ${JSON.stringify(userResult)}`);
 
       // Create tipster profile with application details
-      await this.prisma.$runCommandRaw({
+      const profileResult = await this.prisma.$runCommandRaw({
         insert: 'tipster_profiles',
         documents: [{
           _id: { $oid: profileIdHex },
@@ -141,19 +146,20 @@ export class AuthService {
           created_at: { $date: now },
           updated_at: { $date: now },
         }],
-      });
+      }) as any;
 
-      this.logger.log(`New tipster application received: ${dto.email}`);
+      this.logger.log(`[REGISTER] Profile insert result: ${JSON.stringify(profileResult)}`);
+      this.logger.log(`[REGISTER] New tipster application received: ${dto.email}`);
 
       return {
         message: 'Solicitud de registro enviada correctamente. Un administrador revisará tu solicitud.',
-        userId: userId.toHexString(),
+        userId: userIdHex,
         status: 'PENDING',
         requiresApproval: true,
       };
     } catch (error) {
-      console.error('Error registering tipster:', error);
-      throw new Error('Error creating tipster account');
+      this.logger.error(`[REGISTER] Error registering tipster: ${error.message}`, error.stack);
+      throw new BadRequestException('Error creating tipster account: ' + error.message);
     }
   }
 
