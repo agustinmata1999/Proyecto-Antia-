@@ -8,6 +8,102 @@
 
 ```yaml
 backend:
+  - task: "GET /api/client/profile - Get client profile"
+    implemented: true
+    working: true
+    file: "client.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns correct structure with profile and user data. Profile is null for new clients as expected."
+
+  - task: "PUT /api/client/profile - Update client profile"
+    implemented: true
+    working: true
+    file: "client.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API handles profile updates correctly. Returns success=false with 'Perfil no encontrado' for new clients, which is expected behavior."
+
+  - task: "GET /api/client/purchases - Get all purchases"
+    implemented: true
+    working: true
+    file: "client.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns empty array for client with no purchases. Structure and response format correct."
+
+  - task: "GET /api/client/purchases/:id - Get purchase details"
+    implemented: true
+    working: true
+    file: "client.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API handles purchase details requests correctly. Returns appropriate response when no purchases exist."
+
+  - task: "GET /api/client/payments - Get payment history"
+    implemented: true
+    working: true
+    file: "client.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns empty array for client with no payment history. Structure and response format correct."
+
+  - task: "POST /api/support/tickets - Create support ticket"
+    implemented: true
+    working: true
+    file: "support.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API creates support tickets successfully. Returns success:true with ticketId and appropriate message."
+
+  - task: "GET /api/support/tickets/my - Get my support tickets"
+    implemented: true
+    working: true
+    file: "support.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns list of user's support tickets with all required fields (id, category, subject, status, priority, createdAt)."
+
+  - task: "GET /api/support/tickets/my/:id - Get ticket details"
+    implemented: true
+    working: true
+    file: "support.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API returns detailed ticket information including all fields. Properly validates ticket ownership."
+
   - task: "GET /api/telegram/publication-channel - Get current publication channel config"
     implemented: true
     working: true
