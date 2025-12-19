@@ -18,6 +18,8 @@ TIPSTER_EMAIL = "fausto.perez@antia.com"
 TIPSTER_PASSWORD = "Tipster123!"
 ADMIN_EMAIL = "admin@antia.com"
 ADMIN_PASSWORD = "SuperAdmin123!"
+CLIENT_EMAIL = "cliente@example.com"
+CLIENT_PASSWORD = "Client123!"
 
 class AntiaAPITester:
     def __init__(self):
