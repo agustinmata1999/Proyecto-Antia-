@@ -1002,7 +1002,7 @@ export default function TipsterDashboard() {
                           </div>
                           <div className="flex items-center gap-2">
                             <button 
-                              onClick={() => handlePublishToTelegram(product.id)}
+                              onClick={() => handlePublishToTelegram(product.id, product.title)}
                               disabled={publishingProduct === product.id}
                               className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 disabled:opacity-50 ${
                                 publicationChannel.configured 
@@ -1010,11 +1010,11 @@ export default function TipsterDashboard() {
                                   : 'bg-gray-400 hover:bg-gray-500'
                               }`}
                               title={publicationChannel.configured 
-                                ? `Publicar en ${publicationChannel.channelTitle || 'Telegram'}` 
+                                ? `Publicar automáticamente en ${publicationChannel.channelTitle || 'Telegram'}` 
                                 : 'Configura primero tu Canal de Publicación'
                               }
                             >
-                              {publishingProduct === product.id ? 'Publicando...' : '📱 Compartir'}
+                              {publishingProduct === product.id ? '⏳ Publicando...' : '📱 Compartir en Telegram'}
                             </button>
                             <button 
                               onClick={() => handleEditProduct(product)}
