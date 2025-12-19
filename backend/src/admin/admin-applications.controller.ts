@@ -250,11 +250,16 @@ export class AdminApplicationsController {
     const newStatus = dto.action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
     const userStatus = dto.action === 'APPROVE' ? 'ACTIVE' : 'REJECTED';
 
+    // Determine the query filter based on ID format
+    const profileId = profile._id?.$oid || profile._id;
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const profileFilter = isObjectId ? { _id: { $oid: id } } : { _id: id };
+
     // Update tipster profile
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
       updates: [{
-        q: { _id: { $oid: id } },
+        q: profileFilter,
         u: {
           $set: {
             application_status: newStatus,
@@ -267,11 +272,14 @@ export class AdminApplicationsController {
       }],
     });
 
-    // Update user status
+    // Update user status - user_id might be string or ObjectId
+    const userId = profile.user_id;
+    const userFilter = /^[0-9a-fA-F]{24}$/.test(userId) ? { _id: { $oid: userId } } : { _id: userId };
+    
     await this.prisma.$runCommandRaw({
       update: 'users',
       updates: [{
-        q: { _id: { $oid: profile.user_id } },
+        q: userFilter,
         u: {
           $set: {
             status: userStatus,
