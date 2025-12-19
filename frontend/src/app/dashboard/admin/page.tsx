@@ -110,6 +110,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAuth();
+    // Load application stats for badge in sidebar
+    loadApplicationStats();
   }, []);
 
   useEffect(() => {
