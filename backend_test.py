@@ -2610,6 +2610,47 @@ class AntiaAPITester:
         results["affiliate_module"] = affiliate_success
             
         return results
+
+    def run_telegram_publication_channel_tests(self) -> Dict[str, bool]:
+        """Run Telegram Publication Channel tests with configured scenario"""
+        results = {}
+        
+        # Authentication test (required for other tests)
+        results["login"] = self.test_login()
+        if not results["login"]:
+            self.log("❌ Login failed - skipping other tests", "ERROR")
+            return results
+        
+        # Test the complete Telegram Publication Channel feature flow
+        self.log("\n" + "="*80)
+        self.log("🚀 TESTING TELEGRAM PUBLICATION CHANNEL FEATURE (CONFIGURED SCENARIO)")
+        self.log("="*80)
+        
+        # 1. Verify current configured state
+        results["get_configured_publication_channel"] = self.test_get_configured_publication_channel()
+        
+        # 2. Get a product ID for testing
+        results["get_my_products"] = self.test_get_my_products()
+        
+        # 3. Attempt to publish the product to Telegram (main test - should work now!)
+        results["publish_product_to_telegram_configured"] = self.test_publish_product_to_telegram()
+        
+        # 4. Test the start-linking flow
+        results["start_linking_process"] = self.test_start_linking_process()
+        
+        # 5. Test cancel-linking
+        results["cancel_linking_process"] = self.test_cancel_linking_process()
+        
+        # 6. Test removing publication channel
+        results["remove_publication_channel"] = self.test_remove_publication_channel()
+        
+        # 7. Verify channel is removed
+        results["verify_channel_removed"] = self.test_verify_channel_removed()
+        
+        # 8. Restore the publication channel configuration at the end
+        results["restore_publication_channel"] = self.test_restore_publication_channel()
+        
+        return results
         
     def print_summary(self, results: Dict[str, bool]):
         """Print test results summary"""
