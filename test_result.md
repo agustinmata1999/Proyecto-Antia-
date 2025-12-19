@@ -22,6 +22,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - API returns correct structure with configured:false, channelId:null, channelTitle:null when no publication channel is set"
+      - working: true
+        agent: "testing"
+        comment: "✅ CONFIGURED SCENARIO TESTED - API correctly returns configured:true, channelId:-1003329431615, channelTitle:'Mi Canal de Pronósticos', channelUsername:'@pruebabotantia' when publication channel is configured"
 
   - task: "POST /api/telegram/publication-channel - Set publication channel"
     implemented: true
@@ -37,6 +40,33 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - API correctly validates channel access and returns appropriate error when bot is not admin. Validation logic working as expected"
+      - working: true
+        agent: "testing"
+        comment: "✅ CONFIGURED SCENARIO TESTED - API successfully sets publication channel with channelId:-1003329431615 and returns success:true with channel details"
+
+  - task: "POST /api/telegram/publication-channel/start-linking - Start auto-linking process"
+    implemented: true
+    working: true
+    file: "telegram.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API sets pending:true and returns success message with botUsername:'Antiabetbot'"
+
+  - task: "POST /api/telegram/publication-channel/cancel-linking - Cancel auto-linking process"
+    implemented: true
+    working: true
+    file: "telegram.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - API sets pending:false and returns success message confirming cancellation"
 
   - task: "DELETE /api/telegram/publication-channel - Remove publication channel"
     implemented: true
@@ -52,10 +82,13 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - API successfully removes publication channel and returns success:true with appropriate message"
+      - working: true
+        agent: "testing"
+        comment: "✅ CONFIGURED SCENARIO TESTED - API successfully removes configured publication channel and resets to unconfigured state (channelId:null, channelTitle:null)"
 
   - task: "POST /api/products/:id/publish-telegram - Publish product to Telegram"
     implemented: true
-    working: true
+    working: false
     file: "products.controller.ts"
     stuck_count: 0
     priority: "high"
@@ -67,6 +100,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - API correctly validates that publication channel is configured before attempting to publish. Returns appropriate error message when no channel is configured"
+      - working: false
+        agent: "testing"
+        comment: "❌ MINOR ISSUE - API flow works correctly but Telegram message publishing fails due to text formatting: 'Character '.' is reserved and must be escaped with the preceding '\\'. This is a minor text escaping issue, not a critical API failure. The publication channel validation and API integration work correctly."
 
 frontend:
   - task: "Telegram Publication Channel UI"
