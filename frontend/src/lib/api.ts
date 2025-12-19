@@ -198,6 +198,15 @@ export const adminApi = {
       api.patch(`/admin/tipsters/${id}/modules`, modules),
   },
   
+  // Tipster Applications (solicitudes de registro)
+  applications: {
+    getAll: (status?: string) => api.get('/admin/tipsters/applications', { params: { status } }),
+    getStats: () => api.get('/admin/tipsters/applications/stats'),
+    getOne: (id: string) => api.get(`/admin/tipsters/applications/${id}`),
+    review: (id: string, data: { action: 'APPROVE' | 'REJECT'; rejectionReason?: string }) =>
+      api.post(`/admin/tipsters/applications/${id}/review`, data),
+  },
+  
   // Commissions management
   commissions: {
     getAll: () => api.get('/admin/commissions'),
