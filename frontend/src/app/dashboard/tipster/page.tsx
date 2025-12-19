@@ -362,8 +362,9 @@ export default function TipsterDashboard() {
   };
 
   const handlePublishToTelegram = async (productId: string) => {
-    if (!telegramConnected) {
-      alert('Primero debes conectar tu canal de Telegram');
+    if (!publicationChannel.configured) {
+      alert('Primero debes configurar tu Canal de Publicación en la sección de Telegram');
+      setActiveView('telegram');
       return;
     }
 
@@ -384,6 +385,61 @@ export default function TipsterDashboard() {
       alert('❌ Error: ' + (error.response?.data?.message || 'Error al publicar en Telegram'));
     } finally {
       setPublishingProduct(null);
+    }
+  };
+
+  // ==================== PUBLICATION CHANNEL FUNCTIONS ====================
+
+  const handleSetPublicationChannel = async () => {
+    if (!publicationChannelInput.trim()) {
+      setPublicationChannelError('Por favor, ingresa el ID del canal');
+      return;
+    }
+
+    setSavingPublicationChannel(true);
+    setPublicationChannelError('');
+
+    try {
+      const response = await telegramApi.publicationChannel.set(
+        publicationChannelInput.trim(),
+        publicationChannelTitle.trim() || undefined
+      );
+
+      if (response.data.success) {
+        setPublicationChannel({
+          configured: true,
+          channelId: response.data.channelId,
+          channelTitle: response.data.channelTitle,
+        });
+        setShowPublicationChannelForm(false);
+        setPublicationChannelInput('');
+        setPublicationChannelTitle('');
+        alert('✅ Canal de publicación configurado correctamente');
+      } else {
+        setPublicationChannelError(response.data.message || 'Error al configurar el canal');
+      }
+    } catch (error: any) {
+      setPublicationChannelError(error.response?.data?.message || 'Error al configurar el canal');
+    } finally {
+      setSavingPublicationChannel(false);
+    }
+  };
+
+  const handleRemovePublicationChannel = async () => {
+    if (!confirm('¿Estás seguro de que deseas eliminar el canal de publicación?')) {
+      return;
+    }
+
+    try {
+      await telegramApi.publicationChannel.remove();
+      setPublicationChannel({
+        configured: false,
+        channelId: null,
+        channelTitle: null,
+      });
+      alert('Canal de publicación eliminado');
+    } catch (error: any) {
+      alert('Error al eliminar el canal: ' + (error.response?.data?.message || 'Error desconocido'));
     }
   };
 
