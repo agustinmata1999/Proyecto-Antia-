@@ -101,12 +101,14 @@ export class AuthService {
       const now = new Date().toISOString();
       const userId = new ObjectId();
       const tipsterProfileId = new ObjectId();
+      const userIdHex = userId.toHexString();
+      const profileIdHex = tipsterProfileId.toHexString();
 
       // Create user using raw MongoDB with PENDING status (requires admin approval)
       await this.prisma.$runCommandRaw({
         insert: 'users',
         documents: [{
-          _id: userId,
+          _id: { $oid: userIdHex },
           email: dto.email,
           phone: dto.phone,
           password_hash: passwordHash,
@@ -121,8 +123,8 @@ export class AuthService {
       await this.prisma.$runCommandRaw({
         insert: 'tipster_profiles',
         documents: [{
-          _id: tipsterProfileId,
-          user_id: userId.toHexString(),
+          _id: { $oid: profileIdHex },
+          user_id: userIdHex,
           public_name: dto.name,
           telegram_username: dto.telegramUsername || null,
           locale: 'es',
