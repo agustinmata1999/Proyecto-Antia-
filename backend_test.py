@@ -1334,6 +1334,321 @@ class AntiaAPITester:
             self.log(f"❌ MongoDB geolocation verification failed: {str(e)}", "ERROR")
             return False
 
+    # ===== TELEGRAM PUBLICATION CHANNEL TESTS (CONFIGURED SCENARIO) =====
+    
+    def test_get_configured_publication_channel(self) -> bool:
+        """Test GET /api/telegram/publication-channel - Verify returns configured channel"""
+        self.log("=== Testing Get Configured Publication Channel ===")
+        
+        try:
+            response = self.make_request("GET", "/telegram/publication-channel")
+            
+            if response.status_code == 200:
+                channel_info = response.json()
+                self.log("✅ Successfully retrieved publication channel info")
+                
+                # Check response structure
+                expected_fields = ["configured", "channelId", "channelTitle", "channelUsername"]
+                for field in expected_fields:
+                    if field in channel_info:
+                        self.log(f"✅ Publication channel info has {field}: {channel_info[field]}")
+                    else:
+                        self.log(f"❌ Publication channel info missing {field}", "ERROR")
+                        return False
+                
+                # Verify the channel is configured with expected values
+                if channel_info.get("configured"):
+                    self.log("✅ Publication channel is configured")
+                    
+                    # Check for expected channel ID
+                    expected_channel_id = "-1003329431615"
+                    if channel_info.get("channelId") == expected_channel_id:
+                        self.log(f"✅ Channel ID matches expected: {expected_channel_id}")
+                    else:
+                        self.log(f"⚠️ Channel ID is {channel_info.get('channelId')}, expected {expected_channel_id}", "WARN")
+                    
+                    # Check for expected channel username
+                    expected_username = "@pruebabotantia"
+                    if channel_info.get("channelUsername") == expected_username:
+                        self.log(f"✅ Channel username matches expected: {expected_username}")
+                    else:
+                        self.log(f"⚠️ Channel username is {channel_info.get('channelUsername')}, expected {expected_username}", "WARN")
+                    
+                    # Check for channel title
+                    if channel_info.get("channelTitle"):
+                        self.log(f"✅ Channel title: {channel_info.get('channelTitle')}")
+                    else:
+                        self.log("⚠️ No channel title", "WARN")
+                    
+                    return True
+                else:
+                    self.log("❌ Publication channel is not configured", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Get publication channel failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get configured publication channel test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_start_linking_process(self) -> bool:
+        """Test POST /api/telegram/publication-channel/start-linking - Test starting auto-linking process"""
+        self.log("=== Testing Start Linking Process ===")
+        
+        try:
+            response = self.make_request("POST", "/telegram/publication-channel/start-linking")
+            
+            if response.status_code == 200 or response.status_code == 201:
+                result = response.json()
+                self.log("✅ Start linking request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Start linking marked as successful")
+                    
+                    # Check for expected message
+                    if "vinculación iniciado" in result.get("message", "").lower():
+                        self.log("✅ Appropriate message returned")
+                    else:
+                        self.log(f"⚠️ Unexpected message: {result.get('message')}", "WARN")
+                    
+                    # Check for bot username
+                    if result.get("botUsername") == "Antiabetbot":
+                        self.log("✅ Bot username is correct")
+                    else:
+                        self.log(f"⚠️ Bot username is {result.get('botUsername')}, expected Antiabetbot", "WARN")
+                    
+                    return True
+                else:
+                    self.log(f"❌ Start linking failed: {result.get('message', 'No message')}", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Start linking failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Start linking process test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_cancel_linking_process(self) -> bool:
+        """Test POST /api/telegram/publication-channel/cancel-linking - Test canceling auto-linking"""
+        self.log("=== Testing Cancel Linking Process ===")
+        
+        try:
+            response = self.make_request("POST", "/telegram/publication-channel/cancel-linking")
+            
+            if response.status_code == 200 or response.status_code == 201:
+                result = response.json()
+                self.log("✅ Cancel linking request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Cancel linking marked as successful")
+                    
+                    # Check for expected message
+                    if "cancelado" in result.get("message", "").lower():
+                        self.log("✅ Appropriate cancellation message returned")
+                    else:
+                        self.log(f"⚠️ Unexpected message: {result.get('message')}", "WARN")
+                    
+                    return True
+                else:
+                    self.log(f"❌ Cancel linking failed: {result.get('message', 'No message')}", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Cancel linking failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Cancel linking process test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_publish_product_to_telegram(self) -> bool:
+        """Test POST /api/products/:id/publish-telegram - Test publishing a product to Telegram"""
+        self.log("=== Testing Publish Product to Telegram ===")
+        
+        # First get a product ID from the tipster's products
+        try:
+            products_response = self.make_request("GET", "/products/my")
+            
+            if products_response.status_code != 200:
+                self.log("❌ Failed to get products list", "ERROR")
+                return False
+            
+            products = products_response.json()
+            if not products or len(products) == 0:
+                self.log("❌ No products found for tipster", "ERROR")
+                return False
+            
+            # Use the first product
+            product_id = products[0].get("id")
+            product_title = products[0].get("title", "Unknown")
+            
+            if not product_id:
+                self.log("❌ Product ID not found", "ERROR")
+                return False
+            
+            self.log(f"Using product: {product_title} (ID: {product_id})")
+            
+            # Now try to publish to Telegram
+            response = self.make_request("POST", f"/products/{product_id}/publish-telegram")
+            
+            if response.status_code == 200 or response.status_code == 201:
+                result = response.json()
+                self.log("✅ Publish to Telegram request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Product published to Telegram successfully")
+                    
+                    # Check for message details
+                    if "message" in result:
+                        self.log(f"✅ Publish message: {result.get('message')}")
+                    
+                    # Check if channel info is included
+                    if "channelId" in result:
+                        self.log(f"✅ Published to channel: {result.get('channelId')}")
+                    
+                    return True
+                else:
+                    # Check if it's a configuration error (expected if no channel configured)
+                    error_msg = result.get("message", "").lower()
+                    if "canal" in error_msg and "configurado" in error_msg:
+                        self.log("❌ Publication channel not configured - this should work now", "ERROR")
+                        return False
+                    else:
+                        self.log(f"❌ Publish to Telegram failed: {result.get('message', 'No message')}", "ERROR")
+                        return False
+            else:
+                self.log(f"❌ Publish to Telegram failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Publish product to Telegram test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_remove_publication_channel(self) -> bool:
+        """Test DELETE /api/telegram/publication-channel - Test removing publication channel"""
+        self.log("=== Testing Remove Publication Channel ===")
+        
+        try:
+            response = self.make_request("DELETE", "/telegram/publication-channel")
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Remove publication channel request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Publication channel removed successfully")
+                    
+                    # Check for expected message
+                    if "eliminado" in result.get("message", "").lower():
+                        self.log("✅ Appropriate removal message returned")
+                    else:
+                        self.log(f"⚠️ Unexpected message: {result.get('message')}", "WARN")
+                    
+                    return True
+                else:
+                    self.log(f"❌ Remove publication channel failed: {result.get('message', 'No message')}", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Remove publication channel failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Remove publication channel test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_verify_channel_removed(self) -> bool:
+        """Test GET /api/telegram/publication-channel after removal - Verify channel is unconfigured"""
+        self.log("=== Testing Verify Channel Removed ===")
+        
+        try:
+            response = self.make_request("GET", "/telegram/publication-channel")
+            
+            if response.status_code == 200:
+                channel_info = response.json()
+                self.log("✅ Successfully retrieved publication channel info after removal")
+                
+                # Check if channel is now unconfigured
+                if not channel_info.get("configured"):
+                    self.log("✅ Publication channel is now unconfigured")
+                    
+                    # Verify fields are null
+                    if channel_info.get("channelId") is None:
+                        self.log("✅ Channel ID is null")
+                    else:
+                        self.log(f"❌ Channel ID should be null but is: {channel_info.get('channelId')}", "ERROR")
+                        return False
+                    
+                    if channel_info.get("channelTitle") is None:
+                        self.log("✅ Channel title is null")
+                    else:
+                        self.log(f"❌ Channel title should be null but is: {channel_info.get('channelTitle')}", "ERROR")
+                        return False
+                    
+                    return True
+                else:
+                    self.log("❌ Publication channel is still configured after removal", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Verify channel removed failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Verify channel removed test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_restore_publication_channel(self) -> bool:
+        """Test restoring the publication channel configuration at the end"""
+        self.log("=== Testing Restore Publication Channel ===")
+        
+        # Restore the original configuration
+        channel_data = {
+            "channelId": "-1003329431615",
+            "channelTitle": "Mi Canal de Pronósticos"
+        }
+        
+        try:
+            response = self.make_request("POST", "/telegram/publication-channel", channel_data)
+            
+            if response.status_code == 200 or response.status_code == 201:
+                result = response.json()
+                self.log("✅ Restore publication channel request completed")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ Publication channel restored successfully")
+                    
+                    # Verify the response contains the channel info
+                    if result.get("channelId") == channel_data["channelId"]:
+                        self.log("✅ Channel ID matches expected value")
+                    else:
+                        self.log(f"❌ Channel ID mismatch. Expected: {channel_data['channelId']}, Got: {result.get('channelId')}", "ERROR")
+                        return False
+                    
+                    return True
+                else:
+                    # This might fail if the bot is not admin of the channel, which is expected
+                    error_msg = result.get('message', '').lower()
+                    if "administrador" in error_msg or "admin" in error_msg:
+                        self.log("ℹ️ Expected failure - bot is not admin of test channel, but API validation works")
+                        return True
+                    else:
+                        self.log(f"❌ Restore publication channel failed: {result.get('message', 'No message')}", "ERROR")
+                        return False
+            else:
+                self.log(f"❌ Restore publication channel failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Restore publication channel test failed: {str(e)}", "ERROR")
+            return False
+
     # ===== TELEGRAM PUBLICATION CHANNEL TESTS =====
     
     def test_get_publication_channel(self) -> bool:
