@@ -86,6 +86,8 @@ metadata:
   version: "1.0"
   test_sequence: 1
   run_ui: false
+  last_tested: "2025-12-19T00:14:36Z"
+  test_status: "COMPLETED"
 
 test_plan:
   current_focus: []
