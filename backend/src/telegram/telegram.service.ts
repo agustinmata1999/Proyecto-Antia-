@@ -49,6 +49,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async onModuleDestroy() {
+    this.logger.log('🛑 Stopping Telegram bot...');
+    this.bot.stop('App shutdown');
+    this.logger.log('✅ Telegram bot stopped');
+  }
+
   private setupBot() {
     // Handler cuando el bot es añadido a un canal
     this.bot.on('my_chat_member', async (ctx) => {
