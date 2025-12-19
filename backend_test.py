@@ -1699,6 +1699,32 @@ class AntiaAPITester:
         
         return failed == 0
 
+def main():
+    """Main function to run tipster registration and approval flow tests"""
+    print("🚀 Starting Antia Platform - Tipster Registration and Approval Flow Tests")
+    print("=" * 80)
+    
+    tester = AntiaAPITester()
+    
+    try:
+        # Run the complete tipster registration and approval flow
+        success = tester.run_tipster_registration_approval_flow()
+        
+        if success:
+            print("\n🎉 ALL TESTS PASSED - Tipster Registration and Approval Flow is working correctly!")
+            return 0
+        else:
+            print("\n❌ SOME TESTS FAILED - Check the logs above for details")
+            return 1
+            
+    except Exception as e:
+        print(f"\n💥 CRITICAL ERROR: {str(e)}")
+        return 1
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())
+
     # ===== TELEGRAM PUBLICATION CHANNEL TESTS (CONFIGURED SCENARIO) =====
     
     def test_get_configured_publication_channel(self) -> bool:
