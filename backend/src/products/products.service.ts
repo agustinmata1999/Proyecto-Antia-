@@ -170,7 +170,7 @@ export class ProductsService {
     };
   }
 
-  async publishToTelegram(productId: string, userId: string) {
+  async publishToTelegram(productId: string, userId: string, targetChannelId?: string) {
     try {
       // Dynamically resolve TelegramService to avoid circular dependency
       const { TelegramService } = await import('../telegram/telegram.service');
@@ -188,14 +188,6 @@ export class ProductsService {
         };
       }
 
-      // Check if Telegram channel is connected
-      if (!tipsterProfile.telegramChannelId) {
-        return {
-          success: false,
-          message: 'No tienes un canal de Telegram conectado. Por favor, conéctalo primero.',
-        };
-      }
-
       // Get product details
       const product = await this.findOne(productId);
 
@@ -207,16 +199,11 @@ export class ProductsService {
         };
       }
 
-      // Get checkout link
-      const checkoutLink = await this.getCheckoutLink(productId, tipsterProfile.id);
-
-      // Publish to Telegram
-      return telegramService.publishProduct(
-        tipsterProfile.telegramChannelId,
-        {
-          ...product,
-          checkoutLink: checkoutLink.url,
-        },
+      // Use the new publishProductToChannel method
+      return telegramService.publishProductToChannel(
+        tipsterProfile.id,
+        productId,
+        targetChannelId,
       );
     } catch (error) {
       return {
