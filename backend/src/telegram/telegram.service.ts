@@ -1313,16 +1313,18 @@ export class TelegramService implements OnModuleInit {
       }
 
       // Format and send message
-      const price = (product.priceCents / 100).toFixed(2);
+      const price = (product.priceCents / 100).toFixed(2).replace('.', '\\.');
       const appUrl = process.env.APP_URL || 'https://affiliate-hub-170.preview.emergentagent.com';
       const checkoutUrl = `${appUrl}/checkout/${product.id}`;
+      const validityDays = product.validityDays || 30;
+      const tipsterName = this.escapeMarkdown(tipsterProfile.public_name || 'Tipster');
       
       const message = `
 🎯 *${this.escapeMarkdown(product.title)}*
 
 ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}💰 *Precio:* €${price}
-📅 *Validez:* ${product.validityDays || 30} días
-👤 *Por:* ${tipsterProfile.public_name || 'Tipster'}
+📅 *Validez:* ${validityDays} días
+👤 *Por:* ${tipsterName}
 
 🛒 *¡Compra ahora y accede al contenido premium\\!*
       `.trim();
