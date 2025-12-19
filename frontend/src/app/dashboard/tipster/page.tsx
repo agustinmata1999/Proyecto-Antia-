@@ -1092,7 +1092,15 @@ export default function TipsterDashboard() {
             {/* Canales Premium - Para dar acceso a clientes */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Mis Canales</h2>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    🔒 Canales Premium
+                    <span className="text-xs font-normal px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Para clientes</span>
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Estos son los canales privados donde tus clientes reciben acceso después de comprar.
+                  </p>
+                </div>
                 <button
                   onClick={() => setShowAddChannelForm(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
