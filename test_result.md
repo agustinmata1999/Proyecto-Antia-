@@ -200,6 +200,78 @@ backend:
         agent: "testing"
         comment: "❌ MINOR ISSUE - API flow works correctly but Telegram message publishing fails due to text formatting: 'Character '.' is reserved and must be escaped with the preceding '\\'. This is a minor text escaping issue, not a critical API failure. The publication channel validation and API integration work correctly."
 
+  - task: "POST /api/auth/tipster/register - Register new tipster"
+    implemented: true
+    working: true
+    file: "auth.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Tipster registration works correctly. Returns status: 'PENDING', requiresApproval: true as expected. Registration data properly stored in database."
+
+  - task: "POST /api/auth/login - Login pending tipster (should fail)"
+    implemented: true
+    working: true
+    file: "auth.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Login correctly fails for pending tipster with 401 status and appropriate error message about pending approval."
+
+  - task: "GET /api/admin/tipsters/applications/stats - Get application stats"
+    implemented: true
+    working: false
+    file: "admin-tipsters.controller.ts"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED - Route ordering issue in AdminTipstersController. The @Get(':id') route catches 'stats' and 'applications' as IDs before specific routes. Returns 500 Internal Server Error due to malformed ObjectID validation."
+
+  - task: "GET /api/admin/tipsters/applications - Get pending applications"
+    implemented: true
+    working: false
+    file: "admin-tipsters.controller.ts"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED - Same route ordering issue as stats endpoint. The parameterized route @Get(':id') intercepts 'applications' path before the specific @Get('applications') route."
+
+  - task: "POST /api/admin/tipsters/applications/:id/review - Approve/reject application"
+    implemented: true
+    working: false
+    file: "admin-tipsters.controller.ts"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED - Route ordering issue prevents access to review endpoint. Manual database approval works correctly, indicating business logic is sound."
+
+  - task: "POST /api/auth/login - Login approved tipster (should succeed)"
+    implemented: true
+    working: true
+    file: "auth.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - After manual approval via database, tipster login works correctly. Returns access_token and user status: 'ACTIVE'."
+
 frontend:
   - task: "Telegram Publication Channel UI"
     implemented: true
