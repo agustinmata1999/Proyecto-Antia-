@@ -183,8 +183,10 @@ export class TelegramController {
     if (!tipster) {
       return {
         configured: false,
+        pending: false,
         channelId: null,
         channelTitle: null,
+        channelUsername: null,
       };
     }
 
@@ -192,7 +194,12 @@ export class TelegramController {
     const result = await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: tipster.id } },
-      projection: { publication_channel_id: 1, publication_channel_title: 1 },
+      projection: { 
+        publication_channel_id: 1, 
+        publication_channel_title: 1,
+        publication_channel_username: 1,
+        publication_channel_pending: 1,
+      },
       limit: 1,
     }) as any;
     
@@ -200,8 +207,87 @@ export class TelegramController {
 
     return {
       configured: !!profile?.publication_channel_id,
+      pending: !!profile?.publication_channel_pending,
       channelId: profile?.publication_channel_id || null,
       channelTitle: profile?.publication_channel_title || null,
+      channelUsername: profile?.publication_channel_username || null,
+    };
+  }
+
+  @Post('publication-channel/start-linking')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TIPSTER')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Start automatic channel linking process' })
+  async startPublicationChannelLinking(@CurrentUser() user: any) {
+    const tipster = await this.prisma.tipsterProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!tipster) {
+      return {
+        success: false,
+        message: 'Perfil de tipster no encontrado',
+      };
+    }
+
+    // Set pending flag for automatic detection
+    await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [{
+        q: { _id: { $oid: tipster.id } },
+        u: {
+          $set: {
+            publication_channel_pending: true,
+            updated_at: { $date: new Date().toISOString() },
+          },
+        },
+      }],
+    });
+
+    this.logger.log(`Started publication channel linking for tipster ${tipster.id}`);
+
+    return {
+      success: true,
+      message: 'Proceso de vinculación iniciado. Ahora añade @Antiabetbot como administrador a tu canal.',
+      botUsername: 'Antiabetbot',
+    };
+  }
+
+  @Post('publication-channel/cancel-linking')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TIPSTER')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel automatic channel linking process' })
+  async cancelPublicationChannelLinking(@CurrentUser() user: any) {
+    const tipster = await this.prisma.tipsterProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!tipster) {
+      return {
+        success: false,
+        message: 'Perfil de tipster no encontrado',
+      };
+    }
+
+    // Remove pending flag
+    await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [{
+        q: { _id: { $oid: tipster.id } },
+        u: {
+          $set: {
+            publication_channel_pending: false,
+            updated_at: { $date: new Date().toISOString() },
+          },
+        },
+      }],
+    });
+
+    return {
+      success: true,
+      message: 'Proceso de vinculación cancelado',
     };
   }
 
@@ -209,7 +295,7 @@ export class TelegramController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('TIPSTER')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Set publication channel for posting products' })
+  @ApiOperation({ summary: 'Set publication channel for posting products (manual method)' })
   async setPublicationChannel(
     @CurrentUser() user: any,
     @Body() body: { channelId: string; channelTitle?: string },
@@ -225,14 +311,17 @@ export class TelegramController {
       };
     }
 
+    // Clean the channel identifier (support both @username and numeric ID)
+    let channelIdentifier = body.channelId.trim();
+    
     // Verify the channel exists and bot is admin
     try {
-      const chatInfo = await this.telegramService.verifyChannelAccess(body.channelId);
+      const chatInfo = await this.telegramService.verifyChannelAccess(channelIdentifier);
       
       if (!chatInfo.valid) {
         return {
           success: false,
-          message: chatInfo.error || 'No se pudo verificar el canal. Asegúrate de que el bot sea administrador.',
+          message: chatInfo.error || 'No se pudo verificar el canal. Asegúrate de que @Antiabetbot sea administrador del canal.',
         };
       }
 
@@ -243,21 +332,24 @@ export class TelegramController {
           q: { _id: { $oid: tipster.id } },
           u: {
             $set: {
-              publication_channel_id: body.channelId,
+              publication_channel_id: channelIdentifier,
               publication_channel_title: body.channelTitle || chatInfo.title || 'Canal de Publicación',
+              publication_channel_username: chatInfo.username ? `@${chatInfo.username}` : null,
+              publication_channel_pending: false,
               updated_at: { $date: new Date().toISOString() },
             },
           },
         }],
       });
 
-      this.logger.log(`Updated publication channel for tipster ${tipster.id}: ${body.channelId}`);
+      this.logger.log(`Updated publication channel for tipster ${tipster.id}: ${channelIdentifier}`);
 
       return {
         success: true,
-        message: 'Canal de publicación configurado correctamente',
-        channelId: body.channelId,
+        message: '¡Canal de publicación configurado correctamente!',
+        channelId: channelIdentifier,
         channelTitle: body.channelTitle || chatInfo.title,
+        channelUsername: chatInfo.username ? `@${chatInfo.username}` : null,
       };
     } catch (error) {
       this.logger.error('Error setting publication channel:', error);
