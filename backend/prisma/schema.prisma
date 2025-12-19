@@ -639,3 +639,24 @@ model TelegramChannel {
   @@unique([tipsterId, channelId])
   @@map("telegram_channels")
 }
+
+
+// Tickets de soporte para clientes
+model SupportTicket {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @map("user_id")               // Usuario que crea el ticket
+  userEmail       String   @map("user_email")            // Email del usuario
+  orderId         String?  @map("order_id")              // Orden relacionada (opcional)
+  category        String   @map("category")              // "access", "payment", "telegram_change", "other"
+  subject         String                                 // Asunto del ticket
+  description     String                                 // Descripción del problema
+  status          String   @default("OPEN") @map("status") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority        String   @default("NORMAL") @map("priority") // LOW, NORMAL, HIGH, URGENT
+  adminNotes      String?  @map("admin_notes")           // Notas del admin
+  resolvedAt      DateTime? @map("resolved_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("support_tickets")
+}
+
