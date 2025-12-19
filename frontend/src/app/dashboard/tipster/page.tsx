@@ -123,6 +123,15 @@ export default function TipsterDashboard() {
 
   const loadData = async () => {
     try {
+      // Load user profile first
+      try {
+        const userRes = await authApi.getMe();
+        setUser(userRes.data);
+        console.log('Loaded user profile:', userRes.data);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+
       // Load products
       try {
         const productsRes = await productsApi.getMy();
