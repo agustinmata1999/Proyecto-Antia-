@@ -170,4 +170,142 @@ export class TelegramController {
     };
   }
 
+  @Get('publication-channel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TIPSTER')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get publication channel info' })
+  async getPublicationChannel(@CurrentUser() user: any) {
+    const tipster = await this.prisma.tipsterProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!tipster) {
+      return {
+        configured: false,
+        channelId: null,
+        channelTitle: null,
+      };
+    }
+
+    // Get publication channel from tipster profile
+    const result = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: { _id: { $oid: tipster.id } },
+      projection: { publication_channel_id: 1, publication_channel_title: 1 },
+      limit: 1,
+    }) as any;
+    
+    const profile = result.cursor?.firstBatch?.[0];
+
+    return {
+      configured: !!profile?.publication_channel_id,
+      channelId: profile?.publication_channel_id || null,
+      channelTitle: profile?.publication_channel_title || null,
+    };
+  }
+
+  @Post('publication-channel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TIPSTER')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set publication channel for posting products' })
+  async setPublicationChannel(
+    @CurrentUser() user: any,
+    @Body() body: { channelId: string; channelTitle?: string },
+  ) {
+    const tipster = await this.prisma.tipsterProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!tipster) {
+      return {
+        success: false,
+        message: 'Perfil de tipster no encontrado',
+      };
+    }
+
+    // Verify the channel exists and bot is admin
+    try {
+      const chatInfo = await this.telegramService.verifyChannelAccess(body.channelId);
+      
+      if (!chatInfo.valid) {
+        return {
+          success: false,
+          message: chatInfo.error || 'No se pudo verificar el canal. Asegúrate de que el bot sea administrador.',
+        };
+      }
+
+      // Update the publication channel
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_profiles',
+        updates: [{
+          q: { _id: { $oid: tipster.id } },
+          u: {
+            $set: {
+              publication_channel_id: body.channelId,
+              publication_channel_title: body.channelTitle || chatInfo.title || 'Canal de Publicación',
+              updated_at: { $date: new Date().toISOString() },
+            },
+          },
+        }],
+      });
+
+      this.logger.log(`Updated publication channel for tipster ${tipster.id}: ${body.channelId}`);
+
+      return {
+        success: true,
+        message: 'Canal de publicación configurado correctamente',
+        channelId: body.channelId,
+        channelTitle: body.channelTitle || chatInfo.title,
+      };
+    } catch (error) {
+      this.logger.error('Error setting publication channel:', error);
+      return {
+        success: false,
+        message: 'Error al configurar el canal: ' + error.message,
+      };
+    }
+  }
+
+  @Delete('publication-channel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('TIPSTER')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove publication channel' })
+  async removePublicationChannel(@CurrentUser() user: any) {
+    const tipster = await this.prisma.tipsterProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!tipster) {
+      return {
+        success: false,
+        message: 'Perfil de tipster no encontrado',
+      };
+    }
+
+    await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [{
+        q: { _id: { $oid: tipster.id } },
+        u: {
+          $set: {
+            publication_channel_id: null,
+            publication_channel_title: null,
+            updated_at: { $date: new Date().toISOString() },
+          },
+        },
+      }],
+    });
+
+    this.logger.log(`Removed publication channel for tipster ${tipster.id}`);
+
+    return {
+      success: true,
+      message: 'Canal de publicación eliminado',
+    };
+  }
+
 }
