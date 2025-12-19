@@ -20,6 +20,8 @@ import { AdminModule } from './admin/admin.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ReportsModule } from './reports/reports.module';
 import { AffiliateModule } from './affiliate/affiliate.module';
+import { ClientModule } from './client/client.module';
+import { SupportModule } from './support/support.module';
 import { HealthController } from './health.controller';
 
 @Module({
