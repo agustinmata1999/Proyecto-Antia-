@@ -1693,6 +1693,68 @@ export default function TipsterDashboard() {
         )}
       </main>
 
+      {/* Modal: Confirmar Compartir en Telegram */}
+      {showShareConfirmModal && productToShare && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={cancelPublishToTelegram}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">📱</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Compartir en Telegram</h3>
+                  <p className="text-green-100 text-sm">Publicación automática</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                ¿Estás seguro que quieres compartir este producto en tu canal de Telegram?
+              </p>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <p className="text-sm text-gray-500 mb-1">Producto:</p>
+                <p className="font-semibold text-gray-900">{productToShare.title}</p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl">ℹ️</span>
+                  <div>
+                    <p className="text-sm text-blue-800">
+                      <strong>Se publicará automáticamente</strong> en tu canal:
+                    </p>
+                    <p className="text-sm text-blue-600 font-medium mt-1">
+                      {publicationChannel.channelTitle} {publicationChannel.channelUsername && `(${publicationChannel.channelUsername})`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={cancelPublishToTelegram}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmPublishToTelegram}
+                className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition flex items-center gap-2"
+              >
+                <span>📤</span> Sí, Publicar Ahora
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal: Añadir Canal */}
       {showAddChannelForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddChannelForm(false)}>
