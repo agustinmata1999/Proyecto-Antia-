@@ -200,11 +200,11 @@ export const adminApi = {
   
   // Tipster Applications (solicitudes de registro)
   applications: {
-    getAll: (status?: string) => api.get('/admin/tipsters/applications', { params: { status } }),
-    getStats: () => api.get('/admin/tipsters/applications/stats'),
-    getOne: (id: string) => api.get(`/admin/tipsters/applications/${id}`),
+    getAll: (status?: string) => api.get('/admin/applications', { params: { status } }),
+    getStats: () => api.get('/admin/applications/stats'),
+    getOne: (id: string) => api.get(`/admin/applications/${id}`),
     review: (id: string, data: { action: 'APPROVE' | 'REJECT'; rejectionReason?: string }) =>
-      api.post(`/admin/tipsters/applications/${id}/review`, data),
+      api.post(`/admin/applications/${id}/review`, data),
   },
   
   // Commissions management
