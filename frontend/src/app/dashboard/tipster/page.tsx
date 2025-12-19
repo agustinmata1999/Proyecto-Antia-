@@ -375,8 +375,8 @@ export default function TipsterDashboard() {
     }
   };
 
-  const handlePublishToTelegram = async (productId: string) => {
-    console.log('handlePublishToTelegram called', { productId, publicationChannel });
+  const handlePublishToTelegram = (productId: string, productTitle: string) => {
+    console.log('handlePublishToTelegram called', { productId, productTitle, publicationChannel });
     
     if (!publicationChannel.configured) {
       alert('Primero debes configurar tu Canal de Publicación en la sección de Telegram');
@@ -384,10 +384,19 @@ export default function TipsterDashboard() {
       return;
     }
 
-    // Publicar directamente sin confirmación (mejor UX)
-    setPublishingProduct(productId);
+    // Mostrar modal de confirmación
+    setProductToShare({ id: productId, title: productTitle });
+    setShowShareConfirmModal(true);
+  };
+
+  const confirmPublishToTelegram = async () => {
+    if (!productToShare) return;
+
+    setShowShareConfirmModal(false);
+    setPublishingProduct(productToShare.id);
+    
     try {
-      const response = await telegramApi.publishProduct(productId);
+      const response = await telegramApi.publishProduct(productToShare.id);
       console.log('Publish response:', response.data);
       
       if (response.data.success) {
@@ -400,7 +409,13 @@ export default function TipsterDashboard() {
       alert('❌ Error: ' + (error.response?.data?.message || 'Error al publicar en Telegram'));
     } finally {
       setPublishingProduct(null);
+      setProductToShare(null);
     }
+  };
+
+  const cancelPublishToTelegram = () => {
+    setShowShareConfirmModal(false);
+    setProductToShare(null);
   };
 
   // ==================== PUBLICATION CHANNEL FUNCTIONS ====================
