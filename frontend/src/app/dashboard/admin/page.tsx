@@ -84,6 +84,30 @@ export default function AdminDashboard() {
   });
   const [loadingReport, setLoadingReport] = useState(false);
 
+  // Applications state (solicitudes de tipsters)
+  interface Application {
+    id: string;
+    publicName: string;
+    email?: string;
+    phone?: string;
+    telegramUsername?: string;
+    country?: string;
+    experience?: string;
+    socialMedia?: string;
+    website?: string;
+    applicationNotes?: string;
+    applicationStatus: string;
+    rejectionReason?: string;
+    createdAt: string;
+  }
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationStats, setApplicationStats] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const [applicationFilter, setApplicationFilter] = useState('PENDING');
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [reviewingApplication, setReviewingApplication] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+
   useEffect(() => {
     checkAuth();
   }, []);
