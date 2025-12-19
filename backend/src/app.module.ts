@@ -52,6 +52,8 @@ import { HealthController } from './health.controller';
     CurrencyModule,
     ReportsModule,
     AffiliateModule,
+    ClientModule,
+    SupportModule,
   ],
   controllers: [HealthController],
 })
