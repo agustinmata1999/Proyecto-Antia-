@@ -399,9 +399,71 @@ export default function TipsterDashboard() {
 
   // ==================== PUBLICATION CHANNEL FUNCTIONS ====================
 
+  // Polling para detectar conexión automática
+  const startPollingForConnection = () => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await telegramApi.publicationChannel.get();
+        if (res.data.configured) {
+          setPublicationChannel(res.data);
+          setLinkingMethod(null);
+          clearInterval(interval);
+          setPollingInterval(null);
+        }
+      } catch (error) {
+        console.error('Error polling publication channel:', error);
+      }
+    }, 3000); // Check every 3 seconds
+    setPollingInterval(interval);
+  };
+
+  // Limpiar polling cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
+
+  const handleStartAutoLinking = async () => {
+    setSavingPublicationChannel(true);
+    setPublicationChannelError('');
+
+    try {
+      const response = await telegramApi.publicationChannel.startLinking();
+
+      if (response.data.success) {
+        setPublicationChannel(prev => ({ ...prev, pending: true }));
+        setLinkingMethod('auto');
+        startPollingForConnection();
+      } else {
+        setPublicationChannelError(response.data.message || 'Error al iniciar vinculación');
+      }
+    } catch (error: any) {
+      setPublicationChannelError(error.response?.data?.message || 'Error al iniciar vinculación');
+    } finally {
+      setSavingPublicationChannel(false);
+    }
+  };
+
+  const handleCancelLinking = async () => {
+    try {
+      await telegramApi.publicationChannel.cancelLinking();
+      setPublicationChannel(prev => ({ ...prev, pending: false }));
+      setLinkingMethod(null);
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+    } catch (error: any) {
+      console.error('Error canceling linking:', error);
+    }
+  };
+
   const handleSetPublicationChannel = async () => {
     if (!publicationChannelInput.trim()) {
-      setPublicationChannelError('Por favor, ingresa el ID del canal');
+      setPublicationChannelError('Por favor, ingresa el ID o @username del canal');
       return;
     }
 
@@ -417,13 +479,14 @@ export default function TipsterDashboard() {
       if (response.data.success) {
         setPublicationChannel({
           configured: true,
+          pending: false,
           channelId: response.data.channelId,
           channelTitle: response.data.channelTitle,
+          channelUsername: response.data.channelUsername,
         });
-        setShowPublicationChannelForm(false);
+        setLinkingMethod(null);
         setPublicationChannelInput('');
         setPublicationChannelTitle('');
-        alert('✅ Canal de publicación configurado correctamente');
       } else {
         setPublicationChannelError(response.data.message || 'Error al configurar el canal');
       }
@@ -435,7 +498,7 @@ export default function TipsterDashboard() {
   };
 
   const handleRemovePublicationChannel = async () => {
-    if (!confirm('¿Estás seguro de que deseas eliminar el canal de publicación?')) {
+    if (!confirm('¿Estás seguro de que deseas desvincular el canal de publicación?')) {
       return;
     }
 
@@ -443,10 +506,11 @@ export default function TipsterDashboard() {
       await telegramApi.publicationChannel.remove();
       setPublicationChannel({
         configured: false,
+        pending: false,
         channelId: null,
         channelTitle: null,
+        channelUsername: null,
       });
-      alert('Canal de publicación eliminado');
     } catch (error: any) {
       alert('Error al eliminar el canal: ' + (error.response?.data?.message || 'Error desconocido'));
     }
