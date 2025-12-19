@@ -887,7 +887,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const username = ctx.from.username || ctx.from.first_name;
 
       // Generar link de checkout con parámetros de Telegram
-      const appUrl = this.config.get('APP_URL') || 'https://tipify-platform.preview.emergentagent.com';
+      const appUrl = this.config.get('APP_URL');
       const checkoutUrl = `${appUrl}/checkout/${productId}?telegram_user_id=${userId}&telegram_username=${encodeURIComponent(username || '')}`;
 
       await ctx.reply(
@@ -1328,7 +1328,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Format and send message
       const price = (product.priceCents / 100).toFixed(2).replace('.', '\\.');
-      const appUrl = process.env.APP_URL || 'https://tipify-platform.preview.emergentagent.com';
+      const appUrl = process.env.APP_URL;
       const checkoutUrl = `${appUrl}/checkout/${product.id}`;
       const validityDays = product.validityDays || 30;
       const tipsterName = this.escapeMarkdown(tipsterProfile.public_name || 'Tipster');
