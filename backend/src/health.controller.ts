@@ -10,23 +10,30 @@ export class HealthController {
   @Get()
   @ApiOperation({ summary: 'Health check' })
   async check() {
+    let dbStatus = 'unknown';
+    let dbError = null;
+    
     try {
-      // Check database connection
-      await this.prisma.user.count();
-      
-      return {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        database: 'connected',
-        uptime: process.uptime(),
-      };
+      // Try a simple raw query to check connection
+      await this.prisma.$runCommandRaw({ ping: 1 });
+      dbStatus = 'connected';
     } catch (error) {
-      return {
-        status: 'error',
-        timestamp: new Date().toISOString(),
-        database: 'disconnected',
-        error: error.message,
-      };
+      dbStatus = 'error';
+      dbError = error.message;
+      console.error('Database health check failed:', error.message);
     }
+    
+    return {
+      status: dbStatus === 'connected' ? 'ok' : 'error',
+      timestamp: new Date().toISOString(),
+      database: dbStatus,
+      ...(dbError && { error: dbError }),
+      uptime: process.uptime(),
+      env: {
+        hasDbUrl: !!process.env.DATABASE_URL,
+        hasMongoUrl: !!process.env.MONGO_URL,
+        appUrl: process.env.APP_URL || 'not set',
+      }
+    };
   }
 }
