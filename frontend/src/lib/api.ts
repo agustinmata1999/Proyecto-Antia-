@@ -86,10 +86,19 @@ export const telegramApi = {
   getChannelInfo: () => api.get('/telegram/channel-info'),
   connect: (channelIdentifier: string) => api.post('/telegram/connect', { channelIdentifier }),
   disconnect: () => api.delete('/telegram/disconnect'),
-  publishProduct: (productId: string) => api.post(`/products/${productId}/publish-telegram`),
+  publishProduct: (productId: string, channelId?: string) => 
+    api.post(`/products/${productId}/publish-telegram`, channelId ? { channelId } : {}),
   setPremiumChannel: (premiumChannelLink: string | null) => api.post('/telegram/premium-channel', { premiumChannelLink }),
   
-  // Canales múltiples
+  // Canal de publicación (para compartir productos)
+  publicationChannel: {
+    get: () => api.get('/telegram/publication-channel'),
+    set: (channelId: string, channelTitle?: string) => 
+      api.post('/telegram/publication-channel', { channelId, channelTitle }),
+    remove: () => api.delete('/telegram/publication-channel'),
+  },
+  
+  // Canales múltiples (premium para clientes)
   channels: {
     getAll: () => api.get('/telegram/channels'),
     getOne: (id: string) => api.get(`/telegram/channels/${id}`),
