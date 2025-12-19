@@ -89,7 +89,11 @@ export class ProductsController {
   @Post(':id/publish-telegram')
   @Roles('TIPSTER')
   @ApiOperation({ summary: 'Publish product to Telegram channel' })
-  async publishToTelegram(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.productsService.publishToTelegram(id, user.id);
+  async publishToTelegram(
+    @Param('id') id: string, 
+    @CurrentUser() user: any,
+    @Body() body?: { channelId?: string },
+  ) {
+    return this.productsService.publishToTelegram(id, user.id, body?.channelId);
   }
 }
