@@ -220,12 +220,21 @@ export class AdminApplicationsController {
   ) {
     const admin = await this.verifyAdmin(req.user.id);
 
-    // Get tipster profile
-    const profileResult = await this.prisma.$runCommandRaw({
+    // Get tipster profile - try both ObjectId and string format
+    let profileResult = await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: id } },
       limit: 1,
     }) as any;
+    
+    // If not found with ObjectId, try as string
+    if (!profileResult.cursor?.firstBatch?.[0]) {
+      profileResult = await this.prisma.$runCommandRaw({
+        find: 'tipster_profiles',
+        filter: { _id: id },
+        limit: 1,
+      }) as any;
+    }
 
     const profile = profileResult.cursor?.firstBatch?.[0];
 
