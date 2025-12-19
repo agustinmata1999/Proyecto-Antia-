@@ -10,16 +10,19 @@ async function bootstrap() {
     rawBody: true, // Enable raw body for Stripe webhooks
   });
 
-  // Security
-  app.use(helmet());
+  // Security - Configure helmet to allow CORS
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'unsafe-none' },
+  }));
   app.use(cookieParser());
 
-  // CORS - Allow all origins for development
+  // CORS - Allow all origins (including preview URLs)
   app.enableCors({
     origin: true, // Allow all origins
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Accept'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Accept', 'Origin', 'X-Requested-With'],
     exposedHeaders: ['Content-Length', 'Content-Type'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
