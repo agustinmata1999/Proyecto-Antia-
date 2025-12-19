@@ -29,8 +29,32 @@ export class AuthService {
       return null;
     }
 
+    // Check user status with specific messages
+    if (user.status === 'PENDING') {
+      if (user.role === 'TIPSTER') {
+        throw new UnauthorizedException({
+          message: 'Tu solicitud de tipster está pendiente de aprobación. Te notificaremos cuando sea revisada.',
+          code: 'PENDING_APPROVAL',
+          status: 'PENDING',
+        });
+      }
+      throw new UnauthorizedException('Tu cuenta está pendiente de activación');
+    }
+    
+    if (user.status === 'REJECTED') {
+      throw new UnauthorizedException({
+        message: 'Tu solicitud de registro ha sido rechazada. Contacta a soporte para más información.',
+        code: 'REJECTED',
+        status: 'REJECTED',
+      });
+    }
+    
+    if (user.status === 'SUSPENDED') {
+      throw new UnauthorizedException('Tu cuenta ha sido suspendida. Contacta a soporte.');
+    }
+
     if (user.status !== 'ACTIVE') {
-      throw new UnauthorizedException('Account is not active');
+      throw new UnauthorizedException('Tu cuenta no está activa');
     }
 
     const { passwordHash, ...result } = user;
