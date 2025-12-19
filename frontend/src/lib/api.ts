@@ -157,6 +157,37 @@ export const userModulesApi = {
   getMyModules: () => api.get('/users/me/modules'),
 };
 
+// Client API (for end users)
+export const clientApi = {
+  // Profile
+  getProfile: () => api.get('/client/profile'),
+  updateProfile: (data: { countryIso?: string; telegramUserId?: string; locale?: string; timezone?: string }) =>
+    api.put('/client/profile', data),
+  
+  // Purchases
+  getPurchases: () => api.get('/client/purchases'),
+  getPurchaseDetails: (id: string) => api.get(`/client/purchases/${id}`),
+  
+  // Payments/Invoices
+  getPaymentHistory: () => api.get('/client/payments'),
+};
+
+// Support API
+export const supportApi = {
+  // Client endpoints
+  createTicket: (data: { category: string; subject: string; description: string; orderId?: string }) =>
+    api.post('/support/tickets', data),
+  getMyTickets: () => api.get('/support/tickets/my'),
+  getTicketDetails: (id: string) => api.get(`/support/tickets/my/${id}`),
+  
+  // Admin endpoints
+  admin: {
+    getAllTickets: (status?: string) => api.get('/support/admin/tickets', { params: { status } }),
+    updateTicket: (id: string, data: { status?: string; priority?: string; adminNotes?: string }) =>
+      api.put(`/support/admin/tickets/${id}`, data),
+  },
+};
+
 // Admin API
 export const adminApi = {
   // Tipsters management
