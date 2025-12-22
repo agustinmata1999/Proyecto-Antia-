@@ -55,6 +55,7 @@ import { HealthController } from './health.controller';
     AffiliateModule,
     ClientModule,
     SupportModule,
+    TipsterModule,
   ],
   controllers: [HealthController],
 })
