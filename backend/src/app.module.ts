@@ -22,6 +22,7 @@ import { ReportsModule } from './reports/reports.module';
 import { AffiliateModule } from './affiliate/affiliate.module';
 import { ClientModule } from './client/client.module';
 import { SupportModule } from './support/support.module';
+import { TipsterModule } from './tipster/tipster.module';
 import { HealthController } from './health.controller';
 
 @Module({
