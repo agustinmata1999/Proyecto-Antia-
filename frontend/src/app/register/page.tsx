@@ -16,20 +16,41 @@ export default function RegisterPage() {
     confirmPassword: '',
     countryIso: 'ES',
     telegramUsername: '',
+    promotionChannel: '',
+    experience: '',
     consent18: false,
     consentTerms: false,
     consentPrivacy: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    // Validaciones específicas para tipster
+    if (userType === 'tipster') {
+      if (!formData.telegramUsername) {
+        setError('El usuario de Telegram es obligatorio');
+        return;
+      }
+      if (!formData.promotionChannel) {
+        setError('Debes indicar dónde promocionas tu contenido (canal de Telegram, Instagram, etc.)');
+        return;
+      }
     }
 
     // Solo validar consentimientos para clientes
@@ -48,10 +69,11 @@ export default function RegisterPage() {
           phone: formData.phone,
           password: formData.password,
           telegramUsername: formData.telegramUsername,
+          promotionChannel: formData.promotionChannel,
+          experience: formData.experience,
           countryIso: formData.countryIso,
         });
-        alert('Registro de Tipster enviado. Espera la aprobación del administrador.');
-        router.push('/login');
+        setSuccessMessage('¡Solicitud enviada correctamente! Un administrador revisará tu solicitud y te notificará cuando sea aprobada.');
       } else {
         await authApi.registerClient({
           email: formData.email,
@@ -70,6 +92,28 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (successMessage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">¡Solicitud Enviada!</h2>
+          <p className="text-gray-600 mb-6">{successMessage}</p>
+          <Link 
+            href="/login" 
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            Ir a Iniciar Sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
@@ -113,6 +157,18 @@ export default function RegisterPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
+          {userType === 'tipster' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="font-medium text-blue-900 mb-2">📋 Proceso de registro para Tipsters</h3>
+              <ol className="text-sm text-blue-800 space-y-1">
+                <li>1. Completa el formulario con tus datos</li>
+                <li>2. Un administrador revisará tu solicitud</li>
+                <li>3. Si eres aprobado, podrás acceder al panel</li>
+                <li>4. Deberás completar tus datos de cobro antes de poder retirar ganancias</li>
+              </ol>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -165,18 +221,50 @@ export default function RegisterPage() {
             </div>
 
             {userType === 'tipster' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Usuario de Telegram
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="@miusuario"
-                  value={formData.telegramUsername}
-                  onChange={(e) => setFormData({ ...formData, telegramUsername: e.target.value })}
-                />
-              </div>
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Usuario de Telegram *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="@miusuario"
+                    value={formData.telegramUsername}
+                    onChange={(e) => setFormData({ ...formData, telegramUsername: e.target.value })}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tu usuario de Telegram para que podamos verificarte</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Canal o URL donde promocionas *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://t.me/mi_canal o @mi_instagram"
+                    value={formData.promotionChannel}
+                    onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Tu canal público de Telegram, Instagram, Twitter, etc. para verificar tu actividad</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Experiencia como Tipster
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Cuéntanos sobre tu experiencia: deportes, tiempo como tipster, resultados, etc."
+                    rows={3}
+                    value={formData.experience}
+                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                  />
+                </div>
+              </>
             )}
 
             <div className="grid grid-cols-2 gap-4">
@@ -253,7 +341,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Registrando...' : 'Crear Cuenta'}
+              {loading ? 'Enviando...' : userType === 'tipster' ? 'Enviar Solicitud' : 'Crear Cuenta'}
             </button>
           </form>
 
