@@ -142,13 +142,16 @@ export class AuthService {
           timezone: 'Europe/Madrid',
           module_forecasts: true,
           module_affiliate: false,
-          // Application details
+          // Application details (para validación del admin)
           application_status: 'PENDING',
           application_notes: dto.applicationNotes || null,
           application_country: dto.countryIso || null,
           application_experience: dto.experience || null,
           application_social_media: dto.socialMedia || null,
           application_website: dto.website || null,
+          promotion_channel: dto.promotionChannel || null,
+          // KYC fields (vacíos, se completan post-aprobación)
+          kyc_completed: false,
           created_at: { $date: now },
           updated_at: { $date: now },
         }],
