@@ -42,16 +42,27 @@ model TipsterProfile {
   locale                String    @default("es")
   timezone              String    @default("Europe/Madrid")
   
-  // Información de la solicitud de registro
+  // Información de la solicitud de registro (para validación del admin)
   applicationStatus     String    @default("PENDING") @map("application_status") // PENDING, APPROVED, REJECTED
   applicationNotes      String?   @map("application_notes")       // Notas del tipster en su solicitud
   applicationCountry    String?   @map("application_country")     // País desde donde aplica
   applicationExperience String?   @map("application_experience")  // Experiencia como tipster
   applicationSocialMedia String?  @map("application_social_media") // Redes sociales
   applicationWebsite    String?   @map("application_website")     // Sitio web
+  promotionChannel      String?   @map("promotion_channel")       // Canal/URL donde promociona (Telegram público, Instagram, etc.)
   reviewedBy            String?   @map("reviewed_by")             // Admin que revisó
   reviewedAt            DateTime? @map("reviewed_at")             // Fecha de revisión
   rejectionReason       String?   @map("rejection_reason")        // Razón de rechazo
+  
+  // KYC / Datos bancarios (post-aprobación)
+  kycCompleted          Boolean   @default(false) @map("kyc_completed")  // Si completó los datos KYC
+  kycCompletedAt        DateTime? @map("kyc_completed_at")
+  legalName             String?   @map("legal_name")              // Nombre completo o Razón social
+  documentType          String?   @map("document_type")           // DNI, NIE, PASSPORT, CIF
+  documentNumber        String?   @map("document_number")         // Número de documento
+  country               String?   @map("country")                 // País de residencia fiscal
+  bankAccountType       String?   @map("bank_account_type")       // IBAN, PAYPAL, CRYPTO, OTHER
+  bankAccountDetails    Json?     @map("bank_account_details")    // Detalles de la cuenta (IBAN, email PayPal, etc.)
   
   // Módulos habilitados (controlados por SuperAdmin)
   moduleForecasts       Boolean   @default(true) @map("module_forecasts")   // AntiaPay / Pronósticos
