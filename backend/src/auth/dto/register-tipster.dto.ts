@@ -20,10 +20,13 @@ export class RegisterTipsterDto {
   @MinLength(8)
   password: string;
 
-  @ApiProperty({ example: '@tipstername', required: false })
-  @IsOptional()
+  @ApiProperty({ example: '@tipstername', description: 'Usuario de Telegram del tipster' })
   @IsString()
-  telegramUsername?: string;
+  telegramUsername: string;
+
+  @ApiProperty({ example: 'https://t.me/mi_canal o @mi_instagram', description: 'Canal/URL donde promociona (Telegram público, Instagram, etc.)' })
+  @IsString()
+  promotionChannel: string;
 
   @ApiProperty({ example: 'ES', required: false })
   @IsOptional()
