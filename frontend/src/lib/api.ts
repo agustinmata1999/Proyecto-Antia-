@@ -64,6 +64,13 @@ export const usersApi = {
   updateMe: (data: any) => api.patch('/users/me', data),
 };
 
+// Tipster (KYC / Profile)
+export const tipsterApi = {
+  getProfile: () => api.get('/tipster/profile'),
+  getKycStatus: () => api.get('/tipster/kyc-status'),
+  updateKyc: (data: any) => api.put('/tipster/kyc', data),
+};
+
 // Products
 export const productsApi = {
   create: (data: any) => api.post('/products', data),
