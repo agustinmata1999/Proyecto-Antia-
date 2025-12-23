@@ -290,6 +290,11 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleViewTipsterDetail = (tipster: Tipster) => {
+    setSelectedTipsterDetail(tipster);
+    setShowTipsterModal(true);
+  };
+
   const handleEditCommission = (tipster: CommissionConfig) => {
     setSelectedTipster(tipster);
     setCommissionForm({
