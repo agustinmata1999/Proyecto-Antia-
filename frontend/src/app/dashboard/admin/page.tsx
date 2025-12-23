@@ -73,6 +73,8 @@ export default function AdminDashboard() {
   // Tipsters state
   const [tipsters, setTipsters] = useState<Tipster[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedTipsterDetail, setSelectedTipsterDetail] = useState<Tipster | null>(null);
+  const [showTipsterModal, setShowTipsterModal] = useState(false);
   
   // Commissions state
   const [commissions, setCommissions] = useState<CommissionConfig[]>([]);
