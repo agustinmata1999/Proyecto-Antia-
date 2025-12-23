@@ -215,39 +215,58 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log(`🔍 Validating payment for order ${orderId}, user ${telegramUserId}`);
 
+      // Validar formato del orderId
+      if (!orderId || orderId.length < 10) {
+        this.logger.error(`❌ Invalid orderId format: ${orderId}`);
+        await ctx.reply(
+          '❌ *Error en el enlace*\n\n' +
+          'El enlace de acceso parece estar incompleto.\n' +
+          'Por favor, usa el enlace original que recibiste.\n\n' +
+          'Si el problema persiste, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
       // Función para buscar la orden
       const findOrder = async () => {
-        const orderResult = await this.prisma.$runCommandRaw({
-          find: 'orders',
-          filter: { _id: { $oid: orderId } },
-          limit: 1,
-        }) as any;
-        return orderResult.cursor?.firstBatch?.[0];
+        try {
+          const orderResult = await this.prisma.$runCommandRaw({
+            find: 'orders',
+            filter: { _id: { $oid: orderId } },
+            limit: 1,
+          }) as any;
+          return orderResult.cursor?.firstBatch?.[0];
+        } catch (err) {
+          this.logger.error(`Error finding order ${orderId}: ${err.message}`);
+          return null;
+        }
       };
 
-      // Buscar la orden con reintentos (para manejar race condition con el webhook)
+      // Buscar la orden con reintentos más agresivos
       let order = await findOrder();
       let retries = 0;
-      const maxRetries = 3;
+      const maxRetries = 5; // Aumentado de 3 a 5
       const retryDelay = 2000; // 2 segundos
 
-      // Si la orden está PENDING, esperar y reintentar (puede ser que el webhook aún no llegó)
-      while (order && order.status === 'PENDING' && retries < maxRetries) {
-        this.logger.log(`⏳ Order ${orderId} still PENDING, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
+      // Reintentar si la orden no existe O si está PENDING
+      while ((!order || order.status === 'PENDING') && retries < maxRetries) {
+        const reason = !order ? 'not found' : 'PENDING';
+        this.logger.log(`⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         order = await findOrder();
         retries++;
       }
 
       if (!order) {
-        this.logger.warn(`❌ Order ${orderId} not found`);
+        this.logger.warn(`❌ Order ${orderId} not found after ${retries} retries`);
         await ctx.reply(
           '❌ *Orden no encontrada*\n\n' +
           'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
-          '• El pago aún se está procesando\n' +
+          '• El pago aún se está procesando (espera 1-2 min)\n' +
           '• Hubo un problema con la transacción\n\n' +
-          'Por favor, espera unos minutos e intenta de nuevo.\n' +
-          'Si el problema persiste, contacta con @AntiaSupport',
+          '💡 *Solución:* Vuelve a hacer clic en el enlace del bot que te apareció después del pago.\n\n' +
+          'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
           { parse_mode: 'Markdown' }
         );
         return;
