@@ -63,6 +63,7 @@ export default function TipsterDashboard() {
     description: '',
     priceCents: '',
     billingType: 'ONE_TIME',
+    subscriptionInterval: 'MONTHLY', // MONTHLY, QUARTERLY, ANNUAL
     telegramChannelId: '',
     active: true,
   });
