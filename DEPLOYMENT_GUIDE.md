@@ -1,5 +1,24 @@
 # 🚀 Guía Completa de Deployment para antiapay.com
 
+---
+
+## 🔴 PROBLEMA DE CACHÉ - SOLUCIÓN RÁPIDA
+
+Si ves errores como estos en la consola:
+```
+Failed to load resource: /_next/static/chunks/xxx.js 404
+MIME type ('text/plain') is not executable
+```
+
+**SOLUCIÓN:**
+1. **Hard Refresh:** `Ctrl + Shift + R` (Windows/Linux) o `Cmd + Shift + R` (Mac)
+2. **O limpiar caché:** `Ctrl + Shift + Delete` → "Desde siempre" → Borrar
+3. **O modo incógnito:** `Ctrl + Shift + N`
+
+Esto ocurre porque el navegador tiene cacheados archivos viejos de un build anterior.
+
+---
+
 ## ⚠️ IMPORTANTE: Leer Antes de Comenzar
 
 Esta guía te ayudará a desplegar correctamente tu aplicación en `antiapay.com`. 
