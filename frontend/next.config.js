@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
-  
-  // Generate unique build IDs to avoid cache conflicts
-  generateBuildId: async () => {
-    return `build-${Date.now()}`;
-  },
+  // Remove standalone output - use default Next.js server
+  // output: 'standalone',
   
   // Environment variables that should be available at build time
   env: {
