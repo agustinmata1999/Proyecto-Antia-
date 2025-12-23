@@ -761,6 +761,22 @@ export default function TipsterDashboard() {
                 )}
               </span>
             </button>
+            
+            {/* KYC / Datos de Cobro - Visible solo si necesita completar */}
+            {kycStatus.needsKyc && (
+              <button
+                onClick={() => setActiveView('kyc')}
+                className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'kyc' ? 'bg-orange-50 text-orange-600 font-medium' : 'text-orange-600 hover:bg-orange-50 animate-pulse'}`}
+              >
+                <span className="flex items-center justify-between">
+                  <span>🏦 Datos de Cobro</span>
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                    Pendiente
+                  </span>
+                </span>
+              </button>
+            )}
+            
             <button
               onClick={() => setActiveView('profile')}
               className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'profile' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
