@@ -2304,6 +2304,63 @@ class AntiaAPITester:
         
         return failed == 0
 
+def run_payment_flow_tests():
+    """Run the specific payment flow tests for the review request"""
+    print("🚀 Starting Antia Platform - Payment Flow and Telegram Bot Tests")
+    print("=" * 80)
+    print("Testing complete payment flow and Telegram bot access for tipster product")
+    print("Context: Tipster Ramiro Mata, Product 'Jake paul vs Joshua', Channel 'prueba bot'")
+    print("=" * 80)
+    
+    tester = AntiaAPITester()
+    
+    # First login as tipster to get authentication
+    if not tester.test_login():
+        print("❌ Failed to login as tipster - cannot proceed with tests")
+        return 1
+    
+    tests = [
+        ("Create and Simulate Payment for Product", tester.test_create_and_simulate_payment_for_product),
+        ("Verify Order Status is PAGADA", tester.test_verify_order_pagada_status),
+        ("Simulate Telegram Bot Order Command", tester.test_telegram_bot_order_command_simulation),
+        ("Test Channel Has Invite Link", tester.test_channel_has_invite_link),
+        ("Test Telegram Notification Endpoint", tester.test_telegram_notification_endpoint),
+    ]
+    
+    passed = 0
+    failed = 0
+    
+    for test_name, test_func in tests:
+        print(f"\n--- Running: {test_name} ---")
+        try:
+            if test_func():
+                passed += 1
+                print(f"✅ {test_name} PASSED")
+            else:
+                failed += 1
+                print(f"❌ {test_name} FAILED")
+        except Exception as e:
+            failed += 1
+            print(f"❌ {test_name} FAILED with exception: {str(e)}")
+    
+    print("\n" + "="*80)
+    print("PAYMENT FLOW AND TELEGRAM BOT TEST RESULTS")
+    print("="*80)
+    print(f"✅ PASSED: {passed}")
+    print(f"❌ FAILED: {failed}")
+    print(f"📊 SUCCESS RATE: {(passed/(passed+failed)*100):.1f}%" if (passed+failed) > 0 else "0%")
+    
+    if failed == 0:
+        print("\n🎉 ALL PAYMENT FLOW TESTS PASSED!")
+        print("✅ Order creation and payment simulation working")
+        print("✅ Order status verification working")
+        print("✅ Telegram bot integration working")
+        print("✅ Channel configuration working")
+        return 0
+    else:
+        print(f"\n❌ {failed} TESTS FAILED - Check the logs above for details")
+        return 1
+
 def main():
     """Main function to run KYC flow tests"""
     print("🚀 Starting Antia Platform - KYC Flow Tests")
@@ -2328,7 +2385,11 @@ def main():
 
 if __name__ == "__main__":
     import sys
-    sys.exit(main())
+    # Check if we should run payment flow tests instead
+    if len(sys.argv) > 1 and sys.argv[1] == "payment-flow":
+        sys.exit(run_payment_flow_tests())
+    else:
+        sys.exit(main())
 
     # ===== TELEGRAM PUBLICATION CHANNEL TESTS (CONFIGURED SCENARIO) =====
     
