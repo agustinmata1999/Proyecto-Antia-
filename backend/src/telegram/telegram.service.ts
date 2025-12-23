@@ -330,7 +330,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             tipster_id: tipster?.id,
             is_active: true,
           },
-          projection: { invite_link: 1, channel_title: 1, channel_id: 1 },
+          projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1 },
           limit: 1,
         }) as any;
 
@@ -339,11 +339,45 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
+          
+          // Si no hay invite_link, intentar generarlo ahora
+          if (!channelLink && channelId) {
+            this.logger.log(`⚠️ Channel ${channelId} has no invite_link, trying to generate...`);
+            try {
+              channelLink = await this.bot.telegram.exportChatInviteLink(channelId);
+              this.logger.log(`✅ Generated invite link: ${channelLink}`);
+              
+              // Guardar el link generado en la base de datos
+              const channelOid = channel._id?.$oid || channel._id;
+              if (channelOid) {
+                await this.prisma.$runCommandRaw({
+                  update: 'telegram_channels',
+                  updates: [{
+                    q: { _id: { $oid: channelOid } },
+                    u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
+                  }],
+                });
+              }
+            } catch (e) {
+              this.logger.error(`Failed to generate invite link for ${channelId}: ${e.message}`);
+              // Try creating a new invite link
+              try {
+                const inviteResult = await this.bot.telegram.createChatInviteLink(channelId, {
+                  creates_join_request: false,
+                });
+                channelLink = inviteResult.invite_link;
+                this.logger.log(`✅ Created new invite link: ${channelLink}`);
+              } catch (e2) {
+                this.logger.error(`Also failed to create invite link: ${e2.message}`);
+              }
+            }
+          }
+          
           this.logger.log(`✅ Found channel: ${channelTitle} with link: ${channelLink}`);
         }
       }
 
-      // Si no hay canal del producto, buscar legacy
+      // Si no hay canal del producto, buscar legacy premium_channel_link
       if (!channelLink && tipster) {
         const tipsterResult = await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
@@ -352,6 +386,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           limit: 1,
         }) as any;
         channelLink = tipsterResult.cursor?.firstBatch?.[0]?.premium_channel_link;
+        if (channelLink) {
+          this.logger.log(`✅ Using legacy premium_channel_link: ${channelLink}`);
+        }
       }
 
       // Mensaje de confirmación
