@@ -1963,6 +1963,25 @@ export default function TipsterDashboard() {
                       <option value="SUBSCRIPTION">Suscripción</option>
                     </select>
                   </div>
+
+                  {/* Frecuencia de Suscripción - Solo si es SUBSCRIPTION */}
+                  {formData.billingType === 'SUBSCRIPTION' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia de Cobro</label>
+                      <select 
+                        value={formData.subscriptionInterval}
+                        onChange={(e) => setFormData({ ...formData, subscriptionInterval: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="MONTHLY">Mensual</option>
+                        <option value="QUARTERLY">Trimestral (cada 3 meses)</option>
+                        <option value="ANNUAL">Anual</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Si el cliente no renueva, perderá acceso automáticamente al canal
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Selector de Canal de Telegram */}
