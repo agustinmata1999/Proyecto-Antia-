@@ -590,6 +590,7 @@ export default function TipsterDashboard() {
       description: '',
       priceCents: '',
       billingType: 'ONE_TIME',
+      subscriptionInterval: 'MONTHLY',
       telegramChannelId: '',
       active: true,
     });
