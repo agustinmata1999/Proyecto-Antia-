@@ -1418,6 +1418,167 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Modal de Detalle del Tipster */}
+      {showTipsterModal && selectedTipsterDetail && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">📋 Información del Tipster</h3>
+              <button
+                onClick={() => setShowTipsterModal(false)}
+                className="text-white/80 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Información Básica */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Nombre Público</div>
+                  <div className="font-semibold text-gray-900">{selectedTipsterDetail.publicName}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Estado</div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    selectedTipsterDetail.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {selectedTipsterDetail.status}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Email</div>
+                  <div className="text-gray-900">{selectedTipsterDetail.email || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Teléfono</div>
+                  <div className="text-gray-900">{selectedTipsterDetail.phone || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Telegram</div>
+                  <div className="text-gray-900">{selectedTipsterDetail.telegramUsername || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Canal de Promoción</div>
+                  <div className="text-gray-900 text-sm break-all">{selectedTipsterDetail.promotionChannel || '-'}</div>
+                </div>
+              </div>
+
+              {/* Estadísticas */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm font-medium text-gray-700 mb-3">📊 Estadísticas</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-xs text-gray-500">Ventas Totales</div>
+                    <div className="text-xl font-bold text-blue-600">{selectedTipsterDetail.totalSales || 0}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500">Ganancias Totales</div>
+                    <div className="text-xl font-bold text-green-600">
+                      {formatPrice(selectedTipsterDetail.totalEarningsCents || 0)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Datos de Cobro / KYC */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-sm font-medium text-gray-700">🏦 Datos de Cobro (KYC)</div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    selectedTipsterDetail.kycCompleted 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-orange-100 text-orange-800'
+                  }`}>
+                    {selectedTipsterDetail.kycCompleted ? '✓ Completo' : 'Pendiente'}
+                  </span>
+                </div>
+                
+                {selectedTipsterDetail.kycCompleted && selectedTipsterDetail.kycData ? (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-xs text-gray-500">Nombre/Razón Social</div>
+                      <div className="font-medium">{selectedTipsterDetail.kycData.legalName || '-'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Documento</div>
+                      <div className="font-medium">
+                        {selectedTipsterDetail.kycData.documentType}: {selectedTipsterDetail.kycData.documentNumber || '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">País</div>
+                      <div className="font-medium">{selectedTipsterDetail.kycData.country || '-'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Método de Cobro</div>
+                      <div className="font-medium">{selectedTipsterDetail.kycData.bankAccountType || '-'}</div>
+                    </div>
+                    {selectedTipsterDetail.kycData.bankAccountDetails && (
+                      <div className="col-span-2">
+                        <div className="text-xs text-gray-500">Detalles de la Cuenta</div>
+                        <div className="font-medium font-mono text-xs bg-gray-100 p-2 rounded mt-1">
+                          {selectedTipsterDetail.kycData.bankAccountType === 'IBAN' && (
+                            <>IBAN: {selectedTipsterDetail.kycData.bankAccountDetails.iban}</>
+                          )}
+                          {selectedTipsterDetail.kycData.bankAccountType === 'PAYPAL' && (
+                            <>PayPal: {selectedTipsterDetail.kycData.bankAccountDetails.email}</>
+                          )}
+                          {selectedTipsterDetail.kycData.bankAccountType === 'CRYPTO' && (
+                            <>Wallet ({selectedTipsterDetail.kycData.bankAccountDetails.network}): {selectedTipsterDetail.kycData.bankAccountDetails.address}</>
+                          )}
+                          {selectedTipsterDetail.kycData.bankAccountType === 'OTHER' && (
+                            <>{selectedTipsterDetail.kycData.bankAccountDetails.details}</>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic">
+                    El tipster aún no ha completado sus datos de cobro
+                  </div>
+                )}
+              </div>
+
+              {/* Módulos */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="text-sm font-medium text-gray-700 mb-3">🔧 Módulos Habilitados</div>
+                <div className="flex gap-4">
+                  <div className={`px-3 py-1 rounded text-sm ${
+                    selectedTipsterDetail.modules.forecasts 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {selectedTipsterDetail.modules.forecasts ? '✓' : '✗'} Pronósticos
+                  </div>
+                  <div className={`px-3 py-1 rounded text-sm ${
+                    selectedTipsterDetail.modules.affiliate 
+                      ? 'bg-purple-100 text-purple-800' 
+                      : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {selectedTipsterDetail.modules.affiliate ? '✓' : '✗'} Afiliación
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
+              <button
+                onClick={() => setShowTipsterModal(false)}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
