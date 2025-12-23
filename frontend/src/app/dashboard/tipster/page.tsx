@@ -1186,51 +1186,9 @@ export default function TipsterDashboard() {
               </div>
             )}
 
-            {/* Canales Premium - Para dar acceso a clientes */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-                    
-                    <div className="bg-yellow-50 rounded-lg p-4 text-left mb-4 max-w-md mx-auto">
-                      <ol className="space-y-3">
-                        <li className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-                          <span className="text-sm text-gray-700">Abre tu canal de Telegram</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-                          <span className="text-sm text-gray-700">Ve a <strong>Configuración del canal</strong> → <strong>Administradores</strong></span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                          <div className="text-sm text-gray-700">
-                            Busca y añade a <a href="https://t.me/Antiabetbot" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline">@Antiabetbot</a> como administrador
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">✓</span>
-                          <span className="text-sm text-gray-700">¡Listo! Se conectará automáticamente</span>
-                        </li>
-                      </ol>
-                    </div>
+            {/* Removed duplicate section */}
 
-                    <div className="flex justify-center gap-3">
-                      <a
-                        href="https://t.me/Antiabetbot"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
-                      >
-                        Abrir @Antiabetbot
-                      </a>
-                      <button
-                        onClick={handleCancelLinking}
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : linkingMethod === 'manual' ? (
+            {/* Canales Premium - Para dar acceso a clientes */}
                 /* Estado: Formulario manual */
                 <div className="bg-white rounded-lg p-5 border border-green-200">
                   <div className="flex items-center gap-2 mb-4">
