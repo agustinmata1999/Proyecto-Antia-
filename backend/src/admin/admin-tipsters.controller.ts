@@ -64,12 +64,27 @@ export class AdminTipstersController {
             user_id: 1,
             public_name: 1,
             telegram_username: 1,
+            promotion_channel: 1,
             module_forecasts: 1,
             module_affiliate: 1,
             modules_updated_at: 1,
             created_at: 1,
+            application_status: 1,
+            // KYC fields
+            kyc_completed: 1,
+            kyc_completed_at: 1,
+            legal_name: 1,
+            document_type: 1,
+            document_number: 1,
+            country: 1,
+            bank_account_type: 1,
+            bank_account_details: 1,
+            // Stats
+            total_sales: 1,
+            total_earnings_cents: 1,
             'user.email': 1,
             'user.status': 1,
+            'user.phone': 1,
           },
         },
         { $sort: { created_at: -1 } },
@@ -79,17 +94,34 @@ export class AdminTipstersController {
 
     const tipsters = (result.cursor?.firstBatch || []).map((doc: any) => ({
       id: doc._id.$oid || doc._id.toString(),
-      userId: doc.user_id,
+      oduserId: doc.user_id,
       publicName: doc.public_name,
       telegramUsername: doc.telegram_username,
+      promotionChannel: doc.promotion_channel,
       email: doc.user?.email,
+      phone: doc.user?.phone,
       status: doc.user?.status || 'ACTIVE',
+      applicationStatus: doc.application_status,
       modules: {
-        forecasts: doc.module_forecasts !== false, // default true
-        affiliate: doc.module_affiliate === true,  // default false
+        forecasts: doc.module_forecasts !== false,
+        affiliate: doc.module_affiliate === true,
       },
       modulesUpdatedAt: doc.modules_updated_at,
       createdAt: doc.created_at,
+      // KYC Data
+      kycCompleted: doc.kyc_completed || false,
+      kycCompletedAt: doc.kyc_completed_at,
+      kycData: {
+        legalName: doc.legal_name,
+        documentType: doc.document_type,
+        documentNumber: doc.document_number,
+        country: doc.country,
+        bankAccountType: doc.bank_account_type,
+        bankAccountDetails: doc.bank_account_details,
+      },
+      // Stats
+      totalSales: doc.total_sales || 0,
+      totalEarningsCents: doc.total_earnings_cents || 0,
     }));
 
     return { tipsters };
