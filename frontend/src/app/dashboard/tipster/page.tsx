@@ -1139,65 +1139,55 @@ export default function TipsterDashboard() {
         {activeView === 'telegram' && (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">📱 Canales de Telegram</h1>
-              <p className="text-gray-600 mt-1">Gestiona tus canales de Telegram</p>
+              <h1 className="text-3xl font-bold text-gray-900">📱 Canal Premium</h1>
+              <p className="text-gray-600 mt-1">Conecta tu canal privado donde los clientes recibirán acceso después de pagar</p>
             </div>
 
-            {/* Canal de Publicación - Para compartir productos */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 mb-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    📢 Canal de Publicación
-                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded">Para marketing</span>
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Conecta tu canal de Telegram donde promocionas tus productos. Usa el botón "📱 Compartir" en cada producto para publicar automáticamente.
-                  </p>
-                </div>
-              </div>
-
-              {/* Estado: Canal configurado */}
-              {publicationChannel.configured ? (
-                <div className="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow">
-                        <span className="text-2xl">✅</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-900">{publicationChannel.channelTitle || 'Canal de Publicación'}</h3>
-                        {publicationChannel.channelUsername && (
-                          <p className="text-sm text-blue-600 font-medium">{publicationChannel.channelUsername}</p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1">ID: {publicationChannel.channelId}</p>
-                      </div>
+            {/* Guía de Onboarding - Solo mostrar si no hay canales */}
+            {telegramChannels.length === 0 && !showAddChannelForm && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  🚀 Guía Rápida: Cómo conectar tu canal premium
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg p-4 border border-blue-100">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-lg font-bold text-blue-600">1</span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-green-600 font-medium mb-2">🎉 ¡Listo para publicar!</p>
-                      <button
-                        onClick={handleRemovePublicationChannel}
-                        className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-                      >
-                        Cambiar Canal
-                      </button>
-                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Crea tu canal</h3>
+                    <p className="text-sm text-gray-600">
+                      En Telegram, crea un canal <strong>privado</strong> donde tus clientes recibirán tus pronósticos.
+                    </p>
                   </div>
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-800">
-                      <strong>✨ ¡Todo listo!</strong> Ve a "Mis Productos" y usa el botón <span className="font-semibold">📱 Compartir</span> para publicar tus productos en este canal.
+                  <div className="bg-white rounded-lg p-4 border border-blue-100">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-lg font-bold text-blue-600">2</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Agrega el bot como admin</h3>
+                    <p className="text-sm text-gray-600">
+                      Entra a la configuración del canal → Administradores → Agregar administrador → Busca <strong>@Antiabetbot</strong>
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 border border-blue-100">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-lg font-bold text-blue-600">3</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Conecta el canal aquí</h3>
+                    <p className="text-sm text-gray-600">
+                      Haz clic en "Añadir Canal" abajo y pega el <strong>@username</strong> o <strong>link de invitación</strong> de tu canal.
                     </p>
                   </div>
                 </div>
-              ) : linkingMethod === 'auto' || publicationChannel.pending ? (
-                /* Estado: Esperando conexión automática */
-                <div className="bg-white rounded-lg p-5 border-2 border-yellow-300">
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4 animate-pulse">
-                      <span className="text-3xl">⏳</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Esperando conexión...</h3>
-                    <p className="text-gray-600 mb-4">Sigue estos pasos en Telegram:</p>
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Importante:</strong> Solo conecta tu canal premium/privado. El canal público donde haces marketing NO necesita conectarse aquí.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Canales Premium - Para dar acceso a clientes */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
                     
                     <div className="bg-yellow-50 rounded-lg p-4 text-left mb-4 max-w-md mx-auto">
                       <ol className="space-y-3">
