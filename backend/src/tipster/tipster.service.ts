@@ -66,11 +66,34 @@ export class TipsterService {
   async getKycStatus(userId: string) {
     const profile = await this.getProfile(userId);
     
+    // Para tipsters antiguos sin application_status, verificamos si el usuario está activo
+    // mediante una consulta al usuario
+    let userIsActive = false;
+    try {
+      const userResult = await this.prisma.$runCommandRaw({
+        find: 'users',
+        filter: { id: userId },
+        projection: { status: 1 },
+        limit: 1,
+      }) as any;
+      const user = userResult?.cursor?.firstBatch?.[0];
+      userIsActive = user?.status === 'ACTIVE';
+    } catch (e) {
+      this.logger.warn(`Could not check user status: ${e.message}`);
+    }
+    
+    // needsKyc es true si:
+    // 1. El tipster está aprobado (application_status === 'APPROVED') Y no tiene KYC completado
+    // 2. O si es un tipster legacy (sin application_status) pero el usuario está activo Y no tiene KYC completado
+    const isApproved = profile.application_status === 'APPROVED';
+    const isLegacyActiveTipster = !profile.application_status && userIsActive;
+    const needsKyc = (isApproved || isLegacyActiveTipster) && !profile.kyc_completed;
+    
     return {
       kycCompleted: profile.kyc_completed || false,
       kycCompletedAt: profile.kyc_completed_at || null,
-      applicationStatus: profile.application_status,
-      needsKyc: profile.application_status === 'APPROVED' && !profile.kyc_completed,
+      applicationStatus: profile.application_status || (userIsActive ? 'LEGACY_ACTIVE' : 'UNKNOWN'),
+      needsKyc,
       kycData: profile.kyc_completed ? {
         legalName: profile.legal_name,
         documentType: profile.document_type,
