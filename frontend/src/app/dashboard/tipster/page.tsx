@@ -1189,8 +1189,7 @@ export default function TipsterDashboard() {
             {/* Removed duplicate section */}
 
             {/* Canales Premium - Para dar acceso a clientes */}
-                /* Estado: Formulario manual */
-                <div className="bg-white rounded-lg p-5 border border-green-200">
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-xl">✍️</span>
                     <h3 className="font-bold text-gray-900">Configuración Manual</h3>
