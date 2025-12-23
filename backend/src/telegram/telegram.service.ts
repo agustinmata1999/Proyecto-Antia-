@@ -431,12 +431,25 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
         this.logger.log(`✅ Access granted to user ${telegramUserId} for order ${orderId}`);
       } else {
-        await ctx.reply(
-          `ℹ️ *Acceso pendiente*\n\n` +
-          `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
-          `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
-          { parse_mode: 'Markdown' }
-        );
+        // Verificar si el producto intencionalmente no tiene canal
+        if (!product.telegramChannelId) {
+          // Producto sin canal - Solo confirmación
+          await ctx.reply(
+            `✅ *¡Compra completada!*\n\n` +
+            `Tu compra de *${product.title}* ha sido procesada correctamente.\n\n` +
+            `📧 Recibirás información adicional en tu correo electrónico.\n\n` +
+            `Si tienes alguna duda, contacta con @AntiaSupport`,
+            { parse_mode: 'Markdown' }
+          );
+        } else {
+          // Producto con canal pero no se encontró el link
+          await ctx.reply(
+            `ℹ️ *Acceso pendiente*\n\n` +
+            `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
+            `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
+            { parse_mode: 'Markdown' }
+          );
+        }
       }
 
       // Notificar al tipster sobre la venta
