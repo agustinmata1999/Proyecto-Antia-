@@ -1339,6 +1339,198 @@ class AntiaAPITester:
             self.log(f"❌ MongoDB geolocation verification failed: {str(e)}", "ERROR")
             return False
 
+    # ===== KYC FLOW TESTS =====
+    
+    def test_kyc_status_for_approved_tipster(self) -> bool:
+        """Test getting KYC status for approved tipster"""
+        self.log("=== Testing KYC Status for Approved Tipster ===")
+        
+        try:
+            response = self.make_request("GET", "/tipster/kyc-status")
+            
+            if response.status_code == 200:
+                kyc_status = response.json()
+                self.log("✅ Successfully retrieved KYC status")
+                
+                # Check response structure
+                expected_fields = ["kycCompleted", "applicationStatus", "needsKyc"]
+                for field in expected_fields:
+                    if field in kyc_status:
+                        self.log(f"✅ KYC status has {field}: {kyc_status[field]}")
+                    else:
+                        self.log(f"❌ KYC status missing {field}", "ERROR")
+                        return False
+                
+                # Verify application status is APPROVED
+                if kyc_status.get("applicationStatus") == "APPROVED":
+                    self.log("✅ Tipster application status is APPROVED")
+                else:
+                    self.log(f"❌ Tipster application status is {kyc_status.get('applicationStatus')}, expected APPROVED", "ERROR")
+                    return False
+                
+                # Check if KYC is needed (should be true for approved tipster without KYC)
+                needs_kyc = kyc_status.get("needsKyc")
+                kyc_completed = kyc_status.get("kycCompleted")
+                
+                if needs_kyc and not kyc_completed:
+                    self.log("✅ KYC is needed and not completed - banner should appear")
+                elif kyc_completed:
+                    self.log("✅ KYC is already completed")
+                    # Check if KYC data is present
+                    if "kycData" in kyc_status and kyc_status["kycData"]:
+                        kyc_data = kyc_status["kycData"]
+                        self.log(f"✅ KYC data present: {kyc_data.get('legalName')} ({kyc_data.get('country')})")
+                else:
+                    self.log(f"⚠️ Unexpected KYC state: needsKyc={needs_kyc}, kycCompleted={kyc_completed}", "WARN")
+                
+                return True
+            else:
+                self.log(f"❌ Get KYC status failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get KYC status test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_update_kyc_data(self) -> bool:
+        """Test updating KYC data for approved tipster"""
+        self.log("=== Testing Update KYC Data ===")
+        
+        kyc_data = {
+            "legalName": "Fausto Pérez García",
+            "documentType": "DNI",
+            "documentNumber": "12345678A",
+            "country": "España",
+            "bankAccountType": "IBAN",
+            "bankAccountDetails": {
+                "iban": "ES12 3456 7890 1234 5678 9012",
+                "bankName": "Banco Santander"
+            }
+        }
+        
+        try:
+            response = self.make_request("PUT", "/tipster/kyc", kyc_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ KYC data updated successfully")
+                
+                # Check response structure
+                if result.get("success"):
+                    self.log("✅ KYC update marked as successful")
+                    
+                    # Check for success message
+                    message = result.get("message", "")
+                    if "actualizados" in message or "guardados" in message:
+                        self.log(f"✅ Success message: {message}")
+                    else:
+                        self.log(f"⚠️ Unexpected message: {message}", "WARN")
+                    
+                    return True
+                else:
+                    self.log("❌ KYC update marked as failed", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Update KYC data failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Update KYC data test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_kyc_status_after_completion(self) -> bool:
+        """Test KYC status after completion to verify data was saved"""
+        self.log("=== Testing KYC Status After Completion ===")
+        
+        try:
+            response = self.make_request("GET", "/tipster/kyc-status")
+            
+            if response.status_code == 200:
+                kyc_status = response.json()
+                self.log("✅ Successfully retrieved KYC status after completion")
+                
+                # Verify KYC is now completed
+                if kyc_status.get("kycCompleted"):
+                    self.log("✅ KYC is marked as completed")
+                else:
+                    self.log("❌ KYC is not marked as completed after update", "ERROR")
+                    return False
+                
+                # Verify needsKyc is now false
+                if not kyc_status.get("needsKyc"):
+                    self.log("✅ needsKyc is false - banner should not appear")
+                else:
+                    self.log("❌ needsKyc is still true after completion", "ERROR")
+                    return False
+                
+                # Check if KYC data is present and masked
+                if "kycData" in kyc_status and kyc_status["kycData"]:
+                    kyc_data = kyc_status["kycData"]
+                    self.log(f"✅ KYC data present: {kyc_data.get('legalName')}")
+                    self.log(f"✅ Country: {kyc_data.get('country')}")
+                    self.log(f"✅ Document type: {kyc_data.get('documentType')}")
+                    self.log(f"✅ Bank account type: {kyc_data.get('bankAccountType')}")
+                    
+                    # Verify document number is masked
+                    doc_number = kyc_data.get("documentNumber")
+                    if doc_number and doc_number.startswith("****"):
+                        self.log(f"✅ Document number is properly masked: {doc_number}")
+                    else:
+                        self.log(f"⚠️ Document number masking issue: {doc_number}", "WARN")
+                    
+                    # Check completion timestamp
+                    if kyc_status.get("kycCompletedAt"):
+                        self.log(f"✅ KYC completion timestamp: {kyc_status.get('kycCompletedAt')}")
+                    else:
+                        self.log("❌ Missing KYC completion timestamp", "ERROR")
+                        return False
+                    
+                    return True
+                else:
+                    self.log("❌ KYC data missing after completion", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Get KYC status after completion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get KYC status after completion test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_kyc_validation_errors(self) -> bool:
+        """Test KYC validation with invalid data"""
+        self.log("=== Testing KYC Validation Errors ===")
+        
+        # Test with missing required fields
+        invalid_kyc_data = {
+            "legalName": "",  # Empty name
+            "documentType": "DNI",
+            # Missing documentNumber
+            "country": "España",
+            "bankAccountType": "IBAN"
+        }
+        
+        try:
+            response = self.make_request("PUT", "/tipster/kyc", invalid_kyc_data)
+            
+            # Should fail with validation error
+            if response.status_code == 400:
+                result = response.json()
+                self.log("✅ KYC validation correctly rejected invalid data")
+                self.log(f"Error message: {result.get('message', 'No message')}")
+                return True
+            elif response.status_code == 200:
+                self.log("❌ KYC validation should have failed but succeeded", "ERROR")
+                return False
+            else:
+                self.log(f"❌ Unexpected response status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ KYC validation test failed: {str(e)}", "ERROR")
+            return False
+
     # ===== TIPSTER REGISTRATION AND APPROVAL FLOW TESTS =====
     
     def test_register_new_tipster(self) -> bool:
