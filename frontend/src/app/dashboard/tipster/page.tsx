@@ -1730,54 +1730,149 @@ export default function TipsterDashboard() {
               <p className="text-gray-600 mt-1">Configuración de tu cuenta</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Información Personal</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Público</label>
-                  <input 
-                    type="text" 
-                    value={user?.tipsterProfile?.publicName || ''}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Información Personal */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Información Personal</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Público</label>
+                    <input 
+                      type="text" 
+                      value={user?.tipsterProfile?.publicName || ''}
+                      readOnly
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input 
+                      type="email" 
+                      value={user?.email || ''}
+                      readOnly
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input 
+                      type="text" 
+                      value={user?.phone || 'No configurado'}
+                      readOnly
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Usuario de Telegram</label>
+                    <input 
+                      type="text" 
+                      value={user?.tipsterProfile?.telegramUsername || 'No configurado'}
+                      readOnly
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Estado de la cuenta</label>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${user?.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      {user?.status === 'ACTIVE' ? '✓ Activa' : user?.status}
+                    </span>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-gray-500">Para modificar tu información de perfil, contacta con el administrador.</p>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    value={user?.email || ''}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
+              </div>
+
+              {/* Datos de Cobro */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">🏦 Datos de Cobro</h2>
+                  {kycStatus.kycCompleted ? (
+                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                      ✓ Completo
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+                      Pendiente
+                    </span>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input 
-                    type="text" 
-                    value={user?.phone || 'No configurado'}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Usuario de Telegram</label>
-                  <input 
-                    type="text" 
-                    value={user?.tipsterProfile?.telegramUsername || 'No configurado'}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado de la cuenta</label>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${user?.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {user?.status === 'ACTIVE' ? '✓ Activa' : user?.status}
-                  </span>
-                </div>
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-500">Para modificar tu información de perfil, contacta con el administrador.</p>
-                </div>
+                
+                {kycStatus.kycCompleted && kycStatus.kycData ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre/Razón Social</label>
+                      <input 
+                        type="text" 
+                        value={kycStatus.kycData.legalName || '-'}
+                        readOnly
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                        <input 
+                          type="text" 
+                          value={kycStatus.kycData.documentType || '-'}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                        <input 
+                          type="text" 
+                          value={kycStatus.kycData.documentNumber || '-'}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
+                      <input 
+                        type="text" 
+                        value={kycStatus.kycData.country || '-'}
+                        readOnly
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Método de Cobro</label>
+                      <input 
+                        type="text" 
+                        value={kycStatus.kycData.bankAccountType || '-'}
+                        readOnly
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                    </div>
+                    <div className="pt-4 border-t">
+                      <button
+                        onClick={() => setActiveView('kyc')}
+                        className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium transition"
+                      >
+                        ✏️ Modificar Datos de Cobro
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-3xl">📋</span>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Datos no configurados</h3>
+                    <p className="text-gray-500 text-sm mb-4">
+                      Completa tus datos de cobro para poder recibir tus ganancias
+                    </p>
+                    <button
+                      onClick={() => setActiveView('kyc')}
+                      className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium transition"
+                    >
+                      Completar Ahora
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </>
