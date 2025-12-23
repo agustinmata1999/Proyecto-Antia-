@@ -1851,6 +1851,49 @@ class AntiaAPITester:
                 self.access_token = original_token
             return False
 
+    def run_kyc_flow_tests(self) -> bool:
+        """Run complete KYC flow tests for approved tipster"""
+        self.log("\n" + "="*80)
+        self.log("STARTING KYC FLOW TESTS FOR APPROVED TIPSTER")
+        self.log("="*80)
+        
+        # First login as the approved tipster
+        if not self.test_login():
+            self.log("❌ Failed to login as tipster - cannot proceed with KYC tests")
+            return False
+        
+        tests = [
+            ("Get KYC Status (Initial)", self.test_kyc_status_for_approved_tipster),
+            ("Update KYC Data", self.test_update_kyc_data),
+            ("Get KYC Status (After Completion)", self.test_kyc_status_after_completion),
+            ("Test KYC Validation Errors", self.test_kyc_validation_errors),
+        ]
+        
+        passed = 0
+        failed = 0
+        
+        for test_name, test_func in tests:
+            self.log(f"\n--- Running: {test_name} ---")
+            try:
+                if test_func():
+                    passed += 1
+                    self.log(f"✅ {test_name} PASSED")
+                else:
+                    failed += 1
+                    self.log(f"❌ {test_name} FAILED")
+            except Exception as e:
+                failed += 1
+                self.log(f"❌ {test_name} FAILED with exception: {str(e)}")
+        
+        self.log("\n" + "="*80)
+        self.log("KYC FLOW TEST RESULTS")
+        self.log("="*80)
+        self.log(f"✅ PASSED: {passed}")
+        self.log(f"❌ FAILED: {failed}")
+        self.log(f"📊 SUCCESS RATE: {(passed/(passed+failed)*100):.1f}%" if (passed+failed) > 0 else "0%")
+        
+        return failed == 0
+
     def run_tipster_registration_approval_flow(self) -> bool:
         """Run complete tipster registration and approval flow"""
         self.log("\n" + "="*80)
