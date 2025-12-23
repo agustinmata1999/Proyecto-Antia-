@@ -296,6 +296,54 @@ backend:
         agent: "testing"
         comment: "✅ PASSED - KYC update API works correctly. Successfully saves legal name, document type/number, country, and bank account details. Returns success:true with appropriate Spanish message. Validates required fields and rejects invalid data with 400 status."
 
+  - task: "POST /api/checkout/test-purchase - Create and simulate payment for product"
+    implemented: true
+    working: true
+    file: "checkout.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Payment flow test for 'Jake paul vs Joshua' product (ID: 6944bb56a44b83691ca83ceb) successful. Order created with status PAGADA, correct tipster Ramiro Mata (ID: 6944b3a7de7d24dccd17876f), amount 2300 cents. Payment simulation working correctly."
+
+  - task: "GET /api/checkout/order/{orderId} - Get order details"
+    implemented: true
+    working: true
+    file: "checkout.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Order verification API works correctly. Returns complete order details with status PAGADA, product info, tipster info. All fields present and correct for payment flow verification."
+
+  - task: "POST /api/telegram/webhook - Telegram bot order command processing"
+    implemented: true
+    working: true
+    file: "telegram.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Telegram bot webhook processes order_* commands successfully. Bot returns ok:true, backend logs show proper webhook processing. Integration working correctly for payment notifications."
+
+  - task: "Channel Configuration Verification - Telegram channel with invite_link"
+    implemented: true
+    working: true
+    file: "telegram_channels collection"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Channel -1003329431615 'prueba bot' found in MongoDB with invite_link configured. Channel is active and properly configured for customer access after payment. Database integration working correctly."
+
 frontend:
   - task: "Telegram Publication Channel UI"
     implemented: true
