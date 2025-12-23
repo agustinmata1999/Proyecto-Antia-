@@ -1991,7 +1991,7 @@ export default function TipsterDashboard() {
                       onChange={(e) => setFormData({ ...formData, telegramChannelId: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">-- Selecciona un canal --</option>
+                      <option value="">🚫 Sin canal (solo confirmación de pago)</option>
                       {telegramChannels.map((channel) => (
                         <option key={channel.id} value={channel.channelId}>
                           {channel.channelType === 'public' ? '🌐' : '🔒'} {channel.channelTitle}
@@ -2001,7 +2001,9 @@ export default function TipsterDashboard() {
                     </select>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    Este es el canal donde los clientes recibirán acceso después de la compra
+                    {formData.telegramChannelId 
+                      ? 'Los clientes recibirán acceso a este canal después de pagar' 
+                      : 'Sin canal: Los clientes solo recibirán confirmación de pago'}
                   </p>
                 </div>
 
