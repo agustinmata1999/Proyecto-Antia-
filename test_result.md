@@ -314,10 +314,10 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.3"
-  test_sequence: 4
+  version: "1.4"
+  test_sequence: 5
   run_ui: false
-  last_tested: "2025-12-19T01:26:00Z"
+  last_tested: "2025-12-23T21:04:25Z"
   test_status: "COMPLETED"
 
 test_plan:
