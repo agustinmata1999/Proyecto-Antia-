@@ -64,7 +64,7 @@ bot.command('mis_compras', async (ctx) => {
       '🛒 Mis Compras:\n\n' +
       'No tienes compras registradas aún.\n\n' +
       'Para comprar pronósticos visita:\n' +
-      'https://antia-deploy.preview.emergentagent.com'
+      APP_URL
     );
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -76,7 +76,7 @@ bot.command('renovar', (ctx) => {
   ctx.reply(
     '🔄 Renovar Suscripción:\n\n' +
     'Para renovar tu suscripción, visita tu panel de cliente en:\n' +
-    'https://antia-deploy.preview.emergentagent.com/dashboard/client'
+    `${APP_URL}/dashboard/client`
   );
 });
 
@@ -86,7 +86,7 @@ bot.command('mi_cuenta', (ctx) => {
     `Telegram ID: ${ctx.from.id}\n` +
     `Usuario: @${ctx.from.username || 'Sin username'}\n\n` +
     'Gestiona tu cuenta en:\n' +
-    'https://antia-deploy.preview.emergentagent.com/dashboard/client/profile'
+    `${APP_URL}/dashboard/client/profile`
   );
 });
 
