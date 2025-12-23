@@ -685,6 +685,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     channelId: string,
     product: any,
   ): Promise<{ success: boolean; message: string }> {
+    if (!this.bot) {
+      return {
+        success: false,
+        message: 'Telegram bot no está disponible',
+      };
+    }
+    
     try {
       const message = this.formatProductMessage(product);
       
