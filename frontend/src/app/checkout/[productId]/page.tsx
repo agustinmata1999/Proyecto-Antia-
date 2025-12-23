@@ -435,6 +435,13 @@ export default function CheckoutPage() {
             </label>
           </div>
 
+          {/* Info about Telegram access */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-sm text-blue-700">
+              <strong>📱 Acceso a Telegram:</strong> Después de pagar, serás redirigido a Telegram donde recibirás automáticamente el acceso al canal del tipster.
+            </p>
+          </div>
+
           {/* Error Message */}
           {error && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
