@@ -12,15 +12,31 @@ type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
 
 interface Tipster {
   id: string;
-  userId: string;
+  oduserId: string;
   publicName: string;
   telegramUsername?: string;
+  promotionChannel?: string;
   email?: string;
+  phone?: string;
   status: string;
+  applicationStatus?: string;
   modules: {
     forecasts: boolean;
     affiliate: boolean;
   };
+  kycCompleted: boolean;
+  kycCompletedAt?: string;
+  kycData?: {
+    legalName?: string;
+    documentType?: string;
+    documentNumber?: string;
+    country?: string;
+    bankAccountType?: string;
+    bankAccountDetails?: any;
+  };
+  totalSales?: number;
+  totalEarningsCents?: number;
+  createdAt?: string;
 }
 
 interface CommissionConfig {
