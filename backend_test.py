@@ -1601,7 +1601,7 @@ class AntiaAPITester:
         try:
             import subprocess
             
-            # Query MongoDB for the channel configuration
+            # Query MongoDB for the channel configuration (use 'antia' database, not 'antia_db')
             mongo_script = f'''
             db.telegram_channels.findOne(
                 {{channel_id: "{channel_id}"}}, 
@@ -1610,12 +1610,13 @@ class AntiaAPITester:
                     channel_title: 1,
                     invite_link: 1,
                     tipster_id: 1,
-                    is_private: 1
+                    is_active: 1,
+                    channel_type: 1
                 }}
             )
             '''
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
@@ -1638,6 +1639,12 @@ class AntiaAPITester:
                         self.log(f"✅ Channel has correct invite_link: {expected_invite_link}")
                     else:
                         self.log("⚠️ Channel has different invite_link than expected", "WARN")
+                        # Extract the actual invite link from output
+                        import re
+                        link_match = re.search(r'invite_link:\s*[\'"]([^\'"]+)[\'"]', output)
+                        if link_match:
+                            actual_link = link_match.group(1)
+                            self.log(f"Actual invite_link: {actual_link}")
                 else:
                     self.log("❌ Channel missing invite_link field", "ERROR")
                     return False
@@ -1648,6 +1655,18 @@ class AntiaAPITester:
                 else:
                     self.log(f"❌ Channel ID {channel_id} not found", "ERROR")
                     return False
+                
+                # Check if channel is active
+                if "is_active: true" in output:
+                    self.log("✅ Channel is active")
+                else:
+                    self.log("⚠️ Channel may not be active", "WARN")
+                
+                # Check channel title
+                if "prueba bot" in output:
+                    self.log("✅ Channel title matches expected: 'prueba bot'")
+                else:
+                    self.log("⚠️ Channel title may be different", "WARN")
                 
                 return True
             else:
