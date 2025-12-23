@@ -800,6 +800,20 @@ export default function TipsterDashboard() {
           <CurrencySelector variant="pill" />
         </div>
 
+        {/* KYC Banner - Mostrar si necesita completar datos */}
+        {kycStatus.needsKyc && activeView !== 'kyc' && (
+          <KycBanner onComplete={() => setActiveView('kyc')} />
+        )}
+
+        {/* KYC Form View */}
+        {activeView === 'kyc' && (
+          <KycForm 
+            onComplete={handleKycComplete} 
+            onCancel={() => setActiveView('dashboard')}
+            initialData={kycStatus.kycData}
+          />
+        )}
+
         {activeView === 'dashboard' && (
           <>
             <div className="mb-8">
