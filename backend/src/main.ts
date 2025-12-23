@@ -66,13 +66,12 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   // Start server
-  const port = process.env.BACKEND_PORT || 8001;
+  const port = process.env.PORT || process.env.BACKEND_PORT || 8001;
   await app.listen(port, '0.0.0.0');
   
-  console.log(`\n🚀 Antia Backend API running on: http://localhost:${port}/api`);
-  console.log(`📚 Swagger docs available at: http://localhost:${port}/api/docs`);
-  console.log(`🗄️  Database: ${process.env.DATABASE_URL?.split('@')[1] || 'PostgreSQL'}`);
-  console.log(`📦 Redis: ${process.env.REDIS_URL || 'localhost:6379'}`);
+  console.log(`\n🚀 Antia Backend API running on: http://0.0.0.0:${port}/api`);
+  console.log(`📚 Swagger docs available at: http://0.0.0.0:${port}/api/docs`);
+  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
 }
 
 bootstrap();
