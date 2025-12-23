@@ -229,10 +229,30 @@ export default function TipsterDashboard() {
       } catch (error) {
         console.error('Error loading modules:', error);
       }
+
+      // Load KYC status
+      try {
+        const kycRes = await tipsterApi.getKycStatus();
+        setKycStatus(kycRes.data);
+        console.log('Loaded KYC status:', kycRes.data);
+      } catch (error) {
+        console.error('Error loading KYC status:', error);
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKycComplete = async () => {
+    // Reload KYC status after completing
+    try {
+      const kycRes = await tipsterApi.getKycStatus();
+      setKycStatus(kycRes.data);
+      setActiveView('dashboard');
+    } catch (error) {
+      console.error('Error reloading KYC status:', error);
     }
   };
 
