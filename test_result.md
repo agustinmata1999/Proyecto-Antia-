@@ -344,6 +344,8 @@ agent_communication:
     message: "🎯 CLIENT PANEL TESTING COMPLETED - All 8 Client Panel backend APIs tested and working perfectly. Complete test flow executed successfully: 1) Client authentication ✅ 2) Profile management (GET/PUT) ✅ 3) Purchases API (GET list and details) ✅ 4) Payment history API ✅ 5) Support tickets (CREATE, GET list, GET details) ✅. All endpoints return correct data structures and handle edge cases appropriately."
   - agent: "testing"
     message: "🔍 TIPSTER REGISTRATION & APPROVAL FLOW TESTING COMPLETED - Core functionality working: 1) Tipster registration ✅ 2) Pending login rejection ✅ 3) Approved tipster login ✅. CRITICAL ISSUE FOUND: Admin routes have route ordering problem in AdminTipstersController - @Get(':id') intercepts 'applications' and 'stats' paths before specific routes, causing 500 errors. Business logic is correct (manual approval works), but API endpoints are inaccessible due to NestJS route precedence issue."
+  - agent: "testing"
+    message: "🎯 KYC FLOW TESTING COMPLETED - All 4 KYC backend tests PASSED (100% success rate). Complete KYC flow working perfectly: 1) GET /api/tipster/kyc-status returns correct status (needsKyc:true for approved tipster without KYC) ✅ 2) PUT /api/tipster/kyc successfully saves legal name, document details, country, and bank account info ✅ 3) After completion, needsKyc becomes false and document number is properly masked ✅ 4) Validation correctly rejects invalid data ✅. KYC banner logic will work correctly - shows for approved tipsters without KYC, disappears after completion."
 ```
 
 ---
