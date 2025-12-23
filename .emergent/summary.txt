@@ -1,57 +1,82 @@
-<analysis>**original_problem_statement:** The user wants to continue developing the Antia sports betting tipster platform. The initial goals from the previous session were to implement multi-channel Telegram support, a simplified post-payment bot flow, automatic commission calculations, a settlement (Liquidaciones) system, and an admin panel to control tipster modules.
+<analysis>**original_problem_statement:** The user's goal is to build a comprehensive platform for Tipsters and their clients. The latest request is to enhance the Tipster registration and approval flow to give the SuperAdmin more control and implement a post-approval KYC process.
 
-In this session, the user requested the development of the following features:
-1.  **💰 Comisiones (Commissions) Panel:** A dedicated section in the SuperAdmin panel to manage platform and tipster commissions, including setting default rates, manual overrides per tipster, and managing currency exchange rates.
-2.  **📊 Reportes (Reports) Panel:** A new section in the SuperAdmin panel to generate detailed reports on sales, revenue, settlements, and tipster activity, with filters for currency and date ranges, and an option to export data.
-3.  **💱 Monedas (Multi-currency):** Implement support for both EUR and USD across the platform. The customer should be able to choose their preferred currency during checkout. The system must store the original currency, amount, and exchange rate for each transaction.
-
-After implementing these features, the user provided a detailed checklist and requested a comprehensive report with screenshots explaining how each point on the list has been addressed in the application.
+**PRODUCT REQUIREMENTS:**
+1.  **Tipster Registration Update:**
+    *   Add new mandatory fields to the registration form:
+        *   Telegram Username (e.g., )
+        *   Public Promotion Channel URL (e.g., public Telegram channel, Instagram profile)
+    *   On registration, the tipster's status is automatically set to .
+2.  **SuperAdmin Approval Flow:**
+    *   The SuperAdmin dashboard must display these new promotional fields to help validate the tipster's authenticity.
+3.  **Post-Approval KYC for Tipsters:**
+    *   After a tipster is approved by the admin and logs in, they must complete additional KYC (Know Your Customer) / banking information before they can receive payouts.
+    *   A persistent, prominent notice (e.g., Complete your information to enable payouts) must be displayed in the tipster's dashboard until the KYC form is completed.
+    *   The KYC form should collect:
+        *   Name / Company Name
+        *   Document ID (DNI, etc.)
+        *   Country
+        *   Payout Method (IBAN, bank account details, etc.)
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a fully functional NestJS (backend) and Next.js (frontend) platform. All services are running correctly.
+The application is a full-stack NestJS (backend) and Next.js (frontend) platform. All major deployment and runtime bugs from the last session have been resolved, and the application is stable in its production environment (). The login, tipster approval, and Telegram bot functionalities are all working correctly.
 
-The main features implemented and working are:
--   **SuperAdmin Dashboard:** A comprehensive admin panel with tabbed sections for:
-    -   **Gestión de Tipsters:** Enable/disable  (Products) and  (Affiliates) modules for each tipster in real-time.
-    -   **Comisiones:** Manage currency exchange rates (fetched from an API with manual override) and set custom commission percentages for individual tipsters.
-    -   **Reportes:** Generate and view reports on sales, revenue, and tipster performance, with filters and a CSV export option.
--   **Tipster Dashboard:** A dynamic UI that conditionally renders sections (, , ) based on the modules enabled by the admin.
--   **Multi-Currency Support:** The platform now handles EUR and USD. The backend stores transaction details in the original currency, and the frontend displays amounts in the user-selected currency.
--   **Geolocation for Payments:** The checkout page detects the user's country via IP and shows the appropriate payment gateway (Stripe for international, Redsys for Spain).
--   **Core Features (from previous session):** Multi-channel Telegram integration, a post-payment bot flow, automatic gross/net income calculation, and a detailed Liquidaciones module for tipsters.
+The agent has already started implementing the new enhanced registration flow by:
+*   Adding the required , , and KYC-related fields (, , , etc.) to the  model in the Prisma schema.
+*   Creating a new backend module () with an endpoint () for tipsters to submit their KYC data.
+*   Updating the frontend registration form to include the new mandatory Promotion Channel field.
+*   Updating the  endpoint to return the new KYC data.
 
 **Last working item**:
--   **Last item agent was working:** Creating a comprehensive project report document with screenshots. The user provided a detailed checklist and asked for a point-by-point explanation of how the new and existing features fulfill each requirement. The agent was in the process of capturing screenshots for this report.
+-   **Last item agent was working:** The agent was in the process of implementing the new enhanced Tipster registration and approval flow. It had completed the backend setup and updated the registration form. The agent's last action was to begin modifying the main Tipster dashboard component () to add the UI for the KYC notice and form, but this work is not yet complete.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (for the underlying features)
--   **Which testing method agent to use?** NA. The current task is creating a document, not coding. The next step is to use  to create a markdown file with the report.
--   **User Testing Done:** N (User has been provided credentials and is expected to start testing).
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** frontend testing agent
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   There are no known bugs or technical issues. The only pending item is the in-progress task below.
+-   There are no pending issues. All critical bugs related to deployment, user data, and the Telegram bot were resolved in this session.
 
 **In progress Task List**:
--   **Task 1:** Create a detailed project report for the user (P0)
-    -   **Where to resume:** The agent has already captured the necessary screenshots for the report, including the geolocated checkout, tipster dashboard, admin panels (modules, commissions, reports), and the settlements view. The next step is to assemble these screenshots into a single markdown () file, writing a detailed explanation for each point on the user's checklist.
-    -   **What will be achieved with this?** This will fulfill the user's direct request for a project overview and demonstrate that all specified requirements from the checklist have been met.
+-   **Task 1: Implement Enhanced Tipster Registration and Approval Flow (P0)**
+    -   **Where to resume:** The agent needs to modify the Tipster Dashboard UI at .
+        1.  Fetch the user's full profile, including the new  field.
+        2.  Conditionally render a prominent, non-dismissible banner/alert at the top of the dashboard if  is not .
+        3.  Create a new view or tab within the Mi Perfil section for the KYC form.
+        4.  Build the KYC form with fields for , , , and .
+        5.  Implement the form's  handler to call the new  endpoint.
+        6.  Upon successful submission, update the UI to hide the banner and reflect the new KYC status.
+        7.  Update the Admin's Solicitudes view to display the new  and  fields for pending applications.
+    -   **What will be achieved with this?** This will complete the new, more robust tipster onboarding and KYC flow as requested by the user.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** NA
-    -   **Blocked on something:** Nothing.
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
--   **P1: Full backend logic for Afiliación (Affiliates):** The UI and settlement structure exist, but the backend logic to ingest data from betting houses and calculate earnings is a stub.
--   **P2: Build out Facturas (Invoices) and Pagos Recibidos (Received Payments):** These UI tabs exist in the Liquidaciones module but are placeholders.
--   **P2: Implement manual settlement process:** Build the functionality for an admin to mark pending settlements as paid.
--   **P3: Implement Crypto payment option:** This was mentioned as an optional extra by the user.
+
+-   **Upcoming Tasks:**
+    -   **P0: Full E2E Test of Client Panel:** The UI and backend endpoints are built, but the flow needs to be tested with a real client making a purchase and seeing the data populate correctly in their Mis Compras and Facturas sections.
+    -   **P1: Implement CSV Upload for Affiliate Conversions:** Build the admin UI and backend logic to parse a CSV file and attribute conversions.
+    -   **P2: Build Campañas (Campaigns) UI/UX:** The backend models exist, but the UI for admins to create campaigns and for tipsters to view them needs to be built.
+    -   **P2: Implement Manual Affiliate Payouts:** Create the UI for the admin to view monthly affiliate settlements and mark them as Paid.
+-   **Future Tasks:**
+    -   **P2: Build out Facturas (Invoices) and Pagos Recibidos (Received Payments)** sections in the Tipster's Liquidaciones module.
+    -   **P3: Implement Crypto payment option.**
 
 **Completed work in this session**
--   **Admin Control de Módulos Feature:** Completed and fully tested the feature allowing admins to enable/disable modules per tipster. Fixed UI bugs related to conditional rendering.
--   **Admin Comisiones Panel:** Built the UI and backend to manage platform commissions, tipster-specific overrides, and currency exchange rates.
--   **Admin Reportes Panel:** Built the UI and backend to generate filterable reports (by date, currency) with a CSV export function.
--   **Multi-currency Integration:** Updated the database schema (, ) and backend services () to support and store transactions in EUR and USD.
--   **Full System Testing:** Ran the testing subagent to validate the new admin panels and ensure no regressions were introduced. All tests passed.
+-   **Resolved Production Deployment Failures:**
+    -   Fixed a  error by creating a post-build script to ensure the backend entrypoint () was in the location expected by the deployment pipeline.
+    -   Diagnosed and fixed multiple MongoDB Atlas connection errors by advising the user to remove incompatible parameters (e.g., ) from the connection string and use the correct database name ().
+-   **Fixed Critical Hardcoded User Data Bug:**
+    -   Refactored the Tipster Dashboard () to fetch and display the currently logged-in user's data dynamically, eliminating hardcoded Fausto data.
+-   **Fixed Telegram Bot Functionality:**
+    -   Switched the Telegram bot from a  to a  mechanism, making it resilient to ingress/proxy issues and ensuring it processes commands reliably.
+-   **Fixed CORS and URL-Related Issues:**
+    -   Updated all relevant  files and hardcoded fallbacks to use the new production URL.
+    -   Configured the frontend to use relative API paths () and Next.js rewrites, resolving CORS errors and making the app domain-agnostic.
+-   **Initiated Enhanced Tipster Registration Flow:**
+    -   Modified the backend (Prisma schema, DTOs, services) and the frontend registration page to support the new, more detailed tipster onboarding process.
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
@@ -63,77 +88,85 @@ The main features implemented and working are:
 
 
 **Key Technical Concepts**
--   **Tech Stack:** NestJS, Next.js, Prisma, MongoDB.
--   **Tabbed Admin UI:** The admin dashboard at  was refactored into a tabbed interface using React state to switch between views (Tipsters, Comisiones, Reportes).
--   **Multi-currency Logic:**  schema was updated with  (for exchange rates) and new fields in the  model (, , ). A  handles rate fetching.
--   **Reporting Engine:** A new  aggregates data from various models to generate summary and detailed reports for the admin panel.
--   **Dynamic UI (Tipster):** Confirmed and refined the conditional rendering of the tipster dashboard based on fetched module configuration ().
+-   **Deployment Debugging:** The session involved in-depth debugging of a containerized deployment pipeline, solving issues related to build paths (), environment variable-driven database connection strings (for MongoDB Atlas), and Prisma compatibility.
+-   **Infrastructure Workarounds:** The agent demonstrated problem-solving by switching the Telegram bot from a  to a  model to bypass external ingress/proxy issues, resulting in a more robust solution.
+-   **Production Environment Configuration:** The agent guided the user through correctly setting up production environment variables (, ) in deployment secrets, which was critical to resolving the final batch of runtime errors.
+-   **Dynamic Frontend Development:** A key bug was fixed by replacing hardcoded UI text with dynamic data fetched from a  API endpoint and managed with React's  and  hooks.
 
 **key DB schema**
--   **GlobalConfig (New):**  to store global settings like default commission rates and manual exchange rates.
--   **Order:** Added , ,  to support multi-currency transactions.
--   **TipsterProfile:** ,  fields are actively used to control UI visibility.
+-   **TipsterProfile:**
+    -   Added 
+    -   Added  (Made mandatory for registration)
+    -   Added  (Values: PENDING, SUBMITTED, VERIFIED)
+    -   Added 
+    -   Added 
+    -   Added 
+    -   Added 
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--    (Modified)
--    (Rewritten)
--    (Modified)
--    (Modified)
--    (Modified)
--    (New module)
--    (New module)
--    (Updated for testing)
+-    (Defines the new DB fields)
+-    (Handles the new KYC submission endpoint)
+-    (Handles saving new fields on registration)
+-    (Main UI component to be modified)
+-    (Updated registration form)
+-    (Contains the  script deployment fix)
+-    (Contains  output and API rewrite config)
+-    (Configured to use relative API paths)
+
+**Areas that need refactoring**:
+-   The component at  is extremely large and handles logic for multiple different views. As the agent adds the new KYC form and banner, it should prioritize breaking these new features into smaller, dedicated components to improve maintainability.
 
 **key api endpoints**
--   : (Admin) Update enabled modules for a tipster.
--   : Get current exchange rates.
--   : (Admin) Set manual exchange rates.
--   : Get summary data for the admin report dashboard.
--   : Generate a detailed report (e.g., Sales, Tipsters).
--   : (Admin) Get commission configurations for all tipsters.
--   : (Admin) Set a custom commission for a tipster.
+-   ** (New):** Allows an authenticated tipster to submit or update their KYC/payout information.
+-   ** (Modified):** Now includes the full  object, including the new KYC fields and status.
+-   ** (Modified):** Now requires and saves the  field.
+-   ** (Modified):** Now includes a database connection check and user count for easier debugging.
 
 **Critical Info for New Agent**
--   The immediate priority is to **create the project report document** as requested by the user. Do not start any new coding tasks.
--   All necessary screenshots have been captured and are available in the automation output directories.
--   The task is to write a markdown file that addresses each point from the user's checklist, embedding the relevant screenshots.
--   The underlying features for the report (Admin Panels, Multi-currency, etc.) have already been built and successfully tested by the previous agent.
+-   **Production Environment is Stable:** All previous deployment and runtime issues have been resolved. The application is running successfully on its production domain. The key was correcting the  to use the right database name () and remove Prisma-incompatible parameters.
+-   **Telegram Bot Uses Polling:** The bot no longer relies on a webhook URL. It actively polls Telegram for updates, which is a robust solution that avoids any potential network routing issues.
+-   **Frontend API Calls are Relative:** The frontend is configured to make API calls to relative paths (e.g., ). A rewrite rule in  directs these to the backend service () during local/containerized development, which works correctly in the Emergent deployment environment.
 
-**documents created in this job**
--   New backend modules: , .
--   Numerous screenshots saved in  from  captures.
+**documents and test_reports created in this job**
+-   
+-   
+-   
 
-**Last 10 User Messages and any pending user messages**
--   User provided admin credentials to test the admin panel. (Completed)
--   User requested development of Commissions, Reports, and Multi-currency features. (Completed)
--   User provided a detailed checklist of features. (Pending Action)
--   User asked for a comprehensive report with screenshots explaining how each checklist item was implemented. (Last working item, IN PROGRESS)
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** ahora me inicia sesion y me andan las cosas bien
+2.  **User:** Te paso las capuras de los errores que me da al iniciar sesion y lo que me pediste
+3.  **User:** Me dan esos errores. (with screenshots of DB connection errors)
+4.  **User:** Me da este error cuando quiero iniciar sesion  api/currency/rates:1 Failed to load resource: the server responded with a status of 500...
+5.  **User:** No existe ningun boton asi
+6.  **User:** no me aparece BACKEND_INTERNAL_URL
+7.  **User:** (sends screenshot of 404 on /api/health)
+8.  **User:** (sends screenshot of correct DB URLs)
+9.  **User:** verifica que este todo bien
+10. **User:** mongodb+srv://tipify-platform:d52cfoslqs2c73afb2a0@customer-apps.i9ente.mongodb.net/antia?appName=tipify-platform&maxPoolSize=5&retryWrites=true&timeoutMS=10000&w=majority
 
 **Project Health Check:**
 -   **Broken:** None.
--   **Mocked:**
-    -   Redsys & Stripe payments use sandbox/test credentials.
-    -   Affiliate earnings calculation logic is a stub.
-    -   The external currency exchange rate API is a stub that returns fixed values.
+-   **Mocked:** Redsys & Stripe payments still use sandbox/test credentials. This will need to be changed for real payments.
 
 **3rd Party Integrations**
--   **Telegraf.js (Telegram):** In use, configured with a user-provided API key.
+-   **Telegraf.js (Telegram):** In use via polling, configured with a user-provided API key.
 -   **Stripe (Payments):** Integrated for international payments using a test key.
 -   **Redsys (Payments):** Integrated for Spanish payments using sandbox credentials.
 -   **ip-api.com (Geolocation):** Used for IP-to-country lookup (no key required).
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The agent successfully ran the frontend testing agent to validate the new Admin Panels (Module Control, Commissions, Reports).
+-   **Testing agent used after significant changes:** NO (Agent used manual  and screenshot testing to debug).
+-   **Troubleshoot agent used after agent stuck in loop:** YES. The troubleshooter correctly identified that  was not configured to proxy API requests, although this turned out not to be the root cause of the external access issue.
 -   **Test files created:** None.
 -   **Known regressions:** None.
 
 **Credentials to test flow:**
--   **Admin:**  / 
+-   **SuperAdmin:**  / 
 -   **Tipster:**  / 
 -   **Client:**  / 
 
 **What agent forgot to execute**
--   Nothing was forgotten. The agent was methodically working on the user's most recent request before the session ended.</analysis>
+-   The agent did not forget any tasks but was in the middle of implementing the Enhanced Tipster Registration feature. It needs to continue where it left off by modifying the tipster dashboard UI.</analysis>
