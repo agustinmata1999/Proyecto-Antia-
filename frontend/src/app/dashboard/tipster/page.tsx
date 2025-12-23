@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi } from '@/lib/api';
+import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi } from '@/lib/api';
 import AffiliateSection from '@/components/AffiliateSection';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import KycBanner from '@/components/KycBanner';
+import KycForm from '@/components/KycForm';
 
-type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram';
+type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram' | 'kyc';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
 
 interface TelegramChannel {
