@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000",
+    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ 2>/dev/null || true",
+    "start": "node .next/standalone/server.js",
+    "start:legacy": "next start -p 3000",
     "lint": "next lint"
   },
   "dependencies": {
