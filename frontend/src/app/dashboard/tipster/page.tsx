@@ -1075,19 +1075,16 @@ export default function TipsterDashboard() {
                           </div>
                           <div className="flex items-center gap-2">
                             <button 
-                              onClick={() => handlePublishToTelegram(product.id, product.title)}
-                              disabled={publishingProduct === product.id}
-                              className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 disabled:opacity-50 ${
-                                publicationChannel.configured 
-                                  ? 'bg-green-600 hover:bg-green-700' 
-                                  : 'bg-gray-400 hover:bg-gray-500'
-                              }`}
-                              title={publicationChannel.configured 
-                                ? `Publicar automáticamente en ${publicationChannel.channelTitle || 'Telegram'}` 
-                                : 'Configura primero tu Canal de Publicación'
-                              }
+                              onClick={() => {
+                                const checkoutUrl = `${window.location.origin}/checkout/${product.id}`;
+                                const suggestedText = `🔥 ${product.title}\n\n${product.description || ''}\n\n💰 Precio: €${(product.priceCents / 100).toFixed(2)}\n\n👉 Comprar aquí: ${checkoutUrl}`;
+                                navigator.clipboard.writeText(suggestedText);
+                                alert('✅ Texto copiado al portapapeles!\n\nPégalo en tu canal de Telegram, Instagram, o donde quieras.');
+                              }}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-green-700"
+                              title="Copiar link de checkout con texto sugerido"
                             >
-                              {publishingProduct === product.id ? '⏳ Publicando...' : '📱 Compartir en Telegram'}
+                              📋 Copiar Link
                             </button>
                             <button 
                               onClick={() => handleEditProduct(product)}
