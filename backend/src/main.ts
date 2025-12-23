@@ -10,6 +10,17 @@ async function bootstrap() {
     rawBody: true, // Enable raw body for Stripe webhooks
   });
 
+  // Add a simple /health endpoint at root level (without /api prefix)
+  // This is required for Emergent deployment health checks
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  });
+
   // Security - Configure helmet to allow CORS
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
