@@ -628,9 +628,11 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipster</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">KYC</th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pronósticos</th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Afiliación</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -652,6 +654,15 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">{tipster.email || '-'}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            tipster.kycCompleted 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-orange-100 text-orange-800'
+                          }`}>
+                            {tipster.kycCompleted ? '✓ Completo' : 'Pendiente'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => handleToggleModule(tipster.id, 'forecasts', tipster.modules.forecasts)}
@@ -684,6 +695,14 @@ export default function AdminDashboard() {
                           }`}>
                             {tipster.status}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleViewTipsterDetail(tipster)}
+                            className="px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 text-sm font-medium transition"
+                          >
+                            Ver Info
+                          </button>
                         </td>
                       </tr>
                     ))}
