@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://payouts-portal.preview.emergentagent.com"
+BASE_URL = "https://antia-deploy.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
@@ -387,7 +387,7 @@ class AntiaAPITester:
         
         checkout_data = {
             "productId": "6941ab8bc37d0aa47ab23ef8",
-            "originUrl": "https://payouts-portal.preview.emergentagent.com",
+            "originUrl": "https://antia-deploy.preview.emergentagent.com",
             "isGuest": True,
             "email": "test@example.com"
         }

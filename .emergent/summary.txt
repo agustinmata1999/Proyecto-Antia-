@@ -1,82 +1,73 @@
-<analysis>**original_problem_statement:** The user's goal is to build a comprehensive platform for Tipsters and their clients. The latest request is to enhance the Tipster registration and approval flow to give the SuperAdmin more control and implement a post-approval KYC process.
+<analysis>**original_problem_statement:** The user's initial goal was to enhance the Tipster registration and approval flow with KYC verification. However, upon starting the session, the user reported a critical P0 blocker: the application fails to deploy to the production domain () and a custom-linked domain. All development work was halted to address this deployment failure.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Tipster Registration Update:**
-    *   Add new mandatory fields to the registration form:
-        *   Telegram Username (e.g., )
-        *   Public Promotion Channel URL (e.g., public Telegram channel, Instagram profile)
-    *   On registration, the tipster's status is automatically set to .
-2.  **SuperAdmin Approval Flow:**
-    *   The SuperAdmin dashboard must display these new promotional fields to help validate the tipster's authenticity.
-3.  **Post-Approval KYC for Tipsters:**
-    *   After a tipster is approved by the admin and logs in, they must complete additional KYC (Know Your Customer) / banking information before they can receive payouts.
-    *   A persistent, prominent notice (e.g., Complete your information to enable payouts) must be displayed in the tipster's dashboard until the KYC form is completed.
-    *   The KYC form should collect:
-        *   Name / Company Name
-        *   Document ID (DNI, etc.)
-        *   Country
-        *   Payout Method (IBAN, bank account details, etc.)
+*   **(Original) Enhance Tipster Registration:** Add KYC/banking information fields and a post-approval verification flow for Tipsters.
+*   **(New & Overriding) Fix Production Deployment:** The application must successfully deploy and run on the user's custom domain  via the Emergent deployment platform. The user experiences frontend assets failing to load (404 errors) or the entire application failing its health check (502/520 errors).
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a full-stack NestJS (backend) and Next.js (frontend) platform. All major deployment and runtime bugs from the last session have been resolved, and the application is stable in its production environment (). The login, tipster approval, and Telegram bot functionalities are all working correctly.
+The application is a full-stack NestJS (backend) and Next.js (frontend) platform. The codebase is stable and functions correctly in the local development environment. The agent has performed extensive local testing, confirming that all services (backend, frontend, database) start up and respond as expected.
 
-The agent has already started implementing the new enhanced registration flow by:
-*   Adding the required , , and KYC-related fields (, , , etc.) to the  model in the Prisma schema.
-*   Creating a new backend module () with an endpoint () for tipsters to submit their KYC data.
-*   Updating the frontend registration form to include the new mandatory Promotion Channel field.
-*   Updating the  endpoint to return the new KYC data.
+To address the deployment issues, the agent has already implemented several fixes:
+*   Added a root-level  API endpoint to the frontend ().
+*   Added a root-level  endpoint to the backend () to work with the deployment platform's health checker.
+*   Made the  non-blocking to prevent it from crashing the backend on startup.
+*   Attempted multiple fixes to the frontend's  start script to resolve permission and port-related errors observed in deployment logs.
 
 **Last working item**:
--   **Last item agent was working:** The agent was in the process of implementing the new enhanced Tipster registration and approval flow. It had completed the backend setup and updated the registration form. The agent's last action was to begin modifying the main Tipster dashboard component () to add the UI for the KYC notice and form, but this work is not yet complete.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** frontend testing agent
+-   **Last item agent was working:** The agent was debugging a persistent deployment failure. After multiple attempts to fix  start scripts, the latest deployment logs revealed a critical clue: . This indicates the deployment environment is ignoring the project's  and trying to use its own (incorrect) version of Next.js.
+-   **Status:** BLOCKED
+-   **Agent Testing Done:** Y (locally)
+-   **Which testing method agent to use?** NA. The issue is not with the code's functionality but with the deployment platform's behavior. The next step is to understand and adapt to the platform's specific requirements, likely by consulting the  as the previous agent intended.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   There are no pending issues. All critical bugs related to deployment, user data, and the Telegram bot were resolved in this session.
+-   **Issue 1: Production Deployment Fails (P0)**
+    -   **Description:** The application fails to deploy on the Emergent platform. While the backend now passes its health check, the frontend service fails to start or respond correctly, leading to 502/520 errors. The root cause appears to be the deployment environment ignoring the specified  script in  and attempting to use an incorrect version of Next.js.
+    -   **Attempted fixes:**
+        -   Corrected user's DNS records on Hostinger.
+        -   Removed  from .
+        -   Added  endpoints to both frontend and backend.
+        -   Made Telegram services non-blocking.
+        -   Changed frontend  script to .
+        -   Changed script to use the full node path: .
+        -   Removed a conflicting  environment variable from the start script.
+    -   **Next debug checklist:**
+        1.  Do not attempt to modify the code further. The problem is confirmed to be related to the deployment environment.
+        2.  The previous agent was about to consult the  regarding the Unknown command: "warn"
+
+To see a list of supported npm commands, run:
+  npm help log. The next agent's first step should be to call the  or  with the latest deployment logs to get definitive instructions on how Emergent's platform executes a Next.js application.
+        3.  The key question for the subagent is: How do I specify the exact start command for a Next.js frontend so the deployment platform respects it and uses the installed dependencies instead of fetching its own?
+    -   **Why fix this issue and what will be achieved with the fix?** This is a complete blocker. The user cannot use, test, or verify any feature until the application is deployed.
+    -   **Status:** BLOCKED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both (via a successful deployment health check and manual user verification).
+    -   **Blocked on other issue:** Blocked on receiving information about the Emergent deployment environment's specific runtime behavior.
 
 **In progress Task List**:
--   **Task 1: Implement Enhanced Tipster Registration and Approval Flow (P0)**
-    -   **Where to resume:** The agent needs to modify the Tipster Dashboard UI at .
-        1.  Fetch the user's full profile, including the new  field.
-        2.  Conditionally render a prominent, non-dismissible banner/alert at the top of the dashboard if  is not .
-        3.  Create a new view or tab within the Mi Perfil section for the KYC form.
-        4.  Build the KYC form with fields for , , , and .
-        5.  Implement the form's  handler to call the new  endpoint.
-        6.  Upon successful submission, update the UI to hide the banner and reflect the new KYC status.
-        7.  Update the Admin's Solicitudes view to display the new  and  fields for pending applications.
-    -   **What will be achieved with this?** This will complete the new, more robust tipster onboarding and KYC flow as requested by the user.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** None.
+-   None. All work is blocked by the deployment issue.
 
 **Upcoming and Future Tasks**
-
 -   **Upcoming Tasks:**
-    -   **P0: Full E2E Test of Client Panel:** The UI and backend endpoints are built, but the flow needs to be tested with a real client making a purchase and seeing the data populate correctly in their Mis Compras and Facturas sections.
-    -   **P1: Implement CSV Upload for Affiliate Conversions:** Build the admin UI and backend logic to parse a CSV file and attribute conversions.
-    -   **P2: Build Campañas (Campaigns) UI/UX:** The backend models exist, but the UI for admins to create campaigns and for tipsters to view them needs to be built.
-    -   **P2: Implement Manual Affiliate Payouts:** Create the UI for the admin to view monthly affiliate settlements and mark them as Paid.
+    -   **P0: Implement Enhanced Tipster Registration and Approval Flow:** (Original task, to be resumed after deployment is fixed). This involves modifying the Tipster Dashboard UI at  to add a KYC form and banner.
+    -   **P1: Full E2E Test of Client Panel:** Test the client purchase flow.
+    -   **P2: Implement CSV Upload for Affiliate Conversions:** Build the admin UI and backend logic.
+    -   **P2: Build Campañas (Campaigns) UI/UX:** Create the UI for campaign management.
+    -   **P2: Implement Manual Affiliate Payouts:** Create the admin UI for affiliate payment management.
 -   **Future Tasks:**
-    -   **P2: Build out Facturas (Invoices) and Pagos Recibidos (Received Payments)** sections in the Tipster's Liquidaciones module.
-    -   **P3: Implement Crypto payment option.**
+    -   Build out Facturas (Invoices) and Pagos Recibidos (Received Payments) sections.
+    -   Implement Crypto payment option.
 
 **Completed work in this session**
--   **Resolved Production Deployment Failures:**
-    -   Fixed a  error by creating a post-build script to ensure the backend entrypoint () was in the location expected by the deployment pipeline.
-    -   Diagnosed and fixed multiple MongoDB Atlas connection errors by advising the user to remove incompatible parameters (e.g., ) from the connection string and use the correct database name ().
--   **Fixed Critical Hardcoded User Data Bug:**
-    -   Refactored the Tipster Dashboard () to fetch and display the currently logged-in user's data dynamically, eliminating hardcoded Fausto data.
--   **Fixed Telegram Bot Functionality:**
-    -   Switched the Telegram bot from a  to a  mechanism, making it resilient to ingress/proxy issues and ensuring it processes commands reliably.
--   **Fixed CORS and URL-Related Issues:**
-    -   Updated all relevant  files and hardcoded fallbacks to use the new production URL.
-    -   Configured the frontend to use relative API paths () and Next.js rewrites, resolving CORS errors and making the app domain-agnostic.
--   **Initiated Enhanced Tipster Registration Flow:**
-    -   Modified the backend (Prisma schema, DTOs, services) and the frontend registration page to support the new, more detailed tipster onboarding process.
+-   **Deployment Debugging & Hardening:**
+    -   Created a  endpoint for the frontend at  to pass deployment health checks.
+    -   Created a root-level  endpoint in the backend at .
+    -   Made  and  non-blocking to prevent them from crashing the backend during startup.
+    -   Corrected a frontend  script port conflict in .
+    -   Fixed compilation errors in .
+    -   Created and updated  with DNS and caching instructions.
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
@@ -88,80 +79,74 @@ The agent has already started implementing the new enhanced registration flow by
 
 
 **Key Technical Concepts**
--   **Deployment Debugging:** The session involved in-depth debugging of a containerized deployment pipeline, solving issues related to build paths (), environment variable-driven database connection strings (for MongoDB Atlas), and Prisma compatibility.
--   **Infrastructure Workarounds:** The agent demonstrated problem-solving by switching the Telegram bot from a  to a  model to bypass external ingress/proxy issues, resulting in a more robust solution.
--   **Production Environment Configuration:** The agent guided the user through correctly setting up production environment variables (, ) in deployment secrets, which was critical to resolving the final batch of runtime errors.
--   **Dynamic Frontend Development:** A key bug was fixed by replacing hardcoded UI text with dynamic data fetched from a  API endpoint and managed with React's  and  hooks.
+-   **Containerized Deployment Debugging:** The session was an extensive exercise in debugging a failing deployment within a containerized (Kubernetes) environment, focusing on health checks, permissions, and start-up scripts.
+-   **Platform-Specific Execution:** The key finding is that the deployment platform (Emergent) has its own execution logic that can override  scripts, a critical concept for the next agent.
+-   **Health Check Endpoints:** Both frontend and backend require a responsive  endpoint at the root for the deployment platform's readiness probes to succeed.
 
 **key DB schema**
--   **TipsterProfile:**
-    -   Added 
-    -   Added  (Made mandatory for registration)
-    -   Added  (Values: PENDING, SUBMITTED, VERIFIED)
-    -   Added 
-    -   Added 
-    -   Added 
-    -   Added 
+-   **TipsterProfile:** (No changes in this session)
+    -   
+    -   
+    -   
+    -   , , , 
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--    (Defines the new DB fields)
--    (Handles the new KYC submission endpoint)
--    (Handles saving new fields on registration)
--    (Main UI component to be modified)
--    (Updated registration form)
--    (Contains the  script deployment fix)
--    (Contains  output and API rewrite config)
--    (Configured to use relative API paths)
+-   : Modified multiple times to fix the  command. The final version is .
+-   : New file created for the frontend health check.
+-   : Modified to add a root-level  endpoint.
+-   : Modified to make startup non-blocking.
+-   : Modified to make startup non-blocking.
+-   : Modified to fix compilation errors.
+-   : New documentation file created.
 
 **Areas that need refactoring**:
--   The component at  is extremely large and handles logic for multiple different views. As the agent adds the new KYC form and banner, it should prioritize breaking these new features into smaller, dedicated components to improve maintainability.
+-   The component at  is very large and should be broken down into smaller components when development resumes.
 
 **key api endpoints**
--   ** (New):** Allows an authenticated tipster to submit or update their KYC/payout information.
--   ** (Modified):** Now includes the full  object, including the new KYC fields and status.
--   ** (Modified):** Now requires and saves the  field.
--   ** (Modified):** Now includes a database connection check and user count for easier debugging.
+-    (Frontend): Responds with a 200 OK for deployment health checks.
+-    (Backend): Responds with a 200 OK for deployment health checks.
 
 **Critical Info for New Agent**
--   **Production Environment is Stable:** All previous deployment and runtime issues have been resolved. The application is running successfully on its production domain. The key was correcting the  to use the right database name () and remove Prisma-incompatible parameters.
--   **Telegram Bot Uses Polling:** The bot no longer relies on a webhook URL. It actively polls Telegram for updates, which is a robust solution that avoids any potential network routing issues.
--   **Frontend API Calls are Relative:** The frontend is configured to make API calls to relative paths (e.g., ). A rewrite rule in  directs these to the backend service () during local/containerized development, which works correctly in the Emergent deployment environment.
+-   **The primary issue is the deployment environment, not the code.** The code works perfectly in the local sandbox. Do not waste time re-debugging the code itself.
+-   The latest deployment logs show Unknown command: "warn"
+
+To see a list of supported npm commands, run:
+  npm help. This is the most important clue. It strongly suggests the Emergent platform is ignoring the  start script and its defined  version ().
+-   **Your first action should be to consult a subagent ( or )** to understand the specific way the Emergent platform expects a Next.js application to be started. Re-running the same fixes will fail.
 
 **documents and test_reports created in this job**
 -   
--   
--   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** ahora me inicia sesion y me andan las cosas bien
-2.  **User:** Te paso las capuras de los errores que me da al iniciar sesion y lo que me pediste
-3.  **User:** Me dan esos errores. (with screenshots of DB connection errors)
-4.  **User:** Me da este error cuando quiero iniciar sesion  api/currency/rates:1 Failed to load resource: the server responded with a status of 500...
-5.  **User:** No existe ningun boton asi
-6.  **User:** no me aparece BACKEND_INTERNAL_URL
-7.  **User:** (sends screenshot of 404 on /api/health)
-8.  **User:** (sends screenshot of correct DB URLs)
-9.  **User:** verifica que este todo bien
-10. **User:** mongodb+srv://tipify-platform:d52cfoslqs2c73afb2a0@customer-apps.i9ente.mongodb.net/antia?appName=tipify-platform&maxPoolSize=5&retryWrites=true&timeoutMS=10000&w=majority
+1.  me fallo el deploy te paso los logs
+2.  no hice un nuevo deployment (with screenshot of new failed deployment)
+3.  These logs are from the old deployment. I need the new ones.
+4.  (User provides logs for deployment )
+5.  All logs ... [new deployment logs]
+6.  (User provides logs for deployment )
+7.  no esos logs me pusieron de vuelta hice uno nuevo
+8.  I did a new deployment.
+9.  lo hice y me aparece esto (I did it and this appears)
+10. ME APARECEN ESTOS ERRORES (THESE ERRORS APPEAR)
 
 **Project Health Check:**
--   **Broken:** None.
--   **Mocked:** Redsys & Stripe payments still use sandbox/test credentials. This will need to be changed for real payments.
+-   **Broken:** The entire production deployment pipeline is broken and is the main blocker.
+-   **Mocked:** Redsys & Stripe payments use sandbox/test credentials.
 
 **3rd Party Integrations**
--   **Telegraf.js (Telegram):** In use via polling, configured with a user-provided API key.
--   **Stripe (Payments):** Integrated for international payments using a test key.
--   **Redsys (Payments):** Integrated for Spanish payments using sandbox credentials.
--   **ip-api.com (Geolocation):** Used for IP-to-country lookup (no key required).
+-   **Telegraf.js (Telegram):** In use via polling.
+-   **Stripe (Payments):** Integrated for international payments (test key).
+-   **Redsys (Payments):** Integrated for Spanish payments (sandbox credentials).
+-   **ip-api.com (Geolocation):** No key required.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO (Agent used manual  and screenshot testing to debug).
--   **Troubleshoot agent used after agent stuck in loop:** YES. The troubleshooter correctly identified that  was not configured to proxy API requests, although this turned out not to be the root cause of the external access issue.
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** YES, it correctly identified a port conflict in the start script.
 -   **Test files created:** None.
--   **Known regressions:** None.
+-   **Known regressions:** The application is currently non-deployable, a critical regression from the previous session where it was stable.
 
 **Credentials to test flow:**
 -   **SuperAdmin:**  / 
@@ -169,4 +154,4 @@ The agent has already started implementing the new enhanced registration flow by
 -   **Client:**  / 
 
 **What agent forgot to execute**
--   The agent did not forget any tasks but was in the middle of implementing the Enhanced Tipster Registration feature. It needs to continue where it left off by modifying the tipster dashboard UI.</analysis>
+-   The agent was forced to pivot away from the planned task (Tipster KYC flow) to address the user's critical deployment issue. No tasks were forgotten; they were preempted by a higher priority problem.</analysis>
