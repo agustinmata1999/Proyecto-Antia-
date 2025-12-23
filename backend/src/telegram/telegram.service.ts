@@ -215,20 +215,39 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log(`🔍 Validating payment for order ${orderId}, user ${telegramUserId}`);
 
-      // Buscar la orden
-      const orderResult = await this.prisma.$runCommandRaw({
-        find: 'orders',
-        filter: { _id: { $oid: orderId } },
-        limit: 1,
-      }) as any;
+      // Función para buscar la orden
+      const findOrder = async () => {
+        const orderResult = await this.prisma.$runCommandRaw({
+          find: 'orders',
+          filter: { _id: { $oid: orderId } },
+          limit: 1,
+        }) as any;
+        return orderResult.cursor?.firstBatch?.[0];
+      };
 
-      const order = orderResult.cursor?.firstBatch?.[0];
+      // Buscar la orden con reintentos (para manejar race condition con el webhook)
+      let order = await findOrder();
+      let retries = 0;
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 segundos
+
+      // Si la orden está PENDING, esperar y reintentar (puede ser que el webhook aún no llegó)
+      while (order && order.status === 'PENDING' && retries < maxRetries) {
+        this.logger.log(`⏳ Order ${orderId} still PENDING, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        order = await findOrder();
+        retries++;
+      }
 
       if (!order) {
         this.logger.warn(`❌ Order ${orderId} not found`);
         await ctx.reply(
           '❌ *Orden no encontrada*\n\n' +
-          'No pudimos encontrar tu compra. Si crees que es un error, contacta con @AntiaSupport',
+          'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
+          '• El pago aún se está procesando\n' +
+          '• Hubo un problema con la transacción\n\n' +
+          'Por favor, espera unos minutos e intenta de nuevo.\n' +
+          'Si el problema persiste, contacta con @AntiaSupport',
           { parse_mode: 'Markdown' }
         );
         return;
@@ -236,16 +255,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Verificar que el pago está completado
       if (order.status !== 'PAGADA' && order.status !== 'COMPLETED' && order.status !== 'paid') {
-        this.logger.warn(`❌ Order ${orderId} not paid. Status: ${order.status}`);
+        this.logger.warn(`❌ Order ${orderId} not paid after ${retries} retries. Status: ${order.status}`);
         await ctx.reply(
-          '⏳ *Pago pendiente*\n\n' +
-          `Estado actual: ${order.status}\n\n` +
-          'Tu pago aún no ha sido confirmado. Si ya pagaste, espera unos momentos e intenta de nuevo.\n\n' +
-          'Si el problema persiste, contacta con @AntiaSupport',
+          '⏳ *Pago en proceso*\n\n' +
+          'Tu pago está siendo procesado. Por favor:\n\n' +
+          '1️⃣ Espera 1-2 minutos\n' +
+          '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
+          'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
           { parse_mode: 'Markdown' }
         );
         return;
       }
+      
+      this.logger.log(`✅ Order ${orderId} is paid (status: ${order.status})`)
 
       // Actualizar la orden con el telegramUserId del cliente
       await this.prisma.$runCommandRaw({
