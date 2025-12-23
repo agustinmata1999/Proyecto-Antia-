@@ -26,10 +26,28 @@ export class TipsterService {
   async updateKyc(userId: string, dto: UpdateKycDto) {
     this.logger.log(`Updating KYC for user ${userId}`);
 
-    // Verificar que el tipster existe y está aprobado
+    // Verificar que el tipster existe
     const profile = await this.getProfile(userId);
     
-    if (profile.application_status !== 'APPROVED') {
+    // Verificar que está aprobado o es un tipster legacy activo
+    let userIsActive = false;
+    try {
+      const userResult = await this.prisma.$runCommandRaw({
+        find: 'users',
+        filter: { id: userId },
+        projection: { status: 1 },
+        limit: 1,
+      }) as any;
+      const user = userResult?.cursor?.firstBatch?.[0];
+      userIsActive = user?.status === 'ACTIVE';
+    } catch (e) {
+      this.logger.warn(`Could not check user status: ${e.message}`);
+    }
+    
+    const isApproved = profile.application_status === 'APPROVED';
+    const isLegacyActiveTipster = !profile.application_status && userIsActive;
+    
+    if (!isApproved && !isLegacyActiveTipster) {
       throw new BadRequestException('Tu cuenta debe estar aprobada antes de completar los datos de cobro');
     }
 
