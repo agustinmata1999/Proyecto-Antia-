@@ -639,7 +639,7 @@ export default function TipsterDashboard() {
         description: formData.description.trim() || undefined,
         priceCents: Math.round(price * 100),
         billingType: formData.billingType,
-        subscriptionInterval: formData.billingType === 'SUBSCRIPTION' ? formData.subscriptionInterval : undefined,
+        billingPeriod: formData.billingType === 'SUBSCRIPTION' ? formData.subscriptionInterval : undefined,
         telegramChannelId: formData.telegramChannelId || undefined,
         currency: 'EUR',
       };
