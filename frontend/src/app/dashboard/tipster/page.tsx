@@ -37,6 +37,18 @@ export default function TipsterDashboard() {
   const [recentSales, setRecentSales] = useState<any[]>([]);
   const [settlementsData, setSettlementsData] = useState<any>(null);
   
+  // KYC Status
+  const [kycStatus, setKycStatus] = useState<{
+    kycCompleted: boolean;
+    needsKyc: boolean;
+    applicationStatus: string;
+    kycData?: any;
+  }>({
+    kycCompleted: false,
+    needsKyc: false,
+    applicationStatus: 'PENDING',
+  });
+  
   // Módulos habilitados (controlados por SuperAdmin)
   const [enabledModules, setEnabledModules] = useState<{ forecasts: boolean; affiliate: boolean }>({
     forecasts: true,
