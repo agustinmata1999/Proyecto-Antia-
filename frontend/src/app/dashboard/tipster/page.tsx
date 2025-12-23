@@ -605,7 +605,7 @@ export default function TipsterDashboard() {
       description: product.description || '',
       priceCents: product.priceCents ? (product.priceCents / 100).toString() : '',
       billingType: product.billingType || 'ONE_TIME',
-      subscriptionInterval: product.subscriptionInterval || 'MONTHLY',
+      subscriptionInterval: product.billingPeriod || 'MONTHLY',
       telegramChannelId: product.telegramChannelId || '',
       active: product.active ?? true,
     });
