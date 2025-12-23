@@ -272,6 +272,30 @@ backend:
         agent: "testing"
         comment: "✅ PASSED - After manual approval via database, tipster login works correctly. Returns access_token and user status: 'ACTIVE'."
 
+  - task: "GET /api/tipster/kyc-status - Get KYC completion status"
+    implemented: true
+    working: true
+    file: "tipster.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - KYC status API works correctly. Returns kycCompleted:false, applicationStatus:APPROVED, needsKyc:true for approved tipster without KYC. After completion returns kycCompleted:true, needsKyc:false with properly masked document number."
+
+  - task: "PUT /api/tipster/kyc - Update KYC data"
+    implemented: true
+    working: true
+    file: "tipster.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - KYC update API works correctly. Successfully saves legal name, document type/number, country, and bank account details. Returns success:true with appropriate Spanish message. Validates required fields and rejects invalid data with 400 status."
+
 frontend:
   - task: "Telegram Publication Channel UI"
     implemented: true
