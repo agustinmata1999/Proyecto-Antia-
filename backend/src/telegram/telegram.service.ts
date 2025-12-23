@@ -566,6 +566,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     tipsterId: string,
     channelIdentifier: string,
   ): Promise<{ success: boolean; message: string; channelInfo?: any }> {
+    if (!this.bot) {
+      return {
+        success: false,
+        message: 'Telegram bot no está disponible',
+      };
+    }
+    
     try {
       // Verificar si es un username o un ID
       let chatInfo;
