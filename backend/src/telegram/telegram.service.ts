@@ -5,8 +5,9 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
-  private bot: Telegraf;
+  private bot: Telegraf | null = null;
   private readonly logger = new Logger(TelegramService.name);
+  private isInitialized = false;
 
   constructor(
     private prisma: PrismaService,
@@ -14,18 +15,33 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   ) {
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     if (!token) {
-      this.logger.error('TELEGRAM_BOT_TOKEN is not configured');
-      throw new Error('Telegram bot token is required');
+      this.logger.warn('TELEGRAM_BOT_TOKEN is not configured - Telegram features disabled');
+      return;
     }
-    this.bot = new Telegraf(token);
-    this.setupBot();
-    this.setupCallbackHandlers();
+    try {
+      this.bot = new Telegraf(token);
+      this.setupBot();
+      this.setupCallbackHandlers();
+    } catch (error) {
+      this.logger.error('Failed to create Telegram bot:', error);
+      this.bot = null;
+    }
   }
 
   async onModuleInit() {
+    if (!this.bot) {
+      this.logger.warn('Telegram bot not initialized - skipping');
+      return;
+    }
+    
     try {
-      // Obtener info del bot
-      const botInfo = await this.bot.telegram.getMe();
+      // Obtener info del bot with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Telegram connection timeout')), 10000)
+      );
+      
+      const botInfoPromise = this.bot.telegram.getMe();
+      const botInfo = await Promise.race([botInfoPromise, timeoutPromise]) as any;
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
       
       // Usar polling en lugar de webhook para evitar problemas de proxy/ingress
@@ -40,23 +56,29 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       this.bot.launch({
         allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
       }).catch((err) => {
-        this.logger.error('Bot polling error:', err);
+        this.logger.error('Bot polling error:', err.message);
       });
       
+      this.isInitialized = true;
       this.logger.log('✅ TelegramService initialized (polling mode - running in background)');
     } catch (error) {
-      this.logger.error('Failed to initialize Telegram bot:', error);
-      this.logger.warn('⚠️  Telegram features may not work correctly');
+      this.logger.error('Failed to initialize Telegram bot:', error.message);
+      this.logger.warn('⚠️  Telegram features may not work correctly - continuing without Telegram');
+      // Don't throw - let the app continue without Telegram
     }
   }
 
   async onModuleDestroy() {
-    this.logger.log('🛑 Stopping Telegram bot...');
-    this.bot.stop('App shutdown');
-    this.logger.log('✅ Telegram bot stopped');
+    if (this.bot && this.isInitialized) {
+      this.logger.log('🛑 Stopping Telegram bot...');
+      this.bot.stop('App shutdown');
+      this.logger.log('✅ Telegram bot stopped');
+    }
   }
 
   private setupBot() {
+    if (!this.bot) return;
+    
     // Handler cuando el bot es añadido a un canal
     this.bot.on('my_chat_member', async (ctx) => {
       try {
