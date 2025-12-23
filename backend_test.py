@@ -1935,21 +1935,21 @@ class AntiaAPITester:
         return failed == 0
 
 def main():
-    """Main function to run tipster registration and approval flow tests"""
-    print("🚀 Starting Antia Platform - Tipster Registration and Approval Flow Tests")
+    """Main function to run KYC flow tests"""
+    print("🚀 Starting Antia Platform - KYC Flow Tests")
     print("=" * 80)
     
     tester = AntiaAPITester()
     
     try:
-        # Run the complete tipster registration and approval flow
-        success = tester.run_tipster_registration_approval_flow()
+        # Run the KYC flow tests
+        success = tester.run_kyc_flow_tests()
         
         if success:
-            print("\n🎉 ALL TESTS PASSED - Tipster Registration and Approval Flow is working correctly!")
+            print("\n🎉 ALL KYC TESTS PASSED - KYC Flow is working correctly!")
             return 0
         else:
-            print("\n❌ SOME TESTS FAILED - Check the logs above for details")
+            print("\n❌ SOME KYC TESTS FAILED - Check the logs above for details")
             return 1
             
     except Exception as e:
