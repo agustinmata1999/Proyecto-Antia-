@@ -753,6 +753,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
    * Enviar un mensaje simple
    */
   async sendMessage(chatId: string, text: string): Promise<void> {
+    if (!this.bot) {
+      this.logger.warn('Cannot send message - Telegram bot not available');
+      return;
+    }
+    
     try {
       await this.bot.telegram.sendMessage(chatId, text);
     } catch (error) {
