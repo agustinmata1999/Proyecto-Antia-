@@ -19,7 +19,7 @@ export interface UpdateChannelDto {
 
 @Injectable()
 export class TelegramChannelsService {
-  private bot: Telegraf;
+  private bot: Telegraf | null = null;
   private readonly logger = new Logger(TelegramChannelsService.name);
 
   constructor(
@@ -28,7 +28,14 @@ export class TelegramChannelsService {
   ) {
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     if (token) {
-      this.bot = new Telegraf(token);
+      try {
+        this.bot = new Telegraf(token);
+      } catch (error) {
+        this.logger.error('Failed to create Telegram bot for channels service:', error);
+        this.bot = null;
+      }
+    } else {
+      this.logger.warn('TELEGRAM_BOT_TOKEN not configured - channel features may be limited');
     }
   }
 
