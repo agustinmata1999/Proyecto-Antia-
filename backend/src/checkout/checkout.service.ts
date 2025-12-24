@@ -802,6 +802,83 @@ export class CheckoutService {
       );
     }
 
+    // =============================================
+    // SEND EMAILS
+    // =============================================
+    
+    // 1. Email de confirmación de compra al cliente
+    if (order.emailBackup) {
+      try {
+        await this.emailService.sendPurchaseConfirmation({
+          email: order.emailBackup,
+          productName: product?.title || 'Producto',
+          tipsterName: tipster?.publicName || 'Tipster',
+          billingType: product?.billingType || 'ONE_TIME',
+          billingPeriod: product?.billingPeriod,
+          amount: order.amountCents || 0,
+          currency: order.currency || 'EUR',
+          orderId: orderId,
+          purchaseDate: new Date(),
+        });
+        this.logger.log(`📧 Purchase confirmation email sent to ${order.emailBackup}`);
+      } catch (emailError) {
+        this.logger.error('Failed to send purchase confirmation email:', emailError.message);
+      }
+
+      // 2. Email de acceso al canal (si tiene canal)
+      if (product?.telegramChannelId) {
+        try {
+          // Buscar el canal para obtener el link
+          const channelResult = await this.prisma.$runCommandRaw({
+            find: 'telegram_channels',
+            filter: { channel_id: product.telegramChannelId, is_active: true },
+            projection: { invite_link: 1, channel_title: 1 },
+            limit: 1,
+          }) as any;
+          const channel = channelResult.cursor?.firstBatch?.[0];
+          
+          if (channel?.invite_link) {
+            await this.emailService.sendChannelAccess({
+              email: order.emailBackup,
+              productName: product.title,
+              channelName: channel.channel_title || 'Canal Premium',
+              telegramLink: channel.invite_link,
+              orderId: orderId,
+            });
+            this.logger.log(`📧 Channel access email sent to ${order.emailBackup}`);
+          }
+        } catch (emailError) {
+          this.logger.error('Failed to send channel access email:', emailError.message);
+        }
+      }
+    }
+
+    // 3. Email y notificación al tipster sobre la venta
+    if (tipster) {
+      try {
+        // Obtener el user asociado al tipster para el email
+        const tipsterUser = await this.prisma.user.findUnique({
+          where: { id: tipster.userId },
+        });
+        
+        if (tipsterUser?.email) {
+          await this.notificationsService.notifyNewSale({
+            tipsterId: tipster.id,
+            tipsterUserId: tipster.userId,
+            tipsterEmail: tipsterUser.email,
+            productName: product?.title || 'Producto',
+            billingType: product?.billingType || 'ONE_TIME',
+            netAmount: commissions.netAmountCents,
+            currency: order.currency || 'EUR',
+            orderId: orderId,
+          });
+          this.logger.log(`📧 Sale notification sent to tipster ${tipsterUser.email}`);
+        }
+      } catch (emailError) {
+        this.logger.error('Failed to send tipster sale notification:', emailError.message);
+      }
+    }
+
     // Get updated order
     const updatedOrder = await this.getOrderById(orderId);
 
