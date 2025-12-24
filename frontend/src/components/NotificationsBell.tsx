@@ -62,8 +62,8 @@ export function NotificationsBell() {
   const fetchNotifications = async () => {
     try {
       const [notifResponse, countResponse] = await Promise.all([
-        api.get('/api/notifications?limit=20'),
-        api.get('/api/notifications/unread-count'),
+        api.get('/notifications?limit=20'),
+        api.get('/notifications/unread-count'),
       ]);
       setNotifications(notifResponse.data.notifications || []);
       setUnreadCount(countResponse.data.count || 0);
@@ -74,7 +74,7 @@ export function NotificationsBell() {
 
   const markAsRead = async (id: string) => {
     try {
-      await api.post(`/api/notifications/${id}/read`);
+      await api.post(`/notifications/${id}/read`);
       setNotifications(prev =>
         prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
       );
@@ -87,7 +87,7 @@ export function NotificationsBell() {
   const markAllAsRead = async () => {
     try {
       setIsLoading(true);
-      await api.post('/api/notifications/read-all');
+      await api.post('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
