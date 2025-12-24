@@ -8,7 +8,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://antia-deploy.preview.emergentagent.com"
+BASE_URL = "https://tipster-bot-issue.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials

@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const API_URL = process.env.API_URL;
-const APP_URL = process.env.APP_URL || 'https://antia-deploy.preview.emergentagent.com';
+const APP_URL = process.env.APP_URL || 'https://tipster-bot-issue.preview.emergentagent.com';
 
 // Simulated mode message
 const SIMULATED_MODE = process.env.BOT_TOKEN.includes('SIMULATED');

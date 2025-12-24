@@ -651,7 +651,7 @@ agent_communication:
 - `GET /api/checkout/feature-flags` ✅ Working
 
 ### Environment Configuration
-- APP_URL: https://antia-deploy.preview.emergentagent.com
+- APP_URL: https://tipster-bot-issue.preview.emergentagent.com
 - Telegram Bot: @Antiabetbot
 - Stripe: Test mode (sk_test_emergent)
 - Redsys: Sandbox mode
