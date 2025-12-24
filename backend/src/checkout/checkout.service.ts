@@ -989,11 +989,91 @@ export class CheckoutService {
       data.telegramUsername,
     );
 
-    // 6. Get order details
-    const order = await this.getOrderById(orderId);
+    // 6. Get tipster info for emails
     const tipster = await this.prisma.tipsterProfile.findUnique({
       where: { id: product.tipsterId },
     });
+
+    // =============================================
+    // SEND EMAILS (Test Purchase)
+    // =============================================
+    
+    // Email de confirmación de compra al cliente
+    if (data.email) {
+      try {
+        await this.emailService.sendPurchaseConfirmation({
+          email: data.email,
+          productName: product.title,
+          tipsterName: tipster?.publicName || 'Tipster',
+          billingType: (product.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
+          billingPeriod: product.billingPeriod,
+          amount: product.priceCents,
+          currency: product.currency,
+          orderId: orderId,
+          purchaseDate: new Date(),
+        });
+        this.logger.log(`📧 Purchase confirmation email sent to ${data.email}`);
+
+        // Email de acceso al canal (si tiene canal)
+        if (product.telegramChannelId) {
+          const channelResult = await this.prisma.$runCommandRaw({
+            find: 'telegram_channels',
+            filter: { channel_id: product.telegramChannelId, is_active: true },
+            projection: { invite_link: 1, channel_title: 1 },
+            limit: 1,
+          }) as any;
+          const channel = channelResult.cursor?.firstBatch?.[0];
+          
+          if (channel?.invite_link) {
+            await this.emailService.sendChannelAccess({
+              email: data.email,
+              productName: product.title,
+              channelName: channel.channel_title || 'Canal Premium',
+              telegramLink: channel.invite_link,
+              orderId: orderId,
+            });
+            this.logger.log(`📧 Channel access email sent to ${data.email}`);
+          }
+        }
+      } catch (emailError) {
+        this.logger.error('Failed to send emails:', emailError.message);
+      }
+    }
+
+    // Email y notificación al tipster sobre la venta
+    if (tipster) {
+      try {
+        const tipsterUser = await this.prisma.user.findUnique({
+          where: { id: tipster.userId },
+        });
+        
+        if (tipsterUser?.email) {
+          // Calcular comisiones para mostrar neto
+          const commissions = await this.calculateOrderCommissions(
+            product.tipsterId,
+            product.priceCents,
+            'test_simulated',
+          );
+          
+          await this.notificationsService.notifyNewSale({
+            tipsterId: tipster.id,
+            tipsterUserId: tipster.userId,
+            tipsterEmail: tipsterUser.email,
+            productName: product.title,
+            billingType: (product.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
+            netAmount: commissions.netAmountCents,
+            currency: product.currency,
+            orderId: orderId,
+          });
+          this.logger.log(`📧 Sale notification sent to tipster ${tipsterUser.email}`);
+        }
+      } catch (emailError) {
+        this.logger.error('Failed to send tipster notification:', emailError.message);
+      }
+    }
+
+    // 7. Get order details
+    const order = await this.getOrderById(orderId);
 
     return {
       success: true,
