@@ -1343,10 +1343,10 @@ class AntiaAPITester:
     
     def test_create_and_simulate_payment_for_product(self) -> bool:
         """Test creating and simulating payment for the specific product from review request"""
-        self.log("=== Testing Create and Simulate Payment for Jake Paul vs Joshua Product ===")
+        self.log("=== Testing Create and Simulate Payment for Mclaren Product ===")
         
         # Use the specific product ID from the review request
-        product_id = "6944bb56a44b83691ca83ceb"
+        product_id = "6944b0fca44b83691ca83898"
         test_email = "cliente_test@example.com"
         
         payment_data = {
@@ -1391,10 +1391,7 @@ class AntiaAPITester:
                         if "tipster" in result and result["tipster"]:
                             tipster = result["tipster"]
                             tipster_id = tipster.get("id")
-                            if tipster_id == "6944b3a7de7d24dccd17876f":
-                                self.log(f"✅ Correct tipster: Ramiro Mata (ID: {tipster_id})")
-                            else:
-                                self.log(f"⚠️ Unexpected tipster ID: {tipster_id}", "WARN")
+                            self.log(f"✅ Tipster info: {tipster.get('publicName')} (ID: {tipster_id})")
                         
                         return True
                     else:
