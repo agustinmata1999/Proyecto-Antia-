@@ -23,6 +23,8 @@ import { AffiliateModule } from './affiliate/affiliate.module';
 import { ClientModule } from './client/client.module';
 import { SupportModule } from './support/support.module';
 import { TipsterModule } from './tipster/tipster.module';
+import { EmailsModule } from './emails/emails.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { HealthController } from './health.controller';
 
 @Module({
