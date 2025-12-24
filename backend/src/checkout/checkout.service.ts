@@ -434,6 +434,7 @@ export class CheckoutService {
             payment_provider: 'stripe',
             provider_order_id: session.id,
             payment_method: 'card',
+            paid_at: { $date: new Date().toISOString() },
             updated_at: { $date: new Date().toISOString() },
           },
         },
@@ -449,6 +450,11 @@ export class CheckoutService {
         session.metadata?.productId || '',
       );
     }
+
+    // =============================================
+    // SEND EMAILS AFTER SUCCESSFUL STRIPE PAYMENT
+    // =============================================
+    await this.sendPostPaymentEmails(orderId);
   }
 
   async handlePaymentExpired(session: Stripe.Checkout.Session) {
