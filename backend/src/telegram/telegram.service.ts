@@ -44,23 +44,50 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const botInfo = await Promise.race([botInfoPromise, timeoutPromise]) as any;
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
       
-      // Usar polling en lugar de webhook para evitar problemas de proxy/ingress
-      this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
+      // Determinar si usar webhook o polling basado en APP_URL
+      const appUrl = this.config.get<string>('APP_URL');
+      const useWebhook = appUrl && appUrl.includes('preview.emergentagent.com');
       
-      // Eliminar webhook existente
-      await this.bot.telegram.deleteWebhook({ drop_pending_updates: false });
-      this.logger.log(`✅ Webhook removed`);
-      
-      // Iniciar polling en background (no bloqueante)
-      // Note: launch() nunca resuelve normalmente - mantiene el polling activo
-      this.bot.launch({
-        allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-      }).catch((err) => {
-        this.logger.error('Bot polling error:', err.message);
-      });
-      
-      this.isInitialized = true;
-      this.logger.log('✅ TelegramService initialized (polling mode - running in background)');
+      if (useWebhook) {
+        // MODO WEBHOOK para preview (evita conflicto con producción)
+        const webhookUrl = `${appUrl}/api/telegram/webhook`;
+        this.logger.log(`🔧 Setting up webhook mode at: ${webhookUrl}`);
+        
+        try {
+          // Configurar el webhook
+          await this.bot.telegram.setWebhook(webhookUrl, {
+            allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+            drop_pending_updates: false,
+          });
+          this.logger.log(`✅ Webhook configured successfully`);
+          
+          // Verificar el webhook
+          const webhookInfo = await this.bot.telegram.getWebhookInfo();
+          this.logger.log(`📡 Webhook info: ${JSON.stringify(webhookInfo)}`);
+        } catch (webhookError) {
+          this.logger.error('Failed to set webhook:', webhookError.message);
+        }
+        
+        this.isInitialized = true;
+        this.logger.log('✅ TelegramService initialized (WEBHOOK mode for preview)');
+      } else {
+        // MODO POLLING para producción
+        this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
+        
+        // Eliminar webhook existente
+        await this.bot.telegram.deleteWebhook({ drop_pending_updates: false });
+        this.logger.log(`✅ Webhook removed`);
+        
+        // Iniciar polling en background (no bloqueante)
+        this.bot.launch({
+          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+        }).catch((err) => {
+          this.logger.error('Bot polling error:', err.message);
+        });
+        
+        this.isInitialized = true;
+        this.logger.log('✅ TelegramService initialized (POLLING mode for production)');
+      }
     } catch (error) {
       this.logger.error('Failed to initialize Telegram bot:', error.message);
       this.logger.warn('⚠️  Telegram features may not work correctly - continuing without Telegram');
