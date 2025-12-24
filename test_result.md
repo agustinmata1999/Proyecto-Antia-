@@ -306,7 +306,7 @@ backend:
     status_history:
       - working: true
         agent: "testing"
-        comment: "✅ PASSED - Payment flow test for 'Jake paul vs Joshua' product (ID: 6944bb56a44b83691ca83ceb) successful. Order created with status PAGADA, correct tipster Ramiro Mata (ID: 6944b3a7de7d24dccd17876f), amount 2300 cents. Payment simulation working correctly."
+        comment: "✅ PASSED - Payment flow test for 'Mclaren' product (ID: 6944b0fca44b83691ca83898) successful. Order created with status PAGADA, correct tipster Fausto Perez (ID: 694313406d86ad866d3f118f), amount 4300 cents. Payment simulation working correctly."
 
   - task: "GET /api/checkout/order/{orderId} - Get order details"
     implemented: true
@@ -319,6 +319,54 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - Order verification API works correctly. Returns complete order details with status PAGADA, product info, tipster info. All fields present and correct for payment flow verification."
+
+  - task: "Database Verification for Bot Flow - Order has product_id, tipster_id, status=PAGADA"
+    implemented: true
+    working: true
+    file: "MongoDB orders collection"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Database verification successful. Order found in MongoDB with all required fields: product_id (6944b0fca44b83691ca83898), tipster_id (694313406d86ad866d3f118f), status (PAGADA). Database integration working correctly for bot flow."
+
+  - task: "Product Channel Configuration - Product has telegram_channel_id, Channel has invite_link"
+    implemented: true
+    working: true
+    file: "MongoDB products and telegram_channels collections"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Product channel configuration verified. Product (6944b0fca44b83691ca83898) has telegram_channel_id (-1003329431615), Channel has invite_link configured (https://t.me/pruebabotantia/2). Channel is properly configured for customer access after payment."
+
+  - task: "GET /api/tipster/kyc-status - Get KYC completion status"
+    implemented: true
+    working: true
+    file: "tipster.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - KYC status API works correctly. Returns kycCompleted:true, applicationStatus:APPROVED, needsKyc:false for approved tipster with completed KYC. Properly masked document number and all required fields present."
+
+  - task: "GET /api/admin/tipsters - Get all tipsters with modules info"
+    implemented: true
+    working: true
+    file: "admin-tipsters.controller.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Admin tipsters API works correctly. Returns list of 8 tipsters with modules info (forecasts/affiliate), basic tipster fields (id, publicName), and all required data structure. API accessible and functioning properly."
 
   - task: "POST /api/telegram/webhook - Telegram bot order command processing"
     implemented: true
