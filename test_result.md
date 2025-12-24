@@ -622,7 +622,20 @@ agent_communication:
 - Frontend testing: Playwright automation
 - Integration testing: Frontend testing agent
 
-## Current Status: ✅ OPERATIONAL
+## Current Status: ✅ OPERATIONAL (Preview Environment Ready - Dec 24, 2025)
+
+### Preview Environment Configuration
+- **Preview URL**: https://tipster-bot-issue.preview.emergentagent.com
+- **APP_URL**: Corrected in supervisor config
+- **Bot**: @Antiabetbot - Running in polling mode
+- **Stripe**: Test mode (sk_test_emergent - placeholder)
+- **Redsys**: Sandbox mode
+
+### Testing Needed for Preview
+1. **Test Purchase Flow** - Create order, simulate payment, verify bot access
+2. **Telegram Bot /start order_ID** - Verify bot grants channel access
+3. **KYC Flow** - Banner and form for tipsters
+4. **Admin Panel** - Module control, commissions, reports
 
 ### Project Successfully Deployed
 - **Backend**: NestJS running on port 8001 ✅
