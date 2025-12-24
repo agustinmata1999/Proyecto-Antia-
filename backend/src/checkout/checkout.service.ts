@@ -499,11 +499,17 @@ export class CheckoutService {
                 payment_provider: 'stripe',
                 provider_order_id: sessionId,
                 payment_method: 'card',
+                paid_at: { $date: new Date().toISOString() },
                 updated_at: { $date: new Date().toISOString() },
               },
             },
           }],
         });
+
+        // =============================================
+        // SEND EMAILS - First time payment confirmed
+        // =============================================
+        await this.sendPostPaymentEmails(orderId);
       }
     }
 
