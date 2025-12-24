@@ -1455,10 +1455,331 @@ class AntiaAPITester:
                 if "product" in order_data and order_data["product"]:
                     product = order_data["product"]
                     product_id = product.get("id")
-                    if product_id == "6944bb56a44b83691ca83ceb":
+                    if product_id == "6944b0fca44b83691ca83898":
                         self.log(f"✅ Correct product: {product.get('title')} (ID: {product_id})")
                     else:
                         self.log(f"⚠️ Unexpected product ID: {product_id}", "WARN")
+                
+                # Verify tipster info
+                if "tipster" in order_data and order_data["tipster"]:
+                    tipster = order_data["tipster"]
+                    self.log(f"✅ Tipster info: {tipster.get('publicName')}")
+                
+                return True
+            else:
+                self.log(f"❌ Get order details failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Verify order PAGADA status test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_database_verification_for_bot_flow(self) -> bool:
+        """Test database verification for bot flow - check order has product_id, tipster_id, status=PAGADA"""
+        self.log("=== Testing Database Verification for Bot Flow ===")
+        
+        try:
+            import subprocess
+            
+            # Query MongoDB for the test order with required fields
+            mongo_script = f'''
+            db.orders.findOne(
+                {{_id: ObjectId("{self.test_order_id_for_cleanup}")}}, 
+                {{
+                    product_id: 1, 
+                    tipster_id: 1, 
+                    status: 1,
+                    created_at: 1
+                }}
+            )
+            '''
+            
+            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                self.log("✅ Successfully queried MongoDB for order verification")
+                output = result.stdout.strip()
+                self.log(f"MongoDB output: {output}")
+                
+                # Check if we got valid data
+                if "product_id" in output:
+                    self.log("✅ Order has product_id field")
+                else:
+                    self.log("❌ Order missing product_id field", "ERROR")
+                    return False
+                
+                if "tipster_id" in output:
+                    self.log("✅ Order has tipster_id field")
+                else:
+                    self.log("❌ Order missing tipster_id field", "ERROR")
+                    return False
+                
+                if '"status" : "PAGADA"' in output:
+                    self.log("✅ Order status is PAGADA in database")
+                else:
+                    self.log("❌ Order status is not PAGADA in database", "ERROR")
+                    return False
+                
+                # Check if order exists at all
+                if "null" in output:
+                    self.log("❌ No order found in database", "ERROR")
+                    return False
+                
+                self.log("✅ All required fields present in order for bot flow")
+                return True
+            else:
+                self.log(f"❌ MongoDB verification failed: {result.stderr}", "ERROR")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            self.log("❌ MongoDB verification timed out", "ERROR")
+            return False
+        except Exception as e:
+            self.log(f"❌ Database verification failed: {str(e)}", "ERROR")
+            return False
+
+    def test_verify_product_channel_configuration(self) -> bool:
+        """Test that the product has telegram_channel_id configured"""
+        self.log("=== Testing Product Channel Configuration ===")
+        
+        try:
+            import subprocess
+            
+            # Query MongoDB for the product and its channel configuration
+            mongo_script = '''
+            const product = db.products.findOne(
+                {_id: ObjectId("6944b0fca44b83691ca83898")}, 
+                {telegram_channel_id: 1, title: 1}
+            );
+            
+            if (product && product.telegram_channel_id) {
+                const channel = db.telegram_channels.findOne(
+                    {channel_id: product.telegram_channel_id},
+                    {channel_id: 1, invite_link: 1, title: 1, active: 1}
+                );
+                
+                print("PRODUCT:", JSON.stringify(product));
+                print("CHANNEL:", JSON.stringify(channel));
+            } else {
+                print("PRODUCT:", JSON.stringify(product));
+                print("CHANNEL: null");
+            }
+            '''
+            
+            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                self.log("✅ Successfully queried MongoDB for product and channel configuration")
+                output = result.stdout.strip()
+                self.log(f"MongoDB output: {output}")
+                
+                # Check if product has telegram_channel_id
+                if '"telegram_channel_id"' in output and '"-1003329431615"' in output:
+                    self.log("✅ Product has telegram_channel_id: -1003329431615")
+                else:
+                    self.log("❌ Product missing telegram_channel_id or incorrect value", "ERROR")
+                    return False
+                
+                # Check if channel has invite_link
+                if '"invite_link"' in output and output.count('"invite_link"') > 0:
+                    self.log("✅ Channel has invite_link configured")
+                else:
+                    self.log("❌ Channel missing invite_link configuration", "ERROR")
+                    return False
+                
+                # Check if channel is active
+                if '"active" : true' in output:
+                    self.log("✅ Channel is active")
+                else:
+                    self.log("⚠️ Channel may not be active", "WARN")
+                
+                self.log("✅ Product and channel configuration verified for bot flow")
+                return True
+            else:
+                self.log(f"❌ MongoDB channel verification failed: {result.stderr}", "ERROR")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            self.log("❌ MongoDB channel verification timed out", "ERROR")
+            return False
+        except Exception as e:
+            self.log(f"❌ Product channel verification failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_login(self) -> bool:
+        """Test authentication with admin credentials"""
+        self.log("=== Testing Admin Authentication ===")
+        
+        login_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                
+                # Check if access_token is in response
+                if "access_token" in response_data:
+                    self.admin_access_token = response_data["access_token"]
+                    self.log("✅ Admin login successful - JWT token received")
+                    return True
+                else:
+                    self.log("❌ Admin login response missing access_token", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Admin login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin login test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_kyc_status_api(self) -> bool:
+        """Test KYC status API for tipster"""
+        self.log("=== Testing KYC Status API ===")
+        
+        # Use tipster token for this test
+        original_token = self.access_token
+        
+        try:
+            response = self.make_request("GET", "/tipster/kyc-status")
+            
+            if response.status_code == 200:
+                kyc_data = response.json()
+                self.log("✅ Successfully retrieved KYC status")
+                
+                # Check required fields
+                required_fields = ["kycCompleted", "needsKyc"]
+                for field in required_fields:
+                    if field in kyc_data:
+                        self.log(f"✅ KYC status has {field}: {kyc_data[field]}")
+                    else:
+                        self.log(f"❌ KYC status missing {field}", "ERROR")
+                        return False
+                
+                # Log additional fields if present
+                optional_fields = ["applicationStatus", "legalName", "documentType", "documentNumber"]
+                for field in optional_fields:
+                    if field in kyc_data:
+                        value = kyc_data[field]
+                        if field == "documentNumber" and value:
+                            # Mask document number for security
+                            masked_value = value[:2] + "*" * (len(value) - 4) + value[-2:] if len(value) > 4 else "***"
+                            self.log(f"✅ KYC status has {field}: {masked_value}")
+                        else:
+                            self.log(f"✅ KYC status has {field}: {value}")
+                
+                return True
+            else:
+                self.log(f"❌ Get KYC status failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ KYC status test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_tipsters_api(self) -> bool:
+        """Test admin tipsters API"""
+        self.log("=== Testing Admin Tipsters API ===")
+        
+        # Use admin token for this test
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("GET", "/admin/tipsters")
+            
+            if response.status_code == 200:
+                tipsters_data = response.json()
+                self.log("✅ Successfully retrieved tipsters list")
+                
+                # Check if it's an array
+                if isinstance(tipsters_data, list):
+                    self.log(f"✅ Tipsters list contains {len(tipsters_data)} tipsters")
+                    
+                    # Check each tipster has required fields
+                    for i, tipster in enumerate(tipsters_data):
+                        self.log(f"Tipster {i+1}:")
+                        
+                        # Check for modules info
+                        if "modules" in tipster:
+                            modules = tipster["modules"]
+                            self.log(f"  ✅ Has modules info: {modules}")
+                        else:
+                            self.log(f"  ❌ Missing modules info", "ERROR")
+                        
+                        # Check basic tipster fields
+                        basic_fields = ["id", "email", "publicName"]
+                        for field in basic_fields:
+                            if field in tipster:
+                                self.log(f"  ✅ Has {field}: {tipster[field]}")
+                            else:
+                                self.log(f"  ❌ Missing {field}", "ERROR")
+                
+                else:
+                    self.log("❌ Tipsters response is not an array", "ERROR")
+                    return False
+                
+                return True
+            else:
+                self.log(f"❌ Get admin tipsters failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin tipsters test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    # ===== REVIEW REQUEST TEST RUNNER =====
+    
+    def run_review_request_tests(self) -> Dict[str, bool]:
+        """Run all tests specified in the review request"""
+        self.log("🎯 STARTING REVIEW REQUEST TESTS")
+        self.log("=" * 60)
+        
+        test_results = {}
+        
+        # 1. Test Purchase Flow (Critical P0)
+        self.log("\n1️⃣ TESTING PURCHASE FLOW (Critical P0)")
+        test_results["purchase_flow"] = self.test_create_and_simulate_payment_for_product()
+        
+        # 2. Verify Order Details
+        self.log("\n2️⃣ TESTING ORDER DETAILS VERIFICATION")
+        test_results["order_details"] = self.test_verify_order_pagada_status()
+        
+        # 3. Database Verification for Bot Flow
+        self.log("\n3️⃣ TESTING DATABASE VERIFICATION FOR BOT FLOW")
+        test_results["database_verification"] = self.test_database_verification_for_bot_flow()
+        
+        # 4. Product Channel Configuration
+        self.log("\n4️⃣ TESTING PRODUCT CHANNEL CONFIGURATION")
+        test_results["channel_configuration"] = self.test_verify_product_channel_configuration()
+        
+        # 5. KYC Status API (requires tipster login first)
+        self.log("\n5️⃣ TESTING TIPSTER LOGIN AND KYC STATUS API")
+        if self.test_login():
+            test_results["kyc_status"] = self.test_kyc_status_api()
+        else:
+            test_results["kyc_status"] = False
+        
+        # 6. Admin Tipsters API (requires admin login first)
+        self.log("\n6️⃣ TESTING ADMIN LOGIN AND TIPSTERS API")
+        if self.test_admin_login():
+            test_results["admin_tipsters"] = self.test_admin_tipsters_api()
+        else:
+            test_results["admin_tipsters"] = False
+        
+        return test_results
                 
                 # Verify tipster info
                 if "tipster" in order_data and order_data["tipster"]:
