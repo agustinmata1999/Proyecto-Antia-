@@ -867,7 +867,7 @@ export class CheckoutService {
             tipsterUserId: tipster.userId,
             tipsterEmail: tipsterUser.email,
             productName: product?.title || 'Producto',
-            billingType: product?.billingType || 'ONE_TIME',
+            billingType: (product?.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
             netAmount: commissions.netAmountCents,
             currency: order.currency || 'EUR',
             orderId: orderId,
