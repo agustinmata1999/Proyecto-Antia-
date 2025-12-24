@@ -580,7 +580,7 @@ class AntiaAPITester:
             print('ORDER_ID=' + orderId.toString());
             '''
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
@@ -728,7 +728,7 @@ class AntiaAPITester:
                 # Check any PAGADA order
                 mongo_script = 'db.orders.findOne({status: "PAGADA"}, {status: 1, payment_provider: 1, paid_at: 1})'
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
@@ -1281,7 +1281,7 @@ class AntiaAPITester:
             )
             '''
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
@@ -1494,7 +1494,7 @@ class AntiaAPITester:
             )
             '''
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
@@ -1568,7 +1568,7 @@ class AntiaAPITester:
             }
             '''
             
-            cmd = ["mongosh", "--quiet", "antia_db", "--eval", mongo_script]
+            cmd = ["mongosh", "--quiet", "antia", "--eval", mongo_script]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
