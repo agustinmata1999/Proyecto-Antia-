@@ -1516,7 +1516,7 @@ class AntiaAPITester:
                     self.log("❌ Order missing tipster_id field", "ERROR")
                     return False
                 
-                if '"status" : "PAGADA"' in output:
+                if '"status" : "PAGADA"' in output or "status: 'PAGADA'" in output:
                     self.log("✅ Order status is PAGADA in database")
                 else:
                     self.log("❌ Order status is not PAGADA in database", "ERROR")
