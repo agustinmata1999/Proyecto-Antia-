@@ -13,7 +13,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('admin/emails')
 @Controller('admin/emails')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SUPER_ADMIN')
+@Roles('SUPERADMIN')
 @ApiBearerAuth()
 export class EmailsController {
   constructor(private emailService: EmailService) {}
