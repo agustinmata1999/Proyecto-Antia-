@@ -1120,4 +1120,116 @@ export class CheckoutService {
     // Use CommissionsService for calculations (includes custom configs)
     return this.commissionsService.calculateCommissions(tipsterId, amountCents, paymentProvider);
   }
+
+  /**
+   * CENTRALIZED METHOD: Send all post-payment emails
+   * Call this after ANY successful payment confirmation
+   */
+  private async sendPostPaymentEmails(orderId: string): Promise<void> {
+    try {
+      this.logger.log(`📧 Sending post-payment emails for order ${orderId}`);
+
+      // Get order details
+      const order = await this.getOrderById(orderId);
+      if (!order) {
+        this.logger.error(`Order ${orderId} not found for sending emails`);
+        return;
+      }
+
+      // Get product
+      const product = await this.prisma.product.findUnique({
+        where: { id: order.productId },
+      });
+
+      // Get tipster
+      const tipster = product ? await this.prisma.tipsterProfile.findUnique({
+        where: { id: product.tipsterId },
+      }) : null;
+
+      // Get tipster user for email
+      const tipsterUser = tipster ? await this.prisma.user.findUnique({
+        where: { id: tipster.userId },
+      }) : null;
+
+      // =============================================
+      // 1. EMAIL TO CLIENT - Purchase Confirmation
+      // =============================================
+      if (order.emailBackup) {
+        try {
+          await this.emailService.sendPurchaseConfirmation({
+            email: order.emailBackup,
+            productName: product?.title || 'Producto',
+            tipsterName: tipster?.publicName || 'Tipster',
+            billingType: (product?.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
+            billingPeriod: product?.billingPeriod,
+            amount: order.amountCents || 0,
+            currency: order.currency || 'EUR',
+            orderId: orderId,
+            purchaseDate: new Date(),
+          });
+          this.logger.log(`📧 Purchase confirmation sent to ${order.emailBackup}`);
+        } catch (err) {
+          this.logger.error(`Failed to send purchase confirmation: ${err.message}`);
+        }
+
+        // 2. EMAIL TO CLIENT - Channel Access (if product has channel)
+        if (product?.telegramChannelId) {
+          try {
+            const channelResult = await this.prisma.$runCommandRaw({
+              find: 'telegram_channels',
+              filter: { channel_id: product.telegramChannelId, is_active: true },
+              projection: { invite_link: 1, channel_title: 1 },
+              limit: 1,
+            }) as any;
+            const channel = channelResult.cursor?.firstBatch?.[0];
+            
+            if (channel?.invite_link) {
+              await this.emailService.sendChannelAccess({
+                email: order.emailBackup,
+                productName: product.title,
+                channelName: channel.channel_title || 'Canal Premium',
+                telegramLink: channel.invite_link,
+                orderId: orderId,
+              });
+              this.logger.log(`📧 Channel access email sent to ${order.emailBackup}`);
+            }
+          } catch (err) {
+            this.logger.error(`Failed to send channel access email: ${err.message}`);
+          }
+        }
+      }
+
+      // =============================================
+      // 3. EMAIL + NOTIFICATION TO TIPSTER - New Sale
+      // =============================================
+      if (tipster && tipsterUser?.email) {
+        try {
+          // Calculate commissions for net amount
+          const commissions = await this.calculateOrderCommissions(
+            tipster.id,
+            order.amountCents || 0,
+            order.paymentProvider || 'stripe',
+          );
+
+          await this.notificationsService.notifyNewSale({
+            tipsterId: tipster.id,
+            tipsterUserId: tipster.userId,
+            tipsterEmail: tipsterUser.email,
+            productName: product?.title || 'Producto',
+            billingType: (product?.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
+            netAmount: commissions.netAmountCents,
+            currency: order.currency || 'EUR',
+            orderId: orderId,
+          });
+          this.logger.log(`📧 Sale notification sent to tipster ${tipsterUser.email}`);
+        } catch (err) {
+          this.logger.error(`Failed to send tipster notification: ${err.message}`);
+        }
+      }
+
+      this.logger.log(`✅ Post-payment emails completed for order ${orderId}`);
+    } catch (error) {
+      this.logger.error(`Error in sendPostPaymentEmails: ${error.message}`);
+    }
+  }
 }
