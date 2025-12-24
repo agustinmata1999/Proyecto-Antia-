@@ -800,8 +800,9 @@ export default function TipsterDashboard() {
 
       {/* Main Content */}
       <main className="ml-64 p-8">
-        {/* Currency Selector - Fixed top right */}
-        <div className="fixed top-4 right-8 z-50">
+        {/* Currency Selector & Notifications - Fixed top right */}
+        <div className="fixed top-4 right-8 z-50 flex items-center gap-3">
+          <NotificationsBell />
           <CurrencySelector variant="pill" />
         </div>
 
