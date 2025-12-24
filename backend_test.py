@@ -2699,21 +2699,48 @@ def run_payment_flow_tests():
         return 1
 
 def main():
-    """Main function to run KYC flow tests"""
-    print("🚀 Starting Antia Platform - KYC Flow Tests")
+    """Main function to run review request tests"""
+    print("🚀 Starting Antia Platform - Review Request Tests")
+    print("=" * 80)
+    print("Testing complete payment and Telegram bot access flow in preview environment")
+    print("Base URL: https://tipster-bot-issue.preview.emergentagent.com")
     print("=" * 80)
     
     tester = AntiaAPITester()
     
     try:
-        # Run the KYC flow tests
-        success = tester.run_kyc_flow_tests()
+        # Run the review request tests
+        test_results = tester.run_review_request_tests()
         
-        if success:
-            print("\n🎉 ALL KYC TESTS PASSED - KYC Flow is working correctly!")
+        # Count results
+        passed = sum(1 for result in test_results.values() if result)
+        failed = sum(1 for result in test_results.values() if not result)
+        total = len(test_results)
+        
+        print("\n" + "="*80)
+        print("REVIEW REQUEST TEST RESULTS")
+        print("="*80)
+        print(f"✅ PASSED: {passed}")
+        print(f"❌ FAILED: {failed}")
+        print(f"📊 SUCCESS RATE: {(passed/total*100):.1f}%" if total > 0 else "0%")
+        
+        # Show detailed results
+        print("\nDetailed Results:")
+        for test_name, result in test_results.items():
+            status = "✅ PASSED" if result else "❌ FAILED"
+            print(f"  {test_name}: {status}")
+        
+        if failed == 0:
+            print("\n🎉 ALL REVIEW REQUEST TESTS PASSED!")
+            print("✅ Purchase flow working correctly")
+            print("✅ Order verification working")
+            print("✅ Database verification working")
+            print("✅ Channel configuration working")
+            print("✅ KYC status API working")
+            print("✅ Admin tipsters API working")
             return 0
         else:
-            print("\n❌ SOME KYC TESTS FAILED - Check the logs above for details")
+            print(f"\n❌ {failed} TESTS FAILED - Check the logs above for details")
             return 1
             
     except Exception as e:
