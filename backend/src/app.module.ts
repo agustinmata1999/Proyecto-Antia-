@@ -58,6 +58,8 @@ import { HealthController } from './health.controller';
     ClientModule,
     SupportModule,
     TipsterModule,
+    EmailsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
 })
