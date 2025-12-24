@@ -409,6 +409,11 @@ export class CheckoutService {
           order.telegramUsername,
         );
       }
+
+      // =============================================
+      // SEND EMAILS AFTER SUCCESSFUL REDSYS PAYMENT
+      // =============================================
+      await this.sendPostPaymentEmails(result.orderId);
     }
 
     return { received: true, processed: true };
