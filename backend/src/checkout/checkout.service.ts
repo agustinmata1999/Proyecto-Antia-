@@ -813,7 +813,7 @@ export class CheckoutService {
           email: order.emailBackup,
           productName: product?.title || 'Producto',
           tipsterName: tipster?.publicName || 'Tipster',
-          billingType: product?.billingType || 'ONE_TIME',
+          billingType: (product?.billingType as 'ONE_TIME' | 'SUBSCRIPTION') || 'ONE_TIME',
           billingPeriod: product?.billingPeriod,
           amount: order.amountCents || 0,
           currency: order.currency || 'EUR',
