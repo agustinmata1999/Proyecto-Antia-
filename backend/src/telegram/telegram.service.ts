@@ -396,22 +396,42 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       let channelId: string | null = null;
 
       if (product.telegramChannelId) {
-        const channelResult = await this.prisma.$runCommandRaw({
+        this.logger.log(`🔍 Looking for channel: ${product.telegramChannelId} for tipster: ${tipster?.id || 'unknown'}`);
+        
+        // Buscar canal - primero con tipster_id, luego sin él como fallback
+        let channelResult = await this.prisma.$runCommandRaw({
           find: 'telegram_channels',
           filter: { 
             channel_id: product.telegramChannelId,
-            tipster_id: tipster?.id,
+            ...(tipster?.id ? { tipster_id: tipster.id } : {}),
             is_active: true,
           },
-          projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1 },
+          projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1, tipster_id: 1 },
           limit: 1,
         }) as any;
 
-        const channel = channelResult.cursor?.firstBatch?.[0];
+        let channel = channelResult.cursor?.firstBatch?.[0];
+        
+        // Si no encontró con tipster_id, buscar solo por channel_id
+        if (!channel) {
+          this.logger.log(`⚠️ Channel not found with tipster filter, trying without...`);
+          channelResult = await this.prisma.$runCommandRaw({
+            find: 'telegram_channels',
+            filter: { 
+              channel_id: product.telegramChannelId,
+              is_active: true,
+            },
+            projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1, tipster_id: 1 },
+            limit: 1,
+          }) as any;
+          channel = channelResult.cursor?.firstBatch?.[0];
+        }
+        
         if (channel) {
           channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
+          this.logger.log(`✅ Found channel: ${channelTitle} (ID: ${channelId}, link: ${channelLink ? 'YES' : 'NO'})`);
           
           // Si no hay invite_link, intentar generarlo ahora
           if (!channelLink && channelId) {
@@ -430,6 +450,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                     u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
                   }],
                 });
+                this.logger.log(`✅ Saved invite link to database`);
               }
             } catch (e) {
               this.logger.error(`Failed to generate invite link for ${channelId}: ${e.message}`);
@@ -445,9 +466,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               }
             }
           }
-          
-          this.logger.log(`✅ Found channel: ${channelTitle} with link: ${channelLink}`);
+        } else {
+          this.logger.warn(`❌ Channel ${product.telegramChannelId} not found in database`);
         }
+      } else {
+        this.logger.log(`ℹ️ Product has no telegramChannelId - this is a "no channel" product`);
       }
 
       // Si no hay canal del producto, buscar legacy premium_channel_link
