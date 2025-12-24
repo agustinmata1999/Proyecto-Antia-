@@ -1780,24 +1780,6 @@ class AntiaAPITester:
             test_results["admin_tipsters"] = False
         
         return test_results
-                
-                # Verify tipster info
-                if "tipster" in order_data and order_data["tipster"]:
-                    tipster = order_data["tipster"]
-                    tipster_id = tipster.get("id")
-                    if tipster_id == "6944b3a7de7d24dccd17876f":
-                        self.log(f"✅ Correct tipster: {tipster.get('publicName')} (ID: {tipster_id})")
-                    else:
-                        self.log(f"⚠️ Unexpected tipster ID: {tipster_id}", "WARN")
-                
-                return True
-            else:
-                self.log(f"❌ Get order details failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Verify order PAGADA status test failed: {str(e)}", "ERROR")
-            return False
 
     def test_telegram_bot_order_command_simulation(self) -> bool:
         """Test simulating Telegram bot receiving order_* command"""
