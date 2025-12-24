@@ -5,6 +5,8 @@ import { TelegramService } from '../telegram/telegram.service';
 import { GeolocationService, GeoLocationResult } from './geolocation.service';
 import { RedsysService } from './redsys.service';
 import { CommissionsService } from '../commissions/commissions.service';
+import { EmailService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import Stripe from 'stripe';
 
 export interface CreateCheckoutDto {
