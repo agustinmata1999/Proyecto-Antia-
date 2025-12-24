@@ -54,6 +54,8 @@ export class CheckoutService {
     private geolocationService: GeolocationService,
     private redsysService: RedsysService,
     private commissionsService: CommissionsService,
+    private emailService: EmailService,
+    private notificationsService: NotificationsService,
   ) {
     const stripeKey = this.config.get<string>('STRIPE_API_KEY');
     if (!stripeKey) {
