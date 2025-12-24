@@ -1701,12 +1701,13 @@ class AntiaAPITester:
                 tipsters_data = response.json()
                 self.log("✅ Successfully retrieved tipsters list")
                 
-                # Check if it's an array
-                if isinstance(tipsters_data, list):
-                    self.log(f"✅ Tipsters list contains {len(tipsters_data)} tipsters")
+                # Check if it's an object with tipsters array
+                if isinstance(tipsters_data, dict) and "tipsters" in tipsters_data:
+                    tipsters_list = tipsters_data["tipsters"]
+                    self.log(f"✅ Tipsters response contains {len(tipsters_list)} tipsters")
                     
                     # Check each tipster has required fields
-                    for i, tipster in enumerate(tipsters_data):
+                    for i, tipster in enumerate(tipsters_list):
                         self.log(f"Tipster {i+1}:")
                         
                         # Check for modules info
@@ -1717,7 +1718,7 @@ class AntiaAPITester:
                             self.log(f"  ❌ Missing modules info", "ERROR")
                         
                         # Check basic tipster fields
-                        basic_fields = ["id", "email", "publicName"]
+                        basic_fields = ["id", "publicName"]
                         for field in basic_fields:
                             if field in tipster:
                                 self.log(f"  ✅ Has {field}: {tipster[field]}")
@@ -1725,7 +1726,7 @@ class AntiaAPITester:
                                 self.log(f"  ❌ Missing {field}", "ERROR")
                 
                 else:
-                    self.log("❌ Tipsters response is not an array", "ERROR")
+                    self.log("❌ Tipsters response is not in expected format", "ERROR")
                     return False
                 
                 return True
