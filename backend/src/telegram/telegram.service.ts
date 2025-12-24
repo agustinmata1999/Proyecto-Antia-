@@ -302,20 +302,93 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }],
       });
 
-      // Obtener producto
-      const product: any = await this.prisma.product.findUnique({
-        where: { id: order.product_id },
-      });
-
+      // Obtener producto - intentar por id y también con $oid
+      let product: any = null;
+      const productId = order.product_id;
+      
+      this.logger.log(`🔍 Looking for product: ${productId}`);
+      
+      // Primero intentar con Prisma normal
+      try {
+        product = await this.prisma.product.findUnique({
+          where: { id: productId },
+        });
+      } catch (e) {
+        this.logger.warn(`Prisma findUnique failed for product ${productId}: ${e.message}`);
+      }
+      
+      // Si no lo encuentra, intentar con $runCommandRaw
       if (!product) {
-        await ctx.reply('❌ Producto no encontrado. Contacta con @AntiaSupport');
-        return;
+        this.logger.log(`Trying raw query for product ${productId}`);
+        try {
+          const productResult = await this.prisma.$runCommandRaw({
+            find: 'products',
+            filter: { _id: { $oid: productId } },
+            limit: 1,
+          }) as any;
+          const rawProduct = productResult.cursor?.firstBatch?.[0];
+          if (rawProduct) {
+            product = {
+              id: rawProduct._id?.$oid || productId,
+              title: rawProduct.title,
+              description: rawProduct.description,
+              priceCents: rawProduct.price_cents,
+              tipsterId: rawProduct.tipster_id,
+              telegramChannelId: rawProduct.telegram_channel_id,
+              billingType: rawProduct.billing_type,
+            };
+            this.logger.log(`✅ Found product via raw query: ${product.title}`);
+          }
+        } catch (e) {
+          this.logger.error(`Raw query also failed for product ${productId}: ${e.message}`);
+        }
       }
 
+      if (!product) {
+        this.logger.error(`❌ Product ${productId} not found by any method`);
+        await ctx.reply(
+          '❌ *Error al procesar tu compra*\n\n' +
+          'No pudimos encontrar el producto asociado a tu compra.\n\n' +
+          'Por favor, contacta con @AntiaSupport con este código:\n' +
+          `\`ORDER: ${orderId}\``,
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+      
+      this.logger.log(`✅ Product found: ${product.title} (tipsterId: ${product.tipsterId})`);
+
       // Obtener tipster
-      const tipster: any = await this.prisma.tipsterProfile.findUnique({
-        where: { id: product.tipsterId },
-      });
+      let tipster: any = null;
+      try {
+        tipster = await this.prisma.tipsterProfile.findUnique({
+          where: { id: product.tipsterId },
+        });
+      } catch (e) {
+        this.logger.warn(`Could not find tipster profile: ${e.message}`);
+      }
+      
+      // Si no encuentra por Prisma, intentar raw query
+      if (!tipster && product.tipsterId) {
+        try {
+          const tipsterResult = await this.prisma.$runCommandRaw({
+            find: 'tipster_profiles',
+            filter: { _id: { $oid: product.tipsterId } },
+            limit: 1,
+          }) as any;
+          const rawTipster = tipsterResult.cursor?.firstBatch?.[0];
+          if (rawTipster) {
+            tipster = {
+              id: rawTipster._id?.$oid || product.tipsterId,
+              publicName: rawTipster.public_name,
+              premiumChannelLink: rawTipster.premium_channel_link,
+            };
+            this.logger.log(`✅ Found tipster via raw query: ${tipster.publicName}`);
+          }
+        } catch (e) {
+          this.logger.error(`Could not find tipster by raw query: ${e.message}`);
+        }
+      }
 
       // Buscar el canal asociado al producto
       let channelLink: string | null = null;
