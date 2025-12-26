@@ -220,6 +220,24 @@ export default function ClientDashboard() {
     }
   };
 
+  const handleCancelSubscription = async (subscriptionId: string) => {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta suscripción?\n\nMantendrás el acceso hasta el final del periodo actual.')) {
+      return;
+    }
+
+    try {
+      const response = await clientApi.cancelSubscription(subscriptionId);
+      if (response.data.success) {
+        alert('✅ Suscripción cancelada. Mantendrás el acceso hasta el final del periodo actual.');
+        // Reload subscriptions
+        const subsRes = await clientApi.getSubscriptions();
+        setSubscriptions(subsRes.data || []);
+      }
+    } catch (error: any) {
+      alert('Error: ' + (error.response?.data?.message || 'Error al cancelar'));
+    }
+  };
+
   const formatPrice = (cents: number, currency: string = 'EUR') => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
