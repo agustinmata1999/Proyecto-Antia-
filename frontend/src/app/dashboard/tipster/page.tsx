@@ -1894,12 +1894,58 @@ export default function TipsterDashboard() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                       />
                     </div>
+                    
+                    {/* Upload de archivos */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Adjuntar archivos (opcional)</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition cursor-pointer"
+                        onClick={() => document.getElementById('ticket-file-input')?.click()}
+                      >
+                        <input
+                          id="ticket-file-input"
+                          type="file"
+                          multiple
+                          accept="image/*,.pdf,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            setTicketAttachments(prev => [...prev, ...files].slice(0, 5));
+                          }}
+                        />
+                        <div className="text-gray-500">
+                          <span className="text-2xl">📎</span>
+                          <p className="text-sm mt-1">Haz clic para adjuntar capturas o documentos</p>
+                          <p className="text-xs text-gray-400">Máx. 5 archivos (imágenes, PDF, DOC)</p>
+                        </div>
+                      </div>
+                      
+                      {ticketAttachments.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {ticketAttachments.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <span>{file.type.startsWith('image/') ? '🖼️' : '📄'}</span>
+                                <span className="truncate max-w-[150px]">{file.name}</span>
+                                <span className="text-gray-400 text-xs">({(file.size / 1024).toFixed(1)} KB)</span>
+                              </div>
+                              <button
+                                onClick={() => setTicketAttachments(prev => prev.filter((_, i) => i !== idx))}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
                     <button
                       onClick={handleCreateTicket}
-                      disabled={!newTicketData.subject.trim() || !newTicketData.message.trim()}
+                      disabled={!newTicketData.subject.trim() || !newTicketData.message.trim() || ticketSubmitting}
                       className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Enviar Ticket
+                      {ticketSubmitting ? 'Enviando...' : 'Enviar Ticket'}
                     </button>
                   </div>
                 </div>
