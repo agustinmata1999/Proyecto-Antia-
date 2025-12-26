@@ -565,6 +565,17 @@ export default function AdminDashboard() {
               🛒 Ventas Checkout
             </button>
             <button
+              onClick={() => setActiveView('support')}
+              className={`w-full text-left px-4 py-2 rounded-lg flex items-center justify-between ${activeView === 'support' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <span>🎫 Soporte</span>
+              {ticketStats.open > 0 && (
+                <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {ticketStats.open}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setActiveView('affiliate')}
               className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'affiliate' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
             >
