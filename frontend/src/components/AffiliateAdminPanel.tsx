@@ -592,6 +592,210 @@ export default function AffiliateAdminPanel() {
             </>
           )}
 
+          {/* CONVERSIONS/REFERRALS TAB */}
+          {activeTab === 'conversions' && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-4">👥 Listado de Referidos</h2>
+                
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                  <div className="bg-gray-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-gray-900">{referralStats.total}</div>
+                    <div className="text-xs text-gray-500">Total</div>
+                  </div>
+                  <div className="bg-yellow-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{referralStats.pending}</div>
+                    <div className="text-xs text-gray-500">Pendientes</div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">{referralStats.approved}</div>
+                    <div className="text-xs text-gray-500">Aprobados</div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-red-600">{referralStats.rejected}</div>
+                    <div className="text-xs text-gray-500">Rechazados</div>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600">€{(referralStats.totalCommissionCents / 100).toFixed(2)}</div>
+                    <div className="text-xs text-gray-500">Comisiones</div>
+                  </div>
+                </div>
+
+                {/* Filters */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Tipster</label>
+                      <select
+                        value={referralFilters.tipsterId}
+                        onChange={(e) => setReferralFilters({ ...referralFilters, tipsterId: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="">Todos</option>
+                        {tipstersList.map((t) => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Casa</label>
+                      <select
+                        value={referralFilters.houseId}
+                        onChange={(e) => setReferralFilters({ ...referralFilters, houseId: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="">Todas</option>
+                        {houses.map((h) => (
+                          <option key={h.id} value={h.id}>{h.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Estado</label>
+                      <select
+                        value={referralFilters.status}
+                        onChange={(e) => setReferralFilters({ ...referralFilters, status: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="">Todos</option>
+                        <option value="PENDING">Pendiente</option>
+                        <option value="APPROVED">Aprobado</option>
+                        <option value="REJECTED">Rechazado</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Desde</label>
+                      <input
+                        type="date"
+                        value={referralFilters.startDate}
+                        onChange={(e) => setReferralFilters({ ...referralFilters, startDate: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Hasta</label>
+                      <input
+                        type="date"
+                        value={referralFilters.endDate}
+                        onChange={(e) => setReferralFilters({ ...referralFilters, endDate: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      onClick={loadReferrals}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                    >
+                      🔍 Aplicar Filtros
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referrals Table */}
+              <div className="overflow-x-auto">
+                {referralsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                  </div>
+                ) : referrals.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-2">👥</div>
+                    <p className="text-gray-500">No hay referidos con los filtros seleccionados</p>
+                  </div>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipster</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Casa</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">País</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                        <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Comisión</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {referrals.map((ref) => (
+                        <tr key={ref.id} className="hover:bg-gray-50">
+                          <td className="px-3 py-3 text-sm text-gray-500">
+                            {new Date(ref.clickedAt || ref.convertedAt).toLocaleDateString('es-ES', { 
+                              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                            })}
+                          </td>
+                          <td className="px-3 py-3 text-sm font-medium text-gray-900">{ref.tipsterName}</td>
+                          <td className="px-3 py-3 text-sm text-gray-600">{ref.houseName}</td>
+                          <td className="px-3 py-3">
+                            <div className="text-sm text-gray-900">{ref.userEmail || 'Anónimo'}</div>
+                            {ref.userTelegram && (
+                              <div className="text-xs text-gray-500">📱 {ref.userTelegram}</div>
+                            )}
+                            {ref.externalRefId && (
+                              <div className="text-xs text-gray-400">ID: {ref.externalRefId}</div>
+                            )}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm">{ref.country || '🌍'}</td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              ref.eventType === 'DEPOSIT' ? 'bg-green-100 text-green-700' :
+                              ref.eventType === 'REGISTER' ? 'bg-blue-100 text-blue-700' :
+                              ref.eventType === 'QUALIFIED' ? 'bg-purple-100 text-purple-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {ref.eventType === 'DEPOSIT' ? '💰 Depósito' :
+                               ref.eventType === 'REGISTER' ? '📝 Registro' :
+                               ref.eventType === 'QUALIFIED' ? '✅ Calificado' :
+                               ref.eventType || 'Click'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-right text-sm font-medium text-green-600">
+                            €{(ref.commissionCents / 100).toFixed(2)}
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              ref.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                              ref.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                              ref.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {ref.status === 'PENDING' ? '⏳ Pendiente' :
+                               ref.status === 'APPROVED' ? '✅ Aprobado' :
+                               ref.status === 'REJECTED' ? '❌ Rechazado' :
+                               ref.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            {ref.status === 'PENDING' && (
+                              <div className="flex gap-1 justify-center">
+                                <button
+                                  onClick={() => updateReferralStatus(ref.id, 'APPROVED')}
+                                  className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={() => updateReferralStatus(ref.id, 'REJECTED')}
+                                  className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                                >
+                                  ✗
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </>
+          )}
+
           {/* IMPORT TAB */}
           {activeTab === 'import' && (
             <>
