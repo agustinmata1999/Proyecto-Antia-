@@ -1446,17 +1446,6 @@ export default function TipsterDashboard() {
                 </div>
               )}
             </div>
-
-            {/* Instrucciones */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-3">📖 Cómo funcionan los canales</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <p><strong>1. Añade el bot como administrador:</strong> Añade @Antiabetbot como administrador a tu canal de Telegram con permisos para invitar usuarios.</p>
-                <p><strong>2. Conecta el canal:</strong> Usa el botón "Añadir Canal" e ingresa el ID del canal (puedes obtenerlo reenviando un mensaje del canal a @userinfobot).</p>
-                <p><strong>3. Asigna a productos:</strong> Al crear o editar un producto, selecciona el canal donde los clientes recibirán acceso.</p>
-                <p><strong>4. Multi-canal:</strong> Puedes tener múltiples canales y asignar cada producto a un canal diferente.</p>
-              </div>
-            </div>
           </>
         )}
 
