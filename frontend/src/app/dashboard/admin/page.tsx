@@ -778,6 +778,243 @@ export default function AdminDashboard() {
           </>
         )}
 
+        {/* SALES/CHECKOUT VIEW */}
+        {activeView === 'sales' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">🛒 Ventas Checkout</h1>
+              <p className="text-gray-600 mt-1">Listado completo de todas las ventas de la plataforma</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="text-sm text-gray-500 mb-2">💰 Volumen Bruto</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {formatPrice(salesStats.totalGrossCents)}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="text-sm text-gray-500 mb-2">📊 Comisión Antia</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {formatPrice(salesStats.totalPlatformFeeCents)}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="text-sm text-gray-500 mb-2">💵 Neto Tipsters</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatPrice(salesStats.totalNetCents)}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="text-sm text-gray-500 mb-2">🛒 Total Ventas</div>
+                <div className="text-2xl font-bold text-blue-600">{salesStats.totalSales}</div>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h3 className="font-medium text-gray-900 mb-4">🔍 Filtros</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Desde</label>
+                  <input
+                    type="date"
+                    value={salesFilters.startDate}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, startDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Hasta</label>
+                  <input
+                    type="date"
+                    value={salesFilters.endDate}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, endDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Tipster</label>
+                  <select
+                    value={salesFilters.tipsterId}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, tipsterId: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">Todos</option>
+                    {tipsters.map(t => (
+                      <option key={t.id} value={t.id}>{t.publicName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Estado</label>
+                  <select
+                    value={salesFilters.status}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">Todos</option>
+                    <option value="PAGADA">Pagada</option>
+                    <option value="ACCESS_GRANTED">Acceso Otorgado</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="REFUNDED">Reembolsada</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Pasarela</label>
+                  <select
+                    value={salesFilters.paymentProvider}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, paymentProvider: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">Todas</option>
+                    <option value="stripe">Stripe</option>
+                    <option value="redsys">Redsys</option>
+                    <option value="test">Test</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">País</label>
+                  <select
+                    value={salesFilters.country}
+                    onChange={(e) => setSalesFilters({ ...salesFilters, country: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">Todos</option>
+                    <option value="ES">España</option>
+                    <option value="MX">México</option>
+                    <option value="AR">Argentina</option>
+                    <option value="CO">Colombia</option>
+                    <option value="US">Estados Unidos</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={loadSales}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+                >
+                  🔍 Aplicar Filtros
+                </button>
+                <button
+                  onClick={() => {
+                    setSalesFilters({
+                      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      endDate: new Date().toISOString().split('T')[0],
+                      tipsterId: '',
+                      productId: '',
+                      status: '',
+                      paymentProvider: '',
+                      country: '',
+                    });
+                  }}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
+                >
+                  Limpiar
+                </button>
+              </div>
+            </div>
+
+            {/* Sales Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                {salesLoading ? (
+                  <div className="p-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-500">Cargando ventas...</p>
+                  </div>
+                ) : sales.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <div className="text-5xl mb-4">📭</div>
+                    <h3 className="text-lg font-medium text-gray-900">No hay ventas</h3>
+                    <p className="text-gray-500 text-sm mt-1">Ajusta los filtros o espera a tener ventas</p>
+                  </div>
+                ) : (
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipster</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Bruto</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Comisión</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Neto</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pasarela</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">País</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {sales.map((sale) => (
+                        <tr key={sale.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {new Date(sale.createdAt).toLocaleDateString('es-ES', { 
+                              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                            })}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900">{sale.clientEmail || 'Anónimo'}</div>
+                            {sale.clientTelegramId && (
+                              <div className="text-xs text-gray-500">📱 {sale.clientTelegramId}</div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900 max-w-[200px] truncate">
+                              {sale.productTitle}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{sale.tipsterName}</td>
+                          <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                            {formatPrice(sale.grossAmountCents)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right text-red-600">
+                            -{formatPrice(sale.platformFeeCents)}
+                            <span className="text-xs text-gray-400 ml-1">({sale.platformFeePercent}%)</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-medium text-green-600">
+                            {formatPrice(sale.netAmountCents)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              sale.paymentProvider === 'stripe' ? 'bg-purple-100 text-purple-700' :
+                              sale.paymentProvider === 'redsys' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {sale.paymentProvider === 'stripe' ? '💳 Stripe' :
+                               sale.paymentProvider === 'redsys' ? '🏦 Redsys' :
+                               sale.paymentProvider || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="text-sm">{sale.country || '🌍'}</span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              sale.status === 'PAGADA' || sale.status === 'ACCESS_GRANTED' 
+                                ? 'bg-green-100 text-green-700' :
+                              sale.status === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' :
+                              sale.status === 'REFUNDED' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {sale.status === 'ACCESS_GRANTED' ? '✅ Acceso' :
+                               sale.status === 'PAGADA' ? '✅ Pagada' :
+                               sale.status === 'PENDIENTE' ? '⏳ Pendiente' :
+                               sale.status === 'REFUNDED' ? '↩️ Reembolso' :
+                               sale.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         {/* COMMISSIONS VIEW */}
         {activeView === 'commissions' && (
           <>
