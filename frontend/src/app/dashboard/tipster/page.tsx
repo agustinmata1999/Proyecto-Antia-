@@ -291,7 +291,7 @@ export default function TipsterDashboard() {
     
     setTicketSubmitting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/support/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
