@@ -185,6 +185,10 @@ export const clientApi = {
   getPurchases: () => api.get('/client/purchases'),
   getPurchaseDetails: (id: string) => api.get(`/client/purchases/${id}`),
   
+  // Subscriptions
+  getSubscriptions: () => api.get('/client/subscriptions'),
+  cancelSubscription: (id: string) => api.post(`/client/subscriptions/${id}/cancel`),
+  
   // Payments/Invoices
   getPaymentHistory: () => api.get('/client/payments'),
 };
