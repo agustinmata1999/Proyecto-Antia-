@@ -267,4 +267,121 @@ export class ClientService {
       createdAt: order.created_at?.$date || order.created_at,
     }));
   }
+
+  /**
+   * Obtener suscripciones activas del cliente
+   */
+  async getSubscriptions(userId: string) {
+    // Get orders with subscription billing type
+    const ordersResult = await this.prisma.$runCommandRaw({
+      find: 'orders',
+      filter: { 
+        client_user_id: userId,
+        billing_type: 'SUBSCRIPTION',
+        status: { $in: ['PAGADA', 'ACCESS_GRANTED'] },
+      },
+      sort: { created_at: -1 },
+    }) as any;
+
+    const orders = ordersResult.cursor?.firstBatch || [];
+
+    // Enrich with product info
+    const subscriptions = await Promise.all(orders.map(async (order: any) => {
+      let product = null;
+      let tipster = null;
+
+      if (order.product_id) {
+        const productResult = await this.prisma.$runCommandRaw({
+          find: 'products',
+          filter: { _id: { $oid: order.product_id } },
+          limit: 1,
+        }) as any;
+        product = productResult.cursor?.firstBatch?.[0];
+      }
+
+      if (order.tipster_id) {
+        const tipsterResult = await this.prisma.$runCommandRaw({
+          find: 'tipster_profiles',
+          filter: { _id: { $oid: order.tipster_id } },
+          projection: { public_name: 1 },
+          limit: 1,
+        }) as any;
+        tipster = tipsterResult.cursor?.firstBatch?.[0];
+      }
+
+      // Calculate current period
+      const createdAt = new Date(order.created_at?.$date || order.created_at);
+      const interval = order.subscription_interval || product?.subscription_interval || 'MONTHLY';
+      let periodDays = 30;
+      if (interval === 'QUARTERLY') periodDays = 90;
+      if (interval === 'ANNUAL') periodDays = 365;
+
+      const currentPeriodEnd = new Date(createdAt);
+      currentPeriodEnd.setDate(currentPeriodEnd.getDate() + periodDays);
+
+      return {
+        id: order._id.$oid || order._id,
+        productId: order.product_id,
+        productTitle: product?.title || 'Producto',
+        tipsterName: tipster?.public_name || 'Tipster',
+        status: order.subscription_status || 'active',
+        billingInterval: interval,
+        amountCents: order.amount_cents,
+        currency: order.currency || 'EUR',
+        currentPeriodStart: createdAt.toISOString(),
+        currentPeriodEnd: currentPeriodEnd.toISOString(),
+        cancelAtPeriodEnd: order.cancel_at_period_end || false,
+        telegramChannelId: product?.telegram_channel_id,
+        createdAt: createdAt.toISOString(),
+      };
+    }));
+
+    return subscriptions;
+  }
+
+  /**
+   * Cancelar una suscripción
+   */
+  async cancelSubscription(userId: string, subscriptionId: string) {
+    // Verify the order belongs to the user
+    const orderResult = await this.prisma.$runCommandRaw({
+      find: 'orders',
+      filter: { 
+        _id: { $oid: subscriptionId },
+        client_user_id: userId,
+        billing_type: 'SUBSCRIPTION',
+      },
+      limit: 1,
+    }) as any;
+
+    const order = orderResult.cursor?.firstBatch?.[0];
+
+    if (!order) {
+      return { success: false, message: 'Suscripción no encontrada' };
+    }
+
+    // Mark as cancel at period end (don't revoke access immediately)
+    await this.prisma.$runCommandRaw({
+      update: 'orders',
+      updates: [{
+        q: { _id: { $oid: subscriptionId } },
+        u: { 
+          $set: { 
+            cancel_at_period_end: true,
+            canceled_at: new Date().toISOString(),
+          } 
+        },
+      }],
+    });
+
+    // TODO: If using Stripe subscriptions, also cancel on Stripe
+    // await this.stripeService.cancelSubscription(order.stripe_subscription_id);
+
+    this.logger.log(`Subscription ${subscriptionId} canceled for user ${userId}`);
+
+    return { 
+      success: true, 
+      message: 'Suscripción cancelada. Mantendrás el acceso hasta el final del periodo actual.' 
+    };
+  }
 }
