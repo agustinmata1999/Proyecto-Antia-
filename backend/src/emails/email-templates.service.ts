@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 export class EmailTemplatesService {
   private readonly appUrl: string;
   private readonly primaryColor = '#3B82F6';
-  private readonly logoUrl = 'https://via.placeholder.com/150x50?text=Antia';
+  private readonly brandName = 'Antia';
 
   constructor(private config: ConfigService) {
     this.appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
@@ -21,44 +21,29 @@ export class EmailTemplatesService {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antia</title>
-  <!--[if mso]>
-  <style type="text/css">
-    table { border-collapse: collapse; }
-    .button { padding: 12px 24px !important; }
-  </style>
-  <![endif]-->
+  <title>${this.brandName}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preheader -->
-  <div style="display: none; max-height: 0; overflow: hidden;">
-    ${preheader}
-  </div>
+  <div style="display: none; max-height: 0; overflow: hidden;">${preheader}</div>
   
-  <!-- Main container -->
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <!-- Header -->
           <tr>
             <td style="padding: 32px 40px; text-align: center; border-bottom: 1px solid #e5e7eb;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: ${this.primaryColor};">Antia</h1>
+              <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: ${this.primaryColor};">${this.brandName}</h1>
             </td>
           </tr>
-          
-          <!-- Content -->
           <tr>
             <td style="padding: 40px;">
               ${content}
             </td>
           </tr>
-          
-          <!-- Footer -->
           <tr>
             <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
               <p style="margin: 0; font-size: 12px; color: #6b7280; text-align: center;">
-                © ${new Date().getFullYear()} Antia. Todos los derechos reservados.
+                © ${new Date().getFullYear()} ${this.brandName}. Todos los derechos reservados.
               </p>
               <p style="margin: 8px 0 0; font-size: 12px; color: #9ca3af; text-align: center;">
                 Este email fue enviado automáticamente. Por favor no respondas a este mensaje.
@@ -74,9 +59,6 @@ export class EmailTemplatesService {
     `.trim();
   }
 
-  /**
-   * Button component
-   */
   private button(text: string, url: string, color: string = this.primaryColor): string {
     return `
       <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
@@ -91,9 +73,6 @@ export class EmailTemplatesService {
     `;
   }
 
-  /**
-   * Info box component
-   */
   private infoBox(items: { label: string; value: string }[]): string {
     const rows = items.map(item => `
       <tr>
@@ -113,9 +92,6 @@ export class EmailTemplatesService {
     `;
   }
 
-  /**
-   * Format currency
-   */
   private formatMoney(amount: number, currency: string): string {
     const formatter = new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -124,9 +100,6 @@ export class EmailTemplatesService {
     return formatter.format(amount / 100);
   }
 
-  /**
-   * Format date
-   */
   private formatDate(date: Date): string {
     return new Intl.DateTimeFormat('es-ES', {
       day: '2-digit',
@@ -137,15 +110,33 @@ export class EmailTemplatesService {
     }).format(new Date(date));
   }
 
-  /**
-   * =============================================
-   * CLIENT TEMPLATES
-   * =============================================
-   */
+  private formatDateOnly(date: Date): string {
+    return new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(date));
+  }
 
-  /**
-   * 1.1 Confirmación de compra
-   */
+  private getBillingPeriodText(period?: string): string {
+    switch (period) {
+      case 'MONTHLY': return 'Mensual';
+      case 'QUARTERLY': return 'Trimestral';
+      case 'YEARLY': return 'Anual';
+      default: return 'Mensual';
+    }
+  }
+
+  private maskEmail(email: string): string {
+    const [local, domain] = email.split('@');
+    if (local.length <= 2) return `${local[0]}***@${domain}`;
+    return `${local.slice(0, 2)}***@${domain}`;
+  }
+
+  // =============================================
+  // CLIENTE - COMPRA / ACCESO
+  // =============================================
+
   purchaseConfirmation(data: {
     productName: string;
     tipsterName: string;
@@ -162,7 +153,7 @@ export class EmailTemplatesService {
 
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
-        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
           <span style="font-size: 32px;">✓</span>
         </div>
         <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">¡Pago confirmado!</h2>
@@ -186,9 +177,6 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu pago fue procesado correctamente');
   }
 
-  /**
-   * 1.2 Acceso al canal
-   */
   channelAccess(data: {
     productName: string;
     channelName: string;
@@ -206,7 +194,7 @@ export class EmailTemplatesService {
       <ol style="margin: 0 0 24px; padding-left: 24px; color: #4b5563;">
         <li style="margin-bottom: 8px;">Hacé clic en el botón de abajo</li>
         <li style="margin-bottom: 8px;">Se abrirá Telegram automáticamente</li>
-        <li style="margin-bottom: 8px;">Uníte al canal privado</li>
+        <li style="margin-bottom: 8px;">Unite al canal privado</li>
       </ol>
 
       <div style="text-align: center;">
@@ -224,9 +212,240 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu acceso al canal premium está listo');
   }
 
-  /**
-   * 1.3a Suscripción activada
-   */
+  channelAccessApproved(data: {
+    productName: string;
+    channelName: string;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">✓</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Solicitud aprobada</h2>
+      </div>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6; text-align: center;">
+        Tu solicitud para unirte al canal <strong>${data.channelName}</strong> ha sido aprobada.
+      </p>
+
+      <p style="margin: 0; font-size: 14px; color: #6b7280; text-align: center;">
+        Ya podés acceder al contenido de <strong>${data.productName}</strong> desde Telegram.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Tu solicitud de acceso fue aprobada');
+  }
+
+  channelAccessDenied(data: {
+    productName: string;
+    channelName: string;
+    reason: string;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #fee2e2; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">✕</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Acceso denegado</h2>
+      </div>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6; text-align: center;">
+        No pudimos validar tu acceso al canal <strong>${data.channelName}</strong>.
+      </p>
+
+      <div style="padding: 16px; background-color: #fee2e2; border-radius: 8px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 14px; color: #991b1b;">
+          <strong>Motivo:</strong> ${data.reason}
+        </p>
+      </div>
+
+      <p style="margin: 0; font-size: 14px; color: #6b7280; text-align: center;">
+        Si crees que esto es un error, contacta con soporte.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'No pudimos validar tu acceso');
+  }
+
+  channelLinkUpdated(data: {
+    productName: string;
+    channelName: string;
+    newLink: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Canal actualizado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        El tipster ha actualizado el canal de <strong>${data.productName}</strong>. 
+        Usa el nuevo enlace para acceder a <strong>${data.channelName}</strong>.
+      </p>
+
+      <div style="text-align: center;">
+        ${this.button('🔗 Nuevo enlace de acceso', data.newLink)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'El canal de tu producto ha sido actualizado');
+  }
+
+  // =============================================
+  // CLIENTE - CUENTA
+  // =============================================
+
+  welcomeClient(data: {
+    name?: string;
+    email: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">¡Bienvenido a ${this.brandName}!</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        ${data.name ? `Hola ${data.name},` : 'Hola,'}<br><br>
+        Tu cuenta ha sido creada exitosamente. Ya podés acceder a contenido exclusivo de los mejores tipsters.
+      </p>
+
+      <div style="text-align: center;">
+        ${this.button('Ir al panel', `${this.appUrl}/dashboard/client`)}
+      </div>
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
+        Tu email registrado: <strong>${data.email}</strong>
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Tu cuenta ha sido creada');
+  }
+
+  passwordReset(data: {
+    resetLink: string;
+    expiresIn: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Recuperar contraseña</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Recibimos una solicitud para restablecer tu contraseña. Hacé clic en el botón de abajo para crear una nueva.
+      </p>
+
+      <div style="text-align: center;">
+        ${this.button('Restablecer contraseña', data.resetLink)}
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px; background-color: #fef3c7; border-radius: 8px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;">
+          ⏰ Este enlace expira en <strong>${data.expiresIn}</strong>.<br>
+          Si no solicitaste esto, ignorá este email.
+        </p>
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Solicitud para restablecer contraseña');
+  }
+
+  emailVerification(data: {
+    verificationLink: string;
+    newEmail?: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Verificar email</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        ${data.newEmail 
+          ? `Hacé clic en el botón para confirmar tu nuevo email: <strong>${data.newEmail}</strong>` 
+          : 'Hacé clic en el botón para verificar tu dirección de email.'}
+      </p>
+
+      <div style="text-align: center;">
+        ${this.button('Verificar email', data.verificationLink)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Verificá tu dirección de email');
+  }
+
+  // =============================================
+  // CLIENTE - SOPORTE
+  // =============================================
+
+  ticketCreated(data: {
+    ticketId: string;
+    subject: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Ticket creado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Recibimos tu consulta y te responderemos lo antes posible.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Ticket #', value: data.ticketId },
+        { label: 'Asunto', value: data.subject },
+      ])}
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
+        Te notificaremos por email cuando tengamos una respuesta.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Tu ticket de soporte fue creado');
+  }
+
+  ticketReplied(data: {
+    ticketId: string;
+    subject: string;
+    replyPreview: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Nueva respuesta</h2>
+      
+      <p style="margin: 0 0 16px; font-size: 16px; color: #4b5563;">
+        Tu ticket <strong>#${data.ticketId}</strong> tiene una nueva respuesta.
+      </p>
+
+      <div style="padding: 16px; background-color: #f3f4f6; border-radius: 8px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 14px; color: #4b5563; font-style: italic;">
+          "${data.replyPreview}..."
+        </p>
+      </div>
+
+      <div style="text-align: center;">
+        ${this.button('Ver conversación', `${this.appUrl}/support/ticket/${data.ticketId}`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Hay una nueva respuesta en tu ticket');
+  }
+
+  ticketClosed(data: {
+    ticketId: string;
+    subject: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Ticket cerrado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Tu ticket <strong>#${data.ticketId}</strong> ha sido cerrado.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Ticket #', value: data.ticketId },
+        { label: 'Asunto', value: data.subject },
+        { label: 'Estado', value: 'Cerrado' },
+      ])}
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
+        Si necesitás más ayuda, podés abrir un nuevo ticket.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Tu ticket de soporte fue cerrado');
+  }
+
+  // =============================================
+  // CLIENTE - SUSCRIPCIONES
+  // =============================================
+
   subscriptionActivated(data: {
     productName: string;
     tipsterName: string;
@@ -237,8 +456,8 @@ export class EmailTemplatesService {
   }): string {
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
-        <div style="width: 64px; height: 64px; background-color: #dbeafe; border-radius: 50%; margin: 0 auto 16px;">
-          <span style="font-size: 32px; line-height: 64px;">🔄</span>
+        <div style="width: 64px; height: 64px; background-color: #dbeafe; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">🔄</span>
         </div>
         <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Suscripción activada</h2>
       </div>
@@ -248,7 +467,7 @@ export class EmailTemplatesService {
         { label: 'Tipster', value: data.tipsterName },
         { label: 'Frecuencia', value: this.getBillingPeriodText(data.billingPeriod) },
         { label: 'Monto', value: this.formatMoney(data.amount, data.currency) },
-        { label: 'Próxima renovación', value: this.formatDate(data.nextRenewalDate) },
+        { label: 'Próxima renovación', value: this.formatDateOnly(data.nextRenewalDate) },
       ])}
 
       <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
@@ -259,9 +478,6 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu suscripción está activa');
   }
 
-  /**
-   * 1.3b Suscripción cancelada
-   */
   subscriptionCancelled(data: {
     productName: string;
     accessUntil: Date;
@@ -275,7 +491,7 @@ export class EmailTemplatesService {
 
       <div style="padding: 16px; background-color: #fef3c7; border-radius: 8px; margin-bottom: 24px;">
         <p style="margin: 0; font-size: 14px; color: #92400e;">
-          <strong>⚠️ Importante:</strong> Tendrás acceso hasta el <strong>${this.formatDate(data.accessUntil)}</strong>
+          ⚠️ <strong>Importante:</strong> Tendrás acceso hasta el <strong>${this.formatDateOnly(data.accessUntil)}</strong>
         </p>
       </div>
 
@@ -287,9 +503,6 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu suscripción ha sido cancelada');
   }
 
-  /**
-   * 1.3c Suscripción expirada
-   */
   subscriptionExpired(data: {
     productName: string;
     channelName?: string;
@@ -317,15 +530,10 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu suscripción ha expirado');
   }
 
-  /**
-   * =============================================
-   * TIPSTER TEMPLATES
-   * =============================================
-   */
+  // =============================================
+  // TIPSTER - VENTAS / ACCESOS
+  // =============================================
 
-  /**
-   * 2.1 Nueva venta
-   */
   newSaleNotification(data: {
     productName: string;
     billingType: 'ONE_TIME' | 'SUBSCRIPTION';
@@ -338,8 +546,8 @@ export class EmailTemplatesService {
 
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
-        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px;">
-          <span style="font-size: 32px; line-height: 64px;">💰</span>
+        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">💰</span>
         </div>
         <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">¡Nueva venta!</h2>
       </div>
@@ -359,9 +567,60 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, `Nueva venta: ${data.productName}`);
   }
 
-  /**
-   * 2.2a Nueva suscripción (tipster)
-   */
+  clientAccessedChannel(data: {
+    productName: string;
+    channelName: string;
+    accessDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Cliente accedió al canal</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Un cliente ha accedido exitosamente al canal <strong>${data.channelName}</strong> de tu producto <strong>${data.productName}</strong>.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Producto', value: data.productName },
+        { label: 'Canal', value: data.channelName },
+        { label: 'Fecha de acceso', value: this.formatDate(data.accessDate) },
+      ])}
+    `;
+
+    return this.baseTemplate(content, 'Un cliente accedió a tu canal');
+  }
+
+  accessAttemptRejected(data: {
+    productName: string;
+    channelName: string;
+    reason: string;
+    attemptDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Intento de acceso rechazado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Se rechazó un intento de acceso al canal <strong>${data.channelName}</strong>.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Producto', value: data.productName },
+        { label: 'Canal', value: data.channelName },
+        { label: 'Motivo', value: data.reason },
+        { label: 'Fecha', value: this.formatDate(data.attemptDate) },
+      ])}
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280;">
+        Esto puede indicar un intento de fraude o un error del usuario.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Intento de acceso rechazado');
+  }
+
+  // =============================================
+  // TIPSTER - SUSCRIPCIONES
+  // =============================================
+
   tipsterSubscriptionStarted(data: {
     productName: string;
     clientEmail: string;
@@ -384,9 +643,6 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tienes una nueva suscripción');
   }
 
-  /**
-   * 2.2b Suscripción cancelada (tipster)
-   */
   tipsterSubscriptionCancelled(data: {
     productName: string;
     clientEmail: string;
@@ -407,9 +663,6 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Una suscripción fue cancelada');
   }
 
-  /**
-   * 2.2c Suscripción expirada (tipster)
-   */
   tipsterSubscriptionExpired(data: {
     productName: string;
     clientEmail: string;
@@ -430,24 +683,346 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Una suscripción ha expirado');
   }
 
-  /**
-   * =============================================
-   * HELPERS
-   * =============================================
-   */
+  // =============================================
+  // TIPSTER - OPERACIÓN / LIQUIDACIONES
+  // =============================================
 
-  private getBillingPeriodText(period?: string): string {
-    switch (period) {
-      case 'MONTHLY': return 'Mensual';
-      case 'QUARTERLY': return 'Trimestral';
-      case 'YEARLY': return 'Anual';
-      default: return 'Mensual';
-    }
+  settlementGenerated(data: {
+    periodStart: Date;
+    periodEnd: Date;
+    totalAmount: number;
+    currency: string;
+    salesCount: number;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #dbeafe; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">💵</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Liquidación generada</h2>
+      </div>
+
+      ${this.infoBox([
+        { label: 'Período', value: `${this.formatDateOnly(data.periodStart)} - ${this.formatDateOnly(data.periodEnd)}` },
+        { label: 'Ventas', value: data.salesCount.toString() },
+        { label: 'Total a cobrar', value: this.formatMoney(data.totalAmount, data.currency) },
+      ])}
+
+      <div style="text-align: center;">
+        ${this.button('Ver liquidación', `${this.appUrl}/dashboard/tipster`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Tu liquidación está lista');
   }
 
-  private maskEmail(email: string): string {
-    const [local, domain] = email.split('@');
-    if (local.length <= 2) return `${local[0]}***@${domain}`;
-    return `${local.slice(0, 2)}***@${domain}`;
+  settlementPaid(data: {
+    amount: number;
+    currency: string;
+    paymentDate: Date;
+    paymentMethod: string;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">✓</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Pago procesado</h2>
+      </div>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; text-align: center;">
+        Tu liquidación ha sido pagada exitosamente.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Monto', value: this.formatMoney(data.amount, data.currency) },
+        { label: 'Fecha', value: this.formatDate(data.paymentDate) },
+        { label: 'Método', value: data.paymentMethod },
+      ])}
+    `;
+
+    return this.baseTemplate(content, 'Tu pago ha sido procesado');
+  }
+
+  kycReminder(data: {
+    tipsterName: string;
+    daysRemaining?: number;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Completa tus datos de cobro</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hola ${data.tipsterName}, necesitamos que completes tus datos de KYC y método de cobro para poder procesarte los pagos.
+      </p>
+
+      ${data.daysRemaining ? `
+        <div style="padding: 16px; background-color: #fef3c7; border-radius: 8px; margin-bottom: 24px;">
+          <p style="margin: 0; font-size: 14px; color: #92400e;">
+            ⏰ Tienes <strong>${data.daysRemaining} días</strong> para completar esta información.
+          </p>
+        </div>
+      ` : ''}
+
+      <div style="text-align: center;">
+        ${this.button('Completar datos', `${this.appUrl}/dashboard/tipster`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Completa tus datos para recibir pagos');
+  }
+
+  configurationChanged(data: {
+    changeDescription: string;
+    effectiveDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Cambio de configuración</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Se ha realizado un cambio en la configuración de tu cuenta que puede afectar tus ingresos.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Cambio', value: data.changeDescription },
+        { label: 'Efectivo desde', value: this.formatDateOnly(data.effectiveDate) },
+      ])}
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280;">
+        Si tienes dudas, contacta con soporte.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Cambio en la configuración de tu cuenta');
+  }
+
+  // =============================================
+  // TIPSTER - AFILIACIÓN
+  // =============================================
+
+  affiliateMonthlySummary(data: {
+    month: string;
+    totalEarnings: number;
+    currency: string;
+    conversions: number;
+    clicks: number;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Resumen de afiliación - ${data.month}</h2>
+      
+      ${this.infoBox([
+        { label: 'Ganancias totales', value: this.formatMoney(data.totalEarnings, data.currency) },
+        { label: 'Conversiones', value: data.conversions.toString() },
+        { label: 'Clicks', value: data.clicks.toString() },
+        { label: 'Tasa de conversión', value: data.clicks > 0 ? `${((data.conversions / data.clicks) * 100).toFixed(1)}%` : '0%' },
+      ])}
+
+      <div style="text-align: center;">
+        ${this.button('Ver detalles', `${this.appUrl}/dashboard/tipster`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, `Resumen de afiliación: ${data.month}`);
+  }
+
+  affiliateCsvUploaded(data: {
+    fileName: string;
+    recordsCount: number;
+    uploadDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">CSV de afiliación cargado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Se ha cargado un nuevo archivo CSV con datos de conversiones de afiliación.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Archivo', value: data.fileName },
+        { label: 'Registros', value: data.recordsCount.toString() },
+        { label: 'Fecha', value: this.formatDate(data.uploadDate) },
+      ])}
+    `;
+
+    return this.baseTemplate(content, 'Nuevo CSV de afiliación cargado');
+  }
+
+  // =============================================
+  // TIPSTER - SEGURIDAD
+  // =============================================
+
+  newLoginDetected(data: {
+    deviceInfo: string;
+    location: string;
+    loginDate: Date;
+    ipAddress: string;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Nuevo inicio de sesión</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Se detectó un nuevo inicio de sesión en tu cuenta.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Dispositivo', value: data.deviceInfo },
+        { label: 'Ubicación', value: data.location },
+        { label: 'Fecha', value: this.formatDate(data.loginDate) },
+        { label: 'IP', value: data.ipAddress },
+      ])}
+
+      <div style="padding: 16px; background-color: #fee2e2; border-radius: 8px;">
+        <p style="margin: 0; font-size: 14px; color: #991b1b;">
+          ⚠️ Si no fuiste vos, cambiá tu contraseña inmediatamente.
+        </p>
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Nuevo inicio de sesión detectado');
+  }
+
+  passwordChanged(data: {
+    changeDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Contraseña actualizada</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Tu contraseña ha sido cambiada exitosamente.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Fecha del cambio', value: this.formatDate(data.changeDate) },
+      ])}
+
+      <div style="padding: 16px; background-color: #fee2e2; border-radius: 8px;">
+        <p style="margin: 0; font-size: 14px; color: #991b1b;">
+          ⚠️ Si no realizaste este cambio, contacta con soporte inmediatamente.
+        </p>
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Tu contraseña fue actualizada');
+  }
+
+  // =============================================
+  // SUPERADMIN
+  // =============================================
+
+  newTipsterApplication(data: {
+    tipsterName: string;
+    email: string;
+    applicationDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Nueva solicitud de tipster</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hay una nueva solicitud de tipster pendiente de revisión.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Nombre', value: data.tipsterName },
+        { label: 'Email', value: data.email },
+        { label: 'Fecha', value: this.formatDate(data.applicationDate) },
+      ])}
+
+      <div style="text-align: center;">
+        ${this.button('Revisar solicitud', `${this.appUrl}/dashboard/admin`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Nueva solicitud de tipster');
+  }
+
+  tipsterKycCompleted(data: {
+    tipsterName: string;
+    email: string;
+    completedDate: Date;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">KYC completado</h2>
+      
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Un tipster ha completado su información de KYC.
+      </p>
+
+      ${this.infoBox([
+        { label: 'Tipster', value: data.tipsterName },
+        { label: 'Email', value: data.email },
+        { label: 'Fecha', value: this.formatDate(data.completedDate) },
+      ])}
+
+      <div style="text-align: center;">
+        ${this.button('Ver información', `${this.appUrl}/dashboard/admin`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, 'Un tipster completó su KYC');
+  }
+
+  operationalAlert(data: {
+    alertType: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    timestamp: Date;
+  }): string {
+    const severityColors = {
+      low: '#dbeafe',
+      medium: '#fef3c7',
+      high: '#fed7aa',
+      critical: '#fee2e2',
+    };
+    const severityTextColors = {
+      low: '#1e40af',
+      medium: '#92400e',
+      high: '#c2410c',
+      critical: '#991b1b',
+    };
+
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Alerta operativa</h2>
+      
+      <div style="padding: 16px; background-color: ${severityColors[data.severity]}; border-radius: 8px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 14px; color: ${severityTextColors[data.severity]};">
+          <strong>${data.alertType.toUpperCase()}</strong>
+        </p>
+      </div>
+
+      ${this.infoBox([
+        { label: 'Descripción', value: data.description },
+        { label: 'Severidad', value: data.severity.toUpperCase() },
+        { label: 'Fecha', value: this.formatDate(data.timestamp) },
+      ])}
+    `;
+
+    return this.baseTemplate(content, `Alerta: ${data.alertType}`);
+  }
+
+  dailyActivitySummary(data: {
+    date: Date;
+    newUsers: number;
+    totalSales: number;
+    totalRevenue: number;
+    currency: string;
+    newTipsters: number;
+    activeProducts: number;
+  }): string {
+    const content = `
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Resumen diario - ${this.formatDateOnly(data.date)}</h2>
+      
+      ${this.infoBox([
+        { label: 'Nuevos usuarios', value: data.newUsers.toString() },
+        { label: 'Ventas totales', value: data.totalSales.toString() },
+        { label: 'Ingresos', value: this.formatMoney(data.totalRevenue, data.currency) },
+        { label: 'Nuevos tipsters', value: data.newTipsters.toString() },
+        { label: 'Productos activos', value: data.activeProducts.toString() },
+      ])}
+
+      <div style="text-align: center;">
+        ${this.button('Ver dashboard', `${this.appUrl}/dashboard/admin`)}
+      </div>
+    `;
+
+    return this.baseTemplate(content, `Resumen del día: ${this.formatDateOnly(data.date)}`);
   }
 }
