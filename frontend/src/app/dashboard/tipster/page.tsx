@@ -1986,15 +1986,15 @@ export default function TipsterDashboard() {
                         <div className="flex gap-2">
                           <input 
                             type="text"
-                            value={ticketReply}
-                            onChange={(e) => setTicketReply(e.target.value)}
+                            value={replyMessage}
+                            onChange={(e) => setReplyMessage(e.target.value)}
                             placeholder="Escribe tu respuesta..."
                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onKeyPress={(e) => e.key === 'Enter' && handleReplyTicket()}
                           />
                           <button
                             onClick={handleReplyTicket}
-                            disabled={!ticketReply.trim()}
+                            disabled={!replyMessage.trim()}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50"
                           >
                             Enviar
