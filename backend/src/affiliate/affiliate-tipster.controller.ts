@@ -120,6 +120,28 @@ export class AffiliateTipsterController {
     };
   }
 
+  // ==================== MY REFERRALS ====================
+
+  /**
+   * Get tipster's own referrals (conversions) with detailed info
+   */
+  @Get('my-referrals')
+  async getMyReferrals(
+    @Request() req,
+    @Query('houseId') houseId?: string,
+    @Query('status') status?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const profile = await this.getTipsterProfile(req.user.id);
+    return this.affiliateService.getTipsterReferrals(profile.id, {
+      houseId,
+      status,
+      startDate,
+      endDate,
+    });
+  }
+
   // ==================== CAMPAIGNS ====================
 
   /**
