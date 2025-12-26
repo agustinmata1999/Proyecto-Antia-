@@ -219,6 +219,19 @@ export const adminApi = {
       api.patch(`/admin/tipsters/${id}/modules`, modules),
   },
   
+  // Sales/Checkout management
+  sales: {
+    getAll: (filters?: {
+      startDate?: string;
+      endDate?: string;
+      tipsterId?: string;
+      productId?: string;
+      status?: string;
+      paymentProvider?: string;
+      country?: string;
+    }) => api.get('/admin/sales', { params: filters }),
+  },
+  
   // Tipster Applications (solicitudes de registro)
   applications: {
     getAll: (status?: string) => api.get('/admin/applications', { params: { status } }),
