@@ -190,6 +190,8 @@ export default function AffiliateAdminPanel() {
         ]);
         setHouses(housesRes.data || []);
         setImportBatches(batchesRes.data || []);
+      } else if (activeTab === 'conversions') {
+        await loadReferrals();
       } else if (activeTab === 'payouts') {
         const res = await affiliateApi.admin.getPayouts();
         setPayouts(res.data || []);
@@ -198,6 +200,35 @@ export default function AffiliateAdminPanel() {
       setError(err.response?.data?.message || 'Error al cargar datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadReferrals = async () => {
+    setReferralsLoading(true);
+    try {
+      const [referralsRes, housesRes, tipstersRes] = await Promise.all([
+        affiliateApi.admin.getReferrals(referralFilters),
+        affiliateApi.admin.getHouses(true),
+        affiliateApi.admin.getTipsters(),
+      ]);
+      setReferrals(referralsRes.data.referrals || []);
+      setReferralStats(referralsRes.data.stats || { total: 0, pending: 0, approved: 0, rejected: 0, totalCommissionCents: 0 });
+      setHouses(housesRes.data || []);
+      setTipstersList(tipstersRes.data || []);
+    } catch (err: any) {
+      console.error('Error loading referrals:', err);
+    } finally {
+      setReferralsLoading(false);
+    }
+  };
+
+  const updateReferralStatus = async (referralId: string, newStatus: string) => {
+    try {
+      await affiliateApi.admin.updateReferralStatus(referralId, newStatus);
+      await loadReferrals();
+    } catch (err) {
+      console.error('Error updating referral status:', err);
+      alert('Error al actualizar estado');
     }
   };
 
