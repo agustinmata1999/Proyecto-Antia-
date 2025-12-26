@@ -209,6 +209,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadSales = async () => {
+    setSalesLoading(true);
+    try {
+      const response = await adminApi.sales.getAll(salesFilters);
+      setSales(response.data.sales || []);
+      setSalesStats(response.data.stats || {
+        totalSales: 0,
+        totalGrossCents: 0,
+        totalPlatformFeeCents: 0,
+        totalNetCents: 0,
+      });
+    } catch (err) {
+      console.error('Error loading sales:', err);
+    } finally {
+      setSalesLoading(false);
+    }
+  };
+
   const loadApplications = async () => {
     try {
       const response = await adminApi.applications.getAll(applicationFilter);
