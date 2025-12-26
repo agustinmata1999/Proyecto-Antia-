@@ -11,7 +11,7 @@ import KycBanner from '@/components/KycBanner';
 import KycForm from '@/components/KycForm';
 import { NotificationsBell } from '@/components/NotificationsBell';
 
-type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram' | 'kyc';
+type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram' | 'kyc' | 'support';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
 
 interface TelegramChannel {
