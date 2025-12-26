@@ -1794,6 +1794,220 @@ export default function TipsterDashboard() {
             </div>
           </>
         )}
+
+        {/* Vista de Soporte */}
+        {activeView === 'support' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">❓ Soporte</h1>
+              <p className="text-gray-600 mt-1">Centro de ayuda y tickets de soporte</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Crear nuevo ticket */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">📝 Nuevo Ticket</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Asunto *</label>
+                      <input 
+                        type="text"
+                        value={newTicketData.subject}
+                        onChange={(e) => setNewTicketData({ ...newTicketData, subject: e.target.value })}
+                        placeholder="Describe brevemente tu problema"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
+                      <textarea 
+                        value={newTicketData.message}
+                        onChange={(e) => setNewTicketData({ ...newTicketData, message: e.target.value })}
+                        placeholder="Explica tu problema con detalle..."
+                        rows={5}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      />
+                    </div>
+                    <button
+                      onClick={handleCreateTicket}
+                      disabled={!newTicketData.subject.trim() || !newTicketData.message.trim()}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Enviar Ticket
+                    </button>
+                  </div>
+                </div>
+
+                {/* FAQ rápido */}
+                <div className="bg-white rounded-lg shadow p-6 mt-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">❓ Preguntas Frecuentes</h3>
+                  <div className="space-y-3">
+                    <details className="group">
+                      <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-blue-600">
+                        ¿Cómo conecto mi canal de Telegram?
+                      </summary>
+                      <p className="mt-2 text-sm text-gray-600 pl-4">
+                        Ve a la sección Telegram, añade @Antiabetbot como admin de tu canal y luego conecta el canal desde el panel.
+                      </p>
+                    </details>
+                    <details className="group">
+                      <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-blue-600">
+                        ¿Cuándo recibo mis pagos?
+                      </summary>
+                      <p className="mt-2 text-sm text-gray-600 pl-4">
+                        Las liquidaciones se procesan el día 28 de cada mes. Asegúrate de tener tus datos de cobro completos.
+                      </p>
+                    </details>
+                    <details className="group">
+                      <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-blue-600">
+                        ¿Cómo creo un producto sin canal?
+                      </summary>
+                      <p className="mt-2 text-sm text-gray-600 pl-4">
+                        Al crear un producto, selecciona "Sin canal" en la opción de canal. Los clientes recibirán confirmación por email.
+                      </p>
+                    </details>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista de tickets */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900">📋 Mis Tickets</h2>
+                  </div>
+                  
+                  {ticketsLoading ? (
+                    <div className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="mt-2 text-gray-500">Cargando tickets...</p>
+                    </div>
+                  ) : supportTickets.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-3xl">📭</span>
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No tienes tickets</h3>
+                      <p className="text-gray-500 text-sm">Cuando crees un ticket, aparecerá aquí</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-200">
+                      {supportTickets.map((ticket) => (
+                        <div 
+                          key={ticket.id} 
+                          className={`p-4 hover:bg-gray-50 cursor-pointer transition ${selectedTicket?.id === ticket.id ? 'bg-blue-50' : ''}`}
+                          onClick={() => setSelectedTicket(ticket)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-gray-900">{ticket.subject}</h4>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  ticket.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' :
+                                  ticket.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                                  ticket.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {ticket.status === 'OPEN' ? 'Abierto' :
+                                   ticket.status === 'IN_PROGRESS' ? 'En proceso' :
+                                   ticket.status === 'RESOLVED' ? 'Resuelto' : ticket.status}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{ticket.messages?.[0]?.message || ticket.message}</p>
+                              <p className="text-xs text-gray-400 mt-2">
+                                Creado: {new Date(ticket.createdAt).toLocaleDateString('es-ES', { 
+                                  day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                                })}
+                              </p>
+                            </div>
+                            <div className="ml-4">
+                              {ticket.messages?.length > 1 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                  {ticket.messages.length} mensajes
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Detalle del ticket seleccionado */}
+                {selectedTicket && (
+                  <div className="bg-white rounded-lg shadow mt-6">
+                    <div className="p-6 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">{selectedTicket.subject}</h3>
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                            selectedTicket.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' :
+                            selectedTicket.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                            selectedTicket.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {selectedTicket.status === 'OPEN' ? 'Abierto' :
+                             selectedTicket.status === 'IN_PROGRESS' ? 'En proceso' :
+                             selectedTicket.status === 'RESOLVED' ? 'Resuelto' : selectedTicket.status}
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => setSelectedTicket(null)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 max-h-80 overflow-y-auto space-y-4">
+                      {selectedTicket.messages?.map((msg: any, idx: number) => (
+                        <div 
+                          key={idx} 
+                          className={`p-4 rounded-lg ${msg.isAdmin ? 'bg-blue-50 ml-8' : 'bg-gray-50 mr-8'}`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-sm font-medium ${msg.isAdmin ? 'text-blue-600' : 'text-gray-700'}`}>
+                              {msg.isAdmin ? '👤 Soporte Antia' : '👤 Tú'}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {new Date(msg.createdAt).toLocaleString('es-ES')}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 text-sm">{msg.message}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {selectedTicket.status !== 'RESOLVED' && (
+                      <div className="p-6 border-t border-gray-200">
+                        <div className="flex gap-2">
+                          <input 
+                            type="text"
+                            value={ticketReply}
+                            onChange={(e) => setTicketReply(e.target.value)}
+                            placeholder="Escribe tu respuesta..."
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onKeyPress={(e) => e.key === 'Enter' && handleReplyTicket()}
+                          />
+                          <button
+                            onClick={handleReplyTicket}
+                            disabled={!ticketReply.trim()}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50"
+                          >
+                            Enviar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       {/* Modal: Confirmar Compartir en Telegram */}
