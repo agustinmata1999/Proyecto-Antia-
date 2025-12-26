@@ -54,18 +54,34 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.log(`🔧 Setting up webhook mode at: ${webhookUrl}`);
         
         try {
-          // Configurar el webhook
-          await this.bot.telegram.setWebhook(webhookUrl, {
-            allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-            drop_pending_updates: false,
-          });
-          this.logger.log(`✅ Webhook configured successfully`);
+          // Primero verificar si ya existe el webhook correcto
+          const currentWebhook = await this.bot.telegram.getWebhookInfo();
+          
+          if (currentWebhook.url !== webhookUrl) {
+            // Configurar el webhook si no está configurado o es diferente
+            await this.bot.telegram.setWebhook(webhookUrl, {
+              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+              drop_pending_updates: false,
+            });
+            this.logger.log(`✅ Webhook configured successfully`);
+          } else {
+            this.logger.log(`✅ Webhook already configured correctly`);
+          }
           
           // Verificar el webhook
           const webhookInfo = await this.bot.telegram.getWebhookInfo();
           this.logger.log(`📡 Webhook info: ${JSON.stringify(webhookInfo)}`);
         } catch (webhookError) {
           this.logger.error('Failed to set webhook:', webhookError.message);
+          // Reintentar una vez más
+          try {
+            await this.bot.telegram.setWebhook(webhookUrl, {
+              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+            });
+            this.logger.log(`✅ Webhook configured on retry`);
+          } catch (retryError) {
+            this.logger.error('Webhook retry failed:', retryError.message);
+          }
         }
         
         this.isInitialized = true;
