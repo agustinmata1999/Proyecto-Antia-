@@ -132,7 +132,7 @@ export class AdminSupportController {
   async getTicket(@Param('id') id: string) {
     try {
       const ticketResult = await this.prisma.$runCommandRaw({
-        find: 'tickets',
+        find: 'support_tickets',
         filter: { _id: { $oid: id } },
         limit: 1,
       }) as any;
