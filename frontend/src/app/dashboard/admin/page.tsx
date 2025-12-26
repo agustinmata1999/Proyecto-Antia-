@@ -126,6 +126,46 @@ export default function AdminDashboard() {
   const [reviewingApplication, setReviewingApplication] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
 
+  // Sales/Checkout state
+  interface Sale {
+    id: string;
+    clientEmail: string;
+    clientTelegramId?: string;
+    productTitle: string;
+    productId: string;
+    tipsterName: string;
+    tipsterId: string;
+    amountCents: number;
+    currency: string;
+    status: string;
+    paymentProvider: string;
+    paymentMethod?: string;
+    country?: string;
+    createdAt: string;
+    // Comisiones (solo admin)
+    grossAmountCents: number;
+    platformFeeCents: number;
+    netAmountCents: number;
+    platformFeePercent: number;
+  }
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [salesLoading, setSalesLoading] = useState(false);
+  const [salesFilters, setSalesFilters] = useState({
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    tipsterId: '',
+    productId: '',
+    status: '',
+    paymentProvider: '',
+    country: '',
+  });
+  const [salesStats, setSalesStats] = useState({
+    totalSales: 0,
+    totalGrossCents: 0,
+    totalPlatformFeeCents: 0,
+    totalNetCents: 0,
+  });
+
   useEffect(() => {
     checkAuth();
     // Load application stats for badge in sidebar
