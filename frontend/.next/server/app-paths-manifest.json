@@ -3,11 +3,11 @@
   "/checkout/[productId]/page": "app/checkout/[productId]/page.js",
   "/checkout/cancel/page": "app/checkout/cancel/page.js",
   "/checkout/success/page": "app/checkout/success/page.js",
+  "/dashboard/client/page": "app/dashboard/client/page.js",
   "/dashboard/admin/page": "app/dashboard/admin/page.js",
   "/health/route": "app/health/route.js",
   "/dashboard/tipster/page": "app/dashboard/tipster/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/register/page": "app/register/page.js",
-  "/dashboard/client/page": "app/dashboard/client/page.js"
+  "/register/page": "app/register/page.js"
 }
