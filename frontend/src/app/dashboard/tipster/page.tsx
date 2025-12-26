@@ -267,6 +267,82 @@ export default function TipsterDashboard() {
     }
   };
 
+  // ==================== SUPPORT TICKETS FUNCTIONS ====================
+  
+  const loadTickets = async () => {
+    setTicketsLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets/my`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+      const data = await response.json();
+      setSupportTickets(data.tickets || []);
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicketData.subject.trim() || !newTicketData.message.trim()) return;
+    
+    setTicketSubmitting(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify(newTicketData),
+      });
+      if (response.ok) {
+        setNewTicketData({ subject: '', message: '' });
+        setShowNewTicketForm(false);
+        await loadTickets();
+      }
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+    } finally {
+      setTicketSubmitting(false);
+    }
+  };
+
+  const handleReplyTicket = async () => {
+    if (!selectedTicket || !replyMessage.trim()) return;
+    
+    setTicketSubmitting(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets/${selectedTicket.id}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({ message: replyMessage }),
+      });
+      setReplyMessage('');
+      await loadTickets();
+      // Refresh selected ticket
+      const updated = supportTickets.find(t => t.id === selectedTicket.id);
+      if (updated) setSelectedTicket(updated);
+    } catch (error) {
+      console.error('Error replying to ticket:', error);
+    } finally {
+      setTicketSubmitting(false);
+    }
+  };
+
+  // Load tickets when switching to support view
+  useEffect(() => {
+    if (activeView === 'support') {
+      loadTickets();
+    }
+  }, [activeView]);
+
   const handleLogout = async () => {
     try {
       await authApi.logout();
