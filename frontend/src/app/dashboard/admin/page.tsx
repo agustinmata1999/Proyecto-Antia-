@@ -257,6 +257,62 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadAdminTickets = async () => {
+    setTicketsLoading(true);
+    try {
+      const response = await adminApi.support.getAll(ticketFilter || undefined);
+      setAdminTickets(response.data.tickets || []);
+    } catch (err) {
+      console.error('Error loading tickets:', err);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
+
+  const loadTicketStats = async () => {
+    try {
+      const response = await adminApi.support.getStats();
+      setTicketStats(response.data);
+    } catch (err) {
+      console.error('Error loading ticket stats:', err);
+    }
+  };
+
+  const handleAdminReply = async () => {
+    if (!selectedAdminTicket || !adminReplyMessage.trim()) return;
+    
+    setSendingReply(true);
+    try {
+      await adminApi.support.reply(selectedAdminTicket.id, adminReplyMessage.trim());
+      setAdminReplyMessage('');
+      // Reload ticket to get updated responses
+      const response = await adminApi.support.getOne(selectedAdminTicket.id);
+      setSelectedAdminTicket(response.data.ticket);
+      // Reload all tickets
+      loadAdminTickets();
+    } catch (err) {
+      console.error('Error sending reply:', err);
+      alert('Error al enviar respuesta');
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleUpdateTicketStatus = async (ticketId: string, newStatus: string) => {
+    try {
+      await adminApi.support.updateStatus(ticketId, newStatus);
+      // Reload tickets
+      loadAdminTickets();
+      loadTicketStats();
+      if (selectedAdminTicket?.id === ticketId) {
+        setSelectedAdminTicket({ ...selectedAdminTicket, status: newStatus });
+      }
+    } catch (err) {
+      console.error('Error updating ticket status:', err);
+      alert('Error al actualizar estado');
+    }
+  };
+
   const loadApplications = async () => {
     try {
       const response = await adminApi.applications.getAll(applicationFilter);
