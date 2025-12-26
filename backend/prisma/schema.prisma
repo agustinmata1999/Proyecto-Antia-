@@ -306,6 +306,11 @@ model AffiliateConversion {
   externalRefId       String?   @map("external_ref_id")             // ID externo de la casa
   tipsterTrackingId   String    @map("tipster_tracking_id")         // subid que vino en el CSV
   
+  // Datos del usuario referido
+  userEmail           String?   @map("user_email")                  // Email del usuario referido
+  userTelegram        String?   @map("user_telegram")               // Telegram del usuario referido
+  countryCode         String?   @map("country_code")                // País del usuario por IP
+  
   // Tipo de evento
   eventType           String    @map("event_type")                  // REGISTER, DEPOSIT, QUALIFIED
   
@@ -321,6 +326,7 @@ model AffiliateConversion {
   commissionCents     Int?      @map("commission_cents")            // Se calcula al aprobar
   
   // Fechas
+  clickedAt           DateTime? @map("clicked_at")                  // Cuando hizo click en el link
   occurredAt          DateTime  @map("occurred_at")                 // Fecha del evento original
   approvedAt          DateTime? @map("approved_at")
   
