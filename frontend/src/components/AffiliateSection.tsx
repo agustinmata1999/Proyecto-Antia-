@@ -229,6 +229,21 @@ export default function AffiliateSection() {
               🏠 Casas de Apuestas
             </button>
             <button
+              onClick={() => setActiveTab('referrals')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+                activeTab === 'referrals'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              👥 Mis Referidos
+              {metrics?.referrals?.pending > 0 && (
+                <span className="ml-2 bg-yellow-500 text-white px-2 py-0.5 rounded-full text-xs">
+                  {metrics.referrals.pending}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setActiveTab('metrics')}
               className={`px-6 py-4 text-sm font-medium border-b-2 ${
                 activeTab === 'metrics'
