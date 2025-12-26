@@ -1237,50 +1237,124 @@ export default function TipsterDashboard() {
               <p className="text-gray-600 mt-1">Conecta tu canal privado donde los clientes recibirán acceso después de pagar</p>
             </div>
 
-            {/* Guía de Onboarding - Solo mostrar si no hay canales */}
-            {telegramChannels.length === 0 && !showAddChannelForm && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  🚀 Guía Rápida: Cómo conectar tu canal premium
+            {/* GUÍA DETALLADA - Siempre visible arriba */}
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-8 mb-8 shadow-sm">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  📖 Guía Completa: Cómo conectar tu canal premium
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-lg p-4 border border-blue-100">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-lg font-bold text-blue-600">1</span>
+                <p className="text-gray-600">Sigue estos pasos para que tus clientes reciban acceso automático después de comprar</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {/* PASO 1 */}
+                <div className="bg-white rounded-xl p-6 border-2 border-blue-100 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
+                      1
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Crea tu canal</h3>
-                    <p className="text-sm text-gray-600">
-                      En Telegram, crea un canal <strong>privado</strong> donde tus clientes recibirán tus pronósticos.
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-blue-100">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-lg font-bold text-blue-600">2</span>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Crea tu canal privado en Telegram</h3>
+                      <div className="text-gray-600 space-y-2">
+                        <p>👉 Abre Telegram y ve a <strong>Nuevo Canal</strong></p>
+                        <p>👉 Ponle un nombre (ej: "VIP Pronósticos Premium")</p>
+                        <p>👉 <strong className="text-red-600">¡IMPORTANTE!</strong> Selecciona <strong>"Canal Privado"</strong></p>
+                        <p className="text-sm text-gray-500 mt-2">💡 El canal privado es donde tus clientes de pago recibirán tus pronósticos exclusivos.</p>
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Agrega el bot como admin</h3>
-                    <p className="text-sm text-gray-600">
-                      Entra a la configuración del canal → Administradores → Agregar administrador → Busca <strong>@Antiabetbot</strong>
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-blue-100">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-lg font-bold text-blue-600">3</span>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Conecta el canal aquí</h3>
-                    <p className="text-sm text-gray-600">
-                      Haz clic en "Añadir Canal" abajo y pega el <strong>@username</strong> o <strong>link de invitación</strong> de tu canal.
-                    </p>
                   </div>
                 </div>
-                <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    💡 <strong>Importante:</strong> Solo conecta tu canal premium/privado. El canal público donde haces marketing NO necesita conectarse aquí.
-                  </p>
+
+                {/* PASO 2 */}
+                <div className="bg-white rounded-xl p-6 border-2 border-green-100 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
+                      2
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Agrega al bot como administrador</h3>
+                      <div className="text-gray-600 space-y-2">
+                        <p>👉 Entra a tu canal y toca el <strong>nombre del canal</strong> (arriba)</p>
+                        <p>👉 Toca <strong>"Administradores"</strong> → <strong>"Agregar Administrador"</strong></p>
+                        <p>👉 Busca: <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono font-bold">@Antiabetbot</code></p>
+                        <p>👉 Dale estos permisos:</p>
+                        <div className="ml-6 mt-2 p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm">✅ <strong>Invitar usuarios mediante enlace</strong> (obligatorio)</p>
+                          <p className="text-sm text-gray-500">Los demás permisos puedes dejarlos desactivados</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PASO 3 */}
+                <div className="bg-white rounded-xl p-6 border-2 border-purple-100 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
+                      3
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Obtén el ID de tu canal</h3>
+                      <div className="text-gray-600 space-y-2">
+                        <p>👉 Abre Telegram y busca: <code className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-mono font-bold">@userinfobot</code></p>
+                        <p>👉 Inicia una conversación con ese bot</p>
+                        <p>👉 <strong>Reenvía cualquier mensaje de tu canal</strong> a @userinfobot</p>
+                        <p>👉 El bot te responderá con información, busca el número que dice <strong>"Id"</strong></p>
+                        <div className="mt-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                          <p className="text-sm text-purple-800 font-medium mb-1">📋 Ejemplo de ID:</p>
+                          <code className="text-lg font-mono font-bold text-purple-700">-1001234567890</code>
+                          <p className="text-xs text-purple-600 mt-1">El ID siempre empieza con <strong>-100</strong> seguido de números</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PASO 4 */}
+                <div className="bg-white rounded-xl p-6 border-2 border-orange-100 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
+                      4
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Conecta el canal aquí en Antia</h3>
+                      <div className="text-gray-600 space-y-2">
+                        <p>👉 Haz clic en el botón <strong className="text-blue-600">"+ Añadir Canal"</strong> de abajo</p>
+                        <p>👉 Pega el <strong>ID del canal</strong> que obtuviste (ej: -1001234567890)</p>
+                        <p>👉 Ponle un nombre para identificarlo</p>
+                        <p>👉 Haz clic en <strong>"Verificar y Conectar"</strong></p>
+                        <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                          <p className="text-sm text-green-800">✅ <strong>¡Listo!</strong> Una vez conectado, podrás asignar este canal a tus productos y los clientes recibirán acceso automáticamente después de pagar.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Removed duplicate section */}
+              {/* Resumen de bots */}
+              <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                <h4 className="font-bold text-yellow-800 mb-2">🤖 Resumen de bots que necesitas:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-medium text-gray-900">@Antiabetbot</p>
+                    <p className="text-sm text-gray-600">El bot de Antia - agrégalo como admin a tu canal</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-medium text-gray-900">@userinfobot</p>
+                    <p className="text-sm text-gray-600">Para obtener el ID - reenvíale un mensaje de tu canal</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nota importante */}
+              <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200">
+                <p className="text-red-800">
+                  ⚠️ <strong>¡No confundas!</strong> Solo conecta tu canal <strong>PRIVADO/PREMIUM</strong> (el de pago). 
+                  Tu canal público donde haces marketing NO necesita conectarse aquí.
+                </p>
+              </div>
+            </div>
 
             {/* Canales Premium - Para dar acceso a clientes */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -1307,7 +1381,7 @@ export default function TipsterDashboard() {
                   <div className="text-4xl mb-4">📱</div>
                   <p className="text-gray-500 mb-4">No tienes canales conectados</p>
                   <p className="text-sm text-gray-400 mb-4">
-                    Conecta tus canales de Telegram para asignarlos a tus productos
+                    Sigue la guía de arriba y luego haz clic en "Añadir Canal"
                   </p>
                   <button
                     onClick={() => setShowAddChannelForm(true)}
