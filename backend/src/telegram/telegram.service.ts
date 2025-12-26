@@ -97,9 +97,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     if (this.bot && this.isInitialized) {
-      this.logger.log('🛑 Stopping Telegram bot...');
-      this.bot.stop('App shutdown');
-      this.logger.log('✅ Telegram bot stopped');
+      const appUrl = this.config.get<string>('APP_URL');
+      const isPreview = appUrl && appUrl.includes('preview.emergentagent.com');
+      
+      if (isPreview) {
+        // En modo preview con webhook, NO detenemos el bot
+        // porque eso eliminaría el webhook
+        this.logger.log('🛑 Preview mode - keeping webhook active');
+      } else {
+        // En modo polling, detenemos el bot
+        this.logger.log('🛑 Stopping Telegram bot...');
+        this.bot.stop('App shutdown');
+        this.logger.log('✅ Telegram bot stopped');
+      }
     }
   }
 
