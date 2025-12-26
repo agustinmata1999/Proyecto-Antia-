@@ -724,7 +724,7 @@ export default function AffiliateAdminPanel() {
                       {referrals.map((ref) => (
                         <tr key={ref.id} className="hover:bg-gray-50">
                           <td className="px-3 py-3 text-sm text-gray-500">
-                            {new Date(ref.clickedAt || ref.convertedAt).toLocaleDateString('es-ES', { 
+                            {new Date(ref.clickedAt || ref.convertedAt || new Date()).toLocaleDateString('es-ES', { 
                               day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
                             })}
                           </td>
