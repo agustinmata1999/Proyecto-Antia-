@@ -748,6 +748,76 @@ export class AffiliateService {
     };
   }
 
+  // ==================== TIPSTER REFERRALS ====================
+
+  async getTipsterReferrals(tipsterId: string, filters?: { houseId?: string; status?: string; startDate?: string; endDate?: string }) {
+    // Build where clause
+    const where: any = { tipsterId };
+    
+    if (filters?.houseId) {
+      where.houseId = filters.houseId;
+    }
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+    if (filters?.startDate || filters?.endDate) {
+      where.occurredAt = {};
+      if (filters.startDate) {
+        where.occurredAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        where.occurredAt.lte = new Date(filters.endDate);
+      }
+    }
+
+    // Get conversions
+    const conversions = await this.prisma.affiliateConversion.findMany({
+      where,
+      orderBy: { occurredAt: 'desc' },
+      take: 500, // Limit for performance
+    });
+
+    // Get houses for names
+    const houses = await this.prisma.bettingHouse.findMany();
+    const housesMap = new Map(houses.map(h => [h.id, h]));
+
+    // Map to response format
+    const referrals = conversions.map(conv => {
+      const house = housesMap.get(conv.houseId);
+      return {
+        id: conv.id,
+        houseId: conv.houseId,
+        houseName: house?.name || 'Desconocido',
+        houseSlug: house?.slug || '',
+        userEmail: conv.userEmail || null,
+        userTelegram: conv.userTelegram || null,
+        country: conv.countryCode || 'N/A',
+        eventType: conv.eventType,
+        status: conv.status,
+        commissionCents: conv.commissionCents || 0,
+        commissionEur: (conv.commissionCents || 0) / 100,
+        clickedAt: conv.clickedAt?.toISOString() || null,
+        convertedAt: conv.occurredAt?.toISOString() || null,
+        createdAt: conv.createdAt.toISOString(),
+      };
+    });
+
+    // Calculate stats
+    const stats = {
+      total: referrals.length,
+      pending: referrals.filter(r => r.status === 'PENDING').length,
+      approved: referrals.filter(r => r.status === 'APPROVED').length,
+      rejected: referrals.filter(r => r.status === 'REJECTED').length,
+      totalEarningsEur: referrals.filter(r => r.status === 'APPROVED').reduce((sum, r) => sum + r.commissionEur, 0),
+    };
+
+    return {
+      referrals,
+      stats,
+      filters: filters || {},
+    };
+  }
+
   // ==================== PAYOUTS ====================
 
   async generateMonthlyPayouts(periodMonth: string) {
