@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Param,
   Body,
   UseGuards,
@@ -69,6 +70,21 @@ export class ClientController {
     }
     
     return details;
+  }
+
+  @Get('subscriptions')
+  @ApiOperation({ summary: 'Get all active subscriptions' })
+  async getSubscriptions(@CurrentUser() user: any) {
+    return this.clientService.getSubscriptions(user.id);
+  }
+
+  @Post('subscriptions/:id/cancel')
+  @ApiOperation({ summary: 'Cancel a subscription' })
+  async cancelSubscription(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+  ) {
+    return this.clientService.cancelSubscription(user.id, id);
   }
 
   @Get('payments')
