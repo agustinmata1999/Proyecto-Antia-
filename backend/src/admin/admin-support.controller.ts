@@ -108,7 +108,7 @@ export class AdminSupportController {
   async getTicketStats() {
     try {
       const allTicketsResult = await this.prisma.$runCommandRaw({
-        find: 'tickets',
+        find: 'support_tickets',
         projection: { status: 1 },
       }) as any;
 
