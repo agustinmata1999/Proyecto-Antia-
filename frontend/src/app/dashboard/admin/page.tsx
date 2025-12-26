@@ -178,6 +178,7 @@ export default function AdminDashboard() {
       loadApplications();
       loadApplicationStats();
     }
+    if (activeView === 'sales') loadSales();
     if (activeView === 'commissions') {
       loadCommissions();
       loadExchangeRates();
