@@ -117,6 +117,15 @@ export default function TipsterDashboard() {
   const [publicationChannelError, setPublicationChannelError] = useState('');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   
+  // Support tickets state
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [newTicketData, setNewTicketData] = useState({ subject: '', message: '' });
+  const [replyMessage, setReplyMessage] = useState('');
+  const [ticketSubmitting, setTicketSubmitting] = useState(false);
+  
   // Modal de confirmación para compartir en Telegram
   const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
   const [productToShare, setProductToShare] = useState<{ id: string; title: string } | null>(null);
