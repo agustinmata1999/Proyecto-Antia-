@@ -64,9 +64,30 @@ export default function AffiliateSection() {
   const [metrics, setMetrics] = useState<AffiliateMetrics | null>(null);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'houses' | 'metrics' | 'payouts'>('houses');
+  const [activeTab, setActiveTab] = useState<'houses' | 'referrals' | 'metrics' | 'payouts'>('houses');
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Referrals state (new)
+  interface MyReferral {
+    id: string;
+    houseId: string;
+    houseName: string;
+    userEmail?: string;
+    userTelegram?: string;
+    country: string;
+    eventType: string;
+    status: string;
+    commissionCents: number;
+    clickedAt: string;
+    convertedAt?: string;
+  }
+  const [myReferrals, setMyReferrals] = useState<MyReferral[]>([]);
+  const [referralsLoading, setReferralsLoading] = useState(false);
+  const [referralFilters, setReferralFilters] = useState({
+    houseId: '',
+    status: '',
+  });
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
