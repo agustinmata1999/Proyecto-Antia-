@@ -1112,6 +1112,230 @@ export default function AdminDashboard() {
           </>
         )}
 
+        {/* SUPPORT VIEW */}
+        {activeView === 'support' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">🎫 Centro de Soporte</h1>
+              <p className="text-gray-600 mt-1">Gestiona los tickets de soporte de tipsters y clientes</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div 
+                onClick={() => { setTicketFilter(''); loadAdminTickets(); }}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${!ticketFilter ? 'border-gray-400' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">📊 Todos</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {ticketStats.open + ticketStats.inProgress + ticketStats.resolved}
+                </div>
+              </div>
+              <div 
+                onClick={() => { setTicketFilter('OPEN'); loadAdminTickets(); }}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${ticketFilter === 'OPEN' ? 'border-yellow-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">⏳ Abiertos</div>
+                <div className="text-2xl font-bold text-yellow-600">{ticketStats.open}</div>
+              </div>
+              <div 
+                onClick={() => { setTicketFilter('IN_PROGRESS'); loadAdminTickets(); }}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${ticketFilter === 'IN_PROGRESS' ? 'border-blue-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">🔄 En Proceso</div>
+                <div className="text-2xl font-bold text-blue-600">{ticketStats.inProgress}</div>
+              </div>
+              <div 
+                onClick={() => { setTicketFilter('RESOLVED'); loadAdminTickets(); }}
+                className={`bg-white rounded-lg shadow p-6 cursor-pointer border-2 transition ${ticketFilter === 'RESOLVED' ? 'border-green-500' : 'border-transparent hover:border-gray-200'}`}
+              >
+                <div className="text-sm text-gray-500 mb-2">✅ Resueltos</div>
+                <div className="text-2xl font-bold text-green-600">{ticketStats.resolved}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Tickets List */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-4 border-b border-gray-200">
+                    <h2 className="font-bold text-gray-900">📋 Tickets</h2>
+                  </div>
+                  
+                  {ticketsLoading ? (
+                    <div className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                    </div>
+                  ) : adminTickets.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <div className="text-4xl mb-2">📭</div>
+                      <p className="text-gray-500 text-sm">No hay tickets</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+                      {adminTickets.map((ticket) => (
+                        <div 
+                          key={ticket.id}
+                          onClick={() => setSelectedAdminTicket(ticket)}
+                          className={`p-4 cursor-pointer hover:bg-gray-50 transition ${selectedAdminTicket?.id === ticket.id ? 'bg-red-50 border-l-4 border-red-500' : ''}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                  ticket.userRole === 'TIPSTER' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  {ticket.userRole === 'TIPSTER' ? '👤 Tipster' : '👥 Cliente'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                  ticket.status === 'OPEN' ? 'bg-yellow-100 text-yellow-700' :
+                                  ticket.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-green-100 text-green-700'
+                                }`}>
+                                  {ticket.status === 'OPEN' ? 'Abierto' : ticket.status === 'IN_PROGRESS' ? 'En proceso' : 'Resuelto'}
+                                </span>
+                              </div>
+                              <h4 className="font-medium text-gray-900 mt-1 truncate">{ticket.subject}</h4>
+                              <p className="text-xs text-gray-500 truncate">{ticket.userName || ticket.userEmail}</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {new Date(ticket.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                            {ticket.responses?.length > 0 && (
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                {ticket.responses.length}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ticket Detail */}
+              <div className="lg:col-span-2">
+                {selectedAdminTicket ? (
+                  <div className="bg-white rounded-lg shadow">
+                    <div className="p-6 border-b border-gray-200">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              selectedAdminTicket.userRole === 'TIPSTER' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {selectedAdminTicket.userRole === 'TIPSTER' ? '👤 Tipster' : '👥 Cliente'}
+                            </span>
+                            <span className="text-sm text-gray-500">•</span>
+                            <span className="text-sm text-gray-600">{selectedAdminTicket.userName || selectedAdminTicket.userEmail}</span>
+                          </div>
+                          <h2 className="text-xl font-bold text-gray-900">{selectedAdminTicket.subject}</h2>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Creado: {new Date(selectedAdminTicket.createdAt).toLocaleString('es-ES')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={selectedAdminTicket.status}
+                            onChange={(e) => handleUpdateTicketStatus(selectedAdminTicket.id, e.target.value)}
+                            className={`px-3 py-1.5 rounded-lg border text-sm font-medium ${
+                              selectedAdminTicket.status === 'OPEN' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
+                              selectedAdminTicket.status === 'IN_PROGRESS' ? 'border-blue-300 bg-blue-50 text-blue-700' :
+                              'border-green-300 bg-green-50 text-green-700'
+                            }`}
+                          >
+                            <option value="OPEN">⏳ Abierto</option>
+                            <option value="IN_PROGRESS">🔄 En Proceso</option>
+                            <option value="RESOLVED">✅ Resuelto</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="p-6 max-h-[400px] overflow-y-auto space-y-4">
+                      {/* Original message */}
+                      <div className="p-4 rounded-lg bg-gray-50 mr-12">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-gray-700">
+                            {selectedAdminTicket.userRole === 'TIPSTER' ? '👤' : '👥'} {selectedAdminTicket.userName || 'Usuario'}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(selectedAdminTicket.createdAt).toLocaleString('es-ES')}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm whitespace-pre-wrap">{selectedAdminTicket.message}</p>
+                      </div>
+
+                      {/* Responses */}
+                      {selectedAdminTicket.responses?.map((response, idx) => (
+                        <div 
+                          key={idx}
+                          className={`p-4 rounded-lg ${response.isAdmin ? 'bg-red-50 ml-12' : 'bg-gray-50 mr-12'}`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-sm font-medium ${response.isAdmin ? 'text-red-600' : 'text-gray-700'}`}>
+                              {response.isAdmin ? '🔧 Soporte Antia' : `${selectedAdminTicket.userRole === 'TIPSTER' ? '👤' : '👥'} ${selectedAdminTicket.userName || 'Usuario'}`}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {new Date(response.createdAt).toLocaleString('es-ES')}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{response.message}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Reply Box */}
+                    {selectedAdminTicket.status !== 'RESOLVED' && (
+                      <div className="p-6 border-t border-gray-200">
+                        <div className="flex gap-2">
+                          <textarea
+                            value={adminReplyMessage}
+                            onChange={(e) => setAdminReplyMessage(e.target.value)}
+                            placeholder="Escribe tu respuesta..."
+                            rows={3}
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              handleAdminReply();
+                              handleUpdateTicketStatus(selectedAdminTicket.id, 'IN_PROGRESS');
+                            }}
+                            disabled={!adminReplyMessage.trim() || sendingReply}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm disabled:opacity-50"
+                          >
+                            {sendingReply ? '...' : '💬 Responder'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleAdminReply();
+                              handleUpdateTicketStatus(selectedAdminTicket.id, 'RESOLVED');
+                            }}
+                            disabled={!adminReplyMessage.trim() || sendingReply}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm disabled:opacity-50"
+                          >
+                            {sendingReply ? '...' : '✅ Responder y Cerrar'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg shadow p-12 text-center">
+                    <div className="text-6xl mb-4">🎫</div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">Selecciona un ticket</h3>
+                    <p className="text-gray-500 text-sm">Haz clic en un ticket de la lista para ver los detalles y responder</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         {/* COMMISSIONS VIEW */}
         {activeView === 'commissions' && (
           <>
