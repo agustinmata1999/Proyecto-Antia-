@@ -293,21 +293,52 @@ export default function TipsterDashboard() {
     
     setTicketSubmitting(true);
     try {
+      // Upload attachments if any
+      let attachmentUrls: string[] = [];
+      if (ticketAttachments.length > 0) {
+        const formData = new FormData();
+        ticketAttachments.forEach((file) => {
+          formData.append('files', file);
+        });
+        
+        try {
+          const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/upload/tickets`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            },
+            body: formData,
+          });
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            attachmentUrls = uploadData.urls || [];
+          }
+        } catch (uploadError) {
+          console.error('Error uploading attachments:', uploadError);
+        }
+      }
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
-        body: JSON.stringify(newTicketData),
+        body: JSON.stringify({
+          ...newTicketData,
+          attachments: attachmentUrls,
+        }),
       });
       if (response.ok) {
         setNewTicketData({ subject: '', message: '' });
+        setTicketAttachments([]);
         setShowNewTicketForm(false);
         await loadTickets();
+        alert('✅ Ticket creado exitosamente');
       }
     } catch (error) {
       console.error('Error creating ticket:', error);
+      alert('Error al crear el ticket');
     } finally {
       setTicketSubmitting(false);
     }
