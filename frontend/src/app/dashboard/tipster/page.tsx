@@ -125,6 +125,8 @@ export default function TipsterDashboard() {
   const [newTicketData, setNewTicketData] = useState({ subject: '', message: '' });
   const [replyMessage, setReplyMessage] = useState('');
   const [ticketSubmitting, setTicketSubmitting] = useState(false);
+  const [ticketAttachments, setTicketAttachments] = useState<File[]>([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   
   // Modal de confirmación para compartir en Telegram
   const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
