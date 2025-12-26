@@ -447,6 +447,7 @@ export default function AffiliateAdminPanel() {
             {[
               { id: 'houses', label: '🏠 Casas de Apuestas' },
               { id: 'campaigns', label: '📢 Campañas' },
+              { id: 'conversions', label: '👥 Referidos' },
               { id: 'import', label: '📤 Importar CSV' },
               { id: 'payouts', label: '💵 Liquidaciones' },
             ].map((tab) => (
@@ -460,6 +461,11 @@ export default function AffiliateAdminPanel() {
                 }`}
               >
                 {tab.label}
+                {tab.id === 'conversions' && referralStats.pending > 0 && (
+                  <span className="ml-2 bg-yellow-500 text-white px-2 py-0.5 rounded-full text-xs">
+                    {referralStats.pending}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
