@@ -312,6 +312,9 @@ export const affiliateApi = {
   getMetrics: () => api.get('/affiliate/metrics'),
   getPayouts: () => api.get('/affiliate/payouts'),
   getPayoutDetails: (id: string) => api.get(`/affiliate/payouts/${id}`),
+  // NEW: Tipster referrals detail
+  getMyReferrals: (params?: { houseId?: string; status?: string; startDate?: string; endDate?: string }) =>
+    api.get('/affiliate/my-referrals', { params }),
 
   // Admin endpoints
   admin: {
@@ -358,6 +361,13 @@ export const affiliateApi = {
       api.get('/admin/affiliate/conversions', { params }),
     updateConversionStatus: (id: string, status: string, rejectionReason?: string) =>
       api.patch(`/admin/affiliate/conversions/${id}/status`, { status, rejectionReason }),
+
+    // NEW: Referrals list with filters
+    getReferrals: (filters?: { tipsterId?: string; houseId?: string; status?: string; startDate?: string; endDate?: string }) =>
+      api.get('/admin/affiliate/referrals', { params: filters }),
+    updateReferralStatus: (id: string, status: string) =>
+      api.patch(`/admin/affiliate/referrals/${id}/status`, { status }),
+    getTipsters: () => api.get('/admin/affiliate/tipsters'),
 
     // Payouts
     getPayouts: (params?: { tipsterId?: string; status?: string; periodMonth?: string }) =>
