@@ -104,6 +104,7 @@ export class EmailService {
     currency: string;
     orderId: string;
     purchaseDate: Date;
+    hasChannel?: boolean;
   }) {
     const html = this.templates.purchaseConfirmation(data);
     return this.sendEmail({
