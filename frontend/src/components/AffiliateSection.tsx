@@ -401,7 +401,7 @@ export default function AffiliateSection() {
                       {myReferrals.map((ref) => (
                         <tr key={ref.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-sm text-gray-500">
-                            {new Date(ref.convertedAt || ref.clickedAt).toLocaleDateString('es-ES', {
+                            {new Date(ref.convertedAt || ref.clickedAt || new Date()).toLocaleDateString('es-ES', {
                               day: '2-digit', month: 'short', year: 'numeric'
                             })}
                           </td>
