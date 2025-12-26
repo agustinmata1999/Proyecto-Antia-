@@ -146,10 +146,30 @@ export class EmailTemplatesService {
     currency: string;
     orderId: string;
     purchaseDate: Date;
+    hasChannel?: boolean;
   }): string {
     const billingTypeText = data.billingType === 'SUBSCRIPTION' 
       ? `Suscripción (${this.getBillingPeriodText(data.billingPeriod)})`
       : 'Pago único';
+
+    const channelNote = data.hasChannel === false 
+      ? `
+        <div style="margin-top: 24px; padding: 16px; background-color: #dbeafe; border-radius: 8px;">
+          <p style="margin: 0; font-size: 14px; color: #1e40af;">
+            <strong>📧 Información importante</strong><br>
+            Este producto no incluye acceso a canal de Telegram. 
+            El tipster te enviará la información del pronóstico por email a esta dirección.
+          </p>
+        </div>
+      `
+      : `
+        <div style="margin-top: 24px; padding: 16px; background-color: #d1fae5; border-radius: 8px;">
+          <p style="margin: 0; font-size: 14px; color: #065f46;">
+            <strong>📱 Acceso a Telegram</strong><br>
+            En breve recibirás otro email con el link para acceder al canal privado de Telegram.
+          </p>
+        </div>
+      `;
 
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
@@ -168,6 +188,8 @@ export class EmailTemplatesService {
         { label: 'Total pagado', value: this.formatMoney(data.amount, data.currency) },
         { label: 'ID de compra', value: data.orderId.slice(-8).toUpperCase() },
       ])}
+
+      ${channelNote}
 
       <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
         Guarda este email como comprobante de tu compra.
