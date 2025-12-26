@@ -46,6 +46,22 @@ interface Payment {
   createdAt: string;
 }
 
+interface Subscription {
+  id: string;
+  productId: string;
+  productTitle: string;
+  tipsterName: string;
+  status: string;
+  billingInterval: string;
+  amountCents: number;
+  currency: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  telegramChannelId?: string;
+  createdAt: string;
+}
+
 export default function ClientDashboard() {
   const router = useRouter();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -55,6 +71,7 @@ export default function ClientDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   
