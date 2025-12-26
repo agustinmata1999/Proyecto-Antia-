@@ -203,7 +203,7 @@ export class AdminSupportController {
       };
 
       await this.prisma.$runCommandRaw({
-        update: 'tickets',
+        update: 'support_tickets',
         updates: [{
           q: { _id: { $oid: id } },
           u: {
@@ -235,7 +235,7 @@ export class AdminSupportController {
       }
 
       await this.prisma.$runCommandRaw({
-        update: 'tickets',
+        update: 'support_tickets',
         updates: [{
           q: { _id: { $oid: id } },
           u: {
