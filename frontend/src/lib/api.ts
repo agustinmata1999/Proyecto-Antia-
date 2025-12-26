@@ -232,6 +232,15 @@ export const adminApi = {
     }) => api.get('/admin/sales', { params: filters }),
   },
   
+  // Support tickets management (Admin)
+  support: {
+    getAll: (status?: string) => api.get('/admin/support/tickets', { params: { status } }),
+    getStats: () => api.get('/admin/support/tickets/stats'),
+    getOne: (id: string) => api.get(`/admin/support/tickets/${id}`),
+    reply: (id: string, message: string) => api.post(`/admin/support/tickets/${id}/reply`, { message }),
+    updateStatus: (id: string, status: string) => api.patch(`/admin/support/tickets/${id}/status`, { status }),
+  },
+  
   // Tipster Applications (solicitudes de registro)
   applications: {
     getAll: (status?: string) => api.get('/admin/applications', { params: { status } }),
