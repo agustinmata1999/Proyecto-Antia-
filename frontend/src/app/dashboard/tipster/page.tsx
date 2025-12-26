@@ -1963,7 +1963,19 @@ export default function TipsterDashboard() {
                     </div>
                     
                     <div className="p-6 max-h-80 overflow-y-auto space-y-4">
-                      {selectedTicket.messages?.map((msg: any, idx: number) => (
+                      {/* Mensaje original del ticket */}
+                      <div className="p-4 rounded-lg bg-gray-50 mr-8">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-gray-700">👤 Tú</span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(selectedTicket.createdAt).toLocaleString('es-ES')}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm">{selectedTicket.message}</p>
+                      </div>
+                      
+                      {/* Respuestas */}
+                      {selectedTicket.responses?.map((msg: any, idx: number) => (
                         <div 
                           key={idx} 
                           className={`p-4 rounded-lg ${msg.isAdmin ? 'bg-blue-50 ml-8' : 'bg-gray-50 mr-8'}`}
