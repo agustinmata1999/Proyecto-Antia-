@@ -323,4 +323,132 @@ export class AffiliateAdminController {
       data: updateData,
     });
   }
+
+  // ==================== REFERRALS (New Unified View) ====================
+
+  @Get('referrals')
+  async getReferrals(
+    @Request() req,
+    @Query('tipsterId') tipsterId?: string,
+    @Query('houseId') houseId?: string,
+    @Query('status') status?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    await this.verifyAdmin(req.user.id);
+
+    const filter: any = {};
+    if (tipsterId) filter.tipster_id = tipsterId;
+    if (houseId) filter.house_id = houseId;
+    if (status) filter.status = status;
+    
+    if (startDate || endDate) {
+      filter.occurred_at = {};
+      if (startDate) filter.occurred_at.$gte = { $date: new Date(startDate).toISOString() };
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.occurred_at.$lte = { $date: end.toISOString() };
+      }
+    }
+
+    const conversionsResult = await this.prisma.$runCommandRaw({
+      find: 'affiliate_conversions',
+      filter,
+      sort: { occurred_at: -1 },
+      limit: 500,
+    }) as any;
+
+    const conversions = conversionsResult.cursor?.firstBatch || [];
+
+    // Get all house and tipster IDs
+    const houseIds = [...new Set(conversions.map((c: any) => c.house_id).filter(Boolean))];
+    const tipsterIds = [...new Set(conversions.map((c: any) => c.tipster_id).filter(Boolean))];
+
+    // Fetch houses
+    let housesMap: Record<string, string> = {};
+    if (houseIds.length > 0) {
+      const housesResult = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: { $in: houseIds.map((id: string) => ({ $oid: id })) } },
+        projection: { name: 1 },
+      }) as any;
+      (housesResult.cursor?.firstBatch || []).forEach((h: any) => {
+        housesMap[h._id.$oid || h._id] = h.name;
+      });
+    }
+
+    // Fetch tipsters
+    let tipstersMap: Record<string, string> = {};
+    if (tipsterIds.length > 0) {
+      const tipstersResult = await this.prisma.$runCommandRaw({
+        find: 'tipster_profiles',
+        filter: { _id: { $in: tipsterIds.map((id: string) => ({ $oid: id })) } },
+        projection: { public_name: 1 },
+      }) as any;
+      (tipstersResult.cursor?.firstBatch || []).forEach((t: any) => {
+        tipstersMap[t._id.$oid || t._id] = t.public_name;
+      });
+    }
+
+    // Calculate stats
+    const stats = {
+      total: conversions.length,
+      pending: conversions.filter((c: any) => c.status === 'PENDING').length,
+      approved: conversions.filter((c: any) => c.status === 'APPROVED').length,
+      rejected: conversions.filter((c: any) => c.status === 'REJECTED').length,
+      totalCommissionCents: conversions
+        .filter((c: any) => c.status === 'APPROVED')
+        .reduce((sum: number, c: any) => sum + (c.commission_cents || 0), 0),
+    };
+
+    // Map referrals
+    const referrals = conversions.map((c: any) => ({
+      id: c._id.$oid || c._id,
+      tipsterId: c.tipster_id,
+      tipsterName: tipstersMap[c.tipster_id] || 'Sin asignar',
+      houseId: c.house_id,
+      houseName: housesMap[c.house_id] || 'Unknown',
+      userId: c.user_id,
+      userEmail: c.user_email,
+      userTelegram: c.user_telegram,
+      country: c.country,
+      eventType: c.event_type,
+      status: c.status,
+      amountCents: c.amount_cents || 0,
+      commissionCents: c.commission_cents || 0,
+      clickedAt: c.clicked_at?.$date || c.clicked_at,
+      convertedAt: c.occurred_at?.$date || c.occurred_at,
+      externalRefId: c.external_ref_id,
+    }));
+
+    return { referrals, stats };
+  }
+
+  @Patch('referrals/:id/status')
+  async updateReferralStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @Request() req,
+  ) {
+    return this.updateConversionStatus(id, status, undefined, req);
+  }
+
+  @Get('tipsters')
+  async getTipsters(@Request() req) {
+    await this.verifyAdmin(req.user.id);
+
+    const tipstersResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: {},
+      projection: { public_name: 1 },
+    }) as any;
+
+    const tipsters = (tipstersResult.cursor?.firstBatch || []).map((t: any) => ({
+      id: t._id.$oid || t._id,
+      name: t.public_name,
+    }));
+
+    return tipsters;
+  }
 }
