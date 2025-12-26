@@ -1922,9 +1922,9 @@ export default function TipsterDashboard() {
                               </p>
                             </div>
                             <div className="ml-4">
-                              {ticket.messages?.length > 1 && (
+                              {ticket.responses?.length > 0 && (
                                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                                  {ticket.messages.length} mensajes
+                                  {ticket.responses.length + 1} mensajes
                                 </span>
                               )}
                             </div>
