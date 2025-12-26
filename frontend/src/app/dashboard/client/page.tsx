@@ -132,6 +132,14 @@ export default function ClientDashboard() {
         console.error('Error loading purchases:', error);
       }
 
+      // Load subscriptions
+      try {
+        const subsRes = await clientApi.getSubscriptions();
+        setSubscriptions(subsRes.data || []);
+      } catch (error) {
+        console.error('Error loading subscriptions:', error);
+      }
+
       // Load tickets
       try {
         const ticketsRes = await supportApi.getMyTickets();
