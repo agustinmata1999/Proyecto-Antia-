@@ -582,6 +582,89 @@ export default function ClientDashboard() {
           </>
         )}
 
+        {/* Subscriptions View */}
+        {activeView === 'subscriptions' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Mis Suscripciones</h1>
+              <p className="text-gray-600 mt-1">Gestiona tus suscripciones activas</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              {subscriptions.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="text-6xl mb-4">🔄</div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">No tienes suscripciones activas</h3>
+                  <p className="text-gray-500">Las suscripciones a productos premium aparecerán aquí</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {subscriptions.map((subscription) => (
+                    <div key={subscription.id} className="p-6 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-lg font-semibold text-gray-900">{subscription.productTitle}</h3>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              subscription.status === 'active' 
+                                ? 'bg-green-100 text-green-700' 
+                                : subscription.cancelAtPeriodEnd 
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {subscription.status === 'active' 
+                                ? (subscription.cancelAtPeriodEnd ? '⏳ Cancelada al final del periodo' : '✅ Activa')
+                                : subscription.status === 'canceled' ? '❌ Cancelada' : subscription.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">Por {subscription.tipsterName}</p>
+                          
+                          <div className="flex items-center gap-6 mt-3 text-sm text-gray-600">
+                            <div>
+                              <span className="font-medium">Precio:</span>{' '}
+                              {formatPrice(subscription.amountCents, subscription.currency)}/
+                              {subscription.billingInterval === 'MONTHLY' ? 'mes' : 
+                               subscription.billingInterval === 'QUARTERLY' ? 'trimestre' : 'año'}
+                            </div>
+                            <div>
+                              <span className="font-medium">Próximo cobro:</span>{' '}
+                              {formatDate(subscription.currentPeriodEnd)}
+                            </div>
+                          </div>
+
+                          {subscription.telegramChannelId && (
+                            <div className="mt-3">
+                              <a 
+                                href={`https://t.me/${subscription.telegramChannelId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                📱 Acceder al canal de Telegram
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {subscription.status === 'active' && !subscription.cancelAtPeriodEnd && (
+                            <button
+                              onClick={() => handleCancelSubscription(subscription.id)}
+                              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition"
+                            >
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {/* Payments View */}
         {activeView === 'payments' && (
           <>
