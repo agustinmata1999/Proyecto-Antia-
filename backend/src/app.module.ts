@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -25,6 +27,7 @@ import { SupportModule } from './support/support.module';
 import { TipsterModule } from './tipster/tipster.module';
 import { EmailsModule } from './emails/emails.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { UploadModule } from './upload/upload.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -36,6 +39,10 @@ import { HealthController } from './health.controller';
       ttl: 60000, // 1 minute
       limit: 100, // 100 requests per minute
     }]),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -60,6 +67,7 @@ import { HealthController } from './health.controller';
     TipsterModule,
     EmailsModule,
     NotificationsModule,
+    UploadModule,
   ],
   controllers: [HealthController],
 })
