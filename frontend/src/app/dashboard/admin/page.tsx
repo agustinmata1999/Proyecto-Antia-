@@ -166,10 +166,39 @@ export default function AdminDashboard() {
     totalNetCents: 0,
   });
 
+  // Support tickets state (Admin)
+  interface AdminTicket {
+    id: string;
+    subject: string;
+    message: string;
+    status: string;
+    userId: string;
+    userEmail: string;
+    userName: string;
+    userRole: string;
+    responses: Array<{
+      id: string;
+      message: string;
+      isAdmin: boolean;
+      createdAt: string;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+  }
+  const [adminTickets, setAdminTickets] = useState<AdminTicket[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [ticketFilter, setTicketFilter] = useState('');
+  const [selectedAdminTicket, setSelectedAdminTicket] = useState<AdminTicket | null>(null);
+  const [adminReplyMessage, setAdminReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [ticketStats, setTicketStats] = useState({ open: 0, inProgress: 0, resolved: 0 });
+
   useEffect(() => {
     checkAuth();
     // Load application stats for badge in sidebar
     loadApplicationStats();
+    // Load ticket stats for badge
+    loadTicketStats();
   }, []);
 
   useEffect(() => {
@@ -178,6 +207,7 @@ export default function AdminDashboard() {
       loadApplications();
       loadApplicationStats();
     }
+    if (activeView === 'support') loadAdminTickets();
     if (activeView === 'sales') loadSales();
     if (activeView === 'commissions') {
       loadCommissions();
