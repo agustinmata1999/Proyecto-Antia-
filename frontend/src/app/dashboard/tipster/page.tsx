@@ -789,6 +789,12 @@ export default function TipsterDashboard() {
               ⚙️ Perfil
             </button>
             <button
+              onClick={() => setActiveView('support')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'support' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              ❓ Soporte
+            </button>
+            <button
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50"
             >
