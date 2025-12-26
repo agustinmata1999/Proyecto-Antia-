@@ -36,7 +36,7 @@ export class AdminSupportController {
       }
 
       const ticketsResult = await this.prisma.$runCommandRaw({
-        find: 'tickets',
+        find: 'support_tickets',
         filter,
         sort: { created_at: -1 },
         limit: 200,
