@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://tipster-bot-issue.preview.emergentagent.com"
+BASE_URL = "https://betpanel.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
@@ -387,7 +387,7 @@ class AntiaAPITester:
         
         checkout_data = {
             "productId": "6941ab8bc37d0aa47ab23ef8",
-            "originUrl": "https://tipster-bot-issue.preview.emergentagent.com",
+            "originUrl": "https://betpanel.preview.emergentagent.com",
             "isGuest": True,
             "email": "test@example.com"
         }
@@ -2686,7 +2686,7 @@ def main():
     print("🚀 Starting Antia Platform - Review Request Tests")
     print("=" * 80)
     print("Testing complete payment and Telegram bot access flow in preview environment")
-    print("Base URL: https://tipster-bot-issue.preview.emergentagent.com")
+    print("Base URL: https://betpanel.preview.emergentagent.com")
     print("=" * 80)
     
     tester = AntiaAPITester()

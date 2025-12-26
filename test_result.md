@@ -675,7 +675,7 @@ agent_communication:
 ## Current Status: ✅ OPERATIONAL (Preview Environment Ready - Dec 24, 2025)
 
 ### Preview Environment Configuration
-- **Preview URL**: https://tipster-bot-issue.preview.emergentagent.com
+- **Preview URL**: https://betpanel.preview.emergentagent.com
 - **APP_URL**: Corrected in supervisor config
 - **Bot**: @Antiabetbot - Running in polling mode
 - **Stripe**: Test mode (sk_test_emergent - placeholder)
@@ -714,7 +714,7 @@ agent_communication:
 - `GET /api/checkout/feature-flags` ✅ Working
 
 ### Environment Configuration
-- APP_URL: https://tipster-bot-issue.preview.emergentagent.com
+- APP_URL: https://betpanel.preview.emergentagent.com
 - Telegram Bot: @Antiabetbot
 - Stripe: Test mode (sk_test_emergent)
 - Redsys: Sandbox mode
