@@ -116,6 +116,25 @@ export default function AffiliateSection() {
     }
   };
 
+  const loadMyReferrals = async () => {
+    setReferralsLoading(true);
+    try {
+      const res = await affiliateApi.getMyReferrals(referralFilters);
+      setMyReferrals(res.data.referrals || res.data || []);
+    } catch (err: any) {
+      console.error('Error loading referrals:', err);
+    } finally {
+      setReferralsLoading(false);
+    }
+  };
+
+  // Load referrals when tab changes
+  useEffect(() => {
+    if (activeTab === 'referrals') {
+      loadMyReferrals();
+    }
+  }, [activeTab]);
+
   const copyToClipboard = async (code: string) => {
     const link = `${baseUrl}/r/${code}`;
     try {
