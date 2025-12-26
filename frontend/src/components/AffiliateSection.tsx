@@ -338,6 +338,119 @@ export default function AffiliateSection() {
             </>
           )}
 
+          {/* REFERRALS TAB (New) */}
+          {activeTab === 'referrals' && (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Detalle de Mis Referidos</h2>
+                <div className="flex gap-2">
+                  <select
+                    value={referralFilters.houseId}
+                    onChange={(e) => setReferralFilters({ ...referralFilters, houseId: e.target.value })}
+                    className="border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Todas las casas</option>
+                    {houses.map(({ house }) => (
+                      <option key={house.id} value={house.id}>{house.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={referralFilters.status}
+                    onChange={(e) => setReferralFilters({ ...referralFilters, status: e.target.value })}
+                    className="border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Todos los estados</option>
+                    <option value="PENDING">Pendientes</option>
+                    <option value="APPROVED">Aprobados</option>
+                    <option value="REJECTED">Rechazados</option>
+                  </select>
+                  <button
+                    onClick={loadMyReferrals}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
+                    Filtrar
+                  </button>
+                </div>
+              </div>
+
+              {referralsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                </div>
+              ) : myReferrals.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="text-4xl mb-2">👥</div>
+                  <p>No tienes referidos aún</p>
+                  <p className="text-sm mt-1">Comparte tus links de afiliación para empezar a ganar</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Casa</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">País</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ganancia</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {myReferrals.map((ref) => (
+                        <tr key={ref.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {new Date(ref.convertedAt || ref.clickedAt).toLocaleDateString('es-ES', {
+                              day: '2-digit', month: 'short', year: 'numeric'
+                            })}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{ref.houseName}</td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900">{ref.userEmail || 'Usuario anónimo'}</div>
+                            {ref.userTelegram && (
+                              <div className="text-xs text-gray-500">📱 {ref.userTelegram}</div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center text-sm">{ref.country || '🌍'}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              ref.eventType === 'DEPOSIT' ? 'bg-green-100 text-green-700' :
+                              ref.eventType === 'REGISTER' ? 'bg-blue-100 text-blue-700' :
+                              ref.eventType === 'QUALIFIED' ? 'bg-purple-100 text-purple-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {ref.eventType === 'DEPOSIT' ? '💰 Depósito' :
+                               ref.eventType === 'REGISTER' ? '📝 Registro' :
+                               ref.eventType === 'QUALIFIED' ? '✅ Calificado' :
+                               ref.eventType || 'Click'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-medium text-green-600">
+                            {formatPrice(ref.commissionCents)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              ref.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                              ref.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                              ref.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {ref.status === 'PENDING' ? '⏳ Pendiente' :
+                               ref.status === 'APPROVED' ? '✅ Validado' :
+                               ref.status === 'REJECTED' ? '❌ Rechazado' :
+                               ref.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+
           {activeTab === 'metrics' && (
             <>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas Detalladas</h2>
