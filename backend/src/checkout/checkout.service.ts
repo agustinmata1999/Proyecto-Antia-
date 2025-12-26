@@ -836,6 +836,7 @@ export class CheckoutService {
           currency: order.currency || 'EUR',
           orderId: orderId,
           purchaseDate: new Date(),
+          hasChannel: !!product?.telegramChannelId, // Indica si tiene canal o no
         });
         this.logger.log(`📧 Purchase confirmation email sent to ${order.emailBackup}`);
       } catch (emailError) {
