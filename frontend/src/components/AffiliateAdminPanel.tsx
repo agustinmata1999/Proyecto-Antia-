@@ -86,6 +86,43 @@ export default function AffiliateAdminPanel() {
   const [importBatches, setImportBatches] = useState<ImportBatch[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   
+  // Referrals/Conversions state
+  interface Referral {
+    id: string;
+    tipsterId: string;
+    tipsterName: string;
+    houseId: string;
+    houseName: string;
+    userId?: string;
+    userEmail?: string;
+    userTelegram?: string;
+    country: string;
+    eventType: string;
+    status: string;
+    amountCents: number;
+    commissionCents: number;
+    clickedAt: string;
+    convertedAt?: string;
+    externalRefId?: string;
+  }
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [referralsLoading, setReferralsLoading] = useState(false);
+  const [referralFilters, setReferralFilters] = useState({
+    tipsterId: '',
+    houseId: '',
+    status: '',
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+  });
+  const [referralStats, setReferralStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    totalCommissionCents: 0,
+  });
+  const [tipstersList, setTipstersList] = useState<{id: string, name: string}[]>([]);
+  
   // Modal states
   const [showHouseModal, setShowHouseModal] = useState(false);
   const [editingHouse, setEditingHouse] = useState<BettingHouse | null>(null);
