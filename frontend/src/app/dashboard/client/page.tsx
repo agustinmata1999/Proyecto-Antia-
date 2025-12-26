@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clientApi, supportApi, authApi } from '@/lib/api';
 
-type ViewType = 'dashboard' | 'purchases' | 'payments' | 'support' | 'profile';
+type ViewType = 'dashboard' | 'purchases' | 'subscriptions' | 'payments' | 'support' | 'profile';
 
 interface Purchase {
   id: string;
