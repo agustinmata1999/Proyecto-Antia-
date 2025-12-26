@@ -272,13 +272,13 @@ export default function TipsterDashboard() {
   const loadTickets = async () => {
     setTicketsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/tickets/my`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'}/support/tickets/my`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
       });
       const data = await response.json();
-      setSupportTickets(data.tickets || []);
+      setSupportTickets(data.tickets || data || []);
     } catch (error) {
       console.error('Error loading tickets:', error);
     } finally {
