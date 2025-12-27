@@ -913,29 +913,29 @@ export default function ClientDashboard() {
                         <span className="font-medium text-gray-900">Tú</span>
                         <span className="text-xs text-gray-400">{formatDate(selectedTicket.createdAt)}</span>
                       </div>
-                      <p className="text-gray-700">{selectedTicket.description}</p>
+                      <p className="text-gray-700">{selectedTicket.message || selectedTicket.description}</p>
                     </div>
 
                     {/* Replies */}
-                    {selectedTicket.messages && selectedTicket.messages.map((msg, idx) => (
+                    {(selectedTicket.responses || []).map((msg, idx) => (
                       <div 
                         key={msg.id || idx} 
                         className={`rounded-xl p-4 ${
-                          msg.senderRole === 'ADMIN' || msg.senderRole === 'SUPERADMIN'
+                          msg.isAdmin
                             ? 'bg-green-50 ml-4' 
                             : 'bg-blue-50 mr-4'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg">
-                            {msg.senderRole === 'ADMIN' || msg.senderRole === 'SUPERADMIN' ? '🛡️' : '👤'}
+                            {msg.isAdmin ? '🛡️' : '👤'}
                           </span>
                           <span className="font-medium text-gray-900">
-                            {msg.senderRole === 'ADMIN' || msg.senderRole === 'SUPERADMIN' ? 'Soporte' : 'Tú'}
+                            {msg.isAdmin ? 'Soporte' : 'Tú'}
                           </span>
                           <span className="text-xs text-gray-400">{formatDate(msg.createdAt)}</span>
                         </div>
-                        <p className="text-gray-700">{msg.content}</p>
+                        <p className="text-gray-700">{msg.message}</p>
                         {msg.attachments && msg.attachments.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {msg.attachments.map((att, i) => (
@@ -955,7 +955,7 @@ export default function ClientDashboard() {
                     ))}
 
                     {/* No messages yet */}
-                    {(!selectedTicket.messages || selectedTicket.messages.length === 0) && (
+                    {(!selectedTicket.responses || selectedTicket.responses.length === 0) && (
                       <div className="text-center py-8 text-gray-500">
                         <p>Esperando respuesta del equipo de soporte...</p>
                       </div>
