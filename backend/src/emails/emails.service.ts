@@ -18,6 +18,8 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly senderEmail: string;
   private readonly senderName: string = 'Antia';
+  private readonly brandName: string = 'Antia';
+  private readonly appUrl: string;
   private isConfigured: boolean = false;
 
   constructor(
@@ -27,6 +29,7 @@ export class EmailService {
   ) {
     const apiKey = this.config.get<string>('RESEND_API_KEY');
     this.senderEmail = this.config.get<string>('SENDER_EMAIL') || 'onboarding@resend.dev';
+    this.appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
     
     if (apiKey && apiKey !== 'your_resend_api_key_here') {
       this.resend = new Resend(apiKey);
