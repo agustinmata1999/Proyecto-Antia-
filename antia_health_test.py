@@ -428,7 +428,7 @@ class AntiaHealthTester:
         self.log("=== Testing Tipster Products Endpoint ===")
         
         try:
-            response = self.make_request("GET", "/products/tipster", token=self.tipster_token)
+            response = self.make_request("GET", "/products/my", token=self.tipster_token)
             
             if response.status_code == 200:
                 products = response.json()
