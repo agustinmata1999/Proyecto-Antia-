@@ -37,10 +37,27 @@ export default function AffiliateLandingPage() {
     name: ''
   });
   const [registered, setRegistered] = useState(false);
+  const [clickTracked, setClickTracked] = useState(false);
 
   useEffect(() => {
     loadLinkInfo();
   }, [code]);
+
+  // Track click when demo page loads
+  useEffect(() => {
+    if (linkInfo?.isDemo && linkInfo?.isAllowed && !clickTracked) {
+      trackClick();
+    }
+  }, [linkInfo, clickTracked]);
+
+  const trackClick = async () => {
+    try {
+      await api.post(`/r/${code}/track-click`);
+      setClickTracked(true);
+    } catch (err) {
+      // Ignore tracking errors
+    }
+  };
 
   const loadLinkInfo = async () => {
     try {
