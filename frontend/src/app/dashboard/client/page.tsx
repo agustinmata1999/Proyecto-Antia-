@@ -95,6 +95,11 @@ export default function ClientDashboard() {
   });
   const [submittingTicket, setSubmittingTicket] = useState(false);
   
+  // Ticket detail view
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  
   // Profile edit
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
