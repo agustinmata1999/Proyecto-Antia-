@@ -49,26 +49,21 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const useWebhook = appUrl && appUrl.includes('preview.emergentagent.com');
       
       if (useWebhook) {
-        // MODO WEBHOOK para preview (evita conflicto con producción)
+        // MODO WEBHOOK para preview - AGRESIVO para prevalecer sobre producción
         const webhookUrl = `${appUrl}/api/telegram/webhook`;
-        this.logger.log(`🔧 Setting up webhook mode at: ${webhookUrl}`);
+        this.logger.log(`🔧 Setting up AGGRESSIVE webhook mode at: ${webhookUrl}`);
+        
+        // Guardar referencia al webhookUrl para uso en otros métodos
+        (this as any).webhookUrl = webhookUrl;
         
         // Función para configurar el webhook - SIEMPRE fuerza la configuración
-        const setupWebhook = async (force: boolean = false) => {
+        const setupWebhook = async () => {
           try {
-            const currentWebhook = await this.bot.telegram.getWebhookInfo();
-            
-            if (force || !currentWebhook.url || currentWebhook.url !== webhookUrl) {
-              this.logger.log(`🔄 ${force ? 'Forcing' : 'Setting'} webhook to: ${webhookUrl}`);
-              await this.bot.telegram.setWebhook(webhookUrl, {
-                allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-                drop_pending_updates: false,
-                max_connections: 40,
-              });
-              this.logger.log(`✅ Webhook configured: ${webhookUrl}`);
-              return true;
-            }
-            this.logger.log(`✅ Webhook already correctly configured`);
+            await this.bot.telegram.setWebhook(webhookUrl, {
+              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+              drop_pending_updates: false,
+              max_connections: 100, // Aumentado para mejor rendimiento
+            });
             return true;
           } catch (error) {
             this.logger.error('Failed to set webhook:', error.message);
@@ -76,43 +71,32 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           }
         };
 
-        // SIEMPRE configurar webhook al iniciar (force=true)
-        await setupWebhook(true);
+        // Configurar webhook inicial múltiples veces para asegurar
+        this.logger.log(`🔄 Forcing webhook configuration...`);
+        await setupWebhook();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await setupWebhook();
         
         // Verificar el webhook después de configurarlo
         const webhookInfo = await this.bot.telegram.getWebhookInfo();
-        this.logger.log(`📡 Webhook info after setup: ${JSON.stringify(webhookInfo)}`);
+        this.logger.log(`📡 Webhook configured: ${webhookInfo.url}`);
         
-        // Si aún no hay webhook, intentar de nuevo con un pequeño delay
-        if (!webhookInfo.url) {
-          this.logger.warn(`⚠️ Webhook not set after first attempt, retrying in 3s...`);
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          await setupWebhook(true);
-          const retryInfo = await this.bot.telegram.getWebhookInfo();
-          this.logger.log(`📡 Webhook info after retry: ${JSON.stringify(retryInfo)}`);
-        }
-        
-        // Configurar verificación periódica del webhook (cada 60 segundos - más frecuente)
+        // VERIFICACIÓN ULTRA-AGRESIVA: cada 10 segundos
         setInterval(async () => {
           try {
             const info = await this.bot.telegram.getWebhookInfo();
             if (!info.url || info.url !== webhookUrl) {
-              this.logger.warn(`⚠️ Webhook missing or wrong (current: ${info.url || 'none'}), reconfiguring...`);
-              await setupWebhook(true);
+              this.logger.warn(`⚠️ Webhook hijacked! Reclaiming...`);
+              await setupWebhook();
             }
           } catch (error) {
-            this.logger.error('Webhook health check failed:', error.message);
-            // En caso de error, intentar reconfigurar de todos modos
-            try {
-              await setupWebhook(true);
-            } catch (retryError) {
-              this.logger.error('Webhook retry also failed:', retryError.message);
-            }
+            // Silencioso para no llenar los logs
+            await setupWebhook().catch(() => {});
           }
-        }, 60000); // 1 minuto (antes eran 2)
+        }, 10000); // 10 segundos - muy agresivo
         
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (WEBHOOK mode for preview with auto-recovery)');
+        this.logger.log('✅ TelegramService initialized (AGGRESSIVE WEBHOOK mode - 10s interval)');
       } else {
         // MODO POLLING para producción
         this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
