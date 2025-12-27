@@ -162,6 +162,18 @@ export class AuthService {
       this.logger.log(`[REGISTER] Profile insert result: ${JSON.stringify(profileResult)}`);
       this.logger.log(`[REGISTER] New tipster application received: ${dto.email}`);
 
+      // Enviar email de confirmación al tipster
+      try {
+        await this.emailService.sendTipsterApplicationReceived({
+          tipsterEmail: dto.email,
+          tipsterName: dto.name,
+          applicationDate: new Date(),
+        });
+        this.logger.log(`[REGISTER] Application received email sent to: ${dto.email}`);
+      } catch (emailError) {
+        this.logger.warn(`[REGISTER] Failed to send application received email: ${emailError.message}`);
+      }
+
       return {
         message: 'Solicitud de registro enviada correctamente. Un administrador revisará tu solicitud.',
         userId: userIdHex,
