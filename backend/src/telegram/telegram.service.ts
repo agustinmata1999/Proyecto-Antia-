@@ -1491,11 +1491,36 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Asegurar que el webhook esté configurado antes de procesar
+   */
+  private async ensureWebhook() {
+    const webhookUrl = (this as any).webhookUrl;
+    if (!webhookUrl) return;
+    
+    try {
+      const info = await this.bot.telegram.getWebhookInfo();
+      if (!info.url || info.url !== webhookUrl) {
+        await this.bot.telegram.setWebhook(webhookUrl, {
+          allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+          drop_pending_updates: false,
+          max_connections: 100,
+        });
+      }
+    } catch (e) {
+      // Silencioso
+    }
+  }
+
+  /**
    * Manejar updates desde webhook
    */
   async handleUpdate(update: any) {
     try {
       this.logger.log(`Processing webhook update: ${JSON.stringify(update).substring(0, 200)}`);
+      
+      // Asegurar webhook antes de procesar
+      await this.ensureWebhook();
+      
       await this.bot.handleUpdate(update);
       this.logger.log('Webhook update processed successfully');
     } catch (error) {
