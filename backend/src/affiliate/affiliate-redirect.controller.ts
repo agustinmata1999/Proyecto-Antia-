@@ -1,15 +1,19 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Req,
   Res,
   Headers,
+  Body,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { AffiliateService } from './affiliate.service';
+import { ObjectId } from 'mongodb';
 
 // Simple IP-based geolocation (reuse from checkout if available)
 async function getCountryFromIp(ip: string): Promise<string | null> {
