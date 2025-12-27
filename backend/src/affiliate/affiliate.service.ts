@@ -69,12 +69,21 @@ export class AffiliateService {
   }
 
   async updateBettingHouse(id: string, dto: UpdateBettingHouseDto) {
-    // Check house exists
-    const houseResult = await this.prisma.$runCommandRaw({
+    // Check house exists - try string ID first, then ObjectId
+    let houseResult = await this.prisma.$runCommandRaw({
       find: 'betting_houses',
-      filter: { _id: { $oid: id } },
+      filter: { _id: id },
       limit: 1,
     }) as any;
+
+    if (!houseResult.cursor?.firstBatch?.length) {
+      // Try as ObjectId
+      houseResult = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: { $oid: id } },
+        limit: 1,
+      }) as any;
+    }
 
     if (!houseResult.cursor?.firstBatch?.length) {
       throw new NotFoundException('Casa de apuestas no encontrada');
@@ -97,12 +106,11 @@ export class AffiliateService {
     if (dto.websiteUrl !== undefined) updateFields.website_url = dto.websiteUrl;
     if (dto.csvColumnMapping !== undefined) updateFields.csv_column_mapping = dto.csvColumnMapping;
 
+    // Try update with string ID first
     await this.prisma.$runCommandRaw({
-      update: 'betting_houses',
-      updates: [{
-        q: { _id: { $oid: id } },
-        u: { $set: updateFields },
-      }],
+      findAndModify: 'betting_houses',
+      query: { _id: id },
+      update: { $set: updateFields },
     });
 
     return this.getBettingHouse(id);
