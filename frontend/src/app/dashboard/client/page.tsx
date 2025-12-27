@@ -26,21 +26,25 @@ interface Purchase {
 
 interface TicketMessage {
   id: string;
-  senderId: string;
-  senderRole: string;
-  content: string;
-  attachments?: string[];
+  message: string;
+  responderId: string;
+  isAdmin: boolean;
   createdAt: string;
+  senderRole?: string;
+  content?: string;
+  attachments?: string[];
 }
 
 interface Ticket {
   id: string;
-  category: string;
+  category?: string;
   subject: string;
-  description: string;
+  message?: string;
+  description?: string;
   status: string;
-  priority: string;
+  priority?: string;
   orderId?: string;
+  responses?: TicketMessage[];
   messages?: TicketMessage[];
   createdAt: string;
   resolvedAt?: string;
