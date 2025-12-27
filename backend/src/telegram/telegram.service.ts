@@ -81,22 +81,29 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const webhookInfo = await this.bot.telegram.getWebhookInfo();
         this.logger.log(`📡 Webhook configured: ${webhookInfo.url}`);
         
-        // VERIFICACIÓN ULTRA-AGRESIVA: cada 10 segundos
+        // VERIFICACIÓN ULTRA-AGRESIVA: cada 5 segundos
         setInterval(async () => {
           try {
             const info = await this.bot.telegram.getWebhookInfo();
             if (!info.url || info.url !== webhookUrl) {
-              this.logger.warn(`⚠️ Webhook hijacked! Reclaiming...`);
-              await setupWebhook();
+              await this.bot.telegram.setWebhook(webhookUrl, {
+                allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+                drop_pending_updates: false,
+                max_connections: 100,
+              });
             }
           } catch (error) {
-            // Silencioso para no llenar los logs
-            await setupWebhook().catch(() => {});
+            // Silencioso - intentar reconfigurar sin logging
+            await this.bot.telegram.setWebhook(webhookUrl, {
+              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+              drop_pending_updates: false,
+              max_connections: 100,
+            }).catch(() => {});
           }
-        }, 10000); // 10 segundos - muy agresivo
+        }, 5000); // 5 segundos - ultra agresivo
         
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (AGGRESSIVE WEBHOOK mode - 10s interval)');
+        this.logger.log('✅ TelegramService initialized (ULTRA-AGGRESSIVE WEBHOOK mode - 5s interval)');
       } else {
         // MODO POLLING para producción
         this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
