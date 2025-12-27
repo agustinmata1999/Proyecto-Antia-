@@ -248,24 +248,18 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Health Endpoints - Telegram Bot"
-    - "Health Endpoints - Email Service"
-    - "Authentication - Admin Login"
-    - "Authentication - Tipster Login"
-    - "Authentication - Client Login"
-    - "Admin Panel - Tipsters List"
-    - "Admin Panel - Affiliate Houses"
-    - "Admin Panel - Affiliate Referrals"
-    - "Tipster Panel - Profile"
-    - "Tipster Panel - Products"
-    - "Tipster Panel - Affiliate Referrals"
-    - "Client Panel - Profile"
-    - "Client Panel - Purchases"
-    - "Client Panel - Support Tickets"
-  stuck_tasks: []
+    - "Home Page"
+    - "Admin Login Flow"
+    - "Tipster Login Flow"
+    - "Affiliate Demo Page"
+    - "Currency Exchange Rate Error"
+  stuck_tasks:
+    - "Affiliate Demo Page"
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
     message: "Completed comprehensive testing of Antia platform backend after preview URL change. All critical health endpoints, authentication flows, and panel APIs are working correctly. Only minor issue found: role naming mismatch in admin support tickets endpoint (expects SUPER_ADMIN vs SUPERADMIN). Telegram bot and email services are stable and properly configured for the new preview environment."
+  - agent: "testing"
+    message: "Completed frontend testing of Antia platform. Home page, admin login, and tipster login flows are working correctly. Found 2 issues: 1) Affiliate demo page /r/test-house-api shows 'Invalid link' error instead of demo form, 2) JavaScript error in currency exchange rate loading. Admin dashboard shows all expected sidebar options (Solicitudes, Gestión Tipsters, Afiliación, etc.) and tipster dashboard displays products correctly."
