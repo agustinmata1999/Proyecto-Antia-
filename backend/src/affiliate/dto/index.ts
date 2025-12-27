@@ -53,6 +53,10 @@ export class UpdateBettingHouseDto {
 
   @IsOptional()
   @IsString()
+  slug?: string;
+
+  @IsOptional()
+  @IsString()
   logoUrl?: string;
 
   @IsOptional()
