@@ -294,7 +294,8 @@ class AntiaHealthTester:
             response = self.make_request("GET", "/admin/tipsters", token=self.admin_token)
             
             if response.status_code == 200:
-                tipsters = response.json()
+                response_data = response.json()
+                tipsters = response_data.get("tipsters", [])
                 self.log(f"✅ Successfully retrieved {len(tipsters)} tipsters")
                 
                 # Log tipster details for verification
