@@ -53,12 +53,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const webhookUrl = `${appUrl}/api/telegram/webhook`;
         this.logger.log(`🔧 Setting up webhook mode at: ${webhookUrl}`);
         
-        // Función para configurar el webhook
-        const setupWebhook = async () => {
+        // Función para configurar el webhook - SIEMPRE fuerza la configuración
+        const setupWebhook = async (force: boolean = false) => {
           try {
             const currentWebhook = await this.bot.telegram.getWebhookInfo();
             
-            if (!currentWebhook.url || currentWebhook.url !== webhookUrl) {
+            if (force || !currentWebhook.url || currentWebhook.url !== webhookUrl) {
+              this.logger.log(`🔄 ${force ? 'Forcing' : 'Setting'} webhook to: ${webhookUrl}`);
               await this.bot.telegram.setWebhook(webhookUrl, {
                 allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
                 drop_pending_updates: false,
@@ -67,6 +68,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               this.logger.log(`✅ Webhook configured: ${webhookUrl}`);
               return true;
             }
+            this.logger.log(`✅ Webhook already correctly configured`);
             return true;
           } catch (error) {
             this.logger.error('Failed to set webhook:', error.message);
@@ -74,25 +76,40 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           }
         };
 
-        // Configurar webhook inicial
-        await setupWebhook();
+        // SIEMPRE configurar webhook al iniciar (force=true)
+        await setupWebhook(true);
         
-        // Verificar el webhook
+        // Verificar el webhook después de configurarlo
         const webhookInfo = await this.bot.telegram.getWebhookInfo();
-        this.logger.log(`📡 Webhook info: ${JSON.stringify(webhookInfo)}`);
+        this.logger.log(`📡 Webhook info after setup: ${JSON.stringify(webhookInfo)}`);
         
-        // Configurar verificación periódica del webhook (cada 2 minutos)
+        // Si aún no hay webhook, intentar de nuevo con un pequeño delay
+        if (!webhookInfo.url) {
+          this.logger.warn(`⚠️ Webhook not set after first attempt, retrying in 3s...`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          await setupWebhook(true);
+          const retryInfo = await this.bot.telegram.getWebhookInfo();
+          this.logger.log(`📡 Webhook info after retry: ${JSON.stringify(retryInfo)}`);
+        }
+        
+        // Configurar verificación periódica del webhook (cada 60 segundos - más frecuente)
         setInterval(async () => {
           try {
             const info = await this.bot.telegram.getWebhookInfo();
             if (!info.url || info.url !== webhookUrl) {
-              this.logger.warn(`⚠️ Webhook missing or wrong, reconfiguring...`);
-              await setupWebhook();
+              this.logger.warn(`⚠️ Webhook missing or wrong (current: ${info.url || 'none'}), reconfiguring...`);
+              await setupWebhook(true);
             }
           } catch (error) {
             this.logger.error('Webhook health check failed:', error.message);
+            // En caso de error, intentar reconfigurar de todos modos
+            try {
+              await setupWebhook(true);
+            } catch (retryError) {
+              this.logger.error('Webhook retry also failed:', retryError.message);
+            }
           }
-        }, 120000); // 2 minutos
+        }, 60000); // 1 minuto (antes eran 2)
         
         this.isInitialized = true;
         this.logger.log('✅ TelegramService initialized (WEBHOOK mode for preview with auto-recovery)');
