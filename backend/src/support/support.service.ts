@@ -66,9 +66,16 @@ export class SupportService {
       category: ticket.category,
       subject: ticket.subject,
       description: ticket.description,
+      message: ticket.description, // alias for consistency
       status: ticket.status,
       priority: ticket.priority,
       orderId: ticket.order_id,
+      responses: (ticket.responses || []).map((r: any) => ({
+        id: r.id,
+        message: r.message,
+        isAdmin: r.isAdmin || false,
+        createdAt: r.createdAt,
+      })),
       createdAt: ticket.created_at?.$date || ticket.created_at,
       resolvedAt: ticket.resolved_at?.$date || ticket.resolved_at,
     }));
