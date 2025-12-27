@@ -202,15 +202,14 @@ export class AdminSupportController {
         createdAt: new Date().toISOString(),
       };
 
+      // Try with string ID first (most IDs are UUIDs stored as strings)
       await this.prisma.$runCommandRaw({
-        update: 'support_tickets',
-        updates: [{
-          q: { _id: { $oid: id } },
-          u: {
-            $push: { responses: response },
-            $set: { updated_at: new Date().toISOString() },
-          },
-        }],
+        findAndModify: 'support_tickets',
+        query: { _id: id },
+        update: {
+          $push: { responses: response },
+          $set: { updated_at: new Date().toISOString() },
+        },
       });
 
       this.logger.log(`Admin replied to ticket ${id}`);
