@@ -24,6 +24,15 @@ interface Purchase {
   createdAt: string;
 }
 
+interface TicketMessage {
+  id: string;
+  senderId: string;
+  senderRole: string;
+  content: string;
+  attachments?: string[];
+  createdAt: string;
+}
+
 interface Ticket {
   id: string;
   category: string;
@@ -32,6 +41,7 @@ interface Ticket {
   status: string;
   priority: string;
   orderId?: string;
+  messages?: TicketMessage[];
   createdAt: string;
   resolvedAt?: string;
 }
