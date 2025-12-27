@@ -328,14 +328,30 @@ export class AffiliateRedirectController {
       }],
     });
 
-    // Update link referral count
-    await this.prisma.$runCommandRaw({
-      update: 'tipster_affiliate_links',
-      updates: [{
-        q: { _id: { $oid: linkDoc._id.$oid || linkDoc._id } },
-        u: { $inc: { total_referrals: 1 } },
-      }],
-    });
+    // Get the link ID properly
+    const linkId = linkDoc._id?.$oid || linkDoc._id;
+    
+    // Update link referral count - try both formats
+    try {
+      if (linkDoc._id?.$oid) {
+        await this.prisma.$runCommandRaw({
+          update: 'tipster_affiliate_links',
+          updates: [{
+            q: { _id: { $oid: linkId } },
+            u: { $inc: { total_referrals: 1 } },
+          }],
+        });
+      } else {
+        // If ID is a string, use findOneAndUpdate
+        await this.prisma.$runCommandRaw({
+          findAndModify: 'tipster_affiliate_links',
+          query: { redirect_code: redirectCode },
+          update: { $inc: { total_referrals: 1 } },
+        });
+      }
+    } catch (e) {
+      this.logger.warn(`Could not update link referral count: ${e.message}`);
+    }
 
     this.logger.log(`Demo conversion created: ${conversionId.toHexString()} for tipster ${tipsterId}`);
 
@@ -344,5 +360,67 @@ export class AffiliateRedirectController {
       conversionId: conversionId.toHexString(),
       message: 'Conversión de demo registrada exitosamente',
     };
+  }
+
+  /**
+   * Track a click when visiting the demo page
+   */
+  @Public()
+  @Post(':redirectCode/track-click')
+  async trackClick(
+    @Param('redirectCode') redirectCode: string,
+    @Req() req: Request,
+  ) {
+    this.logger.log(`Tracking click for code: ${redirectCode}`);
+
+    // Find the link
+    const linkResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_links',
+      filter: { redirect_code: redirectCode },
+      limit: 1,
+    }) as any;
+
+    const linkDoc = linkResult.cursor?.firstBatch?.[0];
+    if (!linkDoc || linkDoc.status !== 'ACTIVE') {
+      return { success: false, error: 'Link not found' };
+    }
+
+    // Update click count
+    try {
+      await this.prisma.$runCommandRaw({
+        findAndModify: 'tipster_affiliate_links',
+        query: { redirect_code: redirectCode },
+        update: { $inc: { total_clicks: 1 } },
+      });
+    } catch (e) {
+      this.logger.warn(`Could not update click count: ${e.message}`);
+    }
+
+    // Get IP and record in clicks collection
+    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+      || req.socket.remoteAddress
+      || '';
+    const countryCode = await getCountryFromIp(ip);
+    const now = new Date().toISOString();
+
+    try {
+      await this.prisma.$runCommandRaw({
+        insert: 'affiliate_click_events',
+        documents: [{
+          tipster_id: linkDoc.tipster_id,
+          house_id: linkDoc.house_id,
+          redirect_code: redirectCode,
+          ip_address: ip,
+          country_code: countryCode,
+          user_agent: req.headers['user-agent'] || null,
+          referer: req.headers['referer'] || null,
+          created_at: { $date: now },
+        }],
+      });
+    } catch (e) {
+      // Ignore click logging errors
+    }
+
+    return { success: true };
   }
 }
