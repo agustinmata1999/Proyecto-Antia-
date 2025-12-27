@@ -278,50 +278,78 @@ export class AffiliateAdminController {
   ) {
     await this.verifyAdmin(req.user.id);
 
-    const conversion = await this.prisma.affiliateConversion.findUnique({ where: { id } });
+    // Try to find conversion using raw query (handles both ObjectId and string IDs)
+    let conversionResult: any;
+    try {
+      conversionResult = await this.prisma.$runCommandRaw({
+        find: 'affiliate_conversions',
+        filter: { _id: { $oid: id } },
+        limit: 1,
+      });
+    } catch (e) {
+      // If ObjectId fails, try string
+      conversionResult = await this.prisma.$runCommandRaw({
+        find: 'affiliate_conversions',
+        filter: { _id: id },
+        limit: 1,
+      });
+    }
+
+    const conversion = conversionResult?.cursor?.firstBatch?.[0];
     if (!conversion) {
       throw new BadRequestException('Conversión no encontrada');
     }
 
-    // Get house for commission
-    const house = await this.prisma.bettingHouse.findUnique({ where: { id: conversion.houseId } });
+    const houseId = conversion.house_id;
+    const tipsterId = conversion.tipster_id;
 
-    const updateData: any = { status };
-    
-    if (status === 'APPROVED') {
-      updateData.approvedAt = new Date();
-      updateData.commissionCents = house?.commissionPerReferralCents || 0;
-      updateData.rejectionReason = null;
-      
-      // Update tipster link referral count using raw query
-      if (conversion.tipsterId) {
-        const linkResult = await this.prisma.$runCommandRaw({
-          find: 'tipster_affiliate_links',
-          filter: { tipster_id: conversion.tipsterId, house_id: conversion.houseId },
-          limit: 1,
-        }) as any;
-        
-        const linkDoc = linkResult.cursor?.firstBatch?.[0];
-        if (linkDoc) {
-          const linkId = linkDoc._id.$oid || linkDoc._id.toString();
-          await this.prisma.$runCommandRaw({
-            update: 'tipster_affiliate_links',
-            updates: [{
-              q: { _id: { $oid: linkId } },
-              u: { $inc: { total_referrals: 1 } },
-            }],
-          });
-        }
-      }
-    } else if (status === 'REJECTED') {
-      updateData.rejectionReason = rejectionReason;
-      updateData.commissionCents = null;
+    // Get house for commission
+    let house: any = null;
+    try {
+      const houseResult = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: { $oid: houseId } },
+        limit: 1,
+      }) as any;
+      house = houseResult?.cursor?.firstBatch?.[0];
+    } catch (e) {
+      const houseResult = await this.prisma.$runCommandRaw({
+        find: 'betting_houses',
+        filter: { _id: houseId },
+        limit: 1,
+      }) as any;
+      house = houseResult?.cursor?.firstBatch?.[0];
     }
 
-    return this.prisma.affiliateConversion.update({
-      where: { id },
-      data: updateData,
+    const now = new Date().toISOString();
+    const updateData: any = { 
+      status,
+      updated_at: { $date: now },
+    };
+    
+    if (status === 'APPROVED') {
+      updateData.approved_at = { $date: now };
+      updateData.commission_cents = house?.commission_per_referral_cents || 2500;
+      updateData.rejection_reason = null;
+    } else if (status === 'REJECTED') {
+      updateData.rejection_reason = rejectionReason || null;
+      updateData.commission_cents = null;
+      updateData.approved_at = null;
+    }
+
+    // Update using raw query
+    await this.prisma.$runCommandRaw({
+      findAndModify: 'affiliate_conversions',
+      query: { _id: { $oid: id } },
+      update: { $set: updateData },
     });
+
+    return {
+      success: true,
+      message: status === 'APPROVED' ? 'Referido aprobado' : 'Referido rechazado',
+      conversionId: id,
+      status,
+    };
   }
 
   // ==================== REFERRALS (New Unified View) ====================
