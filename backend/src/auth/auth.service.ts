@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { RegisterTipsterDto, RegisterClientDto, LoginDto } from './dto';
 import { UserPayload } from '../common/interfaces/user-payload.interface';
+import { EmailService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private config: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
