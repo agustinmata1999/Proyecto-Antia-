@@ -84,13 +84,15 @@ export class AffiliateService {
     const updateFields: any = { updated_at: { $date: now } };
 
     if (dto.name) updateFields.name = dto.name;
+    if (dto.slug) updateFields.slug = dto.slug;
     if (dto.logoUrl !== undefined) updateFields.logo_url = dto.logoUrl;
     if (dto.status) updateFields.status = dto.status;
     if (dto.masterAffiliateUrl) updateFields.master_affiliate_url = dto.masterAffiliateUrl;
-    if (dto.trackingParamName) updateFields.tracking_param_name = dto.trackingParamName;
+    if (dto.trackingParamName !== undefined) updateFields.tracking_param_name = dto.trackingParamName;
     if (dto.commissionPerReferralCents !== undefined) updateFields.commission_per_referral_cents = dto.commissionPerReferralCents;
-    if (dto.allowedCountries) updateFields.allowed_countries = dto.allowedCountries;
-    if (dto.blockedCountries) updateFields.blocked_countries = dto.blockedCountries;
+    // Arrays can be empty, so check for undefined instead of truthy
+    if (dto.allowedCountries !== undefined) updateFields.allowed_countries = dto.allowedCountries;
+    if (dto.blockedCountries !== undefined) updateFields.blocked_countries = dto.blockedCountries;
     if (dto.description !== undefined) updateFields.description = dto.description;
     if (dto.websiteUrl !== undefined) updateFields.website_url = dto.websiteUrl;
     if (dto.csvColumnMapping !== undefined) updateFields.csv_column_mapping = dto.csvColumnMapping;
