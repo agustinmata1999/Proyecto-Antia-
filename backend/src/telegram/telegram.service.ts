@@ -53,39 +53,49 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const webhookUrl = `${appUrl}/api/telegram/webhook`;
         this.logger.log(`🔧 Setting up webhook mode at: ${webhookUrl}`);
         
-        try {
-          // Primero verificar si ya existe el webhook correcto
-          const currentWebhook = await this.bot.telegram.getWebhookInfo();
-          
-          if (currentWebhook.url !== webhookUrl) {
-            // Configurar el webhook si no está configurado o es diferente
-            await this.bot.telegram.setWebhook(webhookUrl, {
-              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-              drop_pending_updates: false,
-            });
-            this.logger.log(`✅ Webhook configured successfully`);
-          } else {
-            this.logger.log(`✅ Webhook already configured correctly`);
-          }
-          
-          // Verificar el webhook
-          const webhookInfo = await this.bot.telegram.getWebhookInfo();
-          this.logger.log(`📡 Webhook info: ${JSON.stringify(webhookInfo)}`);
-        } catch (webhookError) {
-          this.logger.error('Failed to set webhook:', webhookError.message);
-          // Reintentar una vez más
+        // Función para configurar el webhook
+        const setupWebhook = async () => {
           try {
-            await this.bot.telegram.setWebhook(webhookUrl, {
-              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-            });
-            this.logger.log(`✅ Webhook configured on retry`);
-          } catch (retryError) {
-            this.logger.error('Webhook retry failed:', retryError.message);
+            const currentWebhook = await this.bot.telegram.getWebhookInfo();
+            
+            if (!currentWebhook.url || currentWebhook.url !== webhookUrl) {
+              await this.bot.telegram.setWebhook(webhookUrl, {
+                allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+                drop_pending_updates: false,
+                max_connections: 40,
+              });
+              this.logger.log(`✅ Webhook configured: ${webhookUrl}`);
+              return true;
+            }
+            return true;
+          } catch (error) {
+            this.logger.error('Failed to set webhook:', error.message);
+            return false;
           }
-        }
+        };
+
+        // Configurar webhook inicial
+        await setupWebhook();
+        
+        // Verificar el webhook
+        const webhookInfo = await this.bot.telegram.getWebhookInfo();
+        this.logger.log(`📡 Webhook info: ${JSON.stringify(webhookInfo)}`);
+        
+        // Configurar verificación periódica del webhook (cada 2 minutos)
+        setInterval(async () => {
+          try {
+            const info = await this.bot.telegram.getWebhookInfo();
+            if (!info.url || info.url !== webhookUrl) {
+              this.logger.warn(`⚠️ Webhook missing or wrong, reconfiguring...`);
+              await setupWebhook();
+            }
+          } catch (error) {
+            this.logger.error('Webhook health check failed:', error.message);
+          }
+        }, 120000); // 2 minutos
         
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (WEBHOOK mode for preview)');
+        this.logger.log('✅ TelegramService initialized (WEBHOOK mode for preview with auto-recovery)');
       } else {
         // MODO POLLING para producción
         this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
