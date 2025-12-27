@@ -34,11 +34,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const loadExchangeRate = async () => {
     try {
       const response = await currencyApi.getRates();
-      const rates = response.data;
-      // Find EUR to USD rate
-      const eurUsd = rates.find((r: any) => r.baseCurrency === 'EUR' && r.targetCurrency === 'USD');
-      if (eurUsd) {
-        setExchangeRate(eurUsd.rate);
+      // Handle both formats: { rates: [...] } or directly [...]
+      const rates = response.data?.rates || response.data;
+      if (Array.isArray(rates)) {
+        // Find EUR to USD rate
+        const eurUsd = rates.find((r: any) => r.baseCurrency === 'EUR' && r.targetCurrency === 'USD');
+        if (eurUsd) {
+          setExchangeRate(eurUsd.rate);
+        }
       }
     } catch (error) {
       console.error('Error loading exchange rate:', error);
