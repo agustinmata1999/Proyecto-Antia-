@@ -553,6 +553,155 @@ export class EmailTemplatesService {
   }
 
   // =============================================
+  // =============================================
+  // TIPSTER - REGISTRO Y APROBACIÓN
+  // =============================================
+
+  /**
+   * Email al tipster cuando envía su solicitud de registro
+   */
+  tipsterApplicationReceived(data: {
+    tipsterName: string;
+    email: string;
+    applicationDate: Date;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #dbeafe; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">📝</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">¡Solicitud recibida!</h2>
+      </div>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hola <strong>${data.tipsterName}</strong>,
+      </p>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hemos recibido tu solicitud para ser tipster en ${this.brandName}. Nuestro equipo revisará tu información y te notificaremos por email cuando tengamos una respuesta.
+      </p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0; font-size: 14px; color: #1e40af;">
+          <strong>¿Qué sigue?</strong><br/>
+          Revisaremos tu perfil y canales en las próximas 24-48 horas. Te enviaremos un email con el resultado.
+        </p>
+      </div>
+
+      ${this.infoBox([
+        { label: 'Email registrado', value: data.email },
+        { label: 'Fecha de solicitud', value: this.formatDate(data.applicationDate) },
+      ])}
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+        Si tienes alguna pregunta, puedes contactarnos respondiendo a este email.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Hemos recibido tu solicitud de tipster');
+  }
+
+  /**
+   * Email al tipster cuando su solicitud es aprobada
+   */
+  tipsterApplicationApproved(data: {
+    tipsterName: string;
+    email: string;
+    approvedDate: Date;
+    loginUrl: string;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">🎉</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">¡Felicitaciones!</h2>
+        <p style="margin: 8px 0 0; font-size: 18px; color: #059669; font-weight: 600;">Tu solicitud ha sido aprobada</p>
+      </div>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hola <strong>${data.tipsterName}</strong>,
+      </p>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        ¡Bienvenido a ${this.brandName}! Tu solicitud para ser tipster ha sido <strong style="color: #059669;">aprobada</strong>. Ya puedes acceder a tu panel y empezar a crear tus productos.
+      </p>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;">
+          <strong>⚠️ Importante:</strong><br/>
+          Recuerda completar tu información de KYC (datos personales y método de cobro) para poder recibir tus ganancias.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 32px 0;">
+        ${this.button('Acceder a mi panel', data.loginUrl)}
+      </div>
+
+      <h3 style="margin: 32px 0 16px; font-size: 18px; font-weight: 600; color: #111827;">Próximos pasos:</h3>
+      
+      <ol style="margin: 0; padding-left: 20px; color: #4b5563; line-height: 1.8;">
+        <li>Completa tu información de KYC</li>
+        <li>Conecta tu canal premium de Telegram</li>
+        <li>Crea tu primer producto</li>
+        <li>Comparte tu link y empieza a vender</li>
+      </ol>
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+        Si tienes alguna duda, puedes crear un ticket de soporte desde tu panel.
+      </p>
+    `;
+
+    return this.baseTemplate(content, '¡Tu solicitud de tipster ha sido aprobada!');
+  }
+
+  /**
+   * Email al tipster cuando su solicitud es rechazada
+   */
+  tipsterApplicationRejected(data: {
+    tipsterName: string;
+    email: string;
+    rejectedDate: Date;
+    rejectionReason?: string;
+  }): string {
+    const content = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 64px; height: 64px; background-color: #fee2e2; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
+          <span style="font-size: 32px;">😔</span>
+        </div>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">Solicitud no aprobada</h2>
+      </div>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Hola <strong>${data.tipsterName}</strong>,
+      </p>
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Lamentamos informarte que tu solicitud para ser tipster en ${this.brandName} no ha sido aprobada en esta ocasión.
+      </p>
+
+      ${data.rejectionReason ? `
+        <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+          <p style="margin: 0; font-size: 14px; color: #991b1b;">
+            <strong>Motivo:</strong><br/>
+            ${data.rejectionReason}
+          </p>
+        </div>
+      ` : ''}
+
+      <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
+        Si crees que esto es un error o deseas más información, puedes contactarnos respondiendo a este email.
+      </p>
+
+      <p style="margin: 24px 0 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+        Gracias por tu interés en ${this.brandName}.
+      </p>
+    `;
+
+    return this.baseTemplate(content, 'Actualización sobre tu solicitud de tipster');
+  }
+
+  // =============================================
   // TIPSTER - VENTAS / ACCESOS
   // =============================================
 
