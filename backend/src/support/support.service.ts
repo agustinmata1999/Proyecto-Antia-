@@ -185,4 +185,46 @@ export class SupportService {
 
     return { success: true, message: 'Ticket actualizado' };
   }
+
+  /**
+   * Agregar respuesta de cliente a un ticket
+   */
+  async addClientResponse(userId: string, ticketId: string, message: string) {
+    // Verify ticket belongs to user
+    const ticketResult = await this.prisma.$runCommandRaw({
+      find: 'support_tickets',
+      filter: { _id: ticketId, user_id: userId },
+      limit: 1,
+    }) as any;
+
+    const ticket = ticketResult.cursor?.firstBatch?.[0];
+    if (!ticket) {
+      throw new Error('Ticket no encontrado');
+    }
+
+    if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') {
+      throw new Error('No se puede responder a un ticket cerrado');
+    }
+
+    const response = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+      message,
+      isAdmin: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    await this.prisma.$runCommandRaw({
+      findAndModify: 'support_tickets',
+      query: { _id: ticketId },
+      update: {
+        $push: { responses: response },
+        $set: { 
+          updated_at: new Date().toISOString(),
+          status: 'OPEN', // Reopen if it was in progress
+        },
+      },
+    });
+
+    return { success: true, response };
+  }
 }
