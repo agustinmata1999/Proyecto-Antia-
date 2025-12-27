@@ -770,4 +770,16 @@ export class EmailService {
   isReady(): boolean {
     return this.isConfigured;
   }
+
+  /**
+   * Get health status of email service
+   */
+  getHealthStatus() {
+    return {
+      isConfigured: this.isConfigured,
+      senderEmail: this.senderEmail,
+      senderName: this.senderName,
+      hasApiKey: !!this.resend,
+    };
+  }
 }
