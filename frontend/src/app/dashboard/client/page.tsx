@@ -217,6 +217,40 @@ export default function ClientDashboard() {
     }
   };
 
+  const handleOpenTicket = async (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    // Reload ticket to get latest messages
+    try {
+      const response = await supportApi.getTicket(ticket.id);
+      if (response.data) {
+        setSelectedTicket(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading ticket:', error);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() || !selectedTicket) return;
+    
+    setSendingReply(true);
+    try {
+      await supportApi.replyToTicket(selectedTicket.id, { message: replyMessage.trim() });
+      setReplyMessage('');
+      // Reload ticket to get latest messages
+      const response = await supportApi.getTicket(selectedTicket.id);
+      if (response.data) {
+        setSelectedTicket(response.data);
+        // Also update in list
+        setTickets(prev => prev.map(t => t.id === selectedTicket.id ? response.data : t));
+      }
+    } catch (error: any) {
+      alert('Error al enviar respuesta: ' + (error.response?.data?.message || 'Error desconocido'));
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
