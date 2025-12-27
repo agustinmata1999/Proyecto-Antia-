@@ -856,9 +856,9 @@ export default function ClientDashboard() {
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="font-medium text-gray-900">{ticket.subject}</h3>
                             {getTicketStatusBadge(ticket.status)}
-                            {ticket.messages && ticket.messages.length > 0 && (
+                            {ticket.responses && ticket.responses.length > 0 && (
                               <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
-                                {ticket.messages.length} mensaje{ticket.messages.length > 1 ? 's' : ''}
+                                {ticket.responses.length} respuesta{ticket.responses.length > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
