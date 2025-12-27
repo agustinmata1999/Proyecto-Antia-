@@ -34,6 +34,8 @@ async function getCountryFromIp(ip: string): Promise<string | null> {
 
 @Controller('r')
 export class AffiliateRedirectController {
+  private readonly logger = new Logger(AffiliateRedirectController.name);
+  
   constructor(
     private affiliateService: AffiliateService,
     private prisma: PrismaService,
