@@ -200,9 +200,9 @@ export const supportApi = {
     api.post('/support/tickets', data),
   getMyTickets: () => api.get('/support/tickets/my'),
   getTicketDetails: (id: string) => api.get(`/support/tickets/my/${id}`),
-  getTicket: (id: string) => api.get(`/tickets/${id}`),
-  replyToTicket: (id: string, data: { message: string; attachments?: string[] }) =>
-    api.post(`/tickets/${id}/reply`, data),
+  getTicket: (id: string) => api.get(`/support/tickets/my/${id}`),
+  replyToTicket: (id: string, data: { message: string }) =>
+    api.post(`/support/tickets/${id}/reply`, data),
   
   // Admin endpoints
   admin: {
