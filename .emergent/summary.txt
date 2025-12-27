@@ -1,35 +1,43 @@
-<analysis>**original_problem_statement:** The user wants to perform a complete overhaul of the application's user panels and add a comprehensive affiliate marketing system.
+<analysis>**original_problem_statement:** The user wants to perform a complete overhaul of the application's user panels, add a comprehensive affiliate marketing system (AFFILIA-GO), and has provided a detailed checklist of features to implement. Recent requests include creating a demo for the affiliate system, implementing emails for the tipster approval flow, fixing several bugs related to the admin panel, enhancing the support ticket system, and ensuring the Telegram bot and email services are stable in the preview environment.
 
 **PRODUCT REQUIREMENTS:**
-*   **Reorganize Panels (PROMPT 1):**
-    *   **Tipster Panel:** Implement a full registration/approval flow (Pending -> Approved -> KYC), create a profile section, simplify product creation (adding a No Channel option and subscription frequencies), simplify link sharing to a Copy Link button, and add a full support ticket system.
-    *   **Client Panel:** Implement a user dashboard to view purchases, manage active subscriptions (with a cancel option), access purchased content, and manage a basic profile.
-    *   **SuperAdmin Panel:** Create a dashboard for total control, including managing tipster applications, a detailed sales/checkout view with filters, global metrics (Stripe-like dashboard), and a view for internal commission splits. Also, a centralized support section to manage tickets from both tipsters and clients.
-*   **Affiliate System (AFFILIA-GO - PROMPT 2):**
-    *   Build a system for promoting third-party betting houses.
-    *   **Admin:** CRUD for betting houses (logo, allowed countries, master affiliate link), and a detailed list of all referred users (conversions) with status and earnings.
-    *   **Tipster:** A dedicated affiliate section to get unique tracking links for each house and see metrics (clicks, referrals, earnings) and a detailed list of their own referred users.
-    *   **Core Logic:** Implement a master redirection link () that tracks the click (tipster, house, country by IP) before redirecting to the betting house's master link.
-    *   **Geolocation:** The system MUST detect the user's country via IP and only show/allow links for betting houses permitted in that country.
+*   **Reorganize Panels & Add Features (PROMPT 1 & Checklist):** Implement full registration/approval/KYC for Tipsters, a client dashboard for managing purchases/subscriptions, and a superadmin panel for total control. Key missing features identified from the user's checklist are:
+    *   Social logins (Google/Telegram) for clients.
+    *   Automatic expulsion from Telegram channels for expired subscriptions.
+    *   Photo uploads for user profiles.
+*   **Affiliate System (AFFILIA-GO - PROMPT 2):** Build a system for promoting third-party betting houses with geolocation, tracking links, and detailed dashboards for admins and tipsters. A demo page for this system was requested and implemented.
+*   **System Stability:** Ensure the Telegram bot and email services are always functional in the preview environment.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is a NestJS backend and Next.js frontend. The agent has successfully completed a massive overhaul of all three user panels (Tipster, Client, SuperAdmin) as per the user's first major prompt. The agent also fixed a critical, recurring issue with the Telegram bot webhook that was caused by an incorrect supervisor configuration. The bot is now stable across restarts. The implementation of the new Affiliate System (AFFILIA-GO) has begun, with the backend and frontend foundations being laid out.
+The application is a NestJS backend and a Next.js frontend. The agent has successfully implemented a demo flow for the affiliate system, allowing the user to simulate a referral and see it appear in the admin and tipster panels. The agent also implemented a series of critical bug fixes for the affiliate admin panel (updating betting houses, approving/rejecting referrals) and enhanced the support ticket system so users can now see admin replies. A new system of emails for the tipster registration/approval/rejection process has also been added. The agent has implemented a temporary fix to improve the stability of the Telegram bot.
 
 **Last working item**:
--   **Last item agent was working:** The agent was implementing the **AFFILIA-GO** system as requested in PROMPT 2. Specifically, they were building out the frontend UI and backend endpoints for the Admin and Tipster panels to display detailed lists of affiliate conversions/referrals. This included adding new tabs, tables, and API endpoints to fetch and display this data.
+-   **Last item agent was working:** The user requested to make the Telegram bot and email services robust and always functional in the preview environment. The agent investigated and found the bot's webhook was being deleted. A periodic check was added to  to re-register the webhook if it's missing, and new health check endpoints (, ) were created to monitor their status.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (Backend endpoints tested with curl, frontend UI partially verified with screenshots)
--   **Which testing method agent to use?** both
+-   **Agent Testing Done:** Y
+-   **Which testing method agent to use?** backend testing agent
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P1) Subscription Backend Logic is Incomplete**
+-   **Issue 1: (P0) Telegram Bot Webhook Instability**
+    -   **Description:** The Telegram webhook is being periodically deleted, causing the bot to become unresponsive. While a periodic self-healing check has been implemented in the code, the root cause is likely an external process (e.g., a production instance running with the same bot token) interfering with the preview environment's configuration.
+    -   **Attempted fixes:** Corrected  in supervisor config; enforced  and  on supervisor restart; implemented a  in  to check and re-register the webhook every minute.
+    -   **Next debug checklist:**
+        1.  Use the new endpoint  to monitor the webhook status.
+        2.  If the issue persists, inform the user that the most probable cause is a conflicting bot instance and recommend using a separate, dedicated bot token for the preview environment to achieve a permanent solution.
+    -   **Why fix this issue and what will be achieved with the fix?** The bot is critical for granting users access to paid content. A stable bot is essential for the application's core business logic.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on other issue:** None
+
+-   **Issue 2: (P1) Subscription Backend Logic is Incomplete**
     -   **Description:** The system does not automatically handle subscription lifecycle events from Stripe. When a user cancels a subscription or a payment fails, they are not removed from the premium Telegram channel.
     -   **Next debug checklist:**
-        1.  Create a Stripe webhook endpoint in .
-        2.  Implement handlers for  and .
+        1.  Create a Stripe webhook endpoint (e.g., in ).
+        2.  Implement handlers for  and  events.
         3.  In the handlers, identify the user and use  to call the  API to remove the user from the channel.
     -   **Why fix this issue and what will be achieved with the fix?** This is a core business requirement to prevent users from retaining access after they stop paying.
     -   **Status:** NOT STARTED
@@ -37,141 +45,119 @@ The application is a NestJS backend and Next.js frontend. The agent has successf
     -   **Should Test frontend/backend/both after fix?** backend
     -   **Blocked on other issue:** None
 
--   **Issue 2: (P1) Bot Does Not Handle Channel Join Requests**
-    -   **Description:** For Telegram channels that require admin approval for new members, the bot doesn't automatically approve users who have made a valid purchase.
-    -   **Next debug checklist:**
-        1.  In , add a handler for the  event.
-        2.  Inside the handler, check if the user has an active purchase for the channel.
-        3.  If a valid purchase exists, call .
-    -   **Why fix this issue and what will be achieved with the fix?** Increases flexibility for tipsters' channel privacy settings.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** backend
-    -   **Blocked on other issue:** None
-
 **In progress Task List**:
--   **Task 1: (P0) Complete AFFILIA-GO Affiliate System**
-    -   **Where to resume:** The UI and data-fetching for viewing affiliate conversions are built for both Admin and Tipster panels. The immediate next steps are to implement the core tracking and redirection logic.
-        1.  Create the backend endpoint ( or ) that will handle the affiliate link clicks.
-        2.  Implement IP-based geolocation within this endpoint to identify the user's country.
-        3.  Record the click event in the database ( model: tipster\_id, house\_id, country, timestamp).
-        4.  Perform the server-side redirect to the betting house's master affiliate link.
-    -   **What will be achieved with this?** This will complete the affiliate system, enabling tipsters to generate and use tracking links, and allowing the admin to monitor all affiliate activity.
+-   **Task 1: (P0) Finalize Bot and Email Stability**
+    -   **Where to resume:** The health check endpoints and the bot's self-healing mechanism are implemented. The next step is to confirm with the user if the bot is now stable. If not, proceed with the recommendation of using a separate bot token.
+    -   **What will be achieved with this?** A stable bot and reliable email delivery in the preview environment, fulfilling the user's direct request.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** both
+    -   **Should Test frontend/backend/both after fix?** backend
     -   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    *   **(P1)** Integrate Google OAuth for client login.
-    *   **(P1)** Integrate Telegram Login Widget for client login.
-    *   **(P2)** Add photo/avatar upload functionality to Tipster and Client profile sections.
+    *   **(P1)** Implement Login with Google OAuth for clients.
+    *   **(P1)** Implement Login with Telegram Widget for clients.
+    *   **(P1)** Implement photo upload functionality for Tipster and Client profiles.
+    *   **(P1)** Add a 'trimestral' (quarterly) subscription option when creating products.
+    *   **(P1)** Implement transactional emails for subscription cancellation and expiration events.
+    *   **(P2)** Add a toggle in the SuperAdmin panel to enable/disable the products/pronósticos module for each tipster.
 -   **Future Tasks:**
     *   Implement CSV Upload for manually importing Affiliate Conversions.
     *   Build the UI/UX for Campañas (Campaigns).
-    *   Implement a Crypto payment option.
+    -   Implement a Crypto payment option.
 
 **Completed work in this session**
--   **Critical Bug Fix:**
-    -   Resolved the recurring Telegram Bot webhook instability by correcting the  environment variable in the supervisor configuration file () and restarting the backend.
--   **Panel Reorganization (PROMPT 1 - Fully Completed):**
-    -   **Tipster Panel:**
-        -   **Soporte:** Fully implemented the support ticket system, including file attachments.
-        -   **Telegram Guide:** Added a detailed, step-by-step guide on how to connect a premium channel.
-        -   **Product Flow:** Verified and confirmed the Sin Canal option works and updated the confirmation email template to reflect this.
-        -   **Verification:** Confirmed the Tipster Registration/KYC flow and simplified Product Link flows are correctly implemented.
-    -   **Client Panel:**
-        -   **Suscripciones:** Added a new Mis Suscripciones section allowing clients to view and cancel their active subscriptions.
-    -   **SuperAdmin Panel:**
-        -   **Ventas Checkout:** Implemented a new, detailed sales dashboard with global metrics (volume, commissions, net) and comprehensive filters.
-        -   **Soporte:** Implemented a unified support center to view and reply to tickets from both Tipsters and Clients.
--   **Code Consolidation:**
-    -   Resolved a conflict between two separate ticket modules ( and ) by consolidating all logic into the more complete  module and updating all frontend calls.
-    -   Cleaned up legacy code related to the old Canal de Publicación feature.
+-   **AFFILIA-GO Demo System:**
+    -   Created a fake registration page () for demo purposes.
+    -   Implemented backend logic to create demo conversions and track clicks/referrals accurately.
+-   **Bug Fixes:**
+    -   **Affiliate Status Update:** Fixed the bug preventing admins from approving/rejecting affiliate referrals.
+    -   **Betting House Edit:** Fixed the bug that blocked admins from editing betting house details (like allowed/blocked countries).
+    -   **Affiliate Counters:** Corrected the logic to ensure click and referral counters update correctly in the tipster panel.
+    -   **UI Fix:** Resolved an issue where the Mis Referidos tab was not visible in the tipster's affiliate section.
+-   **Support Ticket System Enhancement:**
+    -   Implemented the functionality for clients and tipsters to view admin replies and the full conversation history within their respective dashboards.
+-   **Email Implementation:**
+    -   Implemented and tested automated emails sent to tipsters upon application submission, approval, and rejection.
+-   **System Health & Stability:**
+    -   Resolved initial Telegram Bot instability by fixing the supervisor configuration ().
+    -   Created health check endpoints (, ).
+    -   Added a self-healing mechanism to the bot to periodically re-register its webhook.
 
 **Earlier issues found/mentioned but not fixed**
--   Same as the **All Pending/In progress Issue list**. The agent prioritized the user's new requests.
+-   **Issue 1: Subscription Backend Logic is Incomplete** (Same as in All Pending/In progress Issue list).
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** Telegram Bot Webhook Instability
--   **Recurrence count:** 1 (at the very beginning of the session)
--   **Status:** RESOLVED (The root cause in the environment configuration was found and fixed).
+-   **Recurrence count:** High (occurred multiple times during this session)
+-   **Status:** IN PROGRESS (A patch is in place, but the underlying issue may be external).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Environment Configuration:** Debugging service issues by inspecting and modifying supervisor configuration files ().
--   **Feature Refactoring:** Consolidating duplicated backend modules ( vs ) into a single source of truth.
--   **File Uploads:** Implementing file uploads in NestJS using Multer and  to handle multipart/form-data and serve the uploaded files.
--   **Affiliate Marketing Logic:** Designing the architecture for tracking affiliate clicks and conversions.
--   **Conditional Email Templating:** Modifying email templates to show different content based on product attributes (e.g., if it has an associated Telegram channel).
+-   **Supervisor Configuration:** Diagnosed and fixed issues related to environment variables () not being correctly passed to the application process, requiring No config updates to processes and .
+-   **MongoDB ID Handling:** Encountered and fixed multiple bugs caused by an inconsistency between Prisma's expectations for  and the use of  IDs from raw database queries.
+-   **System Resilience:** Implemented a  in a NestJS service to create a simple, periodic self-healing mechanism for the Telegram webhook.
+-   **Feature Prototyping:** Quickly created a functional demo page for the affiliate system by adding a new route in Next.js and corresponding backend endpoints to simulate user registration and conversion tracking.
 
 **key DB schema**
--   **Ticket:** 
--   **TicketMessage:** 
--   **Subscription:** (Implicitly handled via  and Stripe data) 
--   **AffiliateHouse:** 
--   **AffiliateClick:** 
--   **AffiliateConversion:** 
+-   **AffiliateConversion:**  (updated with new fields for demo and tracking).
+-   **SupportTicket:**  (The  array holds the conversation thread).
+-   **ResponseMessage:** .
 
 **changes in tech stack**
--    and  added to the backend for handling file uploads.
+-   None.
 
 **All files of reference**
--   **/app/frontend/src/app/dashboard/admin/page.tsx**: Heavily modified to add the Ventas Checkout and Soporte views.
--   **/app/frontend/src/app/dashboard/client/page.tsx**: Modified to add the Mis Suscripciones view.
--   **/app/frontend/src/app/dashboard/tipster/page.tsx**: Heavily modified to add the Soporte view with file uploads and the detailed Telegram guide.
--   **/app/frontend/src/components/AffiliateAdminPanel.tsx**: Modified to add the Referidos tab and table.
--   **/app/frontend/src/components/AffiliateSection.tsx**: Modified to add the Referidos tab for tipsters.
--   **/app/backend/src/admin/admin-sales.controller.ts**: New controller for the admin sales dashboard.
--   **/app/backend/src/admin/admin-support.controller.ts**: New controller for the admin support dashboard.
--   **/app/backend/src/client/client.controller.ts**: Updated with subscription management endpoints.
--   **/app/backend/src/upload/upload.controller.ts**: New controller to handle file uploads.
--   **/app/frontend/src/lib/api.ts**: Heavily updated with new client methods for all the new features.
--   **/etc/supervisor/conf.d/supervisord.conf**: The file that was edited to fix the critical bot issue.
+-   **/app/backend/src/telegram/telegram.service.ts**: Updated to add a self-healing mechanism for the webhook.
+-   **/app/backend/src/health.controller.ts**: New file created to house health check endpoints for core services.
+-   **/app/backend/src/affiliate/affiliate.service.ts**: Heavily modified to fix database queries failing due to string vs. ObjectId mismatches.
+-   **/app/backend/src/emails/email-templates.service.ts**: Updated with new email templates for the tipster registration flow.
+-   **/app/backend/src/support/support.service.ts**: Updated to include message history in ticket data and allow replies.
+-   **/app/frontend/src/app/r/[code]/page.tsx**: New file for the affiliate system's demo registration page.
+-   **/app/frontend/src/app/dashboard/client/page.tsx**: Updated to display support ticket conversation modals.
+-   **/app/frontend/src/app/dashboard/tipster/page.tsx**: Updated to display support ticket conversation modals.
+-   **/etc/supervisor/conf.d/supervisord.conf**: Modified to fix the  environment variable.
 
 **Areas that need refactoring**:
--   The main page files (, , ) are still very large. While the agent correctly used components for some sections (), further modularization of the UI logic within these pages would improve maintainability.
+-   **Duplicate Ticket Modules:** The codebase contains two separate modules for handling support tickets ( and ). The recent work was done on , but this duplication is confusing and should be consolidated into a single, unified module.
+-   **Database ID Inconsistency:** The pattern of using raw queries that create string-based IDs is a technical debt. This forced many workarounds to query data correctly. The application should be standardized to either use Prisma-compatible ObjectIDs everywhere or switch fully to UUIDs as strings.
 
 **key api endpoints**
--   : Fetches all sales data for the admin dashboard.
--   : Fetches all support tickets for the admin dashboard.
--   : Allows an admin to reply to a ticket.
--   : Fetches active subscriptions for a client.
--   : Cancels a client's subscription.
--   : Creates a new support ticket (for tipster/client).
--   : Adds a reply to a ticket.
--   : Uploads a file for a support ticket.
--   : Fetches all affiliate conversions for the admin panel.
--   : Fetches a tipster's own affiliate conversions.
+-   : (New) Checks the status of the Telegram bot's webhook.
+-   : (New) Checks if the email service is configured.
+-   : (New) Creates a fake affiliate conversion for the demo page.
+-   : (Fixed) Updates the status (approve/reject) of an affiliate referral.
+-   : (Fixed) Updates the details of a betting house.
+-   : (Updated) Now sends a confirmation email to the applicant.
+-   : (Updated) Now sends an approval or rejection email to the tipster.
+-   : (Updated) Allows users and admins to add messages to a ticket.
+-   : (Updated) Fetches a user's tickets, now including the full message history.
 
 **Critical Info for New Agent**
--   **Priority is AFFILIA-GO:** The immediate task is to complete the affiliate system. The core redirection and tracking logic, including IP-based geolocation, is the next critical piece to implement.
--   **File Uploads:** The file upload endpoint () is created and saves files to . The frontend is also updated. This pattern can be reused for profile photo uploads.
--   **Panel Overhaul is Complete:** The extensive work on reorganizing the three main user panels is finished. Avoid making major structural changes to them unless requested. Focus on adding the remaining features (Google/Telegram login, etc.).
--   **Bot is Stable:** The Telegram bot webhook issue was an environment configuration problem and has been fixed. You can assume the bot is stable unless new evidence suggests otherwise.
+-   **Telegram Bot Instability:** The most urgent issue is the bot's instability. A temporary fix (periodic self-check) is in place, but the root cause is likely an external production instance using the same bot token. The next step is to communicate this to the user and recommend using a separate bot token for the preview environment.
+-   **Database ID Inconsistency:** Be extremely cautious when querying the database. Many records have string-based  fields, not s. Queries using Prisma Client's  may fail. You will likely need to use raw queries or  with a  clause that handles both string and ObjectId formats.
+-   **Affiliate Demo:** The Test House API affiliate link () now redirects to a demo registration page. This is an intentional feature for the user to demonstrate the referral flow.
 
-**documents and test_reports created in this job**
+**documents and test reports created in this job**
 -   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Now I want you to read this prompt and tell me what was done and if anything is missing (PROMPT 1).
-2.  **Agent:** Provides a detailed analysis of what was completed, what is partial, and what is missing from PROMPT 1.
-3.  **User:** I want you to explain in the premium channels section, higher up and bigger, what the person has to do to add the channel... Add file uploads to tickets and verify the no channel product flow.
-4.  **Agent:** Implements the requested changes.
-5.  **User:** OK, now let's go with the following (PROMPT 2 - AFFILIA-GO).
-6.  **Agent:** Starts working on the affiliate system.
-7.  **User:** continue with the super admin panel.
-8.  **Agent:** Implements the SuperAdmin features.
-9.  **User:** in admin create a section to be able to see, respond to both tipster and client tickets.
-10. **Agent:** Implements the admin support section.
+1.  **User:** The affiliate counters (clicks/referrals) are not updating. - **Status:** DONE
+2.  **User:** I'm getting an error when trying to approve or reject an affiliate referral. - **Status:** DONE
+3.  **User:** Does the system send emails when a tipster registers, is approved, or rejected? If not, please implement this. - **Status:** DONE
+4.  **Agent:** Confirmed the emails were not implemented and proposed a plan.
+5.  **User:** si (yes) - **Status:** DONE
+6.  **User:** I'm getting an error when I edit a betting house from the admin panel. - **Status:** DONE
+7.  **User:** When an admin replies to a support ticket, the user cannot see the response. Please fix this. - **Status:** DONE
+8.  **User:** The bot and emails are not working. Please fix them to be stable in the preview environment. - **Status:** IN PROGRESS
+9.  **User:** Provided a comprehensive checklist and asked for a status update on all features. - **Status:** DONE (Agent provided a detailed analysis)
+10. **User:** Requested the creation of a fake affiliate registration page for Test House to demonstrate the referral system. - **Status:** DONE
 
 **Project Health Check:**
--   **Broken:** None. The critical Telegram bot issue has been resolved.
--   **Mocked:**
-    -   **Geolocation:** The affiliate system requires IP-based geolocation to function correctly, which has not been implemented yet.
-    -   **Affiliate Tracking:** The core redirection endpoint that tracks affiliate clicks is not yet implemented. The system can display data but cannot generate new tracking events.
+-   **Broken:** The Telegram bot's stability is compromised due to its webhook being repeatedly deleted externally, although a software-based mitigation is now active.
+-   **Mocked:** The affiliate flow for Test House API is mocked, directing to an internal demo page instead of an external betting house.
 
 **3rd Party Integrations**
 -   **Telegraf.js (Telegram):** For all bot interactions.
@@ -179,18 +165,18 @@ The application is a NestJS backend and Next.js frontend. The agent has successf
 -   **Redsys (Payments):** For Spanish payments.
 -   **Resend (Emails):** For all transactional emails.
 -   **Prisma:** ORM for MongoDB.
--   **Multer / @nestjs/serve-static (File Uploads):** Newly added for handling file uploads in the backend.
+-   **Multer / @nestjs/serve-static (File Uploads):** For handling file uploads in the backend.
 
 **Testing status**
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** None.
--   **Known regressions:** None. The previous regression (Telegram bot) was fixed.
+-   **Known regressions:** The Telegram bot webhook instability, which was a known issue from a previous fork, has recurred and is currently being addressed.
 
 **Credentials to test flow:**
 -   **SuperAdmin:**  / 
--   **Tipster (Legacy, working):**  / 
+-   **Tipster (Working):**  / 
 -   **Client:**  / 
 
 **What agent forgot to execute**
--   The agent has correctly followed all user requests and prompts. The items identified as missing (like Google/Telegram login) were correctly categorized as upcoming tasks based on the agent's analysis and were not forgotten.</analysis>
+-   The agent has correctly addressed all direct user requests made during this session. The remaining pending items are part of the larger, initial product requirements and have been correctly identified as upcoming tasks.</analysis>

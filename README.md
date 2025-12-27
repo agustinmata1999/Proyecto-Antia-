@@ -14,10 +14,10 @@ Sistema completo implementado con:
 ## 🌐 ACCESO A LA PLATAFORMA
 
 ### URLs de Acceso
-- **Frontend**: https://affpanel-2.preview.emergentagent.com
-- **API Backend**: https://affpanel-2.preview.emergentagent.com/api
-- **Swagger Docs**: https://affpanel-2.preview.emergentagent.com/api/docs
-- **Health Check**: https://affpanel-2.preview.emergentagent.com/api/health
+- **Frontend**: https://affilia-panel.preview.emergentagent.com
+- **API Backend**: https://affilia-panel.preview.emergentagent.com/api
+- **Swagger Docs**: https://affilia-panel.preview.emergentagent.com/api/docs
+- **Health Check**: https://affilia-panel.preview.emergentagent.com/api/health
 
 ### Credenciales de Prueba
 
@@ -582,7 +582,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
 
 2. **Login Tipster:**
    ```
-   https://affpanel-2.preview.emergentagent.com/login
+   https://affilia-panel.preview.emergentagent.com/login
    → Accede con fausto.perez@antia.com / Tipster123!
    ```
 
@@ -604,7 +604,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
    ```
    Simular webhook de pago con curl:
    
-   curl -X POST https://affpanel-2.preview.emergentagent.com/api/webhooks/payments/confirm \
+   curl -X POST https://affilia-panel.preview.emergentagent.com/api/webhooks/payments/confirm \
      -H "Content-Type: application/json" \
      -d '{
        "product_id": "PRODUCT_ID",
@@ -709,7 +709,7 @@ Propietario - Todos los derechos reservados © 2025 Antia
 
 El sistema está completamente operativo y listo para usar.
 
-**Accede ahora:** https://affpanel-2.preview.emergentagent.com
+**Accede ahora:** https://affilia-panel.preview.emergentagent.com
 
 **Credenciales:**
 - SuperAdmin: admin@antia.com / SuperAdmin123!

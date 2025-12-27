@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const API_URL = process.env.API_URL;
-const APP_URL = process.env.APP_URL || 'https://affpanel-2.preview.emergentagent.com';
+const APP_URL = process.env.APP_URL || 'https://affilia-panel.preview.emergentagent.com';
 
 // Simulated mode message
 const SIMULATED_MODE = process.env.BOT_TOKEN.includes('SIMULATED');
