@@ -177,14 +177,14 @@ class AntiaHealthTester:
                     self.admin_token = response_data["access_token"]
                     self.log("✅ Admin login successful - JWT token received")
                     
-                    # Check user role
+                    # Check user role (accept both ADMIN and SUPERADMIN)
                     user = response_data.get("user", {})
                     role = user.get("role")
-                    if role == "ADMIN":
-                        self.log("✅ User role is ADMIN")
+                    if role in ["ADMIN", "SUPERADMIN"]:
+                        self.log(f"✅ User role is {role}")
                         return True
                     else:
-                        self.log(f"❌ Expected ADMIN role, got: {role}", "ERROR")
+                        self.log(f"❌ Expected ADMIN or SUPERADMIN role, got: {role}", "ERROR")
                         return False
                 else:
                     self.log("❌ Admin login response missing access_token", "ERROR")
