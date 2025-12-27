@@ -1657,4 +1657,62 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
       };
     }
   }
+
+  /**
+   * Get health status of Telegram bot
+   */
+  async getHealthStatus() {
+    try {
+      const webhookInfo = await this.bot.telegram.getWebhookInfo();
+      const botInfo = await this.bot.telegram.getMe();
+      
+      return {
+        isInitialized: this.isInitialized,
+        botUsername: botInfo.username,
+        botId: botInfo.id,
+        webhookUrl: webhookInfo.url || null,
+        pendingUpdates: webhookInfo.pending_update_count || 0,
+        lastError: webhookInfo.last_error_message || null,
+        lastErrorDate: webhookInfo.last_error_date 
+          ? new Date(webhookInfo.last_error_date * 1000).toISOString() 
+          : null,
+      };
+    } catch (error) {
+      return {
+        isInitialized: this.isInitialized,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Force reconfigure webhook (useful for debugging)
+   */
+  async forceReconfigureWebhook() {
+    const appUrl = this.config.get<string>('APP_URL');
+    if (!appUrl) {
+      return { success: false, error: 'APP_URL not configured' };
+    }
+
+    const webhookUrl = `${appUrl}/api/telegram/webhook`;
+    
+    try {
+      await this.bot.telegram.setWebhook(webhookUrl, {
+        allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+        drop_pending_updates: false,
+        max_connections: 40,
+      });
+      
+      const webhookInfo = await this.bot.telegram.getWebhookInfo();
+      return {
+        success: true,
+        webhookUrl: webhookInfo.url,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
 }
