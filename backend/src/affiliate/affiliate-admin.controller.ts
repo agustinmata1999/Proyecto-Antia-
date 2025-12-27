@@ -365,16 +365,24 @@ export class AffiliateAdminController {
     const houseIds = [...new Set(conversions.map((c: any) => c.house_id).filter(Boolean))];
     const tipsterIds = [...new Set(conversions.map((c: any) => c.tipster_id).filter(Boolean))];
 
-    // Fetch houses
+    // Fetch houses - handle both string and ObjectId formats
     let housesMap: Record<string, string> = {};
     if (houseIds.length > 0) {
+      // Try with ObjectId format first
       const housesResult = await this.prisma.$runCommandRaw({
         find: 'betting_houses',
-        filter: { _id: { $in: houseIds.map((id: string) => ({ $oid: id })) } },
+        filter: {},
         projection: { name: 1 },
       }) as any;
       (housesResult.cursor?.firstBatch || []).forEach((h: any) => {
-        housesMap[h._id.$oid || h._id] = h.name;
+        const id = h._id.$oid || h._id || '';
+        housesMap[id] = h.name;
+        // Also map without $oid wrapper
+        if (h._id.$oid) {
+          housesMap[h._id.$oid] = h.name;
+        }
+        // Also try as string
+        housesMap[String(h._id)] = h.name;
       });
     }
 
