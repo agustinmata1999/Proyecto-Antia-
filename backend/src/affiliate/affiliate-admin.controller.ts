@@ -278,47 +278,55 @@ export class AffiliateAdminController {
   ) {
     await this.verifyAdmin(req.user.id);
 
-    // Try to find conversion using raw query (handles both ObjectId and string IDs)
-    let conversionResult: any;
-    try {
-      conversionResult = await this.prisma.$runCommandRaw({
-        find: 'affiliate_conversions',
-        filter: { _id: { $oid: id } },
-        limit: 1,
-      });
-    } catch (e) {
-      // If ObjectId fails, try string
-      conversionResult = await this.prisma.$runCommandRaw({
-        find: 'affiliate_conversions',
-        filter: { _id: id },
-        limit: 1,
-      });
+    // Try to find conversion - first as string, then as ObjectId
+    let conversionResult = await this.prisma.$runCommandRaw({
+      find: 'affiliate_conversions',
+      filter: { _id: id },
+      limit: 1,
+    }) as any;
+
+    let conversion = conversionResult?.cursor?.firstBatch?.[0];
+    
+    // If not found as string, try as ObjectId
+    if (!conversion) {
+      try {
+        conversionResult = await this.prisma.$runCommandRaw({
+          find: 'affiliate_conversions',
+          filter: { _id: { $oid: id } },
+          limit: 1,
+        });
+        conversion = conversionResult?.cursor?.firstBatch?.[0];
+      } catch (e) {
+        // Ignore ObjectId parse errors
+      }
     }
 
-    const conversion = conversionResult?.cursor?.firstBatch?.[0];
     if (!conversion) {
       throw new BadRequestException('Conversión no encontrada');
     }
 
     const houseId = conversion.house_id;
-    const tipsterId = conversion.tipster_id;
 
     // Get house for commission
     let house: any = null;
     try {
-      const houseResult = await this.prisma.$runCommandRaw({
-        find: 'betting_houses',
-        filter: { _id: { $oid: houseId } },
-        limit: 1,
-      }) as any;
-      house = houseResult?.cursor?.firstBatch?.[0];
-    } catch (e) {
-      const houseResult = await this.prisma.$runCommandRaw({
+      let houseResult = await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: houseId },
         limit: 1,
       }) as any;
       house = houseResult?.cursor?.firstBatch?.[0];
+      
+      if (!house) {
+        houseResult = await this.prisma.$runCommandRaw({
+          find: 'betting_houses',
+          filter: { _id: { $oid: houseId } },
+          limit: 1,
+        }) as any;
+        house = houseResult?.cursor?.firstBatch?.[0];
+      }
+    } catch (e) {
+      // Ignore house lookup errors
     }
 
     const now = new Date().toISOString();
@@ -337,10 +345,10 @@ export class AffiliateAdminController {
       updateData.approved_at = null;
     }
 
-    // Update using raw query
+    // Update using raw query - try string ID first
     await this.prisma.$runCommandRaw({
       findAndModify: 'affiliate_conversions',
-      query: { _id: { $oid: id } },
+      query: { _id: id },
       update: { $set: updateData },
     });
 
