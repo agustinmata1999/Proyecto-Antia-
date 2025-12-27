@@ -58,6 +58,18 @@ export class SupportController {
     return ticket;
   }
 
+  @Post('tickets/:id/reply')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reply to my ticket' })
+  async replyToTicket(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() body: { message: string },
+  ) {
+    return this.supportService.addClientResponse(user.id, id, body.message);
+  }
+
   // ==================== ADMIN ENDPOINTS ====================
 
   @Get('admin/tickets')
