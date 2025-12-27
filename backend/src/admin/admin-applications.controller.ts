@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../emails/emails.service';
 
 interface ReviewApplicationDto {
   action: 'APPROVE' | 'REJECT';
@@ -24,7 +25,10 @@ interface ReviewApplicationDto {
 export class AdminApplicationsController {
   private readonly logger = new Logger(AdminApplicationsController.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   /**
    * Verificar que el usuario es SuperAdmin
