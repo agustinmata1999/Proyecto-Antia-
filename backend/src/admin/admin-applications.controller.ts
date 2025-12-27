@@ -320,6 +320,48 @@ export class AdminApplicationsController {
 
     this.logger.log(`Application ${id} ${dto.action}D by admin ${admin.email}`);
 
+    // Obtener el email del tipster para enviar notificación
+    try {
+      const userId = profile.user_id;
+      let userResult = await this.prisma.$runCommandRaw({
+        find: 'users',
+        filter: { _id: { $oid: userId } },
+        limit: 1,
+      }) as any;
+      
+      if (!userResult.cursor?.firstBatch?.[0]) {
+        userResult = await this.prisma.$runCommandRaw({
+          find: 'users',
+          filter: { _id: userId },
+          limit: 1,
+        }) as any;
+      }
+
+      const user = userResult.cursor?.firstBatch?.[0];
+      if (user?.email) {
+        const tipsterName = profile.public_name || 'Tipster';
+        
+        if (dto.action === 'APPROVE') {
+          await this.emailService.sendTipsterApplicationApproved({
+            tipsterEmail: user.email,
+            tipsterName,
+            approvedDate: new Date(),
+          });
+          this.logger.log(`[EMAIL] Approval email sent to: ${user.email}`);
+        } else {
+          await this.emailService.sendTipsterApplicationRejected({
+            tipsterEmail: user.email,
+            tipsterName,
+            rejectedDate: new Date(),
+            rejectionReason: dto.rejectionReason,
+          });
+          this.logger.log(`[EMAIL] Rejection email sent to: ${user.email}`);
+        }
+      }
+    } catch (emailError) {
+      this.logger.warn(`[EMAIL] Failed to send status email: ${emailError.message}`);
+    }
+
     return {
       success: true,
       message: dto.action === 'APPROVE' 
