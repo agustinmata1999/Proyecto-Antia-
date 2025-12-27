@@ -581,6 +581,80 @@ export class EmailService {
   }
 
   // =============================================
+  // TIPSTER - REGISTRO Y APROBACIÓN
+  // =============================================
+
+  /**
+   * Enviar email al tipster cuando se recibe su solicitud
+   */
+  async sendTipsterApplicationReceived(data: {
+    tipsterEmail: string;
+    tipsterName: string;
+    applicationDate: Date;
+  }) {
+    const html = this.templates.tipsterApplicationReceived({
+      tipsterName: data.tipsterName,
+      email: data.tipsterEmail,
+      applicationDate: data.applicationDate,
+    });
+    return this.sendEmail({
+      to: data.tipsterEmail,
+      subject: `¡Hemos recibido tu solicitud! – ${this.brandName}`,
+      html,
+      type: 'TIPSTER_APPLICATION_RECEIVED',
+      metadata: { tipsterEmail: data.tipsterEmail },
+    });
+  }
+
+  /**
+   * Enviar email al tipster cuando su solicitud es aprobada
+   */
+  async sendTipsterApplicationApproved(data: {
+    tipsterEmail: string;
+    tipsterName: string;
+    approvedDate: Date;
+  }) {
+    const loginUrl = `${this.appUrl}/login`;
+    const html = this.templates.tipsterApplicationApproved({
+      tipsterName: data.tipsterName,
+      email: data.tipsterEmail,
+      approvedDate: data.approvedDate,
+      loginUrl,
+    });
+    return this.sendEmail({
+      to: data.tipsterEmail,
+      subject: `🎉 ¡Tu solicitud ha sido aprobada! – ${this.brandName}`,
+      html,
+      type: 'TIPSTER_APPLICATION_APPROVED',
+      metadata: { tipsterEmail: data.tipsterEmail },
+    });
+  }
+
+  /**
+   * Enviar email al tipster cuando su solicitud es rechazada
+   */
+  async sendTipsterApplicationRejected(data: {
+    tipsterEmail: string;
+    tipsterName: string;
+    rejectedDate: Date;
+    rejectionReason?: string;
+  }) {
+    const html = this.templates.tipsterApplicationRejected({
+      tipsterName: data.tipsterName,
+      email: data.tipsterEmail,
+      rejectedDate: data.rejectedDate,
+      rejectionReason: data.rejectionReason,
+    });
+    return this.sendEmail({
+      to: data.tipsterEmail,
+      subject: `Actualización sobre tu solicitud – ${this.brandName}`,
+      html,
+      type: 'TIPSTER_APPLICATION_REJECTED',
+      metadata: { tipsterEmail: data.tipsterEmail },
+    });
+  }
+
+  // =============================================
   // SUPERADMIN
   // =============================================
 
