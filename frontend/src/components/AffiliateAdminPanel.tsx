@@ -175,8 +175,14 @@ export default function AffiliateAdminPanel() {
   }, [activeTab]);
 
   const loadData = async () => {
-    // Promotions tab handles its own loading
-    if (activeTab === 'promotions') {
+    // Campaigns tab handles its own loading
+    if (activeTab === 'campaigns') {
+      setLoading(false);
+      return;
+    }
+    
+    // Stats tab handles its own loading
+    if (activeTab === 'stats') {
       setLoading(false);
       return;
     }
@@ -187,9 +193,6 @@ export default function AffiliateAdminPanel() {
       if (activeTab === 'houses') {
         const res = await affiliateApi.admin.getHouses(true);
         setHouses(res.data || []);
-      } else if (activeTab === 'campaigns') {
-        const res = await affiliateApi.admin.getCampaigns(true);
-        setCampaigns(res.data || []);
       } else if (activeTab === 'import') {
         const [housesRes, batchesRes] = await Promise.all([
           affiliateApi.admin.getHouses(true),
