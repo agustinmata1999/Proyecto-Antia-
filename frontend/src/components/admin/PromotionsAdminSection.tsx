@@ -6,7 +6,10 @@ import { Plus, Trash2, Edit, ChevronDown, ChevronUp, ExternalLink, X, Save } fro
 
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || window.location.origin;
+    // Use REACT_APP_BACKEND_URL for consistency
+    return process.env.REACT_APP_BACKEND_URL || 
+           process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 
+           window.location.origin;
   }
   return '';
 };
