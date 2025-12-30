@@ -75,12 +75,14 @@ export default function TipsterDashboard() {
   const [telegramChannels, setTelegramChannels] = useState<TelegramChannel[]>([]);
   const [channelsLoading, setChannelsLoading] = useState(false);
   const [showAddChannelForm, setShowAddChannelForm] = useState(false);
-  // SIMPLIFICADO: Solo necesitamos el nombre del canal
-  const [channelNameInput, setChannelNameInput] = useState('');
+  // Estado del formulario de conexión
+  const [channelInput, setChannelInput] = useState(''); // Puede ser nombre o ID
+  const [inputMode, setInputMode] = useState<'name' | 'id'>('name'); // Modo de entrada
   const [connectingChannel, setConnectingChannel] = useState(false);
   const [addChannelError, setAddChannelError] = useState('');
   
   // Legacy - mantener para compatibilidad pero no usar
+  const [channelNameInput, setChannelNameInput] = useState('');
   const [newChannelData, setNewChannelData] = useState({
     channelId: '',
     channelTitle: '',
