@@ -133,7 +133,47 @@ export default function TipsterLandingsSection() {
     }
   };
 
+  const loadPromotions = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/promotions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPromotions(data);
+      }
+    } catch (err) {
+      console.error('Error loading promotions:', err);
+    }
+  };
+
+  const loadPromotionHouses = async (promotionId: string) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/promotions/${promotionId}/houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPromotionHouses(data);
+        // Reset country configs when promotion changes
+        setFormData(prev => ({
+          ...prev,
+          countryConfigs: [],
+        }));
+      }
+    } catch (err) {
+      console.error('Error loading promotion houses:', err);
+    }
+  };
+
   const loadHousesForCountry = async (country: string) => {
+    // Si hay promoción seleccionada, usar las casas de la promoción
+    if (formData.promotionId) {
+      return; // Ya tenemos las casas de la promoción
+    }
+
     if (availableHouses[country]) return;
 
     try {
@@ -147,6 +187,18 @@ export default function TipsterLandingsSection() {
       }
     } catch (err) {
       console.error('Error loading houses:', err);
+    }
+  };
+
+  const handlePromotionChange = (promotionId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      promotionId,
+      countryConfigs: [],
+    }));
+    setPromotionHouses([]);
+    if (promotionId) {
+      loadPromotionHouses(promotionId);
     }
   };
 
