@@ -1115,6 +1115,49 @@ class AntiaAffiliateTester:
             self.log(f"❌ Health check test failed: {str(e)}", "ERROR")
             return False
 
+    def run_affiliate_statistics_tests(self) -> Dict[str, bool]:
+        """Run affiliate statistics system tests as requested in review"""
+        self.log("🚀 Starting AFFILIA-GO Affiliate Statistics System Tests")
+        self.log("=" * 60)
+        
+        results = {}
+        
+        # 1. Health Check (P0)
+        results["health_check"] = self.test_health_check()
+        
+        # 2. Authentication Tests
+        results["tipster_login"] = self.test_login()
+        results["admin_login"] = self.test_admin_login()
+        
+        if not results["tipster_login"]:
+            self.log("❌ Tipster authentication failed - skipping tipster tests", "ERROR")
+        
+        if not results["admin_login"]:
+            self.log("❌ Admin authentication failed - skipping admin tests", "ERROR")
+        
+        # 3. Admin Affiliate Stats (P0)
+        if results["admin_login"]:
+            results["admin_affiliate_stats"] = self.test_admin_affiliate_stats()
+        else:
+            results["admin_affiliate_stats"] = False
+        
+        # 4. Tipster Stats (P0)
+        if results["tipster_login"]:
+            results["tipster_affiliate_stats"] = self.test_tipster_affiliate_stats()
+        else:
+            results["tipster_affiliate_stats"] = False
+        
+        # 5. Tipster Promotions/Campaigns (P0)
+        if results["tipster_login"]:
+            results["tipster_promotions"] = self.test_tipster_promotions()
+        else:
+            results["tipster_promotions"] = False
+        
+        # 6. Conversion Postback (P1)
+        results["conversion_postback"] = self.test_conversion_postback()
+        
+        return results
+
     def run_affiliate_landing_tests(self) -> Dict[str, bool]:
         """Run all affiliate landing system tests"""
         self.log("🚀 Starting Antia Affiliate Landing System Tests")
