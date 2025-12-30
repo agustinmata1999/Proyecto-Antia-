@@ -258,6 +258,7 @@ export default function PromotionsAdminSection() {
       bettingHouseId: '',
       affiliateUrl: '',
       trackingParamName: 'subid',
+      commissionCents: 5000, // Default €50
     });
     setShowAddHouseModal(true);
   };
