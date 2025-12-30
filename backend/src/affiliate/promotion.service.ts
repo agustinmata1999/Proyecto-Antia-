@@ -307,7 +307,7 @@ export class PromotionService {
   /**
    * Añadir link de casa a una promoción
    */
-  async addHouseLink(promotionId: string, bettingHouseId: string, affiliateUrl: string, trackingParamName?: string) {
+  async addHouseLink(promotionId: string, bettingHouseId: string, affiliateUrl: string, trackingParamName?: string, commissionCents?: number) {
     // Verificar que no exista ya
     const existingResult = await this.prisma.$runCommandRaw({
       find: 'promotion_house_links',
@@ -330,6 +330,7 @@ export class PromotionService {
         betting_house_id: bettingHouseId,
         affiliate_url: affiliateUrl,
         tracking_param_name: trackingParamName || null,
+        commission_cents: commissionCents || 5000, // Default €50
         is_active: true,
         created_at: { $date: now },
         updated_at: { $date: now },
