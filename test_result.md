@@ -1,13 +1,13 @@
 # Test Results - Módulo Landing de Afiliación Antia
 
 ## Test Context
-- **Date:** 2025-12-30 (Updated)
+- **Date:** 2025-12-30 (Updated v2)
 - **Environment:** Preview (https://tipster-portal-1.preview.emergentagent.com)
-- **Feature:** Sistema de Landings de Afiliación con Promociones/Retos Específicos
+- **Feature:** Sistema de Landings de Afiliación con Promociones/Retos Específicos + Panel Admin
 
-## Feature Update (Fork)
-- **New Feature:** Casas de apuestas con enlaces específicos por Promoción/Reto
-- **Flow:** Admin crea Reto → Tipster selecciona Reto → Usuario ve casas del Reto → Redirección a enlace específico
+## Feature Update (Fork v2)
+- **New Feature:** Panel de SuperAdmin para gestionar Retos/Promociones
+- **Flow Admin:** SuperAdmin crea Reto → Añade casas con links específicos → Tipster selecciona Reto → Usuario ve casas del Reto → Redirección a enlace específico
 
 ## Testing Protocol
 1. Test crear landing desde panel tipster
