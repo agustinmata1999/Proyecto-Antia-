@@ -221,6 +221,35 @@ export default function PromotionsAdminSection() {
     }
   };
 
+  const toggleExpand = async (promoId: string) => {
+    if (expandedPromotion === promoId) {
+      setExpandedPromotion(null);
+      return;
+    }
+    
+    // Si ya tiene houseLinks, solo expandimos
+    const promo = promotions.find(p => p.id === promoId);
+    if (promo && (!promo.houseLinks || promo.houseLinks.length === 0) && (promo.housesCount || 0) > 0) {
+      // Cargar los house links
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`${getBaseUrl()}/api/admin/promotions/${promoId}`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPromotions(prev => prev.map(p => 
+            p.id === promoId ? { ...p, houseLinks: data.houseLinks || [] } : p
+          ));
+        }
+      } catch (err) {
+        console.error('Error loading house links:', err);
+      }
+    }
+    
+    setExpandedPromotion(promoId);
+  };
+
   // House Link handlers
   const openAddHouseModal = (promoId: string) => {
     setSelectedPromotionId(promoId);
