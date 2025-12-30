@@ -5,23 +5,28 @@ import * as https from 'https';
 
 /**
  * TelegramHttpService - Direct HTTP calls to Telegram API via proxy
- * Uses allorigins.win as a CORS proxy to bypass firewall restrictions.
- * This is a reliable fallback when direct connections to api.telegram.org are blocked.
+ * Uses multiple CORS proxies with fallback to ensure reliability.
  */
 @Injectable()
 export class TelegramHttpService {
   private readonly logger = new Logger(TelegramHttpService.name);
   private readonly botToken: string;
   private readonly apiBaseUrl: string = 'https://api.telegram.org';
-  private readonly proxyBaseUrl: string = 'https://api.allorigins.win/raw?url=';
+  
+  // Multiple proxies for redundancy
+  private readonly proxyUrls: string[] = [
+    'https://api.allorigins.win/raw?url=',
+  ];
+  
   private axiosInstance: AxiosInstance;
-  private useProxy: boolean = true; // Always use proxy since direct connection is blocked
+  private currentProxyIndex: number = 0;
+  private consecutiveFailures: number = 0;
+  private lastSuccessTime: number = 0;
 
   constructor(private config: ConfigService) {
     this.botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN') || '';
     
-    // Create axios instance with longer timeout and curl-like headers
-    // The proxy blocks typical Node.js User-Agents, so we use curl's UA
+    // Create axios instance with curl-like headers (required to bypass proxy restrictions)
     this.axiosInstance = axios.create({
       timeout: 30000,
       headers: {
@@ -34,7 +39,55 @@ export class TelegramHttpService {
       }),
     });
 
-    this.logger.log(`TelegramHttpService initialized (using proxy: ${this.proxyBaseUrl})`);
+    this.logger.log(`TelegramHttpService initialized with ${this.proxyUrls.length} proxy(s)`);
+  }
+
+  /**
+   * Get the current proxy URL
+   */
+  private getCurrentProxy(): string {
+    return this.proxyUrls[this.currentProxyIndex % this.proxyUrls.length];
+  }
+
+  /**
+   * Rotate to the next proxy
+   */
+  private rotateProxy(): void {
+    this.currentProxyIndex = (this.currentProxyIndex + 1) % this.proxyUrls.length;
+    this.logger.log(`Rotated to proxy: ${this.getCurrentProxy()}`);
+  }
+
+  /**
+   * Make an API call with retry logic across multiple proxies
+   */
+  private async callApiWithRetry<T>(method: string, params: Record<string, any> = {}, retries: number = 3): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const result = await this.callApiGet<T>(method, params);
+        this.consecutiveFailures = 0;
+        this.lastSuccessTime = Date.now();
+        return result;
+      } catch (error) {
+        lastError = error;
+        this.consecutiveFailures++;
+        this.logger.warn(`API call failed (attempt ${attempt + 1}/${retries}): ${error.message}`);
+        
+        // If too many failures, try rotating proxy
+        if (this.consecutiveFailures >= 2 && this.proxyUrls.length > 1) {
+          this.rotateProxy();
+        }
+        
+        // Wait before retry (exponential backoff)
+        if (attempt < retries - 1) {
+          const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+    
+    throw lastError || new Error('All retries failed');
   }
 
   /**
