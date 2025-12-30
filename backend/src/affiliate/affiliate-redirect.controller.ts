@@ -423,4 +423,74 @@ export class AffiliateRedirectController {
 
     return { success: true };
   }
+
+  /**
+   * Postback endpoint for betting houses to report conversions
+   * URL format: /r/postback?subid=tipsterId_clickId&house=betway&event=registration&amount=100&currency=EUR&txid=ABC123
+   */
+  @Public()
+  @Get('postback')
+  async handlePostbackGet(
+    @Req() req: Request,
+  ) {
+    const { subid, house, event, amount, currency, txid } = req.query as Record<string, string>;
+    
+    this.logger.log(`📡 Postback received: subid=${subid}, house=${house}, event=${event}`);
+    
+    if (!subid) {
+      return { success: false, error: 'Missing subid parameter' };
+    }
+
+    try {
+      const result = await this.affiliateService.handlePostback({
+        subid,
+        houseSlug: house,
+        event: event || 'REGISTRATION',
+        amount: amount ? parseFloat(amount) : undefined,
+        currency: currency || 'EUR',
+        transactionId: txid,
+      });
+      
+      return result;
+    } catch (error) {
+      this.logger.error(`Postback error: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+  }
+
+  @Public()
+  @Post('postback')
+  async handlePostbackPost(
+    @Body() body: any,
+    @Req() req: Request,
+  ) {
+    const subid = body.subid || body.sub_id || body.clickid || body.click_id;
+    const houseSlug = body.house || body.brand || body.operator;
+    const event = body.event || body.type || body.action || 'REGISTRATION';
+    const amount = body.amount || body.commission || body.revenue;
+    const currency = body.currency || 'EUR';
+    const transactionId = body.txid || body.transaction_id || body.conversion_id;
+    
+    this.logger.log(`📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}`);
+    
+    if (!subid) {
+      return { success: false, error: 'Missing subid parameter' };
+    }
+
+    try {
+      const result = await this.affiliateService.handlePostback({
+        subid,
+        houseSlug,
+        event,
+        amount: amount ? parseFloat(amount) : undefined,
+        currency,
+        transactionId,
+      });
+      
+      return result;
+    } catch (error) {
+      this.logger.error(`Postback error: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+  }
 }
