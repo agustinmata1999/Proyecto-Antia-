@@ -227,7 +227,7 @@ class TelegramBotTester:
         
         try:
             # Test with empty body as specified in review request
-            response = self.make_request("POST", "/telegram/webhook", {}, use_auth=False)
+            response = self.make_request("POST", "/telegram/webhook", {}, use_auth=False, timeout=15)
             
             if response.status_code == 200:
                 result = response.json()
