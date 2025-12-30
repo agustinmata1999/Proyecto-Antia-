@@ -288,7 +288,7 @@ export default function TipsterLandingsSection() {
 
   const handleCreateLanding = async () => {
     if (!formData.promotionId) {
-      setFormError('Selecciona un reto/promoción');
+      setFormError('Selecciona una campaña');
       return;
     }
 
@@ -567,20 +567,20 @@ export default function TipsterLandingsSection() {
               </div>
               
               <div className="space-y-6">
-                {/* Selección de Promoción/Reto */}
+                {/* Selección de Campaña */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reto/Promoción <span className="text-red-500">*</span>
+                    Campaña <span className="text-red-500">*</span>
                   </label>
                   <p className="text-sm text-gray-500 mb-2">
-                    Selecciona el reto que quieres promocionar
+                    Selecciona la campaña que quieres promocionar
                   </p>
                   <select
                     value={formData.promotionId}
                     onChange={e => handlePromotionChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Selecciona un reto...</option>
+                    <option value="">Selecciona una campaña...</option>
                     {promotions.map(promo => (
                       <option key={promo.id} value={promo.id}>
                         🎁 {promo.name}
