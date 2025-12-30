@@ -555,7 +555,325 @@ class AntiaAffiliateTester:
             self.log(f"❌ Telegram health check test failed: {str(e)}", "ERROR")
             return False
 
-    def test_health_email(self) -> bool:
+    def test_admin_login(self) -> bool:
+        """Test authentication with admin credentials"""
+        self.log("=== Testing Admin Authentication ===")
+        
+        login_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD
+        }
+        
+        try:
+            response = self.make_request("POST", "/auth/login", login_data, use_auth=False)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                
+                # Check if access_token is in response
+                if "access_token" in response_data:
+                    self.admin_access_token = response_data["access_token"]
+                    self.log("✅ Admin login successful - JWT token received")
+                    return True
+                else:
+                    self.log("❌ Admin login response missing access_token", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Admin login failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin login test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_get_all_promotions(self) -> bool:
+        """Test GET /api/admin/promotions - List all promotions"""
+        self.log("=== Testing Admin Get All Promotions ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("GET", "/admin/promotions")
+            
+            if response.status_code == 200:
+                promotions = response.json()
+                self.log(f"✅ Successfully retrieved {len(promotions)} promotions")
+                
+                # Log promotion details for debugging
+                for i, promotion in enumerate(promotions):
+                    self.log(f"Promotion {i+1}: {promotion.get('name', 'No name')} (ID: {promotion.get('id', 'No ID')})")
+                    self.log(f"  Slug: {promotion.get('slug', 'No slug')}")
+                    self.log(f"  Status: {promotion.get('status', 'No status')}")
+                    self.log(f"  Houses Count: {promotion.get('housesCount', 0)}")
+                    
+                return True
+            else:
+                self.log(f"❌ Get all promotions failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get all promotions test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_admin_create_promotion(self) -> bool:
+        """Test POST /api/admin/promotions - Create new promotion"""
+        self.log("=== Testing Admin Create Promotion ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        promotion_data = {
+            "name": "Reto Año Nuevo 2026",
+            "description": "Celebra el año nuevo con bonos especiales",
+            "houseLinks": []  # We'll add houses separately
+        }
+        
+        try:
+            response = self.make_request("POST", "/admin/promotions", promotion_data)
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                self.log("✅ Promotion created successfully")
+                
+                # Check required fields
+                if "id" in result and "slug" in result:
+                    self.log(f"✅ Promotion ID: {result['id']}")
+                    self.log(f"✅ Promotion Slug: {result['slug']}")
+                    self.log(f"✅ Promotion Name: {result.get('name', 'Not set')}")
+                    self.test_admin_promotion_id = result['id']
+                    return True
+                else:
+                    self.log("❌ Response missing id or slug", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Create promotion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Create promotion test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_admin_add_house_to_promotion(self) -> bool:
+        """Test POST /api/admin/promotions/:id/houses - Add house to promotion"""
+        if not self.test_admin_promotion_id:
+            self.log("❌ No test admin promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Admin Add House to Promotion ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        house_data = {
+            "bettingHouseId": "6944674739e53ced97a01362",  # Bwin
+            "affiliateUrl": "https://bwin.com/ano-nuevo-2026?aff=antia",
+            "trackingParamName": "subid"
+        }
+        
+        try:
+            response = self.make_request("POST", f"/admin/promotions/{self.test_admin_promotion_id}/houses", house_data)
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                self.log("✅ House added to promotion successfully")
+                
+                # Check required fields
+                if "id" in result and "success" in result:
+                    self.log(f"✅ House Link ID: {result['id']}")
+                    self.test_admin_house_link_id = result['id']
+                    return True
+                else:
+                    self.log("❌ Response missing id or success", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Add house to promotion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Add house to promotion test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_admin_get_promotion_detail(self) -> bool:
+        """Test GET /api/admin/promotions/:id - Get promotion detail"""
+        if not self.test_admin_promotion_id:
+            self.log("❌ No test admin promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Admin Get Promotion Detail ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("GET", f"/admin/promotions/{self.test_admin_promotion_id}")
+            
+            if response.status_code == 200:
+                promotion = response.json()
+                self.log("✅ Successfully retrieved promotion detail")
+                
+                # Verify required fields
+                required_fields = ["id", "name", "slug", "status", "houseLinks"]
+                for field in required_fields:
+                    if field in promotion:
+                        self.log(f"✅ Promotion has {field}")
+                    else:
+                        self.log(f"❌ Promotion missing {field}", "ERROR")
+                        return False
+                
+                # Log promotion details
+                self.log(f"Promotion name: {promotion.get('name', 'No name')}")
+                self.log(f"Slug: {promotion.get('slug', 'No slug')}")
+                self.log(f"Status: {promotion.get('status', 'No status')}")
+                
+                # Check house links
+                house_links = promotion.get('houseLinks', [])
+                self.log(f"✅ Found {len(house_links)} house links")
+                for i, link in enumerate(house_links):
+                    house = link.get('house', {})
+                    if house:
+                        self.log(f"  Link {i+1}: {house.get('name', 'No name')} (ID: {link.get('bettingHouseId', 'No ID')})")
+                        self.log(f"    Affiliate URL: {link.get('affiliateUrl', 'No URL')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Get promotion detail failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get promotion detail test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_admin_update_promotion_status(self) -> bool:
+        """Test PUT /api/admin/promotions/:id - Update promotion status"""
+        if not self.test_admin_promotion_id:
+            self.log("❌ No test admin promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Admin Update Promotion Status ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        update_data = {
+            "status": "INACTIVE"
+        }
+        
+        try:
+            response = self.make_request("PUT", f"/admin/promotions/{self.test_admin_promotion_id}", update_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Promotion status updated successfully")
+                
+                # Verify status was updated
+                if result.get('status') == 'INACTIVE':
+                    self.log("✅ Status correctly updated to INACTIVE")
+                    return True
+                else:
+                    self.log(f"❌ Status not updated correctly. Got: {result.get('status')}", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Update promotion status failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Update promotion status test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_tipster_view_active_promotions(self) -> bool:
+        """Test GET /api/promotions - Verify tipster can see only ACTIVE promotions"""
+        self.log("=== Testing Tipster View Active Promotions ===")
+        
+        try:
+            response = self.make_request("GET", "/promotions")
+            
+            if response.status_code == 200:
+                promotions = response.json()
+                self.log(f"✅ Successfully retrieved {len(promotions)} active promotions for tipster")
+                
+                # Verify all promotions are active (our test promotion should be INACTIVE now)
+                test_promotion_found = False
+                for promotion in promotions:
+                    self.log(f"Promotion: {promotion.get('name', 'No name')} (ID: {promotion.get('id', 'No ID')})")
+                    if promotion.get('id') == self.test_admin_promotion_id:
+                        test_promotion_found = True
+                        self.log("❌ Test promotion (INACTIVE) should not be visible to tipster", "ERROR")
+                        return False
+                
+                if not test_promotion_found:
+                    self.log("✅ Test promotion (INACTIVE) correctly hidden from tipster")
+                    
+                return True
+            else:
+                self.log(f"❌ Get active promotions for tipster failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get active promotions for tipster test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_delete_promotion(self) -> bool:
+        """Test DELETE /api/admin/promotions/:id - Delete promotion"""
+        if not self.test_admin_promotion_id:
+            self.log("❌ No test admin promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Admin Delete Promotion ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("DELETE", f"/admin/promotions/{self.test_admin_promotion_id}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Promotion deleted successfully")
+                
+                # Verify success response
+                if result.get('success'):
+                    self.log("✅ Delete operation confirmed successful")
+                    return True
+                else:
+                    self.log("❌ Delete response missing success confirmation", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Delete promotion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Delete promotion test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
         """Test email service health check"""
         self.log("=== Testing Email Health Check ===")
         
