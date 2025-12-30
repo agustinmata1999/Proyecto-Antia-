@@ -28,7 +28,17 @@ export class TelegramController {
     private prisma: PrismaService,
   ) {}
 
+  // Public endpoint to check Telegram bot status
+  @Get('status')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get Telegram bot status (public)' })
+  async getStatus() {
+    const status = await this.telegramService.getBotStatus();
+    return status;
+  }
+
   // Webhook endpoint (sin guards - debe ser público para Telegram)
+  @Post('webhook')
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Telegram webhook endpoint' })
