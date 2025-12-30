@@ -8,7 +8,7 @@
 3. **P2**: Test bot can send messages
 
 ### Test Environment
-- API URL: https://affily-pro.preview.emergentagent.com
+- API URL: https://apifix-2.preview.emergentagent.com
 - Bot Username: @Antiabetbot
 - Proxy: api.allorigins.win
 
@@ -30,7 +30,7 @@ backend:
     status_history:
       - working: true
         agent: "testing"
-        comment: "✅ P0 test passed. Bot status endpoint returns correct data: initialized=true, botUsername=Antiabetbot, webhookConfigured=true, proxyMode=true, lastError=null. Webhook URL properly configured at https://affily-pro.preview.emergentagent.com/api/telegram/webhook"
+        comment: "✅ P0 test passed. Bot status endpoint returns correct data: initialized=true, botUsername=Antiabetbot, webhookConfigured=true, proxyMode=true, lastError=null. Webhook URL properly configured at https://apifix-2.preview.emergentagent.com/api/telegram/webhook"
 
   - task: "Health Check API"
     implemented: true
