@@ -234,4 +234,55 @@ export class TelegramChannelsController {
 
     return this.telegramService.findChannelByName(body.channelName);
   }
+
+  /**
+   * POST /api/telegram/channels/connect-by-id - Conectar canal por ID
+   * Verifica que el bot sea admin y registra el canal automáticamente
+   */
+  @Post('connect-by-id')
+  @HttpCode(HttpStatus.OK)
+  async connectById(@Body() body: { channelId: string }, @Request() req) {
+    if (!body.channelId || body.channelId.trim().length === 0) {
+      return {
+        success: false,
+        message: 'El ID del canal es obligatorio',
+      };
+    }
+
+    const tipsterId = await this.getTipsterId(req.user.id);
+
+    // Verificar si ya está conectado
+    const existingChannel = await this.channelsService.findByChannelId(
+      tipsterId, 
+      body.channelId.trim()
+    );
+    
+    if (existingChannel) {
+      return {
+        success: false,
+        message: 'Este canal ya está conectado a tu cuenta',
+        channel: existingChannel,
+      };
+    }
+
+    // Verificar, registrar y conectar
+    return this.telegramService.connectChannelById(tipsterId, body.channelId.trim());
+  }
+
+  /**
+   * POST /api/telegram/channels/verify-by-id - Verificar canal por ID (sin conectar)
+   * Útil para verificar si el bot es admin de un canal
+   */
+  @Post('verify-by-id')
+  @HttpCode(HttpStatus.OK)
+  async verifyById(@Body() body: { channelId: string }) {
+    if (!body.channelId || body.channelId.trim().length === 0) {
+      return {
+        success: false,
+        error: 'El ID del canal es obligatorio',
+      };
+    }
+
+    return this.telegramService.verifyAndRegisterChannelById(body.channelId.trim());
+  }
 }
