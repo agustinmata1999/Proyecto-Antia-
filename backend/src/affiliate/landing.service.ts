@@ -128,18 +128,50 @@ export class LandingService {
 
     const landings = result.cursor?.firstBatch || [];
 
-    return landings.map((l: any) => ({
-      id: l._id.$oid || l._id.toString(),
-      slug: l.slug,
-      title: l.title,
-      description: l.description,
-      countriesEnabled: l.countries_enabled || [],
-      isActive: l.is_active,
-      totalClicks: l.total_clicks || 0,
-      totalImpressions: l.total_impressions || 0,
-      shareUrl: `/go/${l.slug}`,
-      createdAt: l.created_at?.$date || l.created_at,
-    }));
+    // Obtener info de promociones
+    const promotionIds = landings.map((l: any) => l.promotion_id).filter(Boolean);
+    const promotionsMap = await this.getPromotionsMap(promotionIds);
+
+    return landings.map((l: any) => {
+      const promotion = l.promotion_id ? promotionsMap.get(l.promotion_id) : null;
+      return {
+        id: l._id.$oid || l._id.toString(),
+        slug: l.slug,
+        promotionId: l.promotion_id,
+        promotionName: promotion?.name || null,
+        title: l.title,
+        description: l.description,
+        countriesEnabled: l.countries_enabled || [],
+        isActive: l.is_active,
+        totalClicks: l.total_clicks || 0,
+        totalImpressions: l.total_impressions || 0,
+        shareUrl: `/go/${l.slug}`,
+        createdAt: l.created_at?.$date || l.created_at,
+      };
+    });
+  }
+
+  /**
+   * Obtener mapa de promociones por ID
+   */
+  private async getPromotionsMap(promotionIds: string[]) {
+    if (!promotionIds.length) return new Map();
+
+    const result = await this.prisma.$runCommandRaw({
+      find: 'affiliate_promotions',
+    }) as any;
+
+    const promotions = result.cursor?.firstBatch || [];
+    const map = new Map();
+
+    for (const p of promotions) {
+      const id = p._id.$oid || p._id.toString();
+      if (promotionIds.includes(id)) {
+        map.set(id, { name: p.name, slug: p.slug });
+      }
+    }
+
+    return map;
   }
 
   /**
