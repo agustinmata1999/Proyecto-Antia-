@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { TelegramChannelsService, CreateChannelDto, UpdateChannelDto } from './telegram-channels.service';
+import { TelegramService } from './telegram.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('telegram/channels')
@@ -20,6 +21,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class TelegramChannelsController {
   constructor(
     private channelsService: TelegramChannelsService,
+    private telegramService: TelegramService,
     private prisma: PrismaService,
   ) {}
 
