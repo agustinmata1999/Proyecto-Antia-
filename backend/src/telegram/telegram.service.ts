@@ -997,18 +997,23 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Enviar un mensaje simple
+   * Enviar un mensaje simple - usa proxy como método principal
    */
   async sendMessage(chatId: string, text: string): Promise<void> {
-    if (!this.bot) {
-      this.logger.warn('Cannot send message - Telegram bot not available');
-      return;
-    }
-    
     try {
-      await this.bot.telegram.sendMessage(chatId, text);
-    } catch (error) {
-      this.logger.error(`Error sending message to ${chatId}:`, error);
+      // Try via HTTP proxy first (bypasses firewall)
+      await this.httpService.sendMessage(chatId, text);
+      this.logger.log(`✅ Message sent to ${chatId} via proxy`);
+    } catch (proxyError) {
+      this.logger.warn(`Proxy send failed, trying direct: ${proxyError.message}`);
+      // Fallback to direct if proxy fails
+      if (this.bot) {
+        try {
+          await this.bot.telegram.sendMessage(chatId, text);
+        } catch (directError) {
+          this.logger.error(`Error sending message to ${chatId}:`, directError.message);
+        }
+      }
     }
   }
 
