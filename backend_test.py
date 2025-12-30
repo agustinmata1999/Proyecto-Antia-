@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Antia Platform Backend API Testing
-Tests Product CRUD functionality for tipster platform
+Tests Affiliate Landing System for tipster platform
 """
 
 import requests
@@ -16,10 +16,6 @@ API_BASE = f"{BASE_URL}/api"
 # Test credentials
 TIPSTER_EMAIL = "fausto.perez@antia.com"
 TIPSTER_PASSWORD = "Tipster123!"
-ADMIN_EMAIL = "admin@antia.com"
-ADMIN_PASSWORD = "SuperAdmin123!"
-CLIENT_EMAIL = "cliente@example.com"
-CLIENT_PASSWORD = "Client123!"
 
 class AntiaAPITester:
     def __init__(self):
