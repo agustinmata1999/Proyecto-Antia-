@@ -106,6 +106,42 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Get the current status of the Telegram bot
+   */
+  async getBotStatus(): Promise<{
+    initialized: boolean;
+    botUsername: string | null;
+    webhookUrl: string | null;
+    webhookConfigured: boolean;
+    proxyMode: boolean;
+    lastError: string | null;
+  }> {
+    try {
+      // Test connection via proxy
+      const botInfo = await this.httpService.getMe();
+      const webhookInfo = await this.httpService.getWebhookInfo();
+      
+      return {
+        initialized: this.isInitialized,
+        botUsername: botInfo?.username || null,
+        webhookUrl: webhookInfo?.url || null,
+        webhookConfigured: !!webhookInfo?.url,
+        proxyMode: true,
+        lastError: null,
+      };
+    } catch (error) {
+      return {
+        initialized: this.isInitialized,
+        botUsername: null,
+        webhookUrl: null,
+        webhookConfigured: false,
+        proxyMode: true,
+        lastError: error.message,
+      };
+    }
+  }
+
   private setupBot() {
     if (!this.bot) return;
     
