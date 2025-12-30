@@ -1219,19 +1219,24 @@ export class AffiliateService {
       commissionCents = house.commissionPerReferralCents || 5000;
     }
 
-    // Create conversion
-    const conversion = await this.prisma.affiliateConversion.create({
-      data: {
-        tipsterId,
-        houseId: house?.id || click?.houseId,
-        clickId: clickId || undefined,
-        eventType: event || 'REGISTRATION',
-        status: 'PENDING', // Pending until admin approves
-        commissionCents,
-        countryCode: click?.countryCode,
-        clickedAt: click?.clickedAt,
-        occurredAt: new Date(),
-        externalTransactionId: transactionId,
+    // Create conversion using raw MongoDB command
+    const now = new Date().toISOString();
+    const conversionId = new ObjectId();
+    
+    await this.prisma.$runCommandRaw({
+      insert: 'affiliate_conversions',
+      documents: [{
+        _id: conversionId,
+        tipster_id: tipsterId,
+        house_id: house?.id || click?.houseId,
+        click_id: clickId || null,
+        event_type: event || 'REGISTRATION',
+        status: 'PENDING',
+        commission_cents: commissionCents,
+        country_code: click?.countryCode || null,
+        clicked_at: click?.clickedAt ? { $date: click.clickedAt } : null,
+        occurred_at: { $date: now },
+        external_transaction_id: transactionId || null,
         metadata: {
           subid,
           houseSlug,
@@ -1239,12 +1244,14 @@ export class AffiliateService {
           amount,
           currency,
         },
-      },
+        created_at: { $date: now },
+        updated_at: { $date: now },
+      }],
     });
 
     return {
       success: true,
-      conversionId: conversion.id,
+      conversionId: conversionId.toHexString(),
       message: 'Conversion recorded successfully',
     };
   }
