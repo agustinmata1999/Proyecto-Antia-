@@ -4,8 +4,17 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Plus, Trash2, ExternalLink, GripVertical, Eye, BarChart3, X } from 'lucide-react';
 
-// Use REACT_APP_BACKEND_URL which doesn't include /api
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://affilia-panel.preview.emergentagent.com';
+// For client-side, we need to use NEXT_PUBLIC_ prefix or hardcode
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: use window.location or env var
+    return process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 
+           window.location.origin;
+  }
+  return process.env.REACT_APP_BACKEND_URL || '';
+};
+
+const BASE_URL = getBaseUrl();
 
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   ES: { name: 'España', flag: '🇪🇸' },
