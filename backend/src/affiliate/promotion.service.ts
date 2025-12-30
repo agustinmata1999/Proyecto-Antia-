@@ -151,13 +151,29 @@ export class PromotionService {
    * Obtener detalle de una promoción
    */
   async getPromotionById(promotionId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    // Try both ObjectId format and string format for _id
+    let result = await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
-      filter: { _id: { $oid: promotionId } },
+      filter: { _id: promotionId },
       limit: 1,
     }) as any;
 
-    const promotion = result.cursor?.firstBatch?.[0];
+    let promotion = result.cursor?.firstBatch?.[0];
+    
+    // If not found, try with ObjectId format
+    if (!promotion) {
+      try {
+        result = await this.prisma.$runCommandRaw({
+          find: 'affiliate_promotions',
+          filter: { _id: { $oid: promotionId } },
+          limit: 1,
+        }) as any;
+        promotion = result.cursor?.firstBatch?.[0];
+      } catch (e) {
+        // Ignore error if ObjectId format fails
+      }
+    }
+    
     if (!promotion) {
       throw new NotFoundException('Promoción no encontrada');
     }
