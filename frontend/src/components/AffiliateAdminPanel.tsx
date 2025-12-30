@@ -175,6 +175,12 @@ export default function AffiliateAdminPanel() {
   }, [activeTab]);
 
   const loadData = async () => {
+    // Promotions tab handles its own loading
+    if (activeTab === 'promotions') {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
