@@ -1069,7 +1069,8 @@ class AntiaAffiliateTester:
                 "externalRefId": "test-ref-001"
             }
             
-            response = self.make_request("POST", "/affiliate/postback", postback_data, use_auth=False)
+            # Try the correct postback endpoint from the controller
+            response = self.make_request("POST", "/r/postback", postback_data, use_auth=False)
             
             if response.status_code in [200, 201, 404]:  # 404 is acceptable for invalid clickId
                 result = response.json()
