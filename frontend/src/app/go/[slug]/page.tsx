@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, User, Shield, AlertTriangle } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_BACKEND_URL;
+// Use REACT_APP_BACKEND_URL which doesn't include /api
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://affilia-panel.preview.emergentagent.com';
 
 // Mapeo de países a nombres y banderas
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
