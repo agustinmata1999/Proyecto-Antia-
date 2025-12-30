@@ -874,7 +874,36 @@ class AntiaAffiliateTester:
         finally:
             # Restore original token
             self.access_token = original_token
-        """Test email service health check"""
+
+    def test_health_telegram(self) -> bool:
+        """Test Telegram bot health check"""
+        self.log("=== Testing Telegram Health Check ===")
+        
+        try:
+            response = self.make_request("GET", "/health/telegram", use_auth=False)
+            
+            if response.status_code == 200:
+                status = response.json()
+                self.log("✅ Telegram health check successful")
+                
+                # Log status details
+                self.log(f"Status: {status.get('status', 'Unknown')}")
+                if 'webhookUrl' in status:
+                    self.log(f"Webhook URL: {status.get('webhookUrl', 'Not set')}")
+                if 'botInfo' in status:
+                    bot_info = status.get('botInfo', {})
+                    self.log(f"Bot username: {bot_info.get('username', 'Unknown')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Telegram health check failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Telegram health check test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_health_email(self) -> bool:
         self.log("=== Testing Email Health Check ===")
         
         try:
