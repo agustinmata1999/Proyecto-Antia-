@@ -154,6 +154,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.bot.on('my_chat_member', async (ctx) => {
       try {
         const { chat, new_chat_member, old_chat_member } = ctx.myChatMember;
+        this.logger.log(`📥 my_chat_member event: ${chat.title} (${chat.id}) - status: ${new_chat_member.status}`);
         
         // Verificar si el bot fue añadido como administrador
         if (
@@ -180,6 +181,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }
       } catch (error) {
         this.logger.error('Error handling my_chat_member:', error);
+      }
+    });
+
+    // Handler para CUALQUIER mensaje en canales - auto-registrar el canal
+    this.bot.on('channel_post', async (ctx) => {
+      try {
+        const chat = ctx.chat;
+        if (chat.type === 'channel') {
+          // Auto-registrar el canal si el bot puede ver mensajes (es admin)
+          await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+        }
+      } catch (error) {
+        // Silently ignore errors
       }
     });
 
