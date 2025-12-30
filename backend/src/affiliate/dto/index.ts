@@ -202,3 +202,102 @@ export class MarkPayoutPaidDto {
   @IsString()
   notes?: string;
 }
+
+// ==================== LANDING DTOs ====================
+
+// Item de casa en la landing
+export class LandingItemDto {
+  @IsString()
+  bettingHouseId: string;
+
+  @IsNumber()
+  orderIndex: number;
+
+  @IsOptional()
+  @IsString()
+  customTermsText?: string;
+}
+
+// Configuración de casas por país
+export class LandingCountryConfigDto {
+  @IsString()
+  country: string;
+
+  @IsArray()
+  items: LandingItemDto[];
+}
+
+// Crear Landing
+export class CreateLandingDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  countriesEnabled: string[];
+
+  @IsArray()
+  countryConfigs: LandingCountryConfigDto[];
+}
+
+// Actualizar Landing
+export class UpdateLandingDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  countriesEnabled?: string[];
+
+  @IsOptional()
+  @IsArray()
+  countryConfigs?: LandingCountryConfigDto[];
+
+  @IsOptional()
+  isActive?: boolean;
+}
+
+// Tracking Config DTO
+export class UpdateTrackingConfigDto {
+  @IsOptional()
+  @IsString()
+  trackingStrategy?: string;
+
+  @IsOptional()
+  @IsString()
+  subidParamName?: string;
+
+  @IsOptional()
+  @IsString()
+  clickIdParamName?: string;
+
+  @IsOptional()
+  @IsObject()
+  extraParams?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  urlByCountry?: Record<string, string>;
+}
+
+// Update Betting House con tracking config
+export class UpdateBettingHouseWithTrackingDto extends UpdateBettingHouseDto {
+  @IsOptional()
+  @IsObject()
+  trackingConfig?: UpdateTrackingConfigDto;
+
+  @IsOptional()
+  @IsString()
+  termsText?: string;
+}
