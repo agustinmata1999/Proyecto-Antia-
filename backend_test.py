@@ -17,6 +17,10 @@ API_BASE = f"{BASE_URL}/api"
 TIPSTER_EMAIL = "fausto.perez@antia.com"
 TIPSTER_PASSWORD = "Tipster123!"
 
+# Admin credentials
+ADMIN_EMAIL = "admin@antia.com"
+ADMIN_PASSWORD = "SuperAdmin123!"
+
 class AntiaAffiliateTester:
     def __init__(self):
         self.session = requests.Session()
