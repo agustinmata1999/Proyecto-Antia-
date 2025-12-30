@@ -495,4 +495,25 @@ export class AffiliateAdminController {
 
     return tipsters;
   }
+
+  // ==================== STATISTICS ====================
+
+  @Get('stats')
+  async getStats(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('tipsterId') tipsterId?: string,
+    @Query('campaignId') campaignId?: string,
+    @Query('houseId') houseId?: string,
+  ) {
+    await this.verifyAdmin(req.user.id);
+    return this.affiliateService.getAdminAffiliateStats({
+      startDate,
+      endDate,
+      tipsterId,
+      campaignId,
+      houseId,
+    });
+  }
 }
