@@ -15,16 +15,26 @@ export class LandingService {
    */
   async createLanding(tipsterId: string, dto: CreateLandingDto) {
     // Obtener info del tipster para generar slug
-    const tipster = await this.prisma.tipsterProfile.findUnique({
-      where: { id: tipsterId },
-    });
+    const tipsterResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: { 
+        $or: [
+          { _id: tipsterId },
+          { _id: { $oid: tipsterId } },
+          { id: tipsterId }
+        ]
+      },
+      limit: 1,
+    }) as any;
 
+    const tipster = tipsterResult.cursor?.firstBatch?.[0];
     if (!tipster) {
       throw new NotFoundException('Tipster no encontrado');
     }
 
     // Generar slug automático
-    const baseSlug = this.generateSlug(tipster.publicName);
+    const publicName = tipster.public_name || 'tipster';
+    const baseSlug = this.generateSlug(publicName);
     const shortId = tipsterId.slice(-6);
     let slug = `${baseSlug}-${shortId}`;
 
