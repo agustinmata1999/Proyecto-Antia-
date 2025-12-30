@@ -904,6 +904,7 @@ class AntiaAffiliateTester:
             return False
 
     def test_health_email(self) -> bool:
+        """Test email service health check"""
         self.log("=== Testing Email Health Check ===")
         
         try:
@@ -927,6 +928,7 @@ class AntiaAffiliateTester:
                 
         except Exception as e:
             self.log(f"❌ Email health check test failed: {str(e)}", "ERROR")
+            return False
             return False
 
     def run_affiliate_landing_tests(self) -> Dict[str, bool]:
