@@ -273,7 +273,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.bot.command('registrar', async (ctx) => {
       try {
         const chatId = ctx.chat.id.toString();
-        const chatType = ctx.chat.type;
+        const chatType = ctx.chat.type as string; // Cast to string to allow all comparisons
         const chatTitle = 'title' in ctx.chat ? ctx.chat.title : null;
         const chatUsername = 'username' in ctx.chat ? ctx.chat.username : null;
 
