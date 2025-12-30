@@ -647,93 +647,109 @@ export default function TipsterLandingsSection() {
                   </div>
                 </div>
 
-                {/* Casas por país */}
-                {formData.countriesEnabled.map(country => (
-                  <div key={country} className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-3">
-                      {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
-                    </h4>
-                    
-                    {/* Selected houses */}
-                    <div className="space-y-2 mb-4">
-                      {formData.countryConfigs
-                        .find(c => c.country === country)
-                        ?.items.map((item, index) => {
-                          const house = availableHouses[country]?.find(h => h.id === item.bettingHouseId);
-                          if (!house) return null;
-                          
-                          return (
-                            <div
-                              key={item.bettingHouseId}
-                              className="flex items-center gap-2 p-2 bg-gray-50 rounded"
-                            >
-                              <GripVertical className="w-4 h-4 text-gray-400" />
-                              <span className="font-medium">{index + 1}.</span>
-                              {house.logoUrl && (
-                                <img
-                                  src={house.logoUrl}
-                                  alt={house.name}
-                                  className="w-8 h-8 object-contain"
-                                />
-                              )}
-                              <span className="flex-1">{house.name}</span>
-                              <div className="flex gap-1">
-                                <button
-                                  disabled={index === 0}
-                                  onClick={() => handleMoveItem(country, item.bettingHouseId, 'up')}
-                                  className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-                                >
-                                  ↑
-                                </button>
-                                <button
-                                  disabled={index === (formData.countryConfigs.find(c => c.country === country)?.items.length || 0) - 1}
-                                  onClick={() => handleMoveItem(country, item.bettingHouseId, 'down')}
-                                  className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-                                >
-                                  ↓
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
-                                  className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-
-                    {/* Add house */}
-                    <select
-                      onChange={e => {
-                        if (e.target.value) {
-                          handleAddHouseToCountry(country, e.target.value);
-                          e.target.value = '';
-                        }
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="">Añadir casa de apuestas...</option>
-                      {availableHouses[country]
-                        ?.filter(h => !formData.countryConfigs
+                {/* Casas por país - usando las casas de la promoción */}
+                {formData.promotionId && formData.countriesEnabled.map(country => {
+                  // Filtrar casas de la promoción que están disponibles en este país
+                  const housesForCountry = promotionHouses.filter(ph => 
+                    ph.house.allowedCountries.includes(country)
+                  );
+                  
+                  return (
+                    <div key={country} className="border rounded-lg p-4">
+                      <h4 className="font-medium mb-3">
+                        {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
+                      </h4>
+                      
+                      {/* Selected houses */}
+                      <div className="space-y-2 mb-4">
+                        {formData.countryConfigs
                           .find(c => c.country === country)
-                          ?.items.find(i => i.bettingHouseId === h.id)
-                        )
-                        .map(house => (
-                          <option key={house.id} value={house.id}>
-                            {house.name} ({house.commissionPerReferralEur}€/ref)
-                          </option>
-                        ))}
-                    </select>
+                          ?.items.map((item, index) => {
+                            const promoHouse = promotionHouses.find(ph => ph.bettingHouseId === item.bettingHouseId);
+                            if (!promoHouse) return null;
+                            
+                            return (
+                              <div
+                                key={item.bettingHouseId}
+                                className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+                              >
+                                <GripVertical className="w-4 h-4 text-gray-400" />
+                                <span className="font-medium">{index + 1}.</span>
+                                {promoHouse.house.logoUrl && (
+                                  <img
+                                    src={promoHouse.house.logoUrl}
+                                    alt={promoHouse.house.name}
+                                    className="w-8 h-8 object-contain"
+                                  />
+                                )}
+                                <span className="flex-1">{promoHouse.house.name}</span>
+                                <div className="flex gap-1">
+                                  <button
+                                    disabled={index === 0}
+                                    onClick={() => handleMoveItem(country, item.bettingHouseId, 'up')}
+                                    className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                                  >
+                                    ↑
+                                  </button>
+                                  <button
+                                    disabled={index === (formData.countryConfigs.find(c => c.country === country)?.items.length || 0) - 1}
+                                    onClick={() => handleMoveItem(country, item.bettingHouseId, 'down')}
+                                    className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                                  >
+                                    ↓
+                                  </button>
+                                  <button
+                                    onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
+                                    className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
 
-                    {!availableHouses[country]?.length && (
-                      <p className="text-sm text-gray-500 mt-2">
-                        Cargando casas disponibles...
-                      </p>
-                    )}
+                      {/* Add house from promotion */}
+                      <select
+                        onChange={e => {
+                          if (e.target.value) {
+                            handleAddHouseToCountry(country, e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="">Añadir casa de apuestas...</option>
+                        {housesForCountry
+                          .filter(ph => !formData.countryConfigs
+                            .find(c => c.country === country)
+                            ?.items.find(i => i.bettingHouseId === ph.bettingHouseId)
+                          )
+                          .map(ph => (
+                            <option key={ph.bettingHouseId} value={ph.bettingHouseId}>
+                              {ph.house.name}
+                            </option>
+                          ))}
+                      </select>
+
+                      {housesForCountry.length === 0 && (
+                        <p className="text-sm text-yellow-600 mt-2">
+                          No hay casas disponibles para {COUNTRY_INFO[country]?.name} en este reto.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Mensaje si no hay promoción seleccionada */}
+                {!formData.promotionId && formData.countriesEnabled.length > 0 && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-700 text-sm">
+                      Selecciona un reto/promoción para ver las casas de apuestas disponibles.
+                    </p>
                   </div>
-                ))}
+                )}
 
                 {/* Error */}
                 {formError && (
