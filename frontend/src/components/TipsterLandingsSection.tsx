@@ -287,6 +287,11 @@ export default function TipsterLandingsSection() {
   };
 
   const handleCreateLanding = async () => {
+    if (!formData.promotionId) {
+      setFormError('Selecciona un reto/promoción');
+      return;
+    }
+
     if (formData.countriesEnabled.length === 0) {
       setFormError('Selecciona al menos un país');
       return;
@@ -312,6 +317,7 @@ export default function TipsterLandingsSection() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          promotionId: formData.promotionId,
           title: formData.title || undefined,
           description: formData.description || undefined,
           countriesEnabled: formData.countriesEnabled,
