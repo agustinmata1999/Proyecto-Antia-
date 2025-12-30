@@ -218,10 +218,20 @@ export default function AffiliateSection() {
       {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
+          <nav className="flex -mb-px overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('landings')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap ${
+                activeTab === 'landings'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              🚀 Mis Landings
+            </button>
             <button
               onClick={() => setActiveTab('houses')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'houses'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -231,7 +241,7 @@ export default function AffiliateSection() {
             </button>
             <button
               onClick={() => setActiveTab('referrals')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'referrals'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -246,7 +256,7 @@ export default function AffiliateSection() {
             </button>
             <button
               onClick={() => setActiveTab('metrics')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'metrics'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -256,7 +266,7 @@ export default function AffiliateSection() {
             </button>
             <button
               onClick={() => setActiveTab('payouts')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'payouts'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -269,6 +279,10 @@ export default function AffiliateSection() {
 
         {/* Tab Content */}
         <div className="p-6">
+          {activeTab === 'landings' && (
+            <TipsterLandingsSection />
+          )}
+          
           {activeTab === 'houses' && (
             <>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Tus Enlaces de Afiliado</h2>
