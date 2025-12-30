@@ -717,17 +717,43 @@ export class LandingService {
       }));
   }
 
-  private buildRedirectUrl(house: any, tipsterId: string, clickId: string, countryCode: string): string {
-    // TODO: Implementar urlByCountry desde tracking config
+  private async buildRedirectUrl(
+    house: any, 
+    tipsterId: string, 
+    clickId: string, 
+    countryCode: string,
+    promotionId?: string,
+    bettingHouseId?: string,
+  ): Promise<string> {
     let baseUrl = house.masterAffiliateUrl;
+    let trackingParamName = house.trackingParamName || 'subid';
 
-    // Verificar si hay URL específica por país
-    // Por ahora usamos la URL maestra
+    // Si hay promotionId, buscar el link específico de la promoción
+    if (promotionId && bettingHouseId) {
+      const promotionLinkResult = await this.prisma.$runCommandRaw({
+        find: 'promotion_house_links',
+        filter: { 
+          promotion_id: promotionId, 
+          betting_house_id: bettingHouseId,
+          is_active: true,
+        },
+        limit: 1,
+      }) as any;
+
+      const promotionLink = promotionLinkResult.cursor?.firstBatch?.[0];
+      if (promotionLink && promotionLink.affiliate_url) {
+        baseUrl = promotionLink.affiliate_url;
+        // Si la promoción tiene su propio tracking param, usarlo
+        if (promotionLink.tracking_param_name) {
+          trackingParamName = promotionLink.tracking_param_name;
+        }
+      }
+    }
 
     const url = new URL(baseUrl);
     
     // Añadir parámetros de tracking
-    url.searchParams.set(house.trackingParamName || 'subid', tipsterId);
+    url.searchParams.set(trackingParamName, tipsterId);
     url.searchParams.set('clickid', clickId);
 
     return url.toString();
