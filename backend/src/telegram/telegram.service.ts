@@ -1763,4 +1763,193 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       };
     }
   }
+
+  /**
+   * NUEVO: Guardar canal detectado automáticamente
+   * Se llama cuando el bot es añadido como admin a un canal
+   */
+  private async saveDetectedChannel(
+    channelId: string,
+    channelTitle: string,
+    channelUsername?: string,
+    channelType?: string,
+  ) {
+    try {
+      const now = new Date().toISOString();
+      
+      // Verificar si ya existe
+      const existingResult = await this.prisma.$runCommandRaw({
+        find: 'detected_telegram_channels',
+        filter: { channel_id: channelId },
+        limit: 1,
+      }) as any;
+      
+      const existing = existingResult.cursor?.firstBatch?.[0];
+      
+      if (existing) {
+        // Actualizar el registro existente
+        await this.prisma.$runCommandRaw({
+          update: 'detected_telegram_channels',
+          updates: [{
+            q: { channel_id: channelId },
+            u: {
+              $set: {
+                channel_title: channelTitle,
+                channel_username: channelUsername || null,
+                channel_type: channelType || 'channel',
+                last_seen_at: { $date: now },
+                is_active: true,
+              },
+            },
+          }],
+        });
+        this.logger.log(`📝 Updated detected channel: ${channelTitle} (${channelId})`);
+      } else {
+        // Crear nuevo registro
+        await this.prisma.$runCommandRaw({
+          insert: 'detected_telegram_channels',
+          documents: [{
+            channel_id: channelId,
+            channel_title: channelTitle,
+            channel_username: channelUsername || null,
+            channel_type: channelType || 'channel',
+            detected_at: { $date: now },
+            last_seen_at: { $date: now },
+            is_active: true,
+          }],
+        });
+        this.logger.log(`✅ Saved new detected channel: ${channelTitle} (${channelId})`);
+      }
+    } catch (error) {
+      this.logger.error('Error saving detected channel:', error);
+    }
+  }
+
+  /**
+   * NUEVO: Marcar canal como inactivo cuando el bot es removido
+   */
+  private async markChannelAsInactive(channelId: string) {
+    try {
+      const now = new Date().toISOString();
+      
+      await this.prisma.$runCommandRaw({
+        update: 'detected_telegram_channels',
+        updates: [{
+          q: { channel_id: channelId },
+          u: {
+            $set: {
+              is_active: false,
+              last_seen_at: { $date: now },
+            },
+          },
+        }],
+      });
+      this.logger.log(`🚫 Marked channel ${channelId} as inactive`);
+    } catch (error) {
+      this.logger.error('Error marking channel as inactive:', error);
+    }
+  }
+
+  /**
+   * NUEVO: Buscar canal por nombre (para conectar sin pedir ID)
+   * Busca en la tabla de canales detectados
+   */
+  async findChannelByName(channelName: string): Promise<{
+    found: boolean;
+    channel?: {
+      channelId: string;
+      channelTitle: string;
+      channelUsername?: string;
+      channelType: string;
+    };
+    error?: string;
+  }> {
+    try {
+      // Normalizar el nombre para búsqueda (case-insensitive)
+      const normalizedName = channelName.trim();
+      
+      // Buscar por título exacto o username (sin @)
+      const searchName = normalizedName.replace(/^@/, '');
+      
+      const result = await this.prisma.$runCommandRaw({
+        find: 'detected_telegram_channels',
+        filter: {
+          is_active: true,
+          $or: [
+            { channel_title: { $regex: `^${this.escapeRegex(normalizedName)}$`, $options: 'i' } },
+            { channel_username: { $regex: `^${this.escapeRegex(searchName)}$`, $options: 'i' } },
+          ],
+        },
+        limit: 1,
+      }) as any;
+
+      const channel = result.cursor?.firstBatch?.[0];
+      
+      if (!channel) {
+        return {
+          found: false,
+          error: 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+        };
+      }
+
+      // Verificar que el bot sigue siendo admin
+      try {
+        const verification = await this.verifyChannelAccess(channel.channel_id);
+        if (!verification.valid) {
+          // Marcar como inactivo
+          await this.markChannelAsInactive(channel.channel_id);
+          return {
+            found: false,
+            error: 'El bot ya no es administrador de este canal. Por favor, vuelve a añadirlo como admin.',
+          };
+        }
+      } catch (verifyError) {
+        this.logger.warn(`Could not verify channel ${channel.channel_id}:`, verifyError);
+      }
+
+      return {
+        found: true,
+        channel: {
+          channelId: channel.channel_id,
+          channelTitle: channel.channel_title,
+          channelUsername: channel.channel_username || undefined,
+          channelType: channel.channel_type,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error finding channel by name:', error);
+      return {
+        found: false,
+        error: 'Error al buscar el canal. Por favor, intenta de nuevo.',
+      };
+    }
+  }
+
+  /**
+   * Escapar caracteres especiales para regex
+   */
+  private escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
+   * NUEVO: Conectar canal por nombre (método simplificado)
+   */
+  async connectChannelByName(
+    tipsterId: string,
+    channelName: string,
+  ): Promise<{ success: boolean; message: string; channelInfo?: any }> {
+    // Buscar el canal por nombre
+    const searchResult = await this.findChannelByName(channelName);
+    
+    if (!searchResult.found || !searchResult.channel) {
+      return {
+        success: false,
+        message: searchResult.error || 'Canal no encontrado',
+      };
+    }
+
+    // Usar el método existente para conectar por ID
+    return this.connectChannelManually(tipsterId, searchResult.channel.channelId);
+  }
 }
