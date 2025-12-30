@@ -198,11 +198,16 @@ export class TelegramChannelsController {
 
     // Crear el canal usando el servicio existente
     try {
+      // Determinar si es privado o público:
+      // - Si tiene @username → público
+      // - Si NO tiene @username → privado (la mayoría de canales premium)
+      const isPrivate = !searchResult.channel.channelUsername;
+      
       const channel = await this.channelsService.create(tipsterId, {
         channelId: searchResult.channel.channelId,
         channelTitle: searchResult.channel.channelTitle,
         channelName: searchResult.channel.channelUsername ? `@${searchResult.channel.channelUsername}` : undefined,
-        channelType: searchResult.channel.channelType === 'supergroup' ? 'private' : 'public',
+        channelType: isPrivate ? 'private' : 'public',
       });
 
       return {
