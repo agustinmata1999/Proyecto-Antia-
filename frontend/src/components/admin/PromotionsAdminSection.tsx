@@ -330,14 +330,14 @@ export default function PromotionsAdminSection() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Retos / Promociones</h2>
+          <h2 className="text-xl font-bold text-gray-900">Campañas de Afiliación</h2>
           <p className="text-sm text-gray-500">
-            Crea retos con enlaces específicos de afiliación por casa de apuestas
+            Crea campañas con enlaces específicos de afiliación por casa de apuestas
           </p>
         </div>
         <Button onClick={openCreateModal} className="bg-red-600 hover:bg-red-700">
           <Plus className="w-4 h-4 mr-2" />
-          Nuevo Reto
+          Nueva Campaña
         </Button>
       </div>
 
