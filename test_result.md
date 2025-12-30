@@ -57,11 +57,15 @@
 
 #### ✅ Working Features:
 1. **Authentication System**: JWT-based authentication working correctly
-2. **Landing Management**: Tipster can view existing landings
-3. **Betting Houses**: Available houses retrieved for Spain (3 houses)
-4. **Public Landing Access**: Landing accessible via slug with complete data structure
-5. **Click Tracking**: Functional click tracking with redirect URL generation
-6. **Health Checks**: Both Telegram bot and email service properly configured
+2. **Promotions API**: Active promotions retrieval and house listing for tipsters
+3. **Promotion-Specific URLs**: Houses return promotion-specific affiliate URLs (e.g., Bwin: https://bwin.com/promo-navidad-2025?aff=antia)
+4. **Landing Management**: Tipster can create landings linked to promotions and view existing landings
+5. **Promotion-Linked Landings**: Landings store promotionId and display correctly in public view
+6. **Betting Houses**: Available houses retrieved for Spain (3 houses)
+7. **Public Landing Access**: Both standard and promotion-linked landings accessible via slug
+8. **Click Tracking**: Functional click tracking with redirect URL generation
+9. **CRITICAL: Promotion-Specific Redirects**: When clicking on promotion-linked landing, uses promotion-specific URL instead of master URL
+10. **Health Checks**: Both Telegram bot and email service properly configured
 
 #### ⚠️ Minor Issues:
 1. **Landing Metrics**: Returns 404 for existing landing (may be expected for new landings without activity)
