@@ -392,6 +392,7 @@ export class LandingService {
 
     const landingId = landing._id.$oid || landing._id.toString();
     const tipsterId = landing.tipster_id;
+    const promotionId = landing.promotion_id;
 
     // Obtener casa de apuestas
     const house = await this.getBettingHouseById(bettingHouseId);
@@ -403,7 +404,8 @@ export class LandingService {
     const clickId = uuidv4();
 
     // Construir URL de redirección con tracking
-    const redirectUrl = this.buildRedirectUrl(house, tipsterId, clickId, countryCode);
+    // Si hay promotionId, usar el link específico de la promoción
+    const redirectUrl = await this.buildRedirectUrl(house, tipsterId, clickId, countryCode, promotionId, bettingHouseId);
 
     // Registrar evento de click
     const now = new Date().toISOString();
