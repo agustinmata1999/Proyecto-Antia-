@@ -32,7 +32,7 @@ export class LandingPublicController {
   @Get(':slug')
   async getPublicLanding(
     @Param('slug') slug: string,
-    @Query('country') country?: string,
+    @Query('country') country: string = '',
     @Req() req: Request,
   ) {
     // Detectar país por IP si no se proporciona
