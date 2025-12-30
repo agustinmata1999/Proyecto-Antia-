@@ -1956,19 +1956,25 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         };
       }
 
-      // Verificar que el bot sigue siendo admin
-      try {
-        const verification = await this.verifyChannelAccess(channel.channel_id);
-        if (!verification.valid) {
-          // Marcar como inactivo
-          await this.markChannelAsInactive(channel.channel_id);
-          return {
-            found: false,
-            error: 'El bot ya no es administrador de este canal. Por favor, vuelve a añadirlo como admin.',
-          };
+      // Si el bot está disponible, verificar que sigue siendo admin
+      // Si no está disponible, confiar en que el canal está activo en la BD
+      if (this.bot) {
+        try {
+          const verification = await this.verifyChannelAccess(channel.channel_id);
+          if (!verification.valid) {
+            // Marcar como inactivo
+            await this.markChannelAsInactive(channel.channel_id);
+            return {
+              found: false,
+              error: 'El bot ya no es administrador de este canal. Por favor, vuelve a añadirlo como admin.',
+            };
+          }
+        } catch (verifyError) {
+          this.logger.warn(`Could not verify channel ${channel.channel_id}, but continuing:`, verifyError);
+          // Continuar sin verificación - confiamos en el estado de is_active
         }
-      } catch (verifyError) {
-        this.logger.warn(`Could not verify channel ${channel.channel_id}:`, verifyError);
+      } else {
+        this.logger.warn(`Bot not available for verification, trusting is_active status for ${channel.channel_id}`);
       }
 
       return {
