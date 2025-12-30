@@ -2,7 +2,7 @@
 
 ## Test Context
 - **Date:** 2025-12-30 (Updated v3)
-- **Environment:** Preview (https://tipster-portal-1.preview.emergentagent.com)
+- **Environment:** Preview (https://affily-pro.preview.emergentagent.com)
 - **Feature:** Sistema de conexión de canales de Telegram simplificado (por nombre)
 
 ## Feature Update (Fork v3)

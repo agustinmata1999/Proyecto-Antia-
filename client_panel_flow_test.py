@@ -8,7 +8,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://tipster-portal-1.preview.emergentagent.com"
+BASE_URL = "https://affily-pro.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
