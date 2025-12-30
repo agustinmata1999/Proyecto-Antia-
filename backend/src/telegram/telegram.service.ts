@@ -1684,8 +1684,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       this.logger.error('Error verifying channel access:', error);
       // En caso de error de conectividad, asumir válido para no bloquear
       return { valid: true };
-        error: 'No se pudo acceder al canal. Verifica que el ID sea correcto y que el bot sea administrador.',
-      };
     }
   }
 
