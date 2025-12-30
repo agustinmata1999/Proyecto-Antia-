@@ -231,6 +231,10 @@ export class LandingCountryConfigDto {
 export class CreateLandingDto {
   @IsOptional()
   @IsString()
+  promotionId?: string;  // ID del reto/promoción seleccionado
+
+  @IsOptional()
+  @IsString()
   title?: string;
 
   @IsOptional()
@@ -247,6 +251,10 @@ export class CreateLandingDto {
 
 // Actualizar Landing
 export class UpdateLandingDto {
+  @IsOptional()
+  @IsString()
+  promotionId?: string;
+
   @IsOptional()
   @IsString()
   title?: string;
