@@ -2282,9 +2282,10 @@ export default function TipsterDashboard() {
             <div className="p-6 space-y-4">
               {/* Instrucciones */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium text-blue-800 mb-2">📋 Antes de continuar:</h4>
-                <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                <h4 className="font-medium text-blue-800 mb-2">📋 Pasos para conectar tu canal:</h4>
+                <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
                   <li>Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal</li>
+                  <li>Escribe el comando <code className="bg-blue-100 px-1 rounded">/registrar</code> en tu canal</li>
                   <li>Escribe abajo el <strong>nombre exacto</strong> de tu canal</li>
                 </ol>
               </div>
@@ -2292,6 +2293,11 @@ export default function TipsterDashboard() {
               {addChannelError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-600">{addChannelError}</p>
+                  {addChannelError.includes('no encontrado') && (
+                    <p className="text-xs text-red-500 mt-2">
+                      💡 <strong>Tip:</strong> Ejecuta el comando <code className="bg-red-100 px-1 rounded">/registrar</code> en tu canal de Telegram primero.
+                    </p>
+                  )}
                 </div>
               )}
 
