@@ -92,8 +92,13 @@ export default function TipsterLandingsSection() {
   const [metrics, setMetrics] = useState<any>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
+  // Promotions state
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotionHouses, setPromotionHouses] = useState<PromotionHouse[]>([]);
+
   // Create/Edit form state
   const [formData, setFormData] = useState({
+    promotionId: '' as string,
     title: '',
     description: '',
     countriesEnabled: ['ES'] as string[],
@@ -107,6 +112,7 @@ export default function TipsterLandingsSection() {
 
   useEffect(() => {
     loadLandings();
+    loadPromotions();
   }, []);
 
   const loadLandings = async () => {
