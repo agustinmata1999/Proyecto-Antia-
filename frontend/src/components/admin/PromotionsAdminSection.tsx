@@ -67,6 +67,7 @@ export default function PromotionsAdminSection() {
     bettingHouseId: '',
     affiliateUrl: '',
     trackingParamName: 'subid',
+    commissionCents: 0, // Comisión por conversión en céntimos
   });
   
   const [saving, setSaving] = useState(false);
