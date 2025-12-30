@@ -1101,13 +1101,13 @@ export class AffiliateService {
     // By Campaign
     const byCampaignMap: Record<string, { clicks: number; conversions: number }> = {};
     for (const click of clicks) {
-      const campaignId = click.campaignId || 'NO_CAMPAIGN';
+      const campaignId = (click as any).campaignId || (click as any).promotionId || 'NO_CAMPAIGN';
       if (!byCampaignMap[campaignId]) byCampaignMap[campaignId] = { clicks: 0, conversions: 0 };
       byCampaignMap[campaignId].clicks++;
     }
     const byCampaign = Object.entries(byCampaignMap)
       .map(([campaignId, data]) => {
-        const campaign = promotionsMap.get(campaignId);
+        const campaign = promotionsMap.get(campaignId) as any;
         return {
           campaignId,
           campaignName: campaign?.name || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
