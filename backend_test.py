@@ -1236,11 +1236,12 @@ def main():
     tester = AntiaAffiliateTester()
     
     try:
-        results = tester.run_affiliate_landing_tests()
+        # Run the affiliate statistics tests as requested in the review
+        results = tester.run_affiliate_statistics_tests()
         
         # Print summary
         print("\n" + "=" * 60)
-        print("🏁 TEST SUMMARY")
+        print("🏁 AFFILIATE STATISTICS TEST SUMMARY")
         print("=" * 60)
         
         passed = 0
@@ -1260,7 +1261,7 @@ def main():
         print(f"Failed: {failed}")
         
         if failed == 0:
-            print("\n🎉 All tests passed!")
+            print("\n🎉 All affiliate statistics tests passed!")
             sys.exit(0)
         else:
             print(f"\n💥 {failed} test(s) failed!")
