@@ -1,16 +1,16 @@
 # Test Results - AFFILIA-GO Platform
 
-## Current Test Cycle: Telegram Bot Proxy Implementation
+## Current Test Cycle: Affiliate System E2E Testing
 
 ### Testing Priority
-1. **P0**: Verify Telegram bot works via proxy
-2. **P1**: Test webhook receives updates
-3. **P2**: Test bot can send messages
+1. **P0**: Test Admin Affiliate Stats Dashboard
+2. **P0**: Test Tipster Stats Dashboard  
+3. **P1**: Test Landing Creation and Click Tracking
+4. **P2**: Test Conversion Postback
 
 ### Test Environment
 - API URL: https://apifix-2.preview.emergentagent.com
-- Bot Username: @Antiabetbot
-- Proxy: api.allorigins.win
+- Frontend URL: http://localhost:3000
 
 ### Test Credentials
 - SuperAdmin: admin@antia.com / SuperAdmin123!
