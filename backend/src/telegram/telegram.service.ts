@@ -1572,49 +1572,66 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   /**
    * Asegurar que el webhook esté configurado antes de procesar
    */
-  private async ensureWebhook() {
+  /**
+   * Ensure webhook is configured (non-blocking, runs in background)
+   */
+  private ensureWebhookAsync(): void {
     const webhookUrl = (this as any).webhookUrl;
     if (!webhookUrl) return;
     
-    try {
-      const info = await this.bot.telegram.getWebhookInfo();
-      if (!info.url || info.url !== webhookUrl) {
-        await this.bot.telegram.setWebhook(webhookUrl, {
-          allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-          drop_pending_updates: false,
-          max_connections: 100,
-        });
+    // Run in background without blocking the webhook response
+    setImmediate(async () => {
+      try {
+        const info = await this.httpService.getWebhookInfo();
+        if (!info.url || info.url !== webhookUrl) {
+          this.logger.log('🔄 Re-configuring webhook in background...');
+          await this.httpService.setWebhook(webhookUrl, {
+            allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+            dropPendingUpdates: false,
+            maxConnections: 100,
+          });
+        }
+      } catch (e) {
+        // Silently ignore - webhook check is non-critical
       }
-    } catch (e) {
-      // Silencioso
-    }
+    });
   }
 
   /**
-   * Manejar updates desde webhook
+   * Manejar updates desde webhook - OPTIMIZADO para respuesta rápida
    */
   async handleUpdate(update: any) {
     try {
       this.logger.log(`Processing webhook update: ${JSON.stringify(update).substring(0, 200)}`);
       
-      // Procesar my_chat_member directamente (no requiere bot inicializado)
+      // Process my_chat_member directly (critical - needs sync processing)
       if (update.my_chat_member) {
+        // Process sync but quickly
         await this.handleMyChatMemberUpdate(update.my_chat_member);
         this.logger.log('Webhook my_chat_member processed successfully');
         return;
       }
       
-      // Para otros updates, usar el bot si está disponible
+      // For other updates, process async in background and return immediately
       if (this.bot) {
-        await this.ensureWebhook();
-        await this.bot.handleUpdate(update);
-        this.logger.log('Webhook update processed successfully');
+        // Fire and forget - don't block the webhook response
+        setImmediate(async () => {
+          try {
+            await this.bot.handleUpdate(update);
+            this.logger.log('Webhook update processed successfully (background)');
+          } catch (err) {
+            this.logger.error('Background update processing failed:', err.message);
+          }
+        });
+        
+        // Ensure webhook is still configured (non-blocking)
+        this.ensureWebhookAsync();
       } else {
         this.logger.warn('Bot not initialized, skipping non-critical update');
       }
     } catch (error) {
       this.logger.error('Error handling update:', error);
-      throw error;
+      // Don't throw - always respond to Telegram quickly
     }
   }
 
