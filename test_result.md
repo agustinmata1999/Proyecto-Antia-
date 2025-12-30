@@ -2,7 +2,7 @@
 
 ## Test Context
 - **Date:** 2025-12-30
-- **Environment:** Preview (https://affilia-panel.preview.emergentagent.com)
+- **Environment:** Preview (https://tipster-portal-1.preview.emergentagent.com)
 - **Feature:** Sistema de Landings de Afiliación para Tipsters
 
 ## Testing Protocol
