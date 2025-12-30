@@ -27,7 +27,7 @@ class TelegramBotTester:
         print(f"[{level}] {message}")
         
     def make_request(self, method: str, endpoint: str, data: Dict = None, 
-                    headers: Dict = None, use_auth: bool = True) -> requests.Response:
+                    headers: Dict = None, use_auth: bool = True, timeout: int = 10) -> requests.Response:
         """Make HTTP request with proper headers"""
         url = f"{API_BASE}{endpoint}"
         
