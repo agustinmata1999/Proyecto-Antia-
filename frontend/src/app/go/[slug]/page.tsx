@@ -127,7 +127,8 @@ export default function PublicLandingPage() {
 
   const handleHouseClick = (houseId: string) => {
     // Redirigir a través del endpoint de tracking
-    const redirectUrl = `${BASE_URL}/api/r/${slug}/${houseId}?country=${selectedCountry}`;
+    const baseUrl = getBaseUrl();
+    const redirectUrl = `${baseUrl}/api/r/${slug}/${houseId}?country=${selectedCountry}`;
     window.open(redirectUrl, '_blank');
   };
 
