@@ -2285,7 +2285,7 @@ export default function TipsterDashboard() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Conectar Canal de Telegram</h2>
-                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); }} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -2302,66 +2302,31 @@ export default function TipsterDashboard() {
                 </p>
               </div>
 
-              {/* Tabs para elegir modo */}
-              <div className="flex border-b border-gray-200">
-                <button
-                  onClick={() => { setInputMode('name'); setAddChannelError(''); }}
-                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    inputMode === 'name' 
-                      ? 'border-blue-500 text-blue-600' 
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Por Nombre
-                </button>
-                <button
-                  onClick={() => { setInputMode('id'); setAddChannelError(''); }}
-                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    inputMode === 'id' 
-                      ? 'border-blue-500 text-blue-600' 
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Por ID
-                </button>
-              </div>
-
               {addChannelError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-600">{addChannelError}</p>
-                  {addChannelError.includes('no encontrado') && inputMode === 'name' && (
-                    <button 
-                      onClick={() => setInputMode('id')}
-                      className="text-xs text-blue-600 underline mt-2"
-                    >
-                      💡 Prueba conectar usando el ID del canal
-                    </button>
-                  )}
                 </div>
               )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {inputMode === 'name' ? 'Nombre del Canal' : 'ID del Canal'} <span className="text-red-500">*</span>
+                  Nombre del Canal <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text" 
                   value={channelInput}
                   onChange={(e) => setChannelInput(e.target.value)}
-                  placeholder={inputMode === 'name' ? 'Ej: Mi Canal Premium' : 'Ej: -1001234567890'}
+                  placeholder="Ej: Mi Canal Premium"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {inputMode === 'name' 
-                    ? 'Escribe el nombre exacto de tu canal' 
-                    : 'Puedes obtener el ID usando @userinfobot o reenviando un mensaje del canal'
-                  }
+                  Escribe el nombre exacto de tu canal tal como aparece en Telegram
                 </p>
               </div>
 
               <div className="flex gap-3 justify-end pt-4">
                 <button 
-                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }}
+                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); }}
                   className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
