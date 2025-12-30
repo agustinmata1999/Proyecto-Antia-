@@ -2285,9 +2285,11 @@ export default function TipsterDashboard() {
                 <h4 className="font-medium text-blue-800 mb-2">📋 Pasos para conectar tu canal:</h4>
                 <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
                   <li>Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal</li>
-                  <li>Escribe el comando <code className="bg-blue-100 px-1 rounded">/registrar</code> en tu canal</li>
                   <li>Escribe abajo el <strong>nombre exacto</strong> de tu canal</li>
                 </ol>
+                <p className="text-xs text-blue-600 mt-3 italic">
+                  💡 Si el canal no se encuentra, escribe <code className="bg-blue-100 px-1 rounded">/registrar</code> en tu canal y vuelve a intentar.
+                </p>
               </div>
 
               {addChannelError && (
@@ -2295,7 +2297,7 @@ export default function TipsterDashboard() {
                   <p className="text-sm text-red-600">{addChannelError}</p>
                   {addChannelError.includes('no encontrado') && (
                     <p className="text-xs text-red-500 mt-2">
-                      💡 <strong>Tip:</strong> Ejecuta el comando <code className="bg-red-100 px-1 rounded">/registrar</code> en tu canal de Telegram primero.
+                      💡 <strong>Solución:</strong> Escribe <code className="bg-red-100 px-1 rounded">/registrar</code> en tu canal de Telegram y luego vuelve a intentar.
                     </p>
                   )}
                 </div>
