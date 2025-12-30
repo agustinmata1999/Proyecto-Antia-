@@ -72,9 +72,9 @@ export class PromotionAdminController {
   @Post(':id/houses')
   async addHouseLink(
     @Param('id') id: string,
-    @Body() body: { bettingHouseId: string; affiliateUrl: string; trackingParamName?: string },
+    @Body() body: { bettingHouseId: string; affiliateUrl: string; trackingParamName?: string; commissionCents?: number },
   ) {
-    return this.promotionService.addHouseLink(id, body.bettingHouseId, body.affiliateUrl, body.trackingParamName);
+    return this.promotionService.addHouseLink(id, body.bettingHouseId, body.affiliateUrl, body.trackingParamName, body.commissionCents);
   }
 
   /**
