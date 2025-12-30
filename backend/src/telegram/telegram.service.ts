@@ -1,18 +1,23 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject, forwardRef } from '@nestjs/common';
 import { Telegraf, Context } from 'telegraf';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { TelegramHttpService } from './telegram-http.service';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private bot: Telegraf | null = null;
   private readonly logger = new Logger(TelegramService.name);
   private isInitialized = false;
+  private httpService: TelegramHttpService;
 
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
   ) {
+    // Create HTTP service for proxy-based API calls
+    this.httpService = new TelegramHttpService(config);
+    
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     if (!token) {
       this.logger.warn('TELEGRAM_BOT_TOKEN is not configured - Telegram features disabled');
@@ -29,103 +34,57 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    if (!this.bot) {
-      this.logger.warn('Telegram bot not initialized - skipping');
-      return;
-    }
-    
+    // Always initialize using HTTP service via proxy (bypasses firewall)
     try {
-      // Obtener info del bot with timeout
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Telegram connection timeout')), 10000)
-      );
+      const botInfo = await this.httpService.getMe();
+      this.logger.log(`📱 Bot info (via proxy): @${botInfo.username}`);
       
-      const botInfoPromise = this.bot.telegram.getMe();
-      const botInfo = await Promise.race([botInfoPromise, timeoutPromise]) as any;
-      this.logger.log(`📱 Bot info: @${botInfo.username}`);
-      
-      // Determinar si usar webhook o polling basado en APP_URL
+      // Configure webhook using HTTP service
       const appUrl = this.config.get<string>('APP_URL');
-      const useWebhook = appUrl && appUrl.includes('preview.emergentagent.com');
-      
-      if (useWebhook) {
-        // MODO WEBHOOK para preview - AGRESIVO para prevalecer sobre producción
+      if (appUrl && appUrl.includes('preview.emergentagent.com')) {
         const webhookUrl = `${appUrl}/api/telegram/webhook`;
-        this.logger.log(`🔧 Setting up AGGRESSIVE webhook mode at: ${webhookUrl}`);
+        this.logger.log(`🔧 Setting up webhook via proxy at: ${webhookUrl}`);
         
-        // Guardar referencia al webhookUrl para uso en otros métodos
+        // Store webhook URL for later use
         (this as any).webhookUrl = webhookUrl;
         
-        // Función para configurar el webhook - SIEMPRE fuerza la configuración
-        const setupWebhook = async () => {
-          try {
-            await this.bot.telegram.setWebhook(webhookUrl, {
-              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-              drop_pending_updates: false,
-              max_connections: 100, // Aumentado para mejor rendimiento
-            });
-            return true;
-          } catch (error) {
-            this.logger.error('Failed to set webhook:', error.message);
-            return false;
-          }
-        };
-
-        // Configurar webhook inicial múltiples veces para asegurar
-        this.logger.log(`🔄 Forcing webhook configuration...`);
-        await setupWebhook();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await setupWebhook();
+        // Set webhook using HTTP service (via proxy)
+        await this.httpService.setWebhook(webhookUrl, {
+          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+          dropPendingUpdates: false,
+          maxConnections: 100,
+        });
         
-        // Verificar el webhook después de configurarlo
-        const webhookInfo = await this.bot.telegram.getWebhookInfo();
+        // Verify webhook
+        const webhookInfo = await this.httpService.getWebhookInfo();
         this.logger.log(`📡 Webhook configured: ${webhookInfo.url}`);
         
-        // VERIFICACIÓN ULTRA-AGRESIVA: cada 5 segundos
+        // Periodic webhook verification (every 30 seconds)
         setInterval(async () => {
           try {
-            const info = await this.bot.telegram.getWebhookInfo();
+            const info = await this.httpService.getWebhookInfo();
             if (!info.url || info.url !== webhookUrl) {
-              await this.bot.telegram.setWebhook(webhookUrl, {
-                allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-                drop_pending_updates: false,
-                max_connections: 100,
+              this.logger.log(`🔄 Re-configuring webhook...`);
+              await this.httpService.setWebhook(webhookUrl, {
+                allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+                dropPendingUpdates: false,
+                maxConnections: 100,
               });
             }
           } catch (error) {
-            // Silencioso - intentar reconfigurar sin logging
-            await this.bot.telegram.setWebhook(webhookUrl, {
-              allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-              drop_pending_updates: false,
-              max_connections: 100,
-            }).catch(() => {});
+            this.logger.warn(`Webhook check failed: ${error.message}`);
           }
-        }, 5000); // 5 segundos - ultra agresivo
+        }, 30000); // 30 seconds
         
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (ULTRA-AGGRESSIVE WEBHOOK mode - 5s interval)');
+        this.logger.log('✅ TelegramService initialized via PROXY (webhook mode)');
       } else {
-        // MODO POLLING para producción
-        this.logger.log(`🔧 Removing any existing webhook and starting polling mode...`);
-        
-        // Eliminar webhook existente
-        await this.bot.telegram.deleteWebhook({ drop_pending_updates: false });
-        this.logger.log(`✅ Webhook removed`);
-        
-        // Iniciar polling en background (no bloqueante)
-        this.bot.launch({
-          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-        }).catch((err) => {
-          this.logger.error('Bot polling error:', err.message);
-        });
-        
+        this.logger.log('✅ TelegramService initialized via PROXY (no webhook - production mode)');
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (POLLING mode for production)');
       }
     } catch (error) {
-      this.logger.error('Failed to initialize Telegram bot:', error.message);
-      this.logger.warn('⚠️  Telegram features may not work correctly - continuing without Telegram');
-      // Don't throw - let the app continue without Telegram
+      this.logger.error('Failed to initialize Telegram via proxy:', error.message);
+      this.logger.warn('⚠️  Telegram features may not work correctly');
     }
   }
 
