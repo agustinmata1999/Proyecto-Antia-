@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { affiliateApi } from '@/lib/api';
 import PromotionsAdminSection from './admin/PromotionsAdminSection';
 
-type AffiliateTab = 'promotions' | 'houses' | 'campaigns' | 'import' | 'conversions' | 'payouts';
+type AffiliateTab = 'campaigns' | 'houses' | 'stats' | 'import' | 'conversions' | 'payouts';
 
 interface BettingHouse {
   id: string;
