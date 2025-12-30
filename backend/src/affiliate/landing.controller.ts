@@ -146,7 +146,23 @@ export class LandingRedirectController {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('TIPSTER')
 export class TipsterLandingController {
-  constructor(private landingService: LandingService) {}
+  constructor(
+    private landingService: LandingService,
+    private prisma: PrismaService,
+  ) {}
+
+  /**
+   * Get tipster profile ID from user ID
+   */
+  private async getTipsterProfileId(userId: string): Promise<string> {
+    const profile = await this.prisma.tipsterProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) {
+      throw new Error('Perfil de tipster no encontrado');
+    }
+    return profile.id;
+  }
 
   /**
    * GET /api/tipster/landings
@@ -154,7 +170,7 @@ export class TipsterLandingController {
    */
   @Get()
   async getMyLandings(@Req() req: any) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.getTipsterLandings(tipsterId);
   }
 
@@ -164,7 +180,7 @@ export class TipsterLandingController {
    */
   @Post()
   async createLanding(@Req() req: any, @Body() dto: CreateLandingDto) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.createLanding(tipsterId, dto);
   }
 
@@ -174,7 +190,7 @@ export class TipsterLandingController {
    */
   @Get(':id')
   async getLanding(@Req() req: any, @Param('id') id: string) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     const landing = await this.landingService.getLandingById(id);
     
     if (landing.tipsterId !== tipsterId) {
@@ -194,7 +210,7 @@ export class TipsterLandingController {
     @Param('id') id: string,
     @Body() dto: UpdateLandingDto,
   ) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.updateLanding(id, tipsterId, dto);
   }
 
@@ -204,7 +220,7 @@ export class TipsterLandingController {
    */
   @Delete(':id')
   async deleteLanding(@Req() req: any, @Param('id') id: string) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.deleteLanding(id, tipsterId);
   }
 
@@ -219,7 +235,7 @@ export class TipsterLandingController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.getLandingMetrics(
       id,
       tipsterId,
@@ -239,7 +255,7 @@ export class TipsterLandingController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const tipsterId = req.user.tipsterId;
+    const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.getLandingClickHistory(
       id,
       tipsterId,
