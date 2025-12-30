@@ -2264,14 +2264,14 @@ export default function TipsterDashboard() {
         </div>
       )}
 
-      {/* Modal: Añadir Canal */}
+      {/* Modal: Añadir Canal - SIMPLIFICADO */}
       {showAddChannelForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddChannelForm(false)}>
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Añadir Canal de Telegram</h2>
-                <button onClick={() => setShowAddChannelForm(false)} className="text-gray-400 hover:text-gray-600">
+                <h2 className="text-xl font-bold text-gray-900">Conectar Canal de Telegram</h2>
+                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelNameInput(''); }} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -2280,46 +2280,18 @@ export default function TipsterDashboard() {
             </div>
             
             <div className="p-6 space-y-4">
+              {/* Instrucciones */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 mb-2">📋 Antes de continuar:</h4>
+                <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                  <li>Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal</li>
+                  <li>Escribe abajo el <strong>nombre exacto</strong> de tu canal</li>
+                </ol>
+              </div>
+
               {addChannelError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-600">{addChannelError}</p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ID del Canal <span className="text-red-500">*</span>
-                </label>
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={newChannelData.channelId}
-                    onChange={(e) => {
-                      setNewChannelData({ ...newChannelData, channelId: e.target.value });
-                      setChannelVerified(null);
-                    }}
-                    placeholder="Ej: -1001234567890"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={handleVerifyChannel}
-                    disabled={verifyingChannel || !newChannelData.channelId.trim()}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
-                  >
-                    {verifyingChannel ? 'Verificando...' : 'Verificar'}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Puedes obtener el ID reenviando un mensaje del canal a @userinfobot
-                </p>
-              </div>
-
-              {channelVerified && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800 font-medium">✅ Canal verificado</p>
-                  <p className="text-sm text-green-700">Nombre: {channelVerified.title}</p>
-                  {channelVerified.username && <p className="text-sm text-green-700">@{channelVerified.username}</p>}
-                  <p className="text-sm text-green-700">Tipo: {channelVerified.type}</p>
                 </div>
               )}
 
@@ -2329,56 +2301,36 @@ export default function TipsterDashboard() {
                 </label>
                 <input 
                   type="text" 
-                  value={newChannelData.channelTitle}
-                  onChange={(e) => setNewChannelData({ ...newChannelData, channelTitle: e.target.value })}
+                  value={channelNameInput}
+                  onChange={(e) => setChannelNameInput(e.target.value)}
                   placeholder="Ej: Mi Canal Premium"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Escribe el nombre tal como aparece en Telegram (mayúsculas y espacios incluidos)
+                </p>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Canal</label>
-                <select 
-                  value={newChannelData.channelType}
-                  onChange={(e) => setNewChannelData({ ...newChannelData, channelType: e.target.value as 'public' | 'private' })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="private">🔒 Privado</option>
-                  <option value="public">🌐 Público</option>
-                </select>
-              </div>
-
-              {newChannelData.channelType === 'private' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Enlace de Invitación (Opcional)
-                  </label>
-                  <input 
-                    type="text" 
-                    value={newChannelData.inviteLink}
-                    onChange={(e) => setNewChannelData({ ...newChannelData, inviteLink: e.target.value })}
-                    placeholder="Ej: https://t.me/+AbCdEf123456"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Puedes generarlo después desde la lista de canales
-                  </p>
-                </div>
-              )}
 
               <div className="flex gap-3 justify-end pt-4">
                 <button 
-                  onClick={() => setShowAddChannelForm(false)}
+                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelNameInput(''); }}
                   className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button 
-                  onClick={handleAddChannel}
-                  disabled={addingChannel || !newChannelData.channelId.trim() || !newChannelData.channelTitle.trim()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  onClick={handleConnectChannelByName}
+                  disabled={connectingChannel || !channelNameInput.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
-                  {addingChannel ? 'Añadiendo...' : 'Añadir Canal'}
+                  {connectingChannel ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Conectando...
+                    </>
+                  ) : (
+                    'Conectar Canal'
+                  )}
                 </button>
               </div>
             </div>
