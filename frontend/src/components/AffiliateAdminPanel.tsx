@@ -446,6 +446,7 @@ export default function AffiliateAdminPanel() {
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px overflow-x-auto">
             {[
+              { id: 'promotions', label: '🎁 Retos/Promociones' },
               { id: 'houses', label: '🏠 Casas de Apuestas' },
               { id: 'campaigns', label: '📢 Campañas' },
               { id: 'conversions', label: '👥 Referidos' },
