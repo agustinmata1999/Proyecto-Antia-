@@ -155,4 +155,83 @@ export class TelegramChannelsController {
       error: 'No se pudo generar el enlace de invitación',
     };
   }
+
+  /**
+   * POST /api/telegram/channels/connect-by-name - Conectar canal por nombre (NUEVO)
+   * El tipster solo ingresa el nombre del canal y el sistema busca el ID automáticamente
+   */
+  @Post('connect-by-name')
+  @HttpCode(HttpStatus.OK)
+  async connectByName(@Body() body: { channelName: string }, @Request() req) {
+    if (!body.channelName || body.channelName.trim().length === 0) {
+      return {
+        success: false,
+        message: 'El nombre del canal es obligatorio',
+      };
+    }
+
+    const tipsterId = await this.getTipsterId(req.user.id);
+    
+    // Buscar el canal por nombre en la tabla de canales detectados
+    const searchResult = await this.telegramService.findChannelByName(body.channelName);
+    
+    if (!searchResult.found || !searchResult.channel) {
+      return {
+        success: false,
+        message: searchResult.error || 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+      };
+    }
+
+    // Verificar si el canal ya está conectado para este tipster
+    const existingChannel = await this.channelsService.findByChannelId(
+      tipsterId, 
+      searchResult.channel.channelId
+    );
+    
+    if (existingChannel) {
+      return {
+        success: false,
+        message: 'Este canal ya está conectado a tu cuenta',
+        channel: existingChannel,
+      };
+    }
+
+    // Crear el canal usando el servicio existente
+    try {
+      const channel = await this.channelsService.create(tipsterId, {
+        channelId: searchResult.channel.channelId,
+        channelTitle: searchResult.channel.channelTitle,
+        channelName: searchResult.channel.channelUsername ? `@${searchResult.channel.channelUsername}` : undefined,
+        channelType: searchResult.channel.channelType === 'supergroup' ? 'private' : 'public',
+      });
+
+      return {
+        success: true,
+        message: 'Canal conectado correctamente',
+        channel,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Error al conectar el canal',
+      };
+    }
+  }
+
+  /**
+   * POST /api/telegram/channels/search-by-name - Buscar canal por nombre (sin conectar)
+   * Útil para verificar si un canal existe antes de intentar conectarlo
+   */
+  @Post('search-by-name')
+  @HttpCode(HttpStatus.OK)
+  async searchByName(@Body() body: { channelName: string }) {
+    if (!body.channelName || body.channelName.trim().length === 0) {
+      return {
+        found: false,
+        error: 'El nombre del canal es obligatorio',
+      };
+    }
+
+    return this.telegramService.findChannelByName(body.channelName);
+  }
 }
