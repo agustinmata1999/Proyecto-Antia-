@@ -332,7 +332,7 @@ model AffiliateConversion {
   
   // Metadata de importación
   importBatchId       String?   @map("import_batch_id")             // ID del batch de importación
-  importedAt          DateTime  @default(now()) @map("imported_at")
+  importedAt          DateTime? @default(now()) @map("imported_at")
   rawData             Json?     @map("raw_data")                    // Datos originales del CSV
   
   createdAt           DateTime  @default(now()) @map("created_at")
