@@ -564,48 +564,9 @@ export default function AffiliateAdminPanel() {
             </>
           )}
 
-          {/* CAMPAIGNS TAB */}
-          {activeTab === 'campaigns' && (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Campañas de Afiliación</h2>
-                <button
-                  onClick={() => openCampaignModal()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  + Nueva Campaña
-                </button>
-              </div>
-
-              {campaigns.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No hay campañas creadas</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {campaigns.map((campaign) => (
-                    <div key={campaign.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">{campaign.name}</h3>
-                        {getStatusBadge(campaign.status)}
-                      </div>
-                      <p className="text-sm text-gray-500 mb-3">{campaign.description}</p>
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {campaign.houses?.map((h) => (
-                          <span key={h.id} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded">
-                            {h.name}
-                          </span>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => openCampaignModal(campaign)}
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        Editar
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+          {/* STATS TAB - Statistics for Admin */}
+          {activeTab === 'stats' && (
+            <AffiliateStatsSection />
           )}
 
           {/* CONVERSIONS/REFERRALS TAB */}
