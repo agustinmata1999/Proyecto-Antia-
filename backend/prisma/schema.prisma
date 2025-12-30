@@ -668,6 +668,20 @@ model TelegramChannel {
   @@map("telegram_channels")
 }
 
+// Canales detectados automáticamente cuando el bot es añadido como admin
+// Esta tabla es INTERNA y no se expone a los usuarios
+model DetectedTelegramChannel {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  channelId       String   @unique @map("channel_id")       // ID numérico del canal en Telegram
+  channelTitle    String   @map("channel_title")            // Título/nombre del canal
+  channelUsername String?  @map("channel_username")         // @username del canal (si es público)
+  channelType     String   @map("channel_type")             // "channel" o "supergroup"
+  detectedAt      DateTime @default(now()) @map("detected_at")
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at") // Última vez que el bot verificó que es admin
+  isActive        Boolean  @default(true) @map("is_active") // Si el bot sigue siendo admin
+  
+  @@map("detected_telegram_channels")
+}
 
 // Tickets de soporte para clientes
 model SupportTicket {
