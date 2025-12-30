@@ -455,10 +455,10 @@ export default function AffiliateAdminPanel() {
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px overflow-x-auto">
             {[
-              { id: 'promotions', label: '🎁 Retos/Promociones' },
-              { id: 'houses', label: '🏠 Casas de Apuestas' },
               { id: 'campaigns', label: '📢 Campañas' },
-              { id: 'conversions', label: '👥 Referidos' },
+              { id: 'houses', label: '🏠 Casas de Apuestas' },
+              { id: 'stats', label: '📊 Estadísticas' },
+              { id: 'conversions', label: '👥 Conversiones' },
               { id: 'import', label: '📤 Importar CSV' },
               { id: 'payouts', label: '💵 Liquidaciones' },
             ].map((tab) => (
@@ -483,8 +483,8 @@ export default function AffiliateAdminPanel() {
         </div>
 
         <div className="p-6">
-          {/* PROMOTIONS TAB */}
-          {activeTab === 'promotions' && (
+          {/* CAMPAIGNS TAB */}
+          {activeTab === 'campaigns' && (
             <PromotionsAdminSection />
           )}
 
