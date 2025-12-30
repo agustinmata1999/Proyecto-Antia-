@@ -304,7 +304,7 @@ model AffiliateConversion {
   
   // Datos del CSV/API
   externalRefId       String?   @map("external_ref_id")             // ID externo de la casa
-  tipsterTrackingId   String    @map("tipster_tracking_id")         // subid que vino en el CSV
+  tipsterTrackingId   String?   @map("tipster_tracking_id")         // subid que vino en el CSV
   
   // Datos del usuario referido
   userEmail           String?   @map("user_email")                  // Email del usuario referido
