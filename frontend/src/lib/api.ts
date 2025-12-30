@@ -138,6 +138,10 @@ export const telegramApi = {
     connectByName: (channelName: string) => api.post('/telegram/channels/connect-by-name', { channelName }),
     // NUEVO: Buscar canal por nombre
     searchByName: (channelName: string) => api.post('/telegram/channels/search-by-name', { channelName }),
+    // NUEVO: Conectar canal por ID (verifica que el bot sea admin)
+    connectById: (channelId: string) => api.post('/telegram/channels/connect-by-id', { channelId }),
+    // NUEVO: Verificar canal por ID
+    verifyById: (channelId: string) => api.post('/telegram/channels/verify-by-id', { channelId }),
   },
 };
 
