@@ -100,25 +100,23 @@ export class TelegramChannelsService {
     // Crear nuevo canal usando $runCommandRaw para evitar transacciones
     const now = new Date().toISOString();
     
-    // Si no hay inviteLink, intentar generarlo automáticamente
+    // Si no hay inviteLink, intentar generarlo automáticamente con timeout corto
     let inviteLink = dto.inviteLink || null;
     if (!inviteLink && this.bot) {
       try {
         this.logger.log(`Generating invite link for channel ${dto.channelId}`);
-        inviteLink = await this.bot.telegram.exportChatInviteLink(dto.channelId);
+        // Usar Promise.race para timeout de 5 segundos
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        inviteLink = await Promise.race([
+          this.bot.telegram.exportChatInviteLink(dto.channelId),
+          timeoutPromise
+        ]) as string;
         this.logger.log(`Generated invite link: ${inviteLink}`);
       } catch (error) {
         this.logger.warn(`Could not generate invite link for ${dto.channelId}: ${error.message}`);
-        // Try creating a permanent invite link
-        try {
-          const inviteResult = await this.bot.telegram.createChatInviteLink(dto.channelId, {
-            creates_join_request: false,
-          });
-          inviteLink = inviteResult.invite_link;
-          this.logger.log(`Created permanent invite link: ${inviteLink}`);
-        } catch (e) {
-          this.logger.warn(`Could not create invite link either: ${e.message}`);
-        }
+        // No intentar más - continuar sin invite link
       }
     }
     
