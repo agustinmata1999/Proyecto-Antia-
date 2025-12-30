@@ -1417,7 +1417,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Notificar al tipster sobre una nueva venta
+   * Notificar al tipster sobre una nueva venta - usa proxy
    */
   async notifyTipsterNewSale(
     tipsterId: string,
@@ -1453,7 +1453,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       }).format(amountCents / 100);
 
       // Get tipster's Telegram ID to send notification
-      // First check if tipster has a telegram_user_id
       if (tipster.telegramUserId) {
         const saleMessage = 
           `💰 *¡Nueva Venta!*\n\n` +
@@ -1465,12 +1464,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           `El cliente ya tiene acceso al contenido.`;
 
         try {
-          await this.bot.telegram.sendMessage(tipster.telegramUserId, saleMessage, {
-            parse_mode: 'Markdown',
+          // Use proxy to send message
+          await this.httpService.sendMessage(tipster.telegramUserId, saleMessage, {
+            parseMode: 'Markdown',
           });
-          this.logger.log(`Sale notification sent to tipster ${tipsterId}`);
+          this.logger.log(`✅ Sale notification sent to tipster ${tipsterId} via proxy`);
         } catch (sendError) {
-          this.logger.error('Error sending sale notification to tipster:', sendError);
+          this.logger.error('Error sending sale notification to tipster:', sendError.message);
         }
       }
 
