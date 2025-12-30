@@ -91,8 +91,7 @@ export class TelegramHttpService {
   }
 
   /**
-   * Make a direct API call to Telegram via proxy
-   * For GET requests (no body needed)
+   * Make a direct API call to Telegram via proxy (GET method)
    */
   private async callApiGet<T>(method: string, params: Record<string, any> = {}): Promise<T> {
     // Build query string
@@ -105,7 +104,7 @@ export class TelegramHttpService {
     
     const queryString = queryParams.toString();
     const telegramUrl = `${this.apiBaseUrl}/bot${this.botToken}/${method}${queryString ? '?' + queryString : ''}`;
-    const proxyUrl = `${this.proxyBaseUrl}${encodeURIComponent(telegramUrl)}`;
+    const proxyUrl = `${this.getCurrentProxy()}${encodeURIComponent(telegramUrl)}`;
     
     try {
       this.logger.debug(`Calling Telegram API: ${method}`);
@@ -123,20 +122,10 @@ export class TelegramHttpService {
   }
 
   /**
-   * Make a POST API call to Telegram via proxy
-   * For methods that require sending data in body
-   */
-  private async callApiPost<T>(method: string, params: Record<string, any> = {}): Promise<T> {
-    // For POST, we need to use a different approach since allorigins only supports GET
-    // We'll convert POST params to GET query params for methods that support it
-    return this.callApiGet<T>(method, params);
-  }
-
-  /**
-   * Alias for callApiGet - main method for API calls
+   * Main API call method with retry logic
    */
   private async callApi<T>(method: string, params: Record<string, any> = {}): Promise<T> {
-    return this.callApiGet<T>(method, params);
+    return this.callApiWithRetry<T>(method, params);
   }
 
   /**
