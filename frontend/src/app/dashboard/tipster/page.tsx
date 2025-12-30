@@ -397,10 +397,10 @@ export default function TipsterDashboard() {
 
   // ==================== TELEGRAM CHANNELS FUNCTIONS ====================
   
-  // NUEVO: Conectar canal (por nombre o por ID)
+  // Conectar canal por nombre
   const handleConnectChannel = async () => {
     if (!channelInput.trim()) {
-      setAddChannelError(inputMode === 'name' ? 'Por favor, ingresa el nombre de tu canal' : 'Por favor, ingresa el ID de tu canal');
+      setAddChannelError('Por favor, ingresa el nombre de tu canal');
       return;
     }
 
@@ -408,15 +408,8 @@ export default function TipsterDashboard() {
     setAddChannelError('');
 
     try {
-      let response;
-      
-      if (inputMode === 'name') {
-        // Intentar conectar por nombre
-        response = await telegramApi.channels.connectByName(channelInput.trim());
-      } else {
-        // Conectar por ID (verifica automáticamente que el bot sea admin)
-        response = await telegramApi.channels.connectById(channelInput.trim());
-      }
+      // Conectar por nombre
+      const response = await telegramApi.channels.connectByName(channelInput.trim());
       
       if (response.data.success) {
         // Reload channels
@@ -426,7 +419,6 @@ export default function TipsterDashboard() {
         // Reset form
         setShowAddChannelForm(false);
         setChannelInput('');
-        setInputMode('name');
         alert('✅ Canal conectado correctamente');
       } else {
         setAddChannelError(response.data.message || 'No se pudo conectar el canal.');
