@@ -234,13 +234,25 @@ export class PromotionService {
     if (dto.startDate !== undefined) updateFields.start_date = dto.startDate ? { $date: dto.startDate } : null;
     if (dto.endDate !== undefined) updateFields.end_date = dto.endDate ? { $date: dto.endDate } : null;
 
-    await this.prisma.$runCommandRaw({
+    // Try with string _id first
+    let result = await this.prisma.$runCommandRaw({
       update: 'affiliate_promotions',
       updates: [{
-        q: { _id: { $oid: promotionId } },
+        q: { _id: promotionId },
         u: { $set: updateFields },
       }],
-    });
+    }) as any;
+
+    // If no matches, try with ObjectId
+    if (result.n === 0) {
+      await this.prisma.$runCommandRaw({
+        update: 'affiliate_promotions',
+        updates: [{
+          q: { _id: { $oid: promotionId } },
+          u: { $set: updateFields },
+        }],
+      });
+    }
 
     return this.getPromotionById(promotionId);
   }
@@ -269,7 +281,16 @@ export class PromotionService {
       }],
     });
 
-    // Eliminar promoción
+    // Eliminar promoción - try both _id formats
+    await this.prisma.$runCommandRaw({
+      delete: 'affiliate_promotions',
+      deletes: [{
+        q: { _id: promotionId },
+        limit: 1,
+      }],
+    });
+    
+    // Try with ObjectId as well
     await this.prisma.$runCommandRaw({
       delete: 'affiliate_promotions',
       deletes: [{
