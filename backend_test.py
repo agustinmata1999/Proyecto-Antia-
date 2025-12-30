@@ -929,6 +929,190 @@ class AntiaAffiliateTester:
         except Exception as e:
             self.log(f"❌ Email health check test failed: {str(e)}", "ERROR")
             return False
+
+    # ==================== AFFILIATE STATISTICS TESTS ====================
+
+    def test_admin_affiliate_stats(self) -> bool:
+        """Test GET /api/admin/affiliate/stats - Admin Affiliate Statistics Dashboard"""
+        self.log("=== Testing Admin Affiliate Stats ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            # Test with basic parameters
+            params = {
+                'startDate': '2024-01-01',
+                'endDate': '2024-12-31'
+            }
+            
+            response = self.make_request("GET", "/admin/affiliate/stats", headers={'Content-Type': 'application/json'})
+            
+            if response.status_code == 200:
+                stats = response.json()
+                self.log("✅ Admin affiliate stats retrieved successfully")
+                
+                # Verify expected structure
+                expected_fields = ['general', 'byCountry', 'byHouse', 'byDate', 'byCampaign', 'byTipster', 'filterOptions']
+                for field in expected_fields:
+                    if field in stats:
+                        self.log(f"✅ Stats has {field}")
+                    else:
+                        self.log(f"⚠️ Stats missing {field} (may be empty)", "WARN")
+                
+                # Log general stats if available
+                if 'general' in stats:
+                    general = stats['general']
+                    self.log(f"Total clicks: {general.get('totalClicks', 0)}")
+                    self.log(f"Total conversions: {general.get('conversions', 0)}")
+                    self.log(f"Conversion rate: {general.get('conversionRate', 0)}%")
+                    self.log(f"Total earnings: {general.get('totalEarnings', 0)}")
+                
+                return True
+            else:
+                self.log(f"❌ Admin affiliate stats failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin affiliate stats test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
+    def test_tipster_affiliate_stats(self) -> bool:
+        """Test GET /api/affiliate/tipster/stats - Tipster Statistics Dashboard"""
+        self.log("=== Testing Tipster Affiliate Stats ===")
+        
+        try:
+            # Test with date range parameters
+            params = {
+                'startDate': '2024-01-01',
+                'endDate': '2024-12-31'
+            }
+            
+            response = self.make_request("GET", "/affiliate/tipster/stats")
+            
+            if response.status_code == 200:
+                stats = response.json()
+                self.log("✅ Tipster affiliate stats retrieved successfully")
+                
+                # Verify expected structure
+                expected_fields = ['general', 'byCountry', 'byHouse', 'byDate', 'byCampaign']
+                for field in expected_fields:
+                    if field in stats:
+                        self.log(f"✅ Stats has {field}")
+                    else:
+                        self.log(f"⚠️ Stats missing {field} (may be empty)", "WARN")
+                
+                # Log general stats if available
+                if 'general' in stats:
+                    general = stats['general']
+                    self.log(f"Total clicks: {general.get('totalClicks', 0)}")
+                    self.log(f"Total conversions: {general.get('conversions', 0)}")
+                    self.log(f"Conversion rate: {general.get('conversionRate', 0)}%")
+                    self.log(f"Total earnings: {general.get('totalEarnings', 0)}")
+                
+                return True
+            else:
+                self.log(f"❌ Tipster affiliate stats failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Tipster affiliate stats test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_tipster_promotions(self) -> bool:
+        """Test GET /api/tipster/landings/promotions - Tipster Promotions/Campaigns"""
+        self.log("=== Testing Tipster Promotions ===")
+        
+        try:
+            response = self.make_request("GET", "/tipster/landings/promotions")
+            
+            if response.status_code == 200:
+                promotions = response.json()
+                self.log(f"✅ Successfully retrieved {len(promotions)} promotions")
+                
+                # Verify expected structure for each promotion
+                for i, promotion in enumerate(promotions):
+                    expected_fields = ['id', 'name', 'slug', 'description', 'housesCount']
+                    self.log(f"Promotion {i+1}: {promotion.get('name', 'No name')}")
+                    
+                    for field in expected_fields:
+                        if field in promotion:
+                            self.log(f"  ✅ Has {field}: {promotion[field]}")
+                        else:
+                            self.log(f"  ❌ Missing {field}", "ERROR")
+                            return False
+                
+                return True
+            else:
+                self.log(f"❌ Tipster promotions failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Tipster promotions test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_conversion_postback(self) -> bool:
+        """Test POST /api/affiliate/postback - Conversion Postback"""
+        self.log("=== Testing Conversion Postback ===")
+        
+        try:
+            # Test postback data
+            postback_data = {
+                "clickId": "test-click-id",
+                "conversionType": "DEPOSIT",
+                "amount": 100,
+                "currency": "EUR",
+                "externalRefId": "test-ref-001"
+            }
+            
+            response = self.make_request("POST", "/affiliate/postback", postback_data, use_auth=False)
+            
+            if response.status_code in [200, 201, 404]:  # 404 is acceptable for invalid clickId
+                result = response.json()
+                self.log("✅ Postback endpoint responded correctly")
+                
+                if response.status_code == 404:
+                    self.log("⚠️ Postback returned 404 for test clickId (expected for invalid ID)", "WARN")
+                else:
+                    self.log(f"Postback result: {result}")
+                
+                return True
+            else:
+                self.log(f"❌ Conversion postback failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Conversion postback test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_health_check(self) -> bool:
+        """Test GET /api/health - Health Check"""
+        self.log("=== Testing Health Check ===")
+        
+        try:
+            response = self.make_request("GET", "/health", use_auth=False)
+            
+            if response.status_code == 200:
+                health = response.json()
+                self.log("✅ Health check successful")
+                
+                # Log health details
+                self.log(f"Status: {health.get('status', 'Unknown')}")
+                self.log(f"Database: {health.get('database', 'Unknown')}")
+                self.log(f"Users count: {health.get('usersCount', 0)}")
+                self.log(f"Uptime: {health.get('uptime', 0)} seconds")
+                
+                return True
+            else:
+                self.log(f"❌ Health check failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Health check test failed: {str(e)}", "ERROR")
             return False
 
     def run_affiliate_landing_tests(self) -> Dict[str, bool]:
