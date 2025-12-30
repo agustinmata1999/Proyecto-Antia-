@@ -516,7 +516,7 @@ export default function PromotionsAdminSection() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">
-                  {editingPromotion ? 'Editar Reto' : 'Nuevo Reto'}
+                  {editingPromotion ? 'Editar Campaña' : 'Nueva Campaña'}
                 </h2>
                 <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 rounded">
                   <X className="w-5 h-5" />
@@ -526,14 +526,14 @@ export default function PromotionsAdminSection() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre del Reto *
+                    Nombre de la Campaña *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="Ej: Reto Navidad 2025"
+                    placeholder="Ej: Campaña Navidad 2025"
                   />
                 </div>
 
@@ -546,7 +546,7 @@ export default function PromotionsAdminSection() {
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="reto-navidad-2025"
+                    placeholder="campana-navidad-2025"
                     disabled={!!editingPromotion}
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -563,7 +563,7 @@ export default function PromotionsAdminSection() {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     rows={3}
-                    placeholder="Descripción del reto..."
+                    placeholder="Descripción de la campaña..."
                   />
                 </div>
 
@@ -591,7 +591,7 @@ export default function PromotionsAdminSection() {
                   disabled={saving || !formData.name || !formData.slug}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  {saving ? 'Guardando...' : (editingPromotion ? 'Guardar Cambios' : 'Crear Reto')}
+                  {saving ? 'Guardando...' : (editingPromotion ? 'Guardar Cambios' : 'Crear Campaña')}
                 </Button>
               </div>
             </div>
