@@ -65,8 +65,8 @@
       "static/chunks/117-fdee7c9ac99cb2f8.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/522-d4b7e6a423484678.js",
-      "static/chunks/480-d3410ce934bffed0.js",
-      "static/chunks/app/go/[slug]/page-cbd08a0c4e6edca1.js"
+      "static/chunks/814-3e2c418ee5ea625a.js",
+      "static/chunks/app/go/[slug]/page-38d4da57bbd71fba.js"
     ],
     "/login/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -86,7 +86,7 @@
       "static/chunks/522-d4b7e6a423484678.js",
       "static/chunks/724-4cc72d5f8f665f59.js",
       "static/chunks/80-3e5dbde34621f3a4.js",
-      "static/chunks/app/dashboard/tipster/page-e96aaa85c58a4e12.js"
+      "static/chunks/app/dashboard/tipster/page-a0016b16639fb6b0.js"
     ],
     "/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
