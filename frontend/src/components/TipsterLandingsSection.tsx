@@ -404,17 +404,18 @@ export default function TipsterLandingsSection() {
 
   const resetForm = () => {
     setFormData({
+      promotionId: '',
       title: '',
       description: '',
       countriesEnabled: ['ES'],
       countryConfigs: [],
     });
+    setPromotionHouses([]);
     setFormError('');
   };
 
   const openCreateDialog = () => {
     resetForm();
-    loadHousesForCountry('ES');
     setShowCreateDialog(true);
   };
 
