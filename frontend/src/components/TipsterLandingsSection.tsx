@@ -471,6 +471,11 @@ export default function TipsterLandingsSection() {
                   <h3 className="font-semibold text-gray-900">
                     {landing.title || 'Landing sin título'}
                   </h3>
+                  {landing.promotionName && (
+                    <p className="text-sm text-blue-600 font-medium">
+                      🎁 {landing.promotionName}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-500">
                     {landing.countriesEnabled.map(c => COUNTRY_INFO[c]?.flag || c).join(' ')}
                   </p>
