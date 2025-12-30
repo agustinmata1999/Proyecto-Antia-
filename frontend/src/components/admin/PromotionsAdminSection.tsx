@@ -36,7 +36,8 @@ interface Promotion {
   status: string;
   startDate?: string;
   endDate?: string;
-  houseLinks: PromotionHouseLink[];
+  houseLinks?: PromotionHouseLink[];
+  housesCount?: number;
   createdAt: string;
 }
 
