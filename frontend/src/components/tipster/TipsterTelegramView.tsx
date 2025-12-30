@@ -88,7 +88,7 @@ export default function TipsterTelegramView({
 
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">\ud83d\udcd6 C\u00f3mo conectar tu canal premium</h3>
+        <h3 className="font-semibold text-blue-900 mb-3">📖 Cómo conectar tu canal premium</h3>
         <ol className="space-y-2 text-sm text-blue-800">
           <li className="flex items-start gap-2">
             <span className="font-bold">1.</span>
@@ -100,11 +100,11 @@ export default function TipsterTelegramView({
           </li>
           <li className="flex items-start gap-2">
             <span className="font-bold">3.</span>
-            <span>Copia el <strong>ID del canal</strong> o el <strong>@username</strong> y p\u00e9galo abajo</span>
+            <span>Escribe el <strong>nombre de tu canal</strong> abajo (tal como aparece en Telegram)</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="font-bold">4.</span>
-            <span>El sistema verificar\u00e1 que el bot sea admin y conectar\u00e1 el canal autom\u00e1ticamente</span>
+            <span>El sistema encontrará el canal automáticamente y lo conectará</span>
           </li>
         </ol>
       </div>
