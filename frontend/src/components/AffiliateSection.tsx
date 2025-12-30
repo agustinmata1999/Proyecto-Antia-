@@ -471,44 +471,6 @@ export default function AffiliateSection() {
             </>
           )}
 
-          {activeTab === 'metrics' && (
-            <>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas Detalladas</h2>
-              {!metrics?.byHouse?.length ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>Aún no hay datos de conversiones</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Casa</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pendientes</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Validados</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Rechazados</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ganancias</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {metrics.byHouse.map((item) => (
-                        <tr key={item.houseId}>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.houseName}</td>
-                          <td className="px-4 py-3 text-center text-sm text-yellow-600">{item.pending}</td>
-                          <td className="px-4 py-3 text-center text-sm text-green-600">{item.approved}</td>
-                          <td className="px-4 py-3 text-center text-sm text-red-600">{item.rejected}</td>
-                          <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">
-                            {formatPrice(item.totalEarningsCents)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
-
           {activeTab === 'payouts' && (
             <>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Liquidaciones Mensuales</h2>
