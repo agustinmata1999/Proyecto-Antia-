@@ -692,13 +692,46 @@ model SupportTicket {
 
 // ==================== MÓDULO LANDING DE AFILIACIÓN ====================
 
+// Retos/Promociones creados por el SuperAdmin
+model AffiliatePromotion {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  name              String                                    // Nombre del reto (ej: "Reto Navidad 2025")
+  description       String?                                   // Descripción opcional
+  slug              String    @unique                         // Slug para identificación
+  status            String    @default("ACTIVE")              // ACTIVE, INACTIVE
+  startDate         DateTime? @map("start_date")              // Fecha inicio opcional
+  endDate           DateTime? @map("end_date")                // Fecha fin opcional
+  createdBy         String    @map("created_by")              // Admin que lo creó
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("affiliate_promotions")
+}
+
+// Links específicos de cada casa para cada Reto/Promoción
+model PromotionHouseLink {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  promotionId       String    @map("promotion_id")            // ID del AffiliatePromotion
+  bettingHouseId    String    @map("betting_house_id")        // ID de BettingHouse
+  affiliateUrl      String    @map("affiliate_url")           // Link específico del reto
+  trackingParamName String?   @map("tracking_param_name")     // Override del parámetro de tracking
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([promotionId, bettingHouseId])
+  @@index([promotionId])
+  @@map("promotion_house_links")
+}
+
 // Landing de Afiliación del Tipster (múltiples por tipster = "campañas")
 model TipsterAffiliateLanding {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  tipsterId         String    @map("tipster_id")           // ID del tipster
-  slug              String    @unique                       // URL slug único (ej: "fausto-perez-reto-navidad")
-  title             String?                                 // Título opcional de la landing
-  description       String?                                 // Descripción opcional
+  tipsterId         String    @map("tipster_id")              // ID del tipster
+  promotionId       String?   @map("promotion_id")            // ID del reto/promoción seleccionado
+  slug              String    @unique                         // URL slug único (ej: "fausto-perez-reto-navidad")
+  title             String?                                   // Título opcional de la landing
+  description       String?                                   // Descripción opcional
   countriesEnabled  String[]  @default([]) @map("countries_enabled") // Países habilitados ["ES", "MX", "AR"]
   isActive          Boolean   @default(true) @map("is_active")
   
@@ -710,6 +743,7 @@ model TipsterAffiliateLanding {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   @@index([tipsterId])
+  @@index([promotionId])
   @@map("tipster_affiliate_landings")
 }
 
