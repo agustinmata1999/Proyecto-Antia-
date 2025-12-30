@@ -207,4 +207,19 @@ export class AffiliateTipsterController {
       totalAmountEur: payout.totalAmountCents / 100,
     };
   }
+
+  // ==================== STATISTICS ====================
+
+  /**
+   * Get detailed statistics for the tipster
+   */
+  @Get('tipster/stats')
+  async getStats(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const profile = await this.getTipsterProfile(req.user.id);
+    return this.affiliateService.getTipsterAffiliateStats(profile.id, startDate, endDate);
+  }
 }
