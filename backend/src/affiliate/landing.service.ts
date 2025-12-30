@@ -352,9 +352,9 @@ export class LandingService {
       title: landing.title,
       description: landing.description,
       tipster: tipster ? {
-        id: tipster.id,
-        publicName: tipster.publicName,
-        avatarUrl: tipster.avatarUrl,
+        id: tipster._id?.$oid || tipster._id?.toString() || tipster.id,
+        publicName: tipster.public_name,
+        avatarUrl: tipster.avatar_url,
       } : null,
       countriesEnabled,
       selectedCountry,
