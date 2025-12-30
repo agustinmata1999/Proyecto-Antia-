@@ -1921,6 +1921,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   /**
    * NUEVO: Buscar canal por nombre (para conectar sin pedir ID)
    * Busca en la tabla de canales detectados
+   * OPTIMIZADO: No hace verificación con Telegram para evitar timeouts
    */
   async findChannelByName(channelName: string): Promise<{
     found: boolean;
@@ -1960,26 +1961,9 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         };
       }
 
-      // Si el bot está disponible, verificar que sigue siendo admin
-      // Si no está disponible, confiar en que el canal está activo en la BD
-      if (this.bot) {
-        try {
-          const verification = await this.verifyChannelAccess(channel.channel_id);
-          if (!verification.valid) {
-            // Marcar como inactivo
-            await this.markChannelAsInactive(channel.channel_id);
-            return {
-              found: false,
-              error: 'El bot ya no es administrador de este canal. Por favor, vuelve a añadirlo como admin.',
-            };
-          }
-        } catch (verifyError) {
-          this.logger.warn(`Could not verify channel ${channel.channel_id}, but continuing:`, verifyError);
-          // Continuar sin verificación - confiamos en el estado de is_active
-        }
-      } else {
-        this.logger.warn(`Bot not available for verification, trusting is_active status for ${channel.channel_id}`);
-      }
+      // NO hacemos verificación con Telegram para evitar timeouts
+      // Confiamos en que si el canal está como is_active=true, el bot sigue siendo admin
+      // La verificación se hará cuando se intente enviar mensajes
 
       return {
         found: true,
