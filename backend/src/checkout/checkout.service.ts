@@ -1184,9 +1184,19 @@ export class CheckoutService {
           this.logger.error(`Failed to send purchase confirmation: ${err.message}`);
         }
 
-        // 2. EMAIL TO CLIENT - Channel Access (if product has channel)
-        if (product?.telegramChannelId) {
-          try {
+        // 2. EMAIL TO CLIENT - Channel Access (ALWAYS send for any product)
+        // Send access email with bot link as primary method (more reliable than direct invite links)
+        try {
+          // Build the bot link with order ID for automatic access
+          const botUsername = this.config.get('TELEGRAM_BOT_USERNAME') || 'Antiabetbot';
+          const appUrl = this.config.get('APP_URL');
+          const botLink = `https://t.me/${botUsername}?start=order_${orderId}`;
+          
+          // Try to get channel info if available
+          let channelName = 'Canal Premium';
+          let directInviteLink: string | null = null;
+          
+          if (product?.telegramChannelId) {
             const channelResult = await this.prisma.$runCommandRaw({
               find: 'telegram_channels',
               filter: { channel_id: product.telegramChannelId, is_active: true },
@@ -1194,20 +1204,24 @@ export class CheckoutService {
               limit: 1,
             }) as any;
             const channel = channelResult.cursor?.firstBatch?.[0];
-            
-            if (channel?.invite_link) {
-              await this.emailService.sendChannelAccess({
-                email: order.emailBackup,
-                productName: product.title,
-                channelName: channel.channel_title || 'Canal Premium',
-                telegramLink: channel.invite_link,
-                orderId: orderId,
-              });
-              this.logger.log(`📧 Channel access email sent to ${order.emailBackup}`);
+            if (channel) {
+              channelName = channel.channel_title || 'Canal Premium';
+              directInviteLink = channel.invite_link || null;
             }
-          } catch (err) {
-            this.logger.error(`Failed to send channel access email: ${err.message}`);
           }
+
+          // Always send email with bot link (works even if Telegram API is down)
+          await this.emailService.sendChannelAccess({
+            email: order.emailBackup,
+            productName: product?.title || 'Producto',
+            channelName: channelName,
+            telegramLink: botLink, // Primary: bot link with order
+            orderId: orderId,
+          });
+          this.logger.log(`📧 Channel access email sent to ${order.emailBackup} (bot link: ${botLink})`);
+          
+        } catch (err) {
+          this.logger.error(`Failed to send channel access email: ${err.message}`);
         }
       }
 
