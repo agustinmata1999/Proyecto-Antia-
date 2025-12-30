@@ -1966,4 +1966,93 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     // Usar el método existente para conectar por ID
     return this.connectChannelManually(tipsterId, searchResult.channel.channelId);
   }
+
+  /**
+   * NUEVO: Verificar y registrar canal por ID
+   * Útil cuando el evento my_chat_member no se recibió
+   */
+  async verifyAndRegisterChannelById(channelId: string): Promise<{
+    success: boolean;
+    channel?: {
+      channelId: string;
+      channelTitle: string;
+      channelUsername?: string;
+      channelType: string;
+    };
+    error?: string;
+  }> {
+    try {
+      if (!this.bot) {
+        return { success: false, error: 'Bot no inicializado' };
+      }
+
+      // Intentar obtener información del canal
+      const chat = await this.bot.telegram.getChat(channelId);
+      
+      if (chat.type !== 'channel' && chat.type !== 'supergroup') {
+        return { success: false, error: 'El ID no corresponde a un canal o grupo' };
+      }
+
+      // Verificar que el bot es admin
+      const botInfo = await this.bot.telegram.getMe();
+      const botMember = await this.bot.telegram.getChatMember(channelId, botInfo.id);
+      
+      if (botMember.status !== 'administrator' && botMember.status !== 'creator') {
+        return { 
+          success: false, 
+          error: 'El bot no es administrador de este canal. Añádelo como admin primero.' 
+        };
+      }
+
+      // Guardar en la base de datos
+      const chatTitle = 'title' in chat ? chat.title : 'Canal sin nombre';
+      const chatUsername = 'username' in chat ? chat.username : undefined;
+      
+      await this.saveDetectedChannel(channelId, chatTitle, chatUsername, chat.type);
+
+      this.logger.log(`✅ Canal verificado y registrado: ${chatTitle} (${channelId})`);
+
+      return {
+        success: true,
+        channel: {
+          channelId: channelId,
+          channelTitle: chatTitle,
+          channelUsername: chatUsername,
+          channelType: chat.type,
+        },
+      };
+    } catch (error: any) {
+      this.logger.error('Error verifying channel by ID:', error);
+      
+      if (error.message?.includes('chat not found')) {
+        return { success: false, error: 'Canal no encontrado. Verifica que el ID sea correcto.' };
+      }
+      if (error.message?.includes('bot was kicked') || error.message?.includes('not a member')) {
+        return { success: false, error: 'El bot no tiene acceso a este canal.' };
+      }
+      
+      return { success: false, error: 'Error al verificar el canal. Intenta de nuevo.' };
+    }
+  }
+
+  /**
+   * NUEVO: Conectar canal por ID (verificando que el bot sea admin)
+   */
+  async connectChannelById(
+    tipsterId: string,
+    channelId: string,
+  ): Promise<{ success: boolean; message: string; channelInfo?: any }> {
+    // Primero verificar y registrar el canal
+    const verifyResult = await this.verifyAndRegisterChannelById(channelId);
+    
+    if (!verifyResult.success || !verifyResult.channel) {
+      return {
+        success: false,
+        message: verifyResult.error || 'No se pudo verificar el canal',
+      };
+    }
+
+    // Ahora conectar usando el método existente
+    return this.connectChannelManually(tipsterId, channelId);
+  }
 }
