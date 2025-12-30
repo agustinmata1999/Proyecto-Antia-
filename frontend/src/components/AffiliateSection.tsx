@@ -66,7 +66,7 @@ export default function AffiliateSection() {
   const [metrics, setMetrics] = useState<AffiliateMetrics | null>(null);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'landings' | 'houses' | 'referrals' | 'metrics' | 'payouts'>('landings');
+  const [activeTab, setActiveTab] = useState<'landings' | 'stats' | 'houses' | 'referrals' | 'payouts'>('landings');
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
