@@ -368,10 +368,10 @@ export default function PromotionsAdminSection() {
           <div className="text-gray-400 mb-4">
             <Plus className="w-12 h-12 mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No hay retos creados</h3>
-          <p className="text-gray-500 mb-4">Crea tu primer reto para que los tipsters puedan usarlo</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No hay campañas creadas</h3>
+          <p className="text-gray-500 mb-4">Crea tu primera campaña para que los tipsters puedan usarla</p>
           <Button onClick={openCreateModal} className="bg-red-600 hover:bg-red-700">
-            Crear Primer Reto
+            Crear Primera Campaña
           </Button>
         </div>
       ) : (
