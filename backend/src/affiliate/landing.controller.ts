@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { LandingService } from './landing.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateLandingDto, UpdateLandingDto } from './dto';
 
 // ==================== LANDING PÚBLICA (SIN AUTH) ====================
