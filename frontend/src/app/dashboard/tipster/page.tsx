@@ -2278,14 +2278,14 @@ export default function TipsterDashboard() {
         </div>
       )}
 
-      {/* Modal: Añadir Canal - SIMPLIFICADO */}
+      {/* Modal: Añadir Canal */}
       {showAddChannelForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddChannelForm(false)}>
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Conectar Canal de Telegram</h2>
-                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelNameInput(''); }} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -2296,53 +2296,79 @@ export default function TipsterDashboard() {
             <div className="p-6 space-y-4">
               {/* Instrucciones */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium text-blue-800 mb-2">📋 Pasos para conectar tu canal:</h4>
-                <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
-                  <li>Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal</li>
-                  <li>Escribe abajo el <strong>nombre exacto</strong> de tu canal</li>
-                </ol>
-                <p className="text-xs text-blue-600 mt-3 italic">
-                  💡 Si el canal no se encuentra, escribe <code className="bg-blue-100 px-1 rounded">/registrar</code> en tu canal y vuelve a intentar.
+                <h4 className="font-medium text-blue-800 mb-2">📋 Requisito previo:</h4>
+                <p className="text-sm text-blue-700">
+                  Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal
                 </p>
+              </div>
+
+              {/* Tabs para elegir modo */}
+              <div className="flex border-b border-gray-200">
+                <button
+                  onClick={() => { setInputMode('name'); setAddChannelError(''); }}
+                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    inputMode === 'name' 
+                      ? 'border-blue-500 text-blue-600' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Por Nombre
+                </button>
+                <button
+                  onClick={() => { setInputMode('id'); setAddChannelError(''); }}
+                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    inputMode === 'id' 
+                      ? 'border-blue-500 text-blue-600' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Por ID
+                </button>
               </div>
 
               {addChannelError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-600">{addChannelError}</p>
-                  {addChannelError.includes('no encontrado') && (
-                    <p className="text-xs text-red-500 mt-2">
-                      💡 <strong>Solución:</strong> Escribe <code className="bg-red-100 px-1 rounded">/registrar</code> en tu canal de Telegram y luego vuelve a intentar.
-                    </p>
+                  {addChannelError.includes('no encontrado') && inputMode === 'name' && (
+                    <button 
+                      onClick={() => setInputMode('id')}
+                      className="text-xs text-blue-600 underline mt-2"
+                    >
+                      💡 Prueba conectar usando el ID del canal
+                    </button>
                   )}
                 </div>
               )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre del Canal <span className="text-red-500">*</span>
+                  {inputMode === 'name' ? 'Nombre del Canal' : 'ID del Canal'} <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text" 
-                  value={channelNameInput}
-                  onChange={(e) => setChannelNameInput(e.target.value)}
-                  placeholder="Ej: Mi Canal Premium"
+                  value={channelInput}
+                  onChange={(e) => setChannelInput(e.target.value)}
+                  placeholder={inputMode === 'name' ? 'Ej: Mi Canal Premium' : 'Ej: -1001234567890'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Escribe el nombre tal como aparece en Telegram (mayúsculas y espacios incluidos)
+                  {inputMode === 'name' 
+                    ? 'Escribe el nombre exacto de tu canal' 
+                    : 'Puedes obtener el ID usando @userinfobot o reenviando un mensaje del canal'
+                  }
                 </p>
               </div>
 
               <div className="flex gap-3 justify-end pt-4">
                 <button 
-                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelNameInput(''); }}
+                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }}
                   className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button 
-                  onClick={handleConnectChannelByName}
-                  disabled={connectingChannel || !channelNameInput.trim()}
+                  onClick={handleConnectChannel}
+                  disabled={connectingChannel || !channelInput.trim()}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
                   {connectingChannel ? (
