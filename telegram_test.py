@@ -55,7 +55,7 @@ class TelegramBotTester:
                 url=url,
                 json=data if data else None,
                 headers=req_headers,
-                timeout=30
+                timeout=timeout
             )
             
             self.log(f"Response status: {response.status_code}")
