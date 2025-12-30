@@ -397,10 +397,10 @@ export default function TipsterDashboard() {
 
   // ==================== TELEGRAM CHANNELS FUNCTIONS ====================
   
-  // NUEVO: Conectar canal por nombre (simplificado)
-  const handleConnectChannelByName = async () => {
-    if (!channelNameInput.trim()) {
-      setAddChannelError('Por favor, ingresa el nombre de tu canal');
+  // NUEVO: Conectar canal (por nombre o por ID)
+  const handleConnectChannel = async () => {
+    if (!channelInput.trim()) {
+      setAddChannelError(inputMode === 'name' ? 'Por favor, ingresa el nombre de tu canal' : 'Por favor, ingresa el ID de tu canal');
       return;
     }
 
@@ -408,7 +408,15 @@ export default function TipsterDashboard() {
     setAddChannelError('');
 
     try {
-      const response = await telegramApi.channels.connectByName(channelNameInput.trim());
+      let response;
+      
+      if (inputMode === 'name') {
+        // Intentar conectar por nombre
+        response = await telegramApi.channels.connectByName(channelInput.trim());
+      } else {
+        // Conectar por ID (verifica automáticamente que el bot sea admin)
+        response = await telegramApi.channels.connectById(channelInput.trim());
+      }
       
       if (response.data.success) {
         // Reload channels
@@ -417,10 +425,11 @@ export default function TipsterDashboard() {
         
         // Reset form
         setShowAddChannelForm(false);
-        setChannelNameInput('');
+        setChannelInput('');
+        setInputMode('name');
         alert('✅ Canal conectado correctamente');
       } else {
-        setAddChannelError(response.data.message || 'No se encontró el canal. Asegúrate de que el bot sea administrador.');
+        setAddChannelError(response.data.message || 'No se pudo conectar el canal.');
       }
     } catch (error: any) {
       setAddChannelError(error.response?.data?.message || 'Error al conectar el canal');
@@ -428,6 +437,9 @@ export default function TipsterDashboard() {
       setConnectingChannel(false);
     }
   };
+
+  // Compatibilidad con código antiguo
+  const handleConnectChannelByName = handleConnectChannel;
 
   // LEGACY: mantener funciones antiguas por si se usan en otro lugar
   const handleVerifyChannel = async () => {
