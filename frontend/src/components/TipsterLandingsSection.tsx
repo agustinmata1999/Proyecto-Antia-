@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Plus, Trash2, ExternalLink, GripVertical, Eye, BarChart3, X } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_BACKEND_URL;
+// Use REACT_APP_BACKEND_URL which doesn't include /api
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://affilia-panel.preview.emergentagent.com';
 
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   ES: { name: 'España', flag: '🇪🇸' },
