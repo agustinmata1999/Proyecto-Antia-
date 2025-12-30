@@ -106,441 +106,245 @@ class AntiaAffiliateTester:
         except Exception as e:
             self.log(f"❌ Login test failed: {str(e)}", "ERROR")
             return False
-            
-    def test_get_my_products(self) -> bool:
-        """Test getting tipster's products"""
-        self.log("=== Testing Get My Products ===")
+
+    def test_get_tipster_landings(self) -> bool:
+        """Test getting tipster's landings"""
+        self.log("=== Testing Get Tipster Landings ===")
         
         try:
-            response = self.make_request("GET", "/products/my")
+            response = self.make_request("GET", "/tipster/landings")
             
             if response.status_code == 200:
-                products = response.json()
-                self.log(f"✅ Successfully retrieved {len(products)} products")
+                landings = response.json()
+                self.log(f"✅ Successfully retrieved {len(landings)} landings")
                 
-                # Log product details for debugging
-                for i, product in enumerate(products):
-                    self.log(f"Product {i+1}: {product.get('title', 'No title')} (ID: {product.get('id', 'No ID')})")
+                # Log landing details for debugging
+                for i, landing in enumerate(landings):
+                    self.log(f"Landing {i+1}: {landing.get('title', 'No title')} (ID: {landing.get('id', 'No ID')})")
+                    self.log(f"  Slug: {landing.get('slug', 'No slug')}")
+                    self.log(f"  Countries: {landing.get('countriesEnabled', [])}")
+                    self.log(f"  Clicks: {landing.get('totalClicks', 0)}")
                     
-                return True
-            else:
-                self.log(f"❌ Get my products failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Get my products test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_create_product(self) -> bool:
-        """Test creating a new product"""
-        self.log("=== Testing Create Product ===")
-        
-        product_data = {
-            "title": "Test Product from Agent",
-            "description": "Testing product creation via API",
-            "priceCents": 3500,
-            "currency": "EUR",
-            "billingType": "ONE_TIME",
-            "telegramChannelId": "@test_channel",
-            "accessMode": "AUTO_JOIN"
-        }
-        
-        try:
-            response = self.make_request("POST", "/products", product_data)
-            
-            if response.status_code == 201:
-                product = response.json()
-                self.test_product_id = product.get("id")
-                self.log(f"✅ Product created successfully with ID: {self.test_product_id}")
-                
-                # Verify product fields
-                if product.get("title") == product_data["title"]:
-                    self.log("✅ Product title matches")
-                else:
-                    self.log("❌ Product title mismatch", "ERROR")
-                    
-                if product.get("priceCents") == product_data["priceCents"]:
-                    self.log("✅ Product price matches")
-                else:
-                    self.log("❌ Product price mismatch", "ERROR")
-                    
-                return True
-            else:
-                self.log(f"❌ Create product failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Create product test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_get_single_product(self) -> bool:
-        """Test getting a single product by ID"""
-        if not self.test_product_id:
-            self.log("❌ No test product ID available", "ERROR")
-            return False
-            
-        self.log("=== Testing Get Single Product ===")
-        
-        try:
-            response = self.make_request("GET", f"/products/{self.test_product_id}")
-            
-            if response.status_code == 200:
-                product = response.json()
-                self.log(f"✅ Successfully retrieved product: {product.get('title', 'No title')}")
-                return True
-            else:
-                self.log(f"❌ Get single product failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Get single product test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_update_product(self) -> bool:
-        """Test updating a product"""
-        if not self.test_product_id:
-            self.log("❌ No test product ID available", "ERROR")
-            return False
-            
-        self.log("=== Testing Update Product ===")
-        
-        update_data = {
-            "title": "Updated Test Product from Agent",
-            "priceCents": 4500,
-            "description": "Updated description via API testing"
-        }
-        
-        try:
-            response = self.make_request("PATCH", f"/products/{self.test_product_id}", update_data)
-            
-            if response.status_code == 200:
-                product = response.json()
-                self.log("✅ Product updated successfully")
-                
-                # Verify updates
-                if product.get("title") == update_data["title"]:
-                    self.log("✅ Product title updated correctly")
-                else:
-                    self.log("❌ Product title update failed", "ERROR")
-                    
-                if product.get("priceCents") == update_data["priceCents"]:
-                    self.log("✅ Product price updated correctly")
-                else:
-                    self.log("❌ Product price update failed", "ERROR")
-                    
-                return True
-            else:
-                self.log(f"❌ Update product failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Update product test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_pause_product(self) -> bool:
-        """Test pausing a product"""
-        if not self.test_product_id:
-            self.log("❌ No test product ID available", "ERROR")
-            return False
-            
-        self.log("=== Testing Pause Product ===")
-        
-        try:
-            response = self.make_request("POST", f"/products/{self.test_product_id}/pause")
-            
-            if response.status_code in [200, 201]:  # Accept both 200 and 201
-                product = response.json()
-                self.log("✅ Product paused successfully")
-                
-                # Check if product is inactive
-                if product.get("active") == False:
-                    self.log("✅ Product active status is false")
-                    return True
-                else:
-                    self.log("❌ Product active status not updated correctly", "ERROR")
-                    return False
-                    
-            else:
-                self.log(f"❌ Pause product failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Pause product test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_publish_product(self) -> bool:
-        """Test publishing/activating a product"""
-        if not self.test_product_id:
-            self.log("❌ No test product ID available", "ERROR")
-            return False
-            
-        self.log("=== Testing Publish Product ===")
-        
-        try:
-            response = self.make_request("POST", f"/products/{self.test_product_id}/publish")
-            
-            if response.status_code in [200, 201]:  # Accept both 200 and 201
-                product = response.json()
-                self.log("✅ Product published successfully")
-                
-                # Check if product is active
-                if product.get("active") == True:
-                    self.log("✅ Product active status is true")
-                    return True
-                else:
-                    self.log("❌ Product active status not updated correctly", "ERROR")
-                    return False
-                    
-            else:
-                self.log(f"❌ Publish product failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Publish product test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_verify_product_in_list(self) -> bool:
-        """Verify the created product appears in the products list"""
-        self.log("=== Testing Product Appears in List ===")
-        
-        try:
-            response = self.make_request("GET", "/products/my")
-            
-            if response.status_code == 200:
-                products = response.json()
-                
-                # Look for our test product
-                found_product = None
-                for product in products:
-                    if product.get("id") == self.test_product_id:
-                        found_product = product
-                        break
+                    # Store first landing ID for further tests
+                    if i == 0 and landing.get('id'):
+                        self.test_landing_id = landing.get('id')
                         
-                if found_product:
-                    self.log("✅ Created product appears in products list")
-                    self.log(f"Product details: {found_product.get('title')} - {found_product.get('priceCents')} cents")
-                    return True
-                else:
-                    self.log("❌ Created product NOT found in products list", "ERROR")
-                    return False
-                    
-            else:
-                self.log(f"❌ Failed to get products list with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Verify product in list test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_stripe_checkout_get_product(self) -> bool:
-        """Test getting product for checkout"""
-        self.log("=== Testing Stripe Checkout - Get Product ===")
-        
-        # Use the specific product ID from the review request
-        product_id = "6941ab8bc37d0aa47ab23ef8"
-        
-        try:
-            response = self.make_request("GET", f"/checkout/product/{product_id}", use_auth=False)
-            
-            if response.status_code == 200:
-                product = response.json()
-                self.log("✅ Successfully retrieved product for checkout")
-                
-                # Verify required fields
-                required_fields = ["id", "title", "priceCents", "currency"]
-                for field in required_fields:
-                    if field in product:
-                        self.log(f"✅ Product has {field}: {product[field]}")
-                    else:
-                        self.log(f"❌ Product missing {field}", "ERROR")
-                        return False
-                        
-                # Check if tipster info is included
-                if "tipster" in product and product["tipster"]:
-                    self.log(f"✅ Tipster info included: {product['tipster'].get('publicName', 'No name')}")
-                else:
-                    self.log("⚠️ No tipster info in response", "WARN")
-                    
                 return True
             else:
-                self.log(f"❌ Get product for checkout failed with status {response.status_code}", "ERROR")
+                self.log(f"❌ Get tipster landings failed with status {response.status_code}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Get product for checkout test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_stripe_checkout_create_session(self) -> bool:
-        """Test creating Stripe checkout session (expected to fail with test key)"""
-        self.log("=== Testing Stripe Checkout - Create Session ===")
-        
-        checkout_data = {
-            "productId": "6941ab8bc37d0aa47ab23ef8",
-            "originUrl": "https://affilia-panel.preview.emergentagent.com",
-            "isGuest": True,
-            "email": "test@example.com"
-        }
-        
-        try:
-            response = self.make_request("POST", "/checkout/session", checkout_data, use_auth=False)
-            
-            # We expect this to fail because STRIPE_API_KEY is a test key (sk_test_emergent)
-            if response.status_code == 400:
-                response_data = response.json()
-                self.log("✅ Checkout session creation failed as expected (test Stripe key)")
-                self.log(f"Error message: {response_data.get('message', 'No message')}")
-                return True
-            elif response.status_code == 200 or response.status_code == 201:
-                # If it somehow succeeds, that's also valid
-                response_data = response.json()
-                self.log("✅ Checkout session created successfully")
-                if "url" in response_data and "orderId" in response_data:
-                    self.log(f"Session URL: {response_data['url']}")
-                    self.log(f"Order ID: {response_data['orderId']}")
-                    return True
-                else:
-                    self.log("❌ Response missing required fields (url, orderId)", "ERROR")
-                    return False
-            else:
-                self.log(f"❌ Unexpected response status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Create checkout session test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_telegram_webhook(self) -> bool:
-        """Test Telegram webhook with generic message"""
-        self.log("=== Testing Telegram Webhook ===")
-        
-        # Simulate a Telegram webhook payload with generic text
-        webhook_data = {
-            "update_id": 123456789,
-            "message": {
-                "message_id": 1,
-                "from": {
-                    "id": 987654321,
-                    "is_bot": False,
-                    "first_name": "Test",
-                    "username": "testuser"
-                },
-                "chat": {
-                    "id": 987654321,
-                    "first_name": "Test",
-                    "username": "testuser",
-                    "type": "private"
-                },
-                "date": 1703000000,
-                "text": "Hola"
-            }
-        }
-        
-        try:
-            response = self.make_request("POST", "/telegram/webhook", webhook_data, use_auth=False)
-            
-            # The webhook should process the message and return ok: true or false
-            if response.status_code == 200:
-                response_data = response.json()
-                self.log("✅ Telegram webhook processed message")
-                self.log(f"Response: {response_data}")
-                return True
-            else:
-                self.log(f"❌ Telegram webhook failed with status {response.status_code}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Telegram webhook test failed: {str(e)}", "ERROR")
-            return False
-            
-    def test_mongodb_orders(self) -> bool:
-        """Test MongoDB orders collection"""
-        self.log("=== Testing MongoDB Orders Collection ===")
-        
-        try:
-            # Use mongosh to check orders
-            import subprocess
-            
-            cmd = [
-                "mongosh", "--quiet", "antia_db", 
-                "--eval", "db.orders.find({}).sort({created_at:-1}).limit(3).toArray()"
-            ]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            
-            if result.returncode == 0:
-                self.log("✅ Successfully queried MongoDB orders collection")
-                self.log(f"MongoDB output: {result.stdout}")
-                
-                # Check if we got valid JSON output
-                try:
-                    import json
-                    orders = json.loads(result.stdout)
-                    self.log(f"Found {len(orders)} recent orders")
-                    return True
-                except json.JSONDecodeError:
-                    self.log("⚠️ MongoDB output is not valid JSON, but query succeeded", "WARN")
-                    return True
-            else:
-                self.log(f"❌ MongoDB query failed: {result.stderr}", "ERROR")
-                return False
-                
-        except subprocess.TimeoutExpired:
-            self.log("❌ MongoDB query timed out", "ERROR")
-            return False
-        except Exception as e:
-            self.log(f"❌ MongoDB test failed: {str(e)}", "ERROR")
+            self.log(f"❌ Get tipster landings test failed: {str(e)}", "ERROR")
             return False
 
-    def test_get_order_details(self) -> bool:
-        """Test getting order details by ID"""
-        self.log("=== Testing Get Order Details ===")
-        
-        # Use the specific order ID from the review request
-        order_id = "69420512627906d2653f118c"
+    def test_get_available_houses_for_spain(self) -> bool:
+        """Test getting available betting houses for Spain"""
+        self.log("=== Testing Get Available Houses for Spain ===")
         
         try:
-            response = self.make_request("GET", f"/checkout/order/{order_id}", use_auth=False)
+            response = self.make_request("GET", "/tipster/landings/houses/ES")
             
             if response.status_code == 200:
-                order_data = response.json()
-                self.log("✅ Successfully retrieved order details")
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} houses for Spain")
                 
-                # Verify required fields
-                if "order" in order_data:
-                    order = order_data["order"]
-                    self.log(f"Order ID: {order.get('id', 'N/A')}")
-                    self.log(f"Status: {order.get('status', 'N/A')}")
-                    self.log(f"Amount: {order.get('amountCents', 'N/A')} cents")
-                    
-                    # Check if status is PAGADA as expected
-                    if order.get('status') == 'PAGADA':
-                        self.log("✅ Order status is PAGADA as expected")
-                    else:
-                        self.log(f"⚠️ Order status is {order.get('status')}, expected PAGADA", "WARN")
-                else:
-                    self.log("❌ Order data missing in response", "ERROR")
-                    return False
-                
-                # Check for product and tipster info
-                if "product" in order_data and order_data["product"]:
-                    product = order_data["product"]
-                    self.log(f"✅ Product info included: {product.get('title', 'No title')}")
-                else:
-                    self.log("⚠️ No product info in response", "WARN")
-                    
-                if "tipster" in order_data and order_data["tipster"]:
-                    tipster = order_data["tipster"]
-                    self.log(f"✅ Tipster info included: {tipster.get('publicName', 'No name')}")
-                else:
-                    self.log("⚠️ No tipster info in response", "WARN")
+                # Log house details for debugging
+                for i, house in enumerate(houses):
+                    self.log(f"House {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                    self.log(f"  Commission: {house.get('commissionPerReferralEur', 0)} EUR")
                     
                 return True
             else:
-                self.log(f"❌ Get order details failed with status {response.status_code}", "ERROR")
+                self.log(f"❌ Get houses for Spain failed with status {response.status_code}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Get order details test failed: {str(e)}", "ERROR")
+            self.log(f"❌ Get houses for Spain test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_get_landing_metrics(self) -> bool:
+        """Test getting landing metrics"""
+        if not self.test_landing_id:
+            self.log("❌ No test landing ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Get Landing Metrics ===")
+        
+        try:
+            response = self.make_request("GET", f"/tipster/landings/{self.test_landing_id}/metrics")
+            
+            if response.status_code == 200:
+                metrics = response.json()
+                self.log("✅ Successfully retrieved landing metrics")
+                
+                # Log metrics details
+                landing = metrics.get('landing', {})
+                self.log(f"Landing: {landing.get('title', 'No title')} (ID: {landing.get('id', 'No ID')})")
+                self.log(f"Total clicks: {landing.get('totalClicks', 0)}")
+                self.log(f"Total impressions: {landing.get('totalImpressions', 0)}")
+                
+                clicks_by_country = metrics.get('clicksByCountry', [])
+                self.log(f"Clicks by country: {len(clicks_by_country)} entries")
+                for country_data in clicks_by_country:
+                    self.log(f"  {country_data.get('country')}: {country_data.get('clicks')} clicks")
+                
+                clicks_by_house = metrics.get('clicksByHouse', [])
+                self.log(f"Clicks by house: {len(clicks_by_house)} entries")
+                for house_data in clicks_by_house:
+                    self.log(f"  {house_data.get('houseName')}: {house_data.get('clicks')} clicks")
+                    
+                return True
+            else:
+                self.log(f"❌ Get landing metrics failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get landing metrics test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_get_public_landing(self) -> bool:
+        """Test getting public landing by slug"""
+        self.log("=== Testing Get Public Landing ===")
+        
+        # Use the specific slug from the review request
+        slug = "fausto-perez-reto-navidad-2025"
+        country = "ES"
+        
+        try:
+            response = self.make_request("GET", f"/go/{slug}?country={country}", use_auth=False)
+            
+            if response.status_code == 200:
+                landing = response.json()
+                self.log("✅ Successfully retrieved public landing")
+                
+                # Verify required fields
+                required_fields = ["id", "slug", "title", "tipster", "countriesEnabled", "selectedCountry", "items"]
+                for field in required_fields:
+                    if field in landing:
+                        self.log(f"✅ Landing has {field}")
+                    else:
+                        self.log(f"❌ Landing missing {field}", "ERROR")
+                        return False
+                
+                # Log landing details
+                self.log(f"Landing title: {landing.get('title', 'No title')}")
+                self.log(f"Slug: {landing.get('slug', 'No slug')}")
+                self.log(f"Selected country: {landing.get('selectedCountry', 'No country')}")
+                
+                # Check tipster info
+                tipster = landing.get('tipster', {})
+                if tipster:
+                    self.log(f"✅ Tipster: {tipster.get('publicName', 'No name')} (ID: {tipster.get('id', 'No ID')})")
+                else:
+                    self.log("❌ No tipster info", "ERROR")
+                    return False
+                
+                # Check betting house items
+                items = landing.get('items', [])
+                self.log(f"✅ Found {len(items)} betting house items")
+                for i, item in enumerate(items):
+                    house = item.get('house', {})
+                    if house:
+                        self.log(f"  Item {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                    
+                return True
+            else:
+                self.log(f"❌ Get public landing failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get public landing test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_click_tracking(self) -> bool:
+        """Test click tracking functionality"""
+        self.log("=== Testing Click Tracking ===")
+        
+        click_data = {
+            "slug": "fausto-perez-reto-navidad-2025",
+            "houseId": "6944674739e53ced97a01362",
+            "country": "ES"
+        }
+        
+        try:
+            response = self.make_request("POST", "/r/click", click_data, use_auth=False)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Click tracking successful")
+                
+                # Check required fields
+                if "redirectUrl" in result and "clickId" in result:
+                    self.log(f"✅ Redirect URL: {result['redirectUrl']}")
+                    self.log(f"✅ Click ID: {result['clickId']}")
+                    self.test_click_id = result['clickId']
+                    return True
+                else:
+                    self.log("❌ Response missing redirectUrl or clickId", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Click tracking failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Click tracking test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_health_telegram(self) -> bool:
+        """Test Telegram bot health check"""
+        self.log("=== Testing Telegram Health Check ===")
+        
+        try:
+            response = self.make_request("GET", "/health/telegram", use_auth=False)
+            
+            if response.status_code == 200:
+                status = response.json()
+                self.log("✅ Telegram health check successful")
+                
+                # Log status details
+                self.log(f"Status: {status.get('status', 'Unknown')}")
+                if 'webhookUrl' in status:
+                    self.log(f"Webhook URL: {status.get('webhookUrl', 'Not set')}")
+                if 'botInfo' in status:
+                    bot_info = status.get('botInfo', {})
+                    self.log(f"Bot username: {bot_info.get('username', 'Unknown')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Telegram health check failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Telegram health check test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_health_email(self) -> bool:
+        """Test email service health check"""
+        self.log("=== Testing Email Health Check ===")
+        
+        try:
+            response = self.make_request("GET", "/health/email", use_auth=False)
+            
+            if response.status_code == 200:
+                status = response.json()
+                self.log("✅ Email health check successful")
+                
+                # Log status details
+                self.log(f"Status: {status.get('status', 'Unknown')}")
+                if 'isConfigured' in status:
+                    self.log(f"Is configured: {status.get('isConfigured', False)}")
+                if 'provider' in status:
+                    self.log(f"Provider: {status.get('provider', 'Unknown')}")
+                    
+                return True
+            else:
+                self.log(f"❌ Email health check failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Email health check test failed: {str(e)}", "ERROR")
             return False
 
     def create_test_order_in_mongodb(self) -> str:
