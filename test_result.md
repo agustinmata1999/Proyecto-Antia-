@@ -20,6 +20,54 @@
 ---
 
 backend:
+  - task: "Admin Affiliate Stats Dashboard"
+    implemented: true
+    working: true
+    file: "/api/admin/affiliate/stats"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Admin affiliate stats endpoint returns complete dashboard data: general stats (12 clicks, 3 conversions, 25% rate), byCountry breakdown, byHouse analysis, byDate trends, byCampaign data, byTipster metrics, and filterOptions for all entities. All expected fields present and properly structured."
+
+  - task: "Tipster Stats Dashboard"
+    implemented: true
+    working: true
+    file: "/api/affiliate/tipster/stats"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Tipster affiliate stats endpoint returns comprehensive dashboard: general stats (12 clicks, 3 conversions, 25% rate, €75 earnings), byCountry breakdown, byHouse performance, byDate trends, byCampaign analysis. All required fields present with proper data structure."
+
+  - task: "Tipster Promotions/Campaigns"
+    implemented: true
+    working: true
+    file: "/api/tipster/landings/promotions"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Tipster promotions endpoint returns active campaigns with all required fields: id, name, slug, description, housesCount. Found 1 active promotion 'Reto Navidad 2025' with 3 associated houses."
+
+  - task: "Conversion Postback"
+    implemented: true
+    working: true
+    file: "/api/r/postback"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P1 test passed. Conversion postback endpoint at /api/r/postback responds correctly (201 status). Handles POST requests with subid, house, event, amount, currency, txid parameters. Properly validates ObjectId format and returns appropriate error messages for invalid data."
+
   - task: "Telegram Bot Status API"
     implemented: true
     working: true
