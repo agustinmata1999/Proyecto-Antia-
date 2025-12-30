@@ -1133,7 +1133,7 @@ export class AffiliateService {
     }
     const byTipster = Object.entries(byTipsterMap)
       .map(([tipsterId, data]) => {
-        const tipster = tipstersMap.get(tipsterId);
+        const tipster = tipstersMap.get(tipsterId) as any;
         return {
           tipsterId,
           tipsterName: tipster?.public_name || 'Desconocido',
