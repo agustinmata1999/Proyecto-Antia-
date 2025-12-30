@@ -966,4 +966,286 @@ export class AffiliateService {
       },
     });
   }
+
+  // ==================== ADMIN STATISTICS ====================
+
+  async getAdminAffiliateStats(filters: {
+    startDate?: string;
+    endDate?: string;
+    tipsterId?: string;
+    campaignId?: string;
+    houseId?: string;
+  }) {
+    // Build date range
+    const startDate = filters.startDate ? new Date(filters.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = filters.endDate ? new Date(filters.endDate + 'T23:59:59') : new Date();
+
+    // Build where clause for clicks
+    const clickWhere: any = {
+      wasBlocked: false,
+      clickedAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+    if (filters.tipsterId) clickWhere.tipsterId = filters.tipsterId;
+    if (filters.campaignId) clickWhere.campaignId = filters.campaignId;
+    if (filters.houseId) clickWhere.houseId = filters.houseId;
+
+    // Build where clause for conversions
+    const conversionWhere: any = {
+      occurredAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+    if (filters.tipsterId) conversionWhere.tipsterId = filters.tipsterId;
+    if (filters.houseId) conversionWhere.houseId = filters.houseId;
+
+    // Get all clicks
+    const clicks = await this.prisma.affiliateClickEvent.findMany({
+      where: clickWhere,
+    });
+
+    // Get all conversions
+    const conversions = await this.prisma.affiliateConversion.findMany({
+      where: conversionWhere,
+    });
+
+    // Get houses and tipsters for mapping
+    const houses = await this.prisma.bettingHouse.findMany();
+    const housesMap = new Map(houses.map(h => [h.id, h]));
+
+    const tipstersResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: {},
+      projection: { _id: 1, public_name: 1, slug: 1 },
+    }) as any;
+    const tipsters = tipstersResult.cursor?.firstBatch || [];
+    const tipstersMap = new Map(tipsters.map((t: any) => [t._id.$oid || t._id, t]));
+
+    // Get campaigns/promotions
+    const promotionsResult = await this.prisma.$runCommandRaw({
+      find: 'affiliate_promotions',
+      filter: { status: 'ACTIVE' },
+      projection: { _id: 1, name: 1 },
+    }) as any;
+    const promotions = promotionsResult.cursor?.firstBatch || [];
+    const promotionsMap = new Map(promotions.map((p: any) => [p._id.$oid || p._id, p]));
+
+    // General stats
+    const totalClicks = clicks.length;
+    const uniqueUsers = new Set(clicks.map(c => c.visitorId || c.ipHash)).size;
+    const totalConversions = conversions.filter(c => c.status === 'APPROVED').length;
+    const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
+
+    // By Country
+    const byCountryMap: Record<string, { clicks: number; conversions: number }> = {};
+    for (const click of clicks) {
+      const country = click.countryCode || 'UNKNOWN';
+      if (!byCountryMap[country]) byCountryMap[country] = { clicks: 0, conversions: 0 };
+      byCountryMap[country].clicks++;
+    }
+    for (const conv of conversions) {
+      const country = conv.countryCode || 'UNKNOWN';
+      if (!byCountryMap[country]) byCountryMap[country] = { clicks: 0, conversions: 0 };
+      if (conv.status === 'APPROVED') byCountryMap[country].conversions++;
+    }
+    const byCountry = Object.entries(byCountryMap)
+      .map(([country, data]) => ({ country, countryName: country, ...data }))
+      .sort((a, b) => b.clicks - a.clicks);
+
+    // By House
+    const byHouseMap: Record<string, { clicks: number; conversions: number; commissionEarned: number }> = {};
+    for (const click of clicks) {
+      if (!click.houseId) continue;
+      if (!byHouseMap[click.houseId]) byHouseMap[click.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      byHouseMap[click.houseId].clicks++;
+    }
+    for (const conv of conversions) {
+      if (!conv.houseId) continue;
+      if (!byHouseMap[conv.houseId]) byHouseMap[conv.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (conv.status === 'APPROVED') {
+        byHouseMap[conv.houseId].conversions++;
+        byHouseMap[conv.houseId].commissionEarned += conv.commissionCents || 0;
+      }
+    }
+    const byHouse = Object.entries(byHouseMap)
+      .map(([houseId, data]) => {
+        const house = housesMap.get(houseId);
+        return {
+          houseId,
+          houseName: house?.name || 'Desconocido',
+          houseLogo: house?.logoUrl || null,
+          ...data,
+        };
+      })
+      .sort((a, b) => b.clicks - a.clicks);
+
+    // By Date
+    const byDateMap: Record<string, { clicks: number; conversions: number }> = {};
+    for (const click of clicks) {
+      const date = click.clickedAt.toISOString().split('T')[0];
+      if (!byDateMap[date]) byDateMap[date] = { clicks: 0, conversions: 0 };
+      byDateMap[date].clicks++;
+    }
+    for (const conv of conversions) {
+      const date = conv.occurredAt?.toISOString().split('T')[0] || conv.createdAt.toISOString().split('T')[0];
+      if (!byDateMap[date]) byDateMap[date] = { clicks: 0, conversions: 0 };
+      if (conv.status === 'APPROVED') byDateMap[date].conversions++;
+    }
+    const byDate = Object.entries(byDateMap)
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // By Campaign
+    const byCampaignMap: Record<string, { clicks: number; conversions: number }> = {};
+    for (const click of clicks) {
+      const campaignId = click.campaignId || 'NO_CAMPAIGN';
+      if (!byCampaignMap[campaignId]) byCampaignMap[campaignId] = { clicks: 0, conversions: 0 };
+      byCampaignMap[campaignId].clicks++;
+    }
+    const byCampaign = Object.entries(byCampaignMap)
+      .map(([campaignId, data]) => {
+        const campaign = promotionsMap.get(campaignId);
+        return {
+          campaignId,
+          campaignName: campaign?.name || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
+          ...data,
+        };
+      })
+      .sort((a, b) => b.clicks - a.clicks);
+
+    // By Tipster
+    const byTipsterMap: Record<string, { clicks: number; conversions: number; commissionEarned: number }> = {};
+    for (const click of clicks) {
+      if (!click.tipsterId) continue;
+      if (!byTipsterMap[click.tipsterId]) byTipsterMap[click.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      byTipsterMap[click.tipsterId].clicks++;
+    }
+    for (const conv of conversions) {
+      if (!conv.tipsterId) continue;
+      if (!byTipsterMap[conv.tipsterId]) byTipsterMap[conv.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (conv.status === 'APPROVED') {
+        byTipsterMap[conv.tipsterId].conversions++;
+        byTipsterMap[conv.tipsterId].commissionEarned += conv.commissionCents || 0;
+      }
+    }
+    const byTipster = Object.entries(byTipsterMap)
+      .map(([tipsterId, data]) => {
+        const tipster = tipstersMap.get(tipsterId);
+        return {
+          tipsterId,
+          tipsterName: tipster?.public_name || 'Desconocido',
+          tipsterSlug: tipster?.slug || '',
+          totalClicks: data.clicks,
+          conversions: data.conversions,
+          commissionEarned: data.commissionEarned,
+        };
+      })
+      .sort((a, b) => b.totalClicks - a.totalClicks);
+
+    // Filter options
+    const filterOptions = {
+      tipsters: tipsters.map((t: any) => ({ id: t._id.$oid || t._id, name: t.public_name })),
+      campaigns: promotions.map((p: any) => ({ id: p._id.$oid || p._id, name: p.name })),
+      houses: houses.map(h => ({ id: h.id, name: h.name })),
+    };
+
+    return {
+      general: {
+        totalClicks,
+        uniqueUsers,
+        conversions: totalConversions,
+        conversionRate,
+      },
+      byCountry,
+      byHouse,
+      byDate,
+      byCampaign,
+      byTipster,
+      filterOptions,
+    };
+  }
+
+  // ==================== POSTBACK HANDLER ====================
+
+  async handlePostback(params: {
+    subid: string;
+    houseSlug?: string;
+    event?: string;
+    amount?: number;
+    currency?: string;
+    transactionId?: string;
+  }) {
+    const { subid, houseSlug, event, amount, currency, transactionId } = params;
+
+    // Parse subid: format is tipsterId_clickId or just tipsterId
+    const [tipsterId, clickId] = subid.split('_');
+
+    if (!tipsterId) {
+      throw new BadRequestException('Invalid subid format');
+    }
+
+    // Find the click event if clickId provided
+    let click: any = null;
+    if (clickId) {
+      click = await this.prisma.affiliateClickEvent.findFirst({
+        where: { id: clickId },
+      });
+    }
+
+    // Find the house
+    let house: any = null;
+    if (houseSlug) {
+      house = await this.prisma.bettingHouse.findFirst({
+        where: { slug: houseSlug.toLowerCase() },
+      });
+    }
+
+    // Calculate commission
+    let commissionCents = 0;
+    if (click?.promotionHouseLinkId) {
+      // Get commission from promotion house link
+      const linkResult = await this.prisma.$runCommandRaw({
+        find: 'promotion_house_links',
+        filter: { _id: { $oid: click.promotionHouseLinkId } },
+        projection: { commission_cents: 1 },
+        limit: 1,
+      }) as any;
+      const link = linkResult.cursor?.firstBatch?.[0];
+      commissionCents = link?.commission_cents || house?.commissionPerReferralCents || 5000;
+    } else if (house) {
+      commissionCents = house.commissionPerReferralCents || 5000;
+    }
+
+    // Create conversion
+    const conversion = await this.prisma.affiliateConversion.create({
+      data: {
+        tipsterId,
+        houseId: house?.id || click?.houseId,
+        clickId: clickId || undefined,
+        eventType: event || 'REGISTRATION',
+        status: 'PENDING', // Pending until admin approves
+        commissionCents,
+        countryCode: click?.countryCode,
+        clickedAt: click?.clickedAt,
+        occurredAt: new Date(),
+        externalTransactionId: transactionId,
+        metadata: {
+          subid,
+          houseSlug,
+          event,
+          amount,
+          currency,
+        },
+      },
+    });
+
+    return {
+      success: true,
+      conversionId: conversion.id,
+      message: 'Conversion recorded successfully',
+    };
+  }
 }
