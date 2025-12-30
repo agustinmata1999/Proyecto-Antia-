@@ -16,7 +16,7 @@ interface TelegramChannel {
 interface TipsterTelegramViewProps {
   channels: TelegramChannel[];
   botUsername: string;
-  onConnectChannel: (channelId: string) => Promise<{ success: boolean; channel?: any; error?: string }>;
+  onConnectChannel: (channelName: string) => Promise<{ success: boolean; channel?: any; error?: string }>;
   onDisconnectChannel: (channelId: string) => Promise<void>;
   onRefreshLink: (channelId: string) => Promise<string>;
   loading: boolean;
