@@ -269,6 +269,59 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       `, { parse_mode: 'Markdown' });
     });
 
+    // Command /registrar - NUEVO: Registrar canal manualmente para tipsters
+    this.bot.command('registrar', async (ctx) => {
+      try {
+        const chatId = ctx.chat.id.toString();
+        const chatType = ctx.chat.type;
+        const chatTitle = 'title' in ctx.chat ? ctx.chat.title : null;
+        const chatUsername = 'username' in ctx.chat ? ctx.chat.username : null;
+
+        // Solo funciona en canales y supergrupos
+        if (chatType !== 'channel' && chatType !== 'supergroup') {
+          await ctx.reply(
+            '⚠️ Este comando solo funciona en canales o grupos.\n\n' +
+            'Ejecútalo dentro de tu canal premium.',
+            { parse_mode: 'Markdown' }
+          );
+          return;
+        }
+
+        // Verificar que el bot es admin
+        try {
+          const botInfo = await this.bot.telegram.getMe();
+          const botMember = await ctx.telegram.getChatMember(chatId, botInfo.id);
+          
+          if (botMember.status !== 'administrator' && botMember.status !== 'creator') {
+            await ctx.reply(
+              '⚠️ *El bot no es administrador de este canal.*\n\n' +
+              'Por favor, añádeme como administrador primero.',
+              { parse_mode: 'Markdown' }
+            );
+            return;
+          }
+        } catch (error) {
+          this.logger.error('Error checking bot admin status:', error);
+        }
+
+        // Guardar el canal en la base de datos
+        await this.saveDetectedChannel(chatId, chatTitle || 'Canal sin nombre', chatUsername, chatType);
+
+        await ctx.reply(
+          '✅ *¡Canal registrado correctamente!*\n\n' +
+          `📺 *Nombre:* ${chatTitle || 'N/A'}\n` +
+          `🆔 *ID:* \`${chatId}\`\n\n` +
+          '👉 Ahora puedes ir al panel de Antia y escribir el nombre de tu canal para conectarlo.',
+          { parse_mode: 'Markdown' }
+        );
+
+        this.logger.log(`✅ Canal registrado manualmente: ${chatTitle} (${chatId})`);
+      } catch (error) {
+        this.logger.error('Error in /registrar command:', error);
+        await ctx.reply('❌ Hubo un error al registrar el canal. Por favor, intenta nuevamente.');
+      }
+    });
+
     // Handler para mensajes de texto - ya no procesa compras, solo ayuda
     this.bot.on('text', async (ctx) => {
       try {
