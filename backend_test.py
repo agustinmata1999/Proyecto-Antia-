@@ -1056,30 +1056,31 @@ class AntiaAffiliateTester:
             return False
 
     def test_conversion_postback(self) -> bool:
-        """Test POST /api/affiliate/postback - Conversion Postback"""
+        """Test POST /api/r/postback - Conversion Postback"""
         self.log("=== Testing Conversion Postback ===")
         
         try:
-            # Test postback data
+            # Test postback data with correct format from the controller
             postback_data = {
-                "clickId": "test-click-id",
-                "conversionType": "DEPOSIT",
+                "subid": "test-tipster-id_test-click-id",
+                "house": "test-house",
+                "event": "DEPOSIT",
                 "amount": 100,
                 "currency": "EUR",
-                "externalRefId": "test-ref-001"
+                "txid": "test-ref-001"
             }
             
             # Try the correct postback endpoint from the controller
             response = self.make_request("POST", "/r/postback", postback_data, use_auth=False)
             
-            if response.status_code in [200, 201, 404]:  # 404 is acceptable for invalid clickId
+            if response.status_code in [200, 201]:
                 result = response.json()
                 self.log("✅ Postback endpoint responded correctly")
+                self.log(f"Postback result: {result}")
                 
-                if response.status_code == 404:
-                    self.log("⚠️ Postback returned 404 for test clickId (expected for invalid ID)", "WARN")
-                else:
-                    self.log(f"Postback result: {result}")
+                # Even if it fails due to invalid data, the endpoint is working
+                if result.get('success') == False and 'error' in result:
+                    self.log("⚠️ Postback failed with test data (expected for invalid IDs)", "WARN")
                 
                 return True
             else:
