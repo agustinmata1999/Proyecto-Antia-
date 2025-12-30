@@ -75,6 +75,12 @@ export default function TipsterDashboard() {
   const [telegramChannels, setTelegramChannels] = useState<TelegramChannel[]>([]);
   const [channelsLoading, setChannelsLoading] = useState(false);
   const [showAddChannelForm, setShowAddChannelForm] = useState(false);
+  // SIMPLIFICADO: Solo necesitamos el nombre del canal
+  const [channelNameInput, setChannelNameInput] = useState('');
+  const [connectingChannel, setConnectingChannel] = useState(false);
+  const [addChannelError, setAddChannelError] = useState('');
+  
+  // Legacy - mantener para compatibilidad pero no usar
   const [newChannelData, setNewChannelData] = useState({
     channelId: '',
     channelTitle: '',
@@ -83,7 +89,6 @@ export default function TipsterDashboard() {
   });
   const [verifyingChannel, setVerifyingChannel] = useState(false);
   const [channelVerified, setChannelVerified] = useState<any>(null);
-  const [addChannelError, setAddChannelError] = useState('');
   const [addingChannel, setAddingChannel] = useState(false);
   
   // Legacy telegram state (for backward compatibility)
