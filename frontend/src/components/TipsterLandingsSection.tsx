@@ -32,6 +32,8 @@ const ALL_COUNTRIES = Object.keys(COUNTRY_INFO);
 interface Landing {
   id: string;
   slug: string;
+  promotionId: string | null;
+  promotionName: string | null;
   title: string | null;
   description: string | null;
   countriesEnabled: string[];
@@ -40,6 +42,25 @@ interface Landing {
   totalImpressions: number;
   shareUrl: string;
   createdAt: string;
+}
+
+interface Promotion {
+  id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+}
+
+interface PromotionHouse {
+  bettingHouseId: string;
+  affiliateUrl: string;
+  house: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    allowedCountries: string[];
+  };
 }
 
 interface BettingHouse {
