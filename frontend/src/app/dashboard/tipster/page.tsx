@@ -1371,37 +1371,13 @@ export default function TipsterDashboard() {
                       3
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Obtén el ID de tu canal</h3>
-                      <div className="text-gray-600 space-y-2">
-                        <p>👉 Abre Telegram y busca: <code className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-mono font-bold">@userinfobot</code></p>
-                        <p>👉 Inicia una conversación con ese bot</p>
-                        <p>👉 <strong>Reenvía cualquier mensaje de tu canal</strong> a @userinfobot</p>
-                        <p>👉 El bot te responderá con información, busca el número que dice <strong>"Id"</strong></p>
-                        <div className="mt-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                          <p className="text-sm text-purple-800 font-medium mb-1">📋 Ejemplo de ID:</p>
-                          <code className="text-lg font-mono font-bold text-purple-700">-1001234567890</code>
-                          <p className="text-xs text-purple-600 mt-1">El ID siempre empieza con <strong>-100</strong> seguido de números</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* PASO 4 */}
-                <div className="bg-white rounded-xl p-6 border-2 border-orange-100 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
-                      4
-                    </div>
-                    <div className="flex-1">
                       <h3 className="text-lg font-bold text-gray-900 mb-2">Conecta el canal aquí en Antia</h3>
                       <div className="text-gray-600 space-y-2">
                         <p>👉 Haz clic en el botón <strong className="text-blue-600">"+ Añadir Canal"</strong> de abajo</p>
-                        <p>👉 Pega el <strong>ID del canal</strong> que obtuviste (ej: -1001234567890)</p>
-                        <p>👉 Ponle un nombre para identificarlo</p>
-                        <p>👉 Haz clic en <strong>"Verificar y Conectar"</strong></p>
+                        <p>👉 Escribe el <strong>nombre exacto de tu canal</strong></p>
+                        <p>👉 Haz clic en <strong>"Conectar Canal"</strong></p>
                         <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                          <p className="text-sm text-green-800">✅ <strong>¡Listo!</strong> Una vez conectado, podrás asignar este canal a tus productos y los clientes recibirán acceso automáticamente después de pagar.</p>
+                          <p className="text-sm text-green-800">✅ <strong>¡Listo!</strong> El sistema encontrará tu canal automáticamente y lo conectará. Una vez conectado, podrás asignar este canal a tus productos.</p>
                         </div>
                       </div>
                     </div>
@@ -1409,18 +1385,12 @@ export default function TipsterDashboard() {
                 </div>
               </div>
 
-              {/* Resumen de bots */}
-              <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-                <h4 className="font-bold text-yellow-800 mb-2">🤖 Resumen de bots que necesitas:</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-medium text-gray-900">@Antiabetbot</p>
-                    <p className="text-sm text-gray-600">El bot de Antia - agrégalo como admin a tu canal</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-medium text-gray-900">@userinfobot</p>
-                    <p className="text-sm text-gray-600">Para obtener el ID - reenvíale un mensaje de tu canal</p>
-                  </div>
+              {/* Bot de Antia */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <h4 className="font-bold text-blue-800 mb-2">🤖 Bot de Antia:</h4>
+                <div className="bg-white rounded-lg p-3">
+                  <p className="font-medium text-gray-900">@Antiabetbot</p>
+                  <p className="text-sm text-gray-600">Agrégalo como administrador a tu canal privado</p>
                 </div>
               </div>
 
