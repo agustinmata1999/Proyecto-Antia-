@@ -71,10 +71,14 @@
 1. **Landing Metrics**: Returns 404 for existing landing (may be expected for new landings without activity)
 
 #### 🔍 Test Data Verified:
-- **Landing**: "Reto Navidad 2025" (ID: 69534a3583e8b6c55d04a802)
+- **Promotion**: "Reto Navidad 2025" (ID: 6953544a66c867c967564dd2)
+- **Promotion Houses**: Bwin (https://bwin.com/promo-navidad-2025?aff=antia), Betway (https://betway.com/christmas-bonus-2025?aff=antia)
+- **Landing**: "Mi Reto Navidad Test" (ID: 69535c65e7a0fedc69fa7da9) - Created with promotion link
+- **Legacy Landing**: "Reto Navidad 2025" (ID: 69534a3583e8b6c55d04a802) - Standard landing
 - **Tipster**: Fausto Perez (ID: 694313406d86ad866d3f118f)
 - **Houses**: Bwin (€50 commission), Betway (€45 commission), Test House API (€25 commission)
 - **Click Tracking**: Generated unique click IDs and proper redirect URLs
+- **Promotion-Specific Redirect**: Confirmed using https://bwin.com/promo-navidad-2025 instead of master URL
 
 #### 📊 API Response Quality:
 - All endpoints return proper JSON structure
