@@ -101,3 +101,34 @@ The Affiliate Landing system with **Promotion-specific links (RETOS)** is **full
 - ✅ Click events recorded with correct tipsterId and landingId
 
 **Status: ✅ READY FOR PRODUCTION**
+
+---
+
+## Latest Testing Session (2025-12-30)
+
+### Testing Agent Status Update
+
+**Date**: 2025-12-30  
+**Agent**: Testing  
+**Focus**: Complete validation of Promotion-specific links (RETOS) functionality  
+
+**Tests Executed**: 13/13 ✅ PASSED
+
+**Critical Validations Confirmed**:
+1. **Promotions API**: GET /api/promotions returns active promotions for tipsters ✅
+2. **Promotion Houses**: GET /api/promotions/:id/houses returns houses with promotion-specific URLs ✅
+3. **Landing Creation**: POST /api/tipster/landings with promotionId successfully creates promotion-linked landing ✅
+4. **Public Landing**: GET /api/go/:slug returns promotion-linked landing data correctly ✅
+5. **Promotion-Specific Redirect**: GET /api/r/:slug/:houseId uses promotion-specific URL (https://bwin.com/promo-navidad-2025) instead of master URL ✅
+
+**Key Technical Findings**:
+- Database collections (affiliate_promotions, promotion_house_links, tipster_affiliate_landings) functioning correctly
+- Promotion-specific affiliate URLs properly stored and retrieved
+- Landing service correctly identifies promotion context and builds appropriate redirect URLs
+- Click tracking records events with correct tipsterId, landingId, and promotion context
+
+**Test Credentials Validated**:
+- Tipster: fausto.perez@antia.com / Tipster123! ✅
+- All endpoints accessible with proper authentication ✅
+
+**System Status**: All core functionality operational, promotion-specific redirects working as designed.
