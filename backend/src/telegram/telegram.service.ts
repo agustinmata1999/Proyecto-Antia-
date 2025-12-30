@@ -1249,7 +1249,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Notificar al cliente sobre pago exitoso
+   * Notificar al cliente sobre pago exitoso - usa proxy para enviar mensajes
    */
   async notifyPaymentSuccess(telegramUserId: string, orderId: string, productId: string) {
     try {
@@ -1274,19 +1274,32 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return { success: false, error: 'Tipster not found' };
       }
 
+      // Helper function to send message via proxy
+      const sendMessageViaProxy = async (chatId: string, text: string, options: any = {}) => {
+        try {
+          await this.httpService.sendMessage(chatId, text, {
+            parseMode: options.parse_mode || 'Markdown',
+            replyMarkup: options.reply_markup,
+          });
+          return true;
+        } catch (error) {
+          this.logger.error(`Failed to send message via proxy: ${error.message}`);
+          return false;
+        }
+      };
+
       // Mensaje 1: Agradecimiento y soporte
       const thankYouMessage = 
         `✅ *Gracias por su compra*\n\n` +
         `A continuación recibirá acceso a su servicio.\n\n` +
         `Si tiene alguna consulta, puede contactar con soporte en @AntiaSupport`;
 
-      await this.bot.telegram.sendMessage(telegramUserId, thankYouMessage, {
-        parse_mode: 'Markdown',
-      });
+      await sendMessageViaProxy(telegramUserId, thankYouMessage);
 
-      // NUEVO: Buscar el canal específico asociado al producto
+      // Buscar el canal específico asociado al producto
       let channelLink: string | null = null;
       let channelTitle: string = product.title;
+      let channelId: string | null = null;
 
       if (product.telegramChannelId) {
         // Buscar el canal en la colección telegram_channels
@@ -1297,7 +1310,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             tipster_id: tipster.id,
             is_active: true,
           },
-          projection: { invite_link: 1, channel_title: 1 },
+          projection: { invite_link: 1, channel_title: 1, channel_id: 1 },
           limit: 1,
         }) as any;
 
@@ -1305,7 +1318,40 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         if (channel) {
           channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
+          channelId = channel.channel_id;
           this.logger.log(`Found product channel: ${channelTitle} with link: ${channelLink}`);
+        }
+        
+        // Si no hay invite_link, intentar generarlo via proxy
+        if (!channelLink && channelId) {
+          this.logger.log(`No invite link found, trying to generate one for channel ${channelId}`);
+          try {
+            channelLink = await this.httpService.exportChatInviteLink(channelId);
+            this.logger.log(`✅ Generated invite link via proxy: ${channelLink}`);
+            
+            // Guardar el link en la base de datos
+            if (channel._id) {
+              await this.prisma.$runCommandRaw({
+                update: 'telegram_channels',
+                updates: [{
+                  q: { _id: channel._id },
+                  u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
+                }],
+              });
+            }
+          } catch (e) {
+            this.logger.warn(`Could not generate invite link: ${e.message}`);
+            // Try creating a new invite link with more options
+            try {
+              const inviteResult = await this.httpService.createChatInviteLink(channelId, {
+                createsJoinRequest: false,
+              });
+              channelLink = inviteResult.invite_link;
+              this.logger.log(`✅ Created invite link via proxy: ${channelLink}`);
+            } catch (e2) {
+              this.logger.error(`Also failed to create invite link: ${e2.message}`);
+            }
+          }
         }
       }
 
@@ -1319,39 +1365,37 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }) as any;
         
         channelLink = tipsterProfileResult.cursor?.firstBatch?.[0]?.premium_channel_link || null;
-        this.logger.log(`Using legacy tipster premium channel link: ${channelLink}`);
+        if (channelLink) {
+          this.logger.log(`Using legacy tipster premium channel link: ${channelLink}`);
+        }
       }
 
-      // Usar channelLink como el enlace final (antes era premiumChannelLink)
-      const premiumChannelLink = channelLink;
-
-      // Si hay un enlace de canal configurado (del producto o del tipster), enviarlo
-      if (premiumChannelLink) {
+      // Si hay un enlace de canal configurado, enviarlo
+      if (channelLink) {
         // Mensaje 2: Acceso al canal premium
         const accessMessage = 
           `🎯 *Compra autorizada*\n\n` +
           `Puede entrar al canal del servicio *${channelTitle}* pinchando aquí:\n\n` +
-          `${premiumChannelLink}`;
+          `${channelLink}`;
 
-        await this.bot.telegram.sendMessage(telegramUserId, accessMessage, {
+        await sendMessageViaProxy(telegramUserId, accessMessage, {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
               [
-                { text: '🚀 Entrar al Canal', url: premiumChannelLink },
+                { text: '🚀 Entrar al Canal', url: channelLink },
               ],
             ],
           },
         });
 
         // Mensaje 3: Confirmación final
-        await this.bot.telegram.sendMessage(telegramUserId, 
-          `✅ *Compra finalizada*\n\nYa tienes acceso al contenido premium.`,
-          { parse_mode: 'Markdown' }
+        await sendMessageViaProxy(telegramUserId, 
+          `✅ *Compra finalizada*\n\nYa tienes acceso al contenido premium.`
         );
 
-        this.logger.log(`Payment success notification with premium channel link sent to ${telegramUserId}`);
-        return { success: true, inviteLink: premiumChannelLink };
+        this.logger.log(`✅ Payment success notification with channel link sent to ${telegramUserId}`);
+        return { success: true, inviteLink: channelLink };
 
       } else {
         // El tipster no tiene canal premium configurado - solo confirmar la compra
@@ -1360,11 +1404,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           `Su compra ha sido procesada correctamente.\n\n` +
           `El tipster *${tipster.publicName}* le contactará pronto con los detalles de acceso.`;
 
-        await this.bot.telegram.sendMessage(telegramUserId, noChannelMessage, {
-          parse_mode: 'Markdown',
-        });
+        await sendMessageViaProxy(telegramUserId, noChannelMessage);
 
-        this.logger.log(`Payment success notification (no premium channel configured) sent to ${telegramUserId}`);
+        this.logger.log(`Payment success notification (no premium channel) sent to ${telegramUserId}`);
         return { success: true, inviteLink: null };
       }
 
