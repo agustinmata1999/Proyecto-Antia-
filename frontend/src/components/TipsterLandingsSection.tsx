@@ -83,7 +83,7 @@ export default function TipsterLandingsSection() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/tipster/landings`, {
+      const res = await fetch(`${BASE_URL}/api/tipster/landings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -102,7 +102,7 @@ export default function TipsterLandingsSection() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/tipster/landings/houses/${country}`, {
+      const res = await fetch(`${BASE_URL}/api/tipster/landings/houses/${country}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -217,7 +217,7 @@ export default function TipsterLandingsSection() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/tipster/landings`, {
+      const res = await fetch(`${BASE_URL}/api/tipster/landings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -251,7 +251,7 @@ export default function TipsterLandingsSection() {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/api/tipster/landings/${landingId}`, {
+      await fetch(`${BASE_URL}/api/tipster/landings/${landingId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -264,7 +264,7 @@ export default function TipsterLandingsSection() {
   const handleToggleActive = async (landing: Landing) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/api/tipster/landings/${landing.id}`, {
+      await fetch(`${BASE_URL}/api/tipster/landings/${landing.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ export default function TipsterLandingsSection() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/tipster/landings/${landing.id}/metrics`, {
+      const res = await fetch(`${BASE_URL}/api/tipster/landings/${landing.id}/metrics`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
