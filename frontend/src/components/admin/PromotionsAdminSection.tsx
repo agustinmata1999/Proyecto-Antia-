@@ -381,7 +381,7 @@ export default function PromotionsAdminSection() {
               {/* Promotion Header */}
               <div 
                 className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"
-                onClick={() => setExpandedPromotion(expandedPromotion === promo.id ? null : promo.id)}
+                onClick={() => toggleExpand(promo.id)}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
