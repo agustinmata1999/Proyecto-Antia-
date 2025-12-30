@@ -581,10 +581,10 @@ export class LandingService {
     // Enriquecer con info de casas
     const houseIds = [...new Set(clicks.map((c: any) => c.betting_house_id))];
     const houses = await this.getBettingHousesByIds(houseIds as string[]);
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h: any) => [h.id, h]));
 
     return clicks.map((click: any) => {
-      const house = housesMap.get(click.betting_house_id);
+      const house: any = housesMap.get(click.betting_house_id);
       return {
         id: click._id.$oid || click._id.toString(),
         clickId: click.click_id,
