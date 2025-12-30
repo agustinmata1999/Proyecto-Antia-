@@ -153,7 +153,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Handler cuando el bot es añadido a un canal
     this.bot.on('my_chat_member', async (ctx) => {
       try {
-        const { chat, new_chat_member } = ctx.myChatMember;
+        const { chat, new_chat_member, old_chat_member } = ctx.myChatMember;
         
         // Verificar si el bot fue añadido como administrador
         if (
@@ -161,7 +161,22 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           (chat.type === 'channel' || chat.type === 'supergroup')
         ) {
           this.logger.log(`🎉 Bot added to channel: ${chat.title} (${chat.id})`);
+          
+          // NUEVO: Guardar en la tabla de canales detectados
+          await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+          
+          // Legacy: manejar conexión automática para tipsters pendientes
           await this.handleChannelConnection(chat.id.toString(), chat.title, chat.username);
+        }
+        
+        // Si el bot fue removido del canal, marcar como inactivo
+        if (
+          (old_chat_member?.status === 'administrator' || old_chat_member?.status === 'creator') &&
+          (new_chat_member.status === 'left' || new_chat_member.status === 'kicked') &&
+          (chat.type === 'channel' || chat.type === 'supergroup')
+        ) {
+          this.logger.log(`👋 Bot removed from channel: ${chat.title} (${chat.id})`);
+          await this.markChannelAsInactive(chat.id.toString());
         }
       } catch (error) {
         this.logger.error('Error handling my_chat_member:', error);
