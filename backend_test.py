@@ -23,6 +23,10 @@ class AntiaAffiliateTester:
         self.access_token = None
         self.test_landing_id = None
         self.test_click_id = None
+        self.test_promotion_id = None
+        self.test_promotion_house_id = None
+        self.test_promotion_affiliate_url = None
+        self.test_promotion_landing_slug = None
         
     def log(self, message: str, level: str = "INFO"):
         """Log test messages"""
