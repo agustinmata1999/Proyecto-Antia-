@@ -1923,7 +1923,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Manejar updates desde webhook - OPTIMIZADO para respuesta rápida
+   * Manejar updates desde webhook - PROCESA DIRECTAMENTE VIA PROXY
    */
   async handleUpdate(update: any) {
     try {
@@ -1931,32 +1931,240 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       
       // Process my_chat_member directly (critical - needs sync processing)
       if (update.my_chat_member) {
-        // Process sync but quickly
         await this.handleMyChatMemberUpdate(update.my_chat_member);
         this.logger.log('Webhook my_chat_member processed successfully');
         return;
       }
       
-      // For other updates, process async in background and return immediately
+      // Process message updates directly (bypass Telegraf to use proxy)
+      if (update.message) {
+        setImmediate(async () => {
+          try {
+            await this.handleMessageUpdateViaProxy(update.message);
+          } catch (err) {
+            this.logger.error('Message processing failed:', err.message);
+          }
+        });
+        return;
+      }
+
+      // Process callback queries directly
+      if (update.callback_query) {
+        setImmediate(async () => {
+          try {
+            await this.handleCallbackQueryViaProxy(update.callback_query);
+          } catch (err) {
+            this.logger.error('Callback processing failed:', err.message);
+          }
+        });
+        return;
+      }
+
+      // Process chat join requests
+      if (update.chat_join_request) {
+        setImmediate(async () => {
+          try {
+            await this.handleChatJoinRequestViaProxy(update.chat_join_request);
+          } catch (err) {
+            this.logger.error('Join request processing failed:', err.message);
+          }
+        });
+        return;
+      }
+      
+      // For other updates, try using Telegraf as fallback
       if (this.bot) {
-        // Fire and forget - don't block the webhook response
         setImmediate(async () => {
           try {
             await this.bot.handleUpdate(update);
-            this.logger.log('Webhook update processed successfully (background)');
+            this.logger.log('Webhook update processed via Telegraf (background)');
           } catch (err) {
-            this.logger.error('Background update processing failed:', err.message);
+            this.logger.error('Telegraf processing failed:', err.message);
           }
         });
-        
-        // Ensure webhook is still configured (non-blocking)
-        this.ensureWebhookAsync();
-      } else {
-        this.logger.warn('Bot not initialized, skipping non-critical update');
       }
+      
+      // Ensure webhook is still configured (non-blocking)
+      this.ensureWebhookAsync();
     } catch (error) {
       this.logger.error('Error handling update:', error);
-      // Don't throw - always respond to Telegram quickly
+    }
+  }
+
+  /**
+   * Handle message updates directly via proxy (bypass Telegraf)
+   */
+  private async handleMessageUpdateViaProxy(message: any) {
+    const chatId = message.chat?.id?.toString();
+    const text = message.text || '';
+    const userId = message.from?.id?.toString();
+    
+    if (!chatId || !userId) {
+      this.logger.warn('Message missing chatId or userId');
+      return;
+    }
+
+    this.logger.log(`📨 Processing message from ${userId}: ${text.substring(0, 50)}`);
+
+    // Handle /start command
+    if (text.startsWith('/start')) {
+      const parts = text.split(' ');
+      const payload = parts[1] || '';
+      
+      this.logger.log(`📥 /start command from user ${userId}, payload: ${payload || 'NONE'}`);
+
+      // Handle order_ payload (post-payment access)
+      if (payload.startsWith('order_')) {
+        const orderId = payload.replace('order_', '');
+        this.logger.log(`🎯 Post-payment flow for order: ${orderId}`);
+        await this.handlePostPaymentAccessViaProxy(orderId, userId);
+        return;
+      }
+
+      // Handle product_ payload (redirect to checkout)
+      if (payload.startsWith('product_')) {
+        const productId = payload.replace('product_', '');
+        this.logger.log(`🔄 Redirecting to web checkout for product: ${productId}`);
+        
+        const appUrl = this.config.get('APP_URL');
+        const checkoutUrl = `${appUrl}/checkout/${productId}`;
+        
+        await this.httpService.sendMessage(userId, 
+          '👋 ¡Bienvenido a Antia!\n\n' +
+          '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
+          '_Serás redirigido a nuestra página de pago seguro._',
+          {
+            parseMode: 'Markdown',
+            replyMarkup: {
+              inline_keyboard: [
+                [{ text: '💳 Ir al Checkout', url: checkoutUrl }],
+              ],
+            },
+          }
+        );
+        return;
+      }
+
+      // Default welcome message
+      await this.httpService.sendMessage(userId,
+        '👋 ¡Bienvenido a Antia!\n\n' +
+        '🛒 *¿Cómo comprar?*\n\n' +
+        '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
+        '2️⃣ Haz clic en el enlace de compra\n' +
+        '3️⃣ Completa el pago en nuestra web\n' +
+        '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
+        '✅ *¿Ya pagaste?*\n' +
+        'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
+        '❓ *¿Necesitas ayuda?*\n' +
+        'Contacta con @AntiaSupport',
+        { parseMode: 'Markdown' }
+      );
+      return;
+    }
+
+    // Handle /info command
+    if (text.startsWith('/info')) {
+      const chat = message.chat;
+      await this.httpService.sendMessage(chatId,
+        `📊 *Información del Chat*\n\n` +
+        `🆔 Chat ID: \`${chatId}\`\n` +
+        `📝 Tipo: ${chat.type}\n` +
+        `🏷️ Título: ${chat.title || 'N/A'}\n` +
+        `👤 Username: @${chat.username || 'N/A'}`,
+        { parseMode: 'Markdown' }
+      );
+      return;
+    }
+
+    // For other messages, send a help message
+    if (message.chat?.type === 'private') {
+      await this.httpService.sendMessage(userId,
+        '👋 Hola! Soy el bot de Antia.\n\n' +
+        'Usa /start para ver las opciones disponibles.\n' +
+        'Si necesitas ayuda, contacta con @AntiaSupport',
+        { parseMode: 'Markdown' }
+      );
+    }
+  }
+
+  /**
+   * Handle callback queries via proxy
+   */
+  private async handleCallbackQueryViaProxy(callbackQuery: any) {
+    const userId = callbackQuery.from?.id?.toString();
+    const data = callbackQuery.data || '';
+    
+    this.logger.log(`📲 Callback query from ${userId}: ${data}`);
+    
+    // Handle different callback types here if needed
+    // For now, just acknowledge
+  }
+
+  /**
+   * Handle chat join requests via proxy
+   */
+  private async handleChatJoinRequestViaProxy(joinRequest: any) {
+    const { chat, from } = joinRequest;
+    const chatId = chat.id.toString();
+    const userId = from.id.toString();
+    
+    this.logger.log(`📥 Join request from ${userId} for chat ${chatId}`);
+    
+    // Check if user has a valid purchase for this channel
+    try {
+      const orderResult = await this.prisma.$runCommandRaw({
+        find: 'orders',
+        filter: {
+          telegram_user_id: userId,
+          status: { $in: ['PAGADA', 'COMPLETED', 'paid'] },
+        },
+        sort: { created_at: -1 },
+        limit: 5,
+      }) as any;
+
+      const orders = orderResult.cursor?.firstBatch || [];
+      let hasAccess = false;
+
+      for (const order of orders) {
+        // Get product
+        const productId = order.product_id;
+        const productResult = await this.prisma.$runCommandRaw({
+          find: 'products',
+          filter: { _id: { $oid: productId } },
+          projection: { telegram_channel_id: 1 },
+          limit: 1,
+        }) as any;
+        
+        const product = productResult.cursor?.firstBatch?.[0];
+        if (product?.telegram_channel_id === chatId) {
+          hasAccess = true;
+          break;
+        }
+      }
+
+      if (hasAccess) {
+        await this.httpService.approveChatJoinRequest(chatId, parseInt(userId));
+        this.logger.log(`✅ Approved join request for ${userId} in ${chatId}`);
+        
+        await this.httpService.sendMessage(userId,
+          '✅ *¡Solicitud aprobada!*\n\n' +
+          `Has sido añadido al canal *${chat.title}*.\n` +
+          '¡Disfruta del contenido!',
+          { parseMode: 'Markdown' }
+        );
+      } else {
+        await this.httpService.declineChatJoinRequest(chatId, parseInt(userId));
+        this.logger.log(`❌ Declined join request for ${userId} in ${chatId} (no purchase)`);
+        
+        await this.httpService.sendMessage(userId,
+          '❌ *Solicitud denegada*\n\n' +
+          'No encontramos una compra válida para este canal.\n' +
+          'Si crees que es un error, contacta con @AntiaSupport',
+          { parseMode: 'Markdown' }
+        );
+      }
+    } catch (error) {
+      this.logger.error('Error handling join request:', error.message);
     }
   }
 
