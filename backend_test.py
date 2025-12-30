@@ -945,7 +945,26 @@ class AntiaAffiliateTester:
             self.log("❌ Authentication failed - skipping authenticated tests", "ERROR")
             return results
         
-        # 2. Promotions API (new tests for promotion-specific functionality)
+        # 2. Admin Authentication and Tests
+        results["admin_login"] = self.test_admin_login()
+        
+        if results["admin_login"]:
+            # Admin Promotions API Tests
+            results["admin_get_all_promotions"] = self.test_admin_get_all_promotions()
+            results["admin_create_promotion"] = self.test_admin_create_promotion()
+            
+            if hasattr(self, 'test_admin_promotion_id') and self.test_admin_promotion_id:
+                results["admin_add_house_to_promotion"] = self.test_admin_add_house_to_promotion()
+                results["admin_get_promotion_detail"] = self.test_admin_get_promotion_detail()
+                results["admin_update_promotion_status"] = self.test_admin_update_promotion_status()
+                results["tipster_view_active_promotions"] = self.test_tipster_view_active_promotions()
+                results["admin_delete_promotion"] = self.test_admin_delete_promotion()
+            else:
+                self.log("⚠️ No admin promotion ID available - skipping promotion management tests", "WARN")
+        else:
+            self.log("❌ Admin authentication failed - skipping admin tests", "ERROR")
+        
+        # 3. Promotions API (existing tests for promotion-specific functionality)
         results["get_active_promotions"] = self.test_get_active_promotions()
         
         if hasattr(self, 'test_promotion_id') and self.test_promotion_id:
@@ -954,11 +973,11 @@ class AntiaAffiliateTester:
             self.log("⚠️ No promotion ID available - skipping promotion houses test", "WARN")
             results["get_promotion_houses"] = True  # Skip but don't fail
         
-        # 3. Landing CRUD (with tipster token)
+        # 4. Landing CRUD (with tipster token)
         results["get_tipster_landings"] = self.test_get_tipster_landings()
         results["get_houses_spain"] = self.test_get_available_houses_for_spain()
         
-        # 4. Create landing with promotion
+        # 5. Create landing with promotion
         if hasattr(self, 'test_promotion_id') and self.test_promotion_id:
             results["create_landing_with_promotion"] = self.test_create_landing_with_promotion()
         else:
@@ -971,15 +990,15 @@ class AntiaAffiliateTester:
             self.log("⚠️ No landing ID available - skipping metrics test", "WARN")
             results["get_landing_metrics"] = True  # Skip but don't fail
         
-        # 5. Public Landing (no auth required)
+        # 6. Public Landing (no auth required)
         results["get_public_landing"] = self.test_get_public_landing()
         results["get_public_landing_with_promotion"] = self.test_public_landing_with_promotion()
         
-        # 6. Click Tracking
+        # 7. Click Tracking
         results["click_tracking"] = self.test_click_tracking()
         results["promotion_specific_redirect"] = self.test_promotion_specific_redirect()
         
-        # 7. Health Checks
+        # 8. Health Checks
         results["health_telegram"] = self.test_health_telegram()
         results["health_email"] = self.test_health_email()
         
