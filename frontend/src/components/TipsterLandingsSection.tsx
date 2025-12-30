@@ -589,7 +589,7 @@ export default function TipsterLandingsSection() {
                   </select>
                   {promotions.length === 0 && (
                     <p className="text-sm text-yellow-600 mt-1">
-                      No hay retos disponibles. Contacta al administrador.
+                      No hay campañas disponibles. Contacta al administrador.
                     </p>
                   )}
                 </div>
@@ -601,7 +601,7 @@ export default function TipsterLandingsSection() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej: Mi Reto Navidad..."
+                    placeholder="Ej: Mi Campaña Navidad..."
                     value={formData.title}
                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -735,7 +735,7 @@ export default function TipsterLandingsSection() {
 
                       {housesForCountry.length === 0 && (
                         <p className="text-sm text-yellow-600 mt-2">
-                          No hay casas disponibles para {COUNTRY_INFO[country]?.name} en este reto.
+                          No hay casas disponibles para {COUNTRY_INFO[country]?.name} en esta campaña.
                         </p>
                       )}
                     </div>
@@ -746,7 +746,7 @@ export default function TipsterLandingsSection() {
                 {!formData.promotionId && formData.countriesEnabled.length > 0 && (
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-yellow-700 text-sm">
-                      Selecciona un reto/promoción para ver las casas de apuestas disponibles.
+                      Selecciona una campaña para ver las casas de apuestas disponibles.
                     </p>
                   </div>
                 )}
