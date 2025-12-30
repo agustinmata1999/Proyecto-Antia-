@@ -203,30 +203,42 @@ export class EmailTemplatesService {
     productName: string;
     channelName: string;
     telegramLink: string;
+    orderId?: string;
   }): string {
     const content = `
-      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Accede a tu contenido</h2>
+      <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">🎉 ¡Accede a tu contenido!</h2>
       
       <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
         Tu compra de <strong>${data.productName}</strong> incluye acceso al canal premium <strong>${data.channelName}</strong>.
       </p>
 
-      <p style="margin: 0 0 8px; font-size: 16px; color: #4b5563;">Para acceder, seguí estos pasos:</p>
-      
-      <ol style="margin: 0 0 24px; padding-left: 24px; color: #4b5563;">
-        <li style="margin-bottom: 8px;">Hacé clic en el botón de abajo</li>
-        <li style="margin-bottom: 8px;">Se abrirá Telegram automáticamente</li>
-        <li style="margin-bottom: 8px;">Unite al canal privado</li>
-      </ol>
+      <div style="background-color: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 16px; font-size: 16px; color: #065f46; font-weight: 600;">Para obtener tu acceso:</p>
+        
+        <ol style="margin: 0 0 20px; padding-left: 24px; color: #047857;">
+          <li style="margin-bottom: 12px;">Haz clic en el botón verde de abajo</li>
+          <li style="margin-bottom: 12px;">Se abrirá nuestro bot de Telegram (@Antiabetbot)</li>
+          <li style="margin-bottom: 12px;">El bot verificará tu compra automáticamente</li>
+          <li style="margin-bottom: 0;">Recibirás el enlace de acceso al canal</li>
+        </ol>
 
-      <div style="text-align: center;">
-        ${this.button('🚀 Acceder a Telegram', data.telegramLink)}
+        <div style="text-align: center;">
+          ${this.button('🚀 Obtener Acceso en Telegram', data.telegramLink, '#10b981')}
+        </div>
       </div>
 
-      <div style="margin-top: 32px; padding: 16px; background-color: #fef3c7; border-radius: 8px;">
+      <div style="padding: 16px; background-color: #dbeafe; border-radius: 8px; margin-bottom: 16px;">
+        <p style="margin: 0; font-size: 14px; color: #1e40af;">
+          <strong>💡 ¿El botón no funciona?</strong><br>
+          Abre Telegram, busca @Antiabetbot y envía el mensaje:<br>
+          <code style="background-color: #bfdbfe; padding: 2px 6px; border-radius: 4px;">/start order_${data.orderId?.slice(-12) || ''}</code>
+        </p>
+      </div>
+
+      <div style="padding: 16px; background-color: #fef3c7; border-radius: 8px;">
         <p style="margin: 0; font-size: 14px; color: #92400e;">
-          <strong>💡 ¿No tenés Telegram?</strong><br>
-          Descargalo gratis en <a href="https://telegram.org/" style="color: #92400e;">telegram.org</a>
+          <strong>📱 ¿No tienes Telegram?</strong><br>
+          Descárgalo gratis en <a href="https://telegram.org/" style="color: #92400e; text-decoration: underline;">telegram.org</a> (disponible para iOS, Android y PC)
         </p>
       </div>
     `;
