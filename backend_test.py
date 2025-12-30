@@ -260,9 +260,230 @@ class AntiaAffiliateTester:
             self.log(f"❌ Get public landing test failed: {str(e)}", "ERROR")
             return False
 
+    def test_get_active_promotions(self) -> bool:
+        """Test getting active promotions for tipsters"""
+        self.log("=== Testing Get Active Promotions ===")
+        
+        try:
+            response = self.make_request("GET", "/promotions")
+            
+            if response.status_code == 200:
+                promotions = response.json()
+                self.log(f"✅ Successfully retrieved {len(promotions)} active promotions")
+                
+                # Log promotion details for debugging
+                for i, promotion in enumerate(promotions):
+                    self.log(f"Promotion {i+1}: {promotion.get('name', 'No name')} (ID: {promotion.get('id', 'No ID')})")
+                    self.log(f"  Slug: {promotion.get('slug', 'No slug')}")
+                    self.log(f"  Description: {promotion.get('description', 'No description')}")
+                    
+                    # Store first promotion ID for further tests
+                    if i == 0 and promotion.get('id'):
+                        self.test_promotion_id = promotion.get('id')
+                        
+                return True
+            else:
+                self.log(f"❌ Get active promotions failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get active promotions test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_get_promotion_houses(self) -> bool:
+        """Test getting houses for a specific promotion"""
+        if not hasattr(self, 'test_promotion_id') or not self.test_promotion_id:
+            self.log("❌ No test promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Get Promotion Houses ===")
+        
+        try:
+            response = self.make_request("GET", f"/promotions/{self.test_promotion_id}/houses")
+            
+            if response.status_code == 200:
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} houses for promotion")
+                
+                # Log house details for debugging
+                for i, house_link in enumerate(houses):
+                    house = house_link.get('house', {})
+                    self.log(f"House {i+1}: {house.get('name', 'No name')} (ID: {house_link.get('bettingHouseId', 'No ID')})")
+                    self.log(f"  Affiliate URL: {house_link.get('affiliateUrl', 'No URL')}")
+                    self.log(f"  Allowed Countries: {house.get('allowedCountries', [])}")
+                    
+                    # Store first house ID for further tests
+                    if i == 0 and house_link.get('bettingHouseId'):
+                        self.test_promotion_house_id = house_link.get('bettingHouseId')
+                        self.test_promotion_affiliate_url = house_link.get('affiliateUrl')
+                        
+                return True
+            else:
+                self.log(f"❌ Get promotion houses failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get promotion houses test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_create_landing_with_promotion(self) -> bool:
+        """Test creating a landing with a promotion"""
+        if not hasattr(self, 'test_promotion_id') or not self.test_promotion_id:
+            self.log("❌ No test promotion ID available", "ERROR")
+            return False
+            
+        self.log("=== Testing Create Landing with Promotion ===")
+        
+        landing_data = {
+            "title": "Mi Reto Navidad Test",
+            "description": "Landing de prueba para el reto de navidad",
+            "promotionId": self.test_promotion_id,
+            "countriesEnabled": ["ES"],
+            "countryConfigs": [
+                {
+                    "country": "ES",
+                    "items": [
+                        {
+                            "bettingHouseId": self.test_promotion_house_id if hasattr(self, 'test_promotion_house_id') else "6944674739e53ced97a01362",
+                            "orderIndex": 1,
+                            "customTermsText": "Deposita al menos 10€ y recibe tu bono"
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        try:
+            response = self.make_request("POST", "/tipster/landings", landing_data)
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                self.log("✅ Landing with promotion created successfully")
+                
+                # Check required fields
+                if "id" in result and "slug" in result:
+                    self.log(f"✅ Landing ID: {result['id']}")
+                    self.log(f"✅ Landing Slug: {result['slug']}")
+                    self.log(f"✅ Promotion ID: {result.get('promotionId', 'Not set')}")
+                    self.test_promotion_landing_slug = result['slug']
+                    return True
+                else:
+                    self.log("❌ Response missing id or slug", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Create landing with promotion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Create landing with promotion test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_public_landing_with_promotion(self) -> bool:
+        """Test getting public landing with promotion data"""
+        # Use the specific slug from the review request or the one we just created
+        slug = getattr(self, 'test_promotion_landing_slug', 'fausto-perez-mi-reto-navidad')
+        
+        self.log("=== Testing Public Landing with Promotion ===")
+        
+        try:
+            response = self.make_request("GET", f"/go/{slug}?country=ES", use_auth=False)
+            
+            if response.status_code == 200:
+                landing = response.json()
+                self.log("✅ Successfully retrieved public landing with promotion")
+                
+                # Verify required fields
+                required_fields = ["id", "slug", "title", "tipster", "countriesEnabled", "selectedCountry", "items"]
+                for field in required_fields:
+                    if field in landing:
+                        self.log(f"✅ Landing has {field}")
+                    else:
+                        self.log(f"❌ Landing missing {field}", "ERROR")
+                        return False
+                
+                # Log landing details
+                self.log(f"Landing title: {landing.get('title', 'No title')}")
+                self.log(f"Slug: {landing.get('slug', 'No slug')}")
+                self.log(f"Selected country: {landing.get('selectedCountry', 'No country')}")
+                
+                # Check tipster info
+                tipster = landing.get('tipster', {})
+                if tipster:
+                    self.log(f"✅ Tipster: {tipster.get('publicName', 'No name')} (ID: {tipster.get('id', 'No ID')})")
+                else:
+                    self.log("❌ No tipster info", "ERROR")
+                    return False
+                
+                # Check betting house items
+                items = landing.get('items', [])
+                self.log(f"✅ Found {len(items)} betting house items")
+                for i, item in enumerate(items):
+                    house = item.get('house', {})
+                    if house:
+                        self.log(f"  Item {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                    
+                return True
+            else:
+                self.log(f"❌ Get public landing with promotion failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Get public landing with promotion test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_promotion_specific_redirect(self) -> bool:
+        """Test click tracking with promotion-specific redirect URL"""
+        self.log("=== Testing Promotion-Specific Redirect ===")
+        
+        # Use the specific slug and house ID from the review request
+        slug = getattr(self, 'test_promotion_landing_slug', 'fausto-perez-mi-reto-navidad')
+        house_id = getattr(self, 'test_promotion_house_id', '6944674739e53ced97a01362')  # Bwin
+        
+        click_data = {
+            "slug": slug,
+            "houseId": house_id,
+            "country": "ES"
+        }
+        
+        try:
+            response = self.make_request("POST", "/r/click", click_data, use_auth=False)
+            
+            if response.status_code in [200, 201]:  # Accept both 200 and 201
+                result = response.json()
+                self.log("✅ Promotion-specific click tracking successful")
+                
+                # Check required fields
+                if "redirectUrl" in result and "clickId" in result:
+                    redirect_url = result['redirectUrl']
+                    self.log(f"✅ Redirect URL: {redirect_url}")
+                    self.log(f"✅ Click ID: {result['clickId']}")
+                    
+                    # Validate that it's using promotion-specific URL, not master URL
+                    if hasattr(self, 'test_promotion_affiliate_url') and self.test_promotion_affiliate_url:
+                        expected_base = self.test_promotion_affiliate_url.split('?')[0]  # Remove existing params
+                        if expected_base in redirect_url:
+                            self.log(f"✅ Using promotion-specific URL: {expected_base}")
+                        else:
+                            self.log(f"⚠️ May not be using promotion-specific URL. Expected base: {expected_base}", "WARN")
+                    
+                    self.test_click_id = result['clickId']
+                    return True
+                else:
+                    self.log("❌ Response missing redirectUrl or clickId", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Promotion-specific click tracking failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Promotion-specific click tracking test failed: {str(e)}", "ERROR")
+            return False
+
     def test_click_tracking(self) -> bool:
-        """Test click tracking functionality"""
-        self.log("=== Testing Click Tracking ===")
+        """Test basic click tracking functionality (legacy test)"""
+        self.log("=== Testing Basic Click Tracking ===")
         
         click_data = {
             "slug": "fausto-perez-reto-navidad-2025",
@@ -275,7 +496,7 @@ class AntiaAffiliateTester:
             
             if response.status_code in [200, 201]:  # Accept both 200 and 201
                 result = response.json()
-                self.log("✅ Click tracking successful")
+                self.log("✅ Basic click tracking successful")
                 
                 # Check required fields
                 if "redirectUrl" in result and "clickId" in result:
@@ -288,11 +509,11 @@ class AntiaAffiliateTester:
                     return False
                     
             else:
-                self.log(f"❌ Click tracking failed with status {response.status_code}", "ERROR")
+                self.log(f"❌ Basic click tracking failed with status {response.status_code}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Click tracking test failed: {str(e)}", "ERROR")
+            self.log(f"❌ Basic click tracking test failed: {str(e)}", "ERROR")
             return False
 
     def test_health_telegram(self) -> bool:
