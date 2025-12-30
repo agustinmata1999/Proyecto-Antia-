@@ -307,10 +307,10 @@ export class LandingService {
     // Enriquecer con info de las casas
     const houseIds = items.map((i: any) => i.betting_house_id);
     const houses = await this.getBettingHousesByIds(houseIds);
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h: any) => [h.id, h]));
 
     const enrichedItems = items.map((item: any) => {
-      const house = housesMap.get(item.betting_house_id);
+      const house: any = housesMap.get(item.betting_house_id);
       return {
         id: item._id.$oid || item._id.toString(),
         bettingHouseId: item.betting_house_id,
