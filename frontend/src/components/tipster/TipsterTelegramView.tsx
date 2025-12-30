@@ -119,17 +119,17 @@ export default function TipsterTelegramView({
           <form onSubmit={handleConnect} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                ID o @username del canal
+                Nombre del canal
               </label>
               <input
                 type="text"
                 value={channelInput}
                 onChange={(e) => setChannelInput(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="-1001234567890 o @tucanal"
+                placeholder="Mi Canal Premium"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Puedes obtener el ID del canal usando bots como @userinfobot
+                Escribe el nombre exacto de tu canal tal como aparece en Telegram
               </p>
             </div>
 
