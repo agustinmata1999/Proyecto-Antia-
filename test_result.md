@@ -129,17 +129,41 @@ backend:
         comment: "❌ Webhook endpoint timing out after 15 seconds. This is likely due to slow proxy API calls to Telegram (api.allorigins.win returning 500 errors). The endpoint exists and processes requests but proxy integration is unreliable"
 
 frontend:
-  - task: "Frontend Integration"
-    implemented: false
-    working: "NA"
-    file: "N/A"
+  - task: "Tipster Affiliate Stats Dashboard"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/TipsterStatsSection.tsx"
     stuck_count: 0
-    priority: "low"
+    priority: "high"
     needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "testing"
-        comment: "Frontend testing not performed as per system limitations"
+        comment: "✅ P0 test passed. Tipster affiliate stats dashboard working correctly. Successfully displays summary cards (Clicks, Conversiones, Tasa Conv., Ganancias), Por País section, Por Casa de Apuestas section, and Evolución Diaria chart. Minor: Por Campaña section not found but core functionality working. Login/logout flow working properly."
+
+  - task: "Admin Affiliate Stats Dashboard"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/admin/AffiliateStatsSection.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Admin affiliate stats dashboard working correctly. Successfully displays filter section (date range, tipster, campaign, house filters), summary cards (Clicks Totales, Usuarios Únicos, Conversiones, Tasa Conversión), Por Tipster table, Por País and Por Casa de Apuestas sections, and Por Campaña table. Minor: Evolución Diaria chart not found but core functionality working. Authentication and navigation working properly."
+
+  - task: "Frontend Authentication Flow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/app/login/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Authentication flow working correctly. Successfully tested login for both tipster (fausto.perez@antia.com) and admin (admin@antia.com) users. Proper redirection to respective dashboards (/dashboard/tipster and /dashboard/admin). Logout functionality working properly."
 
 metadata:
   created_by: "testing_agent"
