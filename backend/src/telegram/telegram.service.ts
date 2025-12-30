@@ -283,7 +283,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       `, { parse_mode: 'Markdown' });
     });
 
-    // Command /registrar - NUEVO: Registrar canal manualmente para tipsters
+    // Command /registrar - Registrar canal manualmente (para canales donde el bot ya estaba)
     this.bot.command('registrar', async (ctx) => {
       try {
         const chatId = ctx.chat.id.toString();
@@ -325,7 +325,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           '✅ *¡Canal registrado correctamente!*\n\n' +
           `📺 *Nombre:* ${chatTitle || 'N/A'}\n` +
           `🆔 *ID:* \`${chatId}\`\n\n` +
-          '👉 Ahora puedes ir al panel de Antia y escribir el nombre de tu canal para conectarlo.',
+          '👉 Ahora ve al panel de Antia y escribe el nombre de tu canal para conectarlo.\n\n' +
+          '_Nota: Para canales nuevos, esto ya no será necesario. El bot los detecta automáticamente._',
           { parse_mode: 'Markdown' }
         );
 
