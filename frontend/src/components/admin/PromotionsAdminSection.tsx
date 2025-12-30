@@ -475,8 +475,13 @@ export default function PromotionsAdminSection() {
                                 </div>
                               )}
                               <div>
-                                <div className="font-medium text-gray-900">
+                                <div className="font-medium text-gray-900 flex items-center gap-2">
                                   {link.house?.name || 'Casa desconocida'}
+                                  {link.commissionCents && (
+                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                      €{(link.commissionCents / 100).toFixed(2)} / conversión
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="text-xs text-gray-500 truncate max-w-md">
                                   {link.affiliateUrl}
