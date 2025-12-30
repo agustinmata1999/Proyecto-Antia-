@@ -87,6 +87,17 @@
 - Comprehensive data including tipster info, house details, and tracking data
 
 ### Conclusion
-The Affiliate Landing system is **fully functional** for the core use cases specified in the review request. All major endpoints are working correctly, and the system successfully handles authentication, landing retrieval, public access, and click tracking.
+The Affiliate Landing system with **Promotion-specific links (RETOS)** is **fully functional** for all use cases specified in the review request. All major endpoints are working correctly, and the system successfully handles:
+
+1. **Promotion Management**: Active promotions retrieval and house configuration
+2. **Landing Creation**: Tipsters can create landings linked to specific promotions
+3. **Promotion-Specific Redirects**: Critical functionality confirmed - clicks on promotion-linked landings redirect to promotion-specific URLs (e.g., https://bwin.com/promo-navidad-2025) instead of master affiliate URLs
+4. **Public Access**: Both standard and promotion-linked landings accessible via slug
+5. **Click Tracking**: Comprehensive tracking with proper promotion context
+
+**Key Validation Confirmed**: 
+- ✅ Promotion-specific affiliate URLs are used for redirects when landing has promotionId
+- ✅ Database collections (affiliate_promotions, promotion_house_links, tipster_affiliate_landings) working correctly
+- ✅ Click events recorded with correct tipsterId and landingId
 
 **Status: ✅ READY FOR PRODUCTION**
