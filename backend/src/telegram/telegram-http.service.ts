@@ -20,9 +20,14 @@ export class TelegramHttpService {
   constructor(private config: ConfigService) {
     this.botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN') || '';
     
-    // Create axios instance with longer timeout
+    // Create axios instance with longer timeout and curl-like headers
+    // The proxy blocks typical Node.js User-Agents, so we use curl's UA
     this.axiosInstance = axios.create({
       timeout: 30000,
+      headers: {
+        'User-Agent': 'curl/7.88.1',
+        'Accept': '*/*',
+      },
       httpsAgent: new https.Agent({
         rejectUnauthorized: true,
         keepAlive: true,
