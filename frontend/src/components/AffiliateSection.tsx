@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { affiliateApi } from '@/lib/api';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import TipsterLandingsSection from './TipsterLandingsSection';
+import TipsterStatsSection from './TipsterStatsSection';
 
 interface HouseWithLink {
   house: {
