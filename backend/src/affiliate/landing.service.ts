@@ -56,6 +56,7 @@ export class LandingService {
       documents: [{
         _id: landingId,
         tipster_id: tipsterId,
+        promotion_id: dto.promotionId || null,  // Reto/promoción seleccionado
         slug,
         title: dto.title || null,
         description: dto.description || null,
@@ -76,6 +77,7 @@ export class LandingService {
     return {
       id: landingId.toHexString(),
       slug,
+      promotionId: dto.promotionId,
       title: dto.title,
       countriesEnabled: dto.countriesEnabled,
       isActive: true,
