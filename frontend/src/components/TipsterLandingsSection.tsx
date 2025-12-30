@@ -91,7 +91,7 @@ export default function TipsterLandingsSection() {
   const loadLandings = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const res = await fetch(`${getBaseUrl()}/api/tipster/landings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -110,7 +110,7 @@ export default function TipsterLandingsSection() {
     if (availableHouses[country]) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const res = await fetch(`${getBaseUrl()}/api/tipster/landings/houses/${country}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -225,7 +225,7 @@ export default function TipsterLandingsSection() {
     setFormError('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const res = await fetch(`${getBaseUrl()}/api/tipster/landings`, {
         method: 'POST',
         headers: {
@@ -259,7 +259,7 @@ export default function TipsterLandingsSection() {
     if (!confirm('¿Estás seguro de eliminar esta landing?')) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await fetch(`${getBaseUrl()}/api/tipster/landings/${landingId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
@@ -272,7 +272,7 @@ export default function TipsterLandingsSection() {
 
   const handleToggleActive = async (landing: Landing) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await fetch(`${getBaseUrl()}/api/tipster/landings/${landing.id}`, {
         method: 'PUT',
         headers: {
@@ -293,7 +293,7 @@ export default function TipsterLandingsSection() {
     setMetrics(null);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const res = await fetch(`${getBaseUrl()}/api/tipster/landings/${landing.id}/metrics`, {
         headers: { Authorization: `Bearer ${token}` },
       });
