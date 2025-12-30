@@ -355,10 +355,10 @@ export default function PromotionsAdminSection() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h4 className="font-medium text-blue-800 mb-1">¿Cómo funciona?</h4>
         <p className="text-sm text-blue-700">
-          1. Crea un <strong>Reto</strong> (ej: "Reto Navidad 2025")<br/>
-          2. Añade las <strong>casas de apuestas</strong> con el <strong>link específico</strong> de esa promoción<br/>
-          3. Los tipsters seleccionan el reto al crear sus landings<br/>
-          4. Cuando un usuario hace clic, será redirigido al <strong>link específico del reto</strong>
+          1. Crea una <strong>Campaña</strong> (ej: "Campaña Navidad 2025")<br/>
+          2. Añade las <strong>casas de apuestas</strong> con el <strong>link específico</strong> y la <strong>comisión</strong> de esa campaña<br/>
+          3. Los tipsters seleccionan la campaña al crear sus landings<br/>
+          4. Cuando un usuario hace clic, será redirigido al <strong>link específico de la campaña</strong>
         </p>
       </div>
 
