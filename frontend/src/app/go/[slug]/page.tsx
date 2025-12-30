@@ -87,7 +87,7 @@ export default function PublicLandingPage() {
     try {
       setLoading(true);
       const countryParam = country || searchParams.get('country') || '';
-      const url = `${API_URL}/api/go/${slug}${countryParam ? `?country=${countryParam}` : ''}`;
+      const url = `${BASE_URL}/api/go/${slug}${countryParam ? `?country=${countryParam}` : ''}`;
       
       const res = await fetch(url);
       if (!res.ok) {
