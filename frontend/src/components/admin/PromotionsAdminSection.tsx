@@ -24,6 +24,7 @@ interface PromotionHouseLink {
   bettingHouseId: string;
   affiliateUrl: string;
   trackingParamName?: string;
+  commissionCents?: number;
   isActive: boolean;
   house?: BettingHouse;
 }
