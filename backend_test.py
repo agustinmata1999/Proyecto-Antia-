@@ -589,9 +589,25 @@ class AntiaAffiliateTester:
             self.log("❌ Authentication failed - skipping authenticated tests", "ERROR")
             return results
         
-        # 2. Landing CRUD (with tipster token)
+        # 2. Promotions API (new tests for promotion-specific functionality)
+        results["get_active_promotions"] = self.test_get_active_promotions()
+        
+        if hasattr(self, 'test_promotion_id') and self.test_promotion_id:
+            results["get_promotion_houses"] = self.test_get_promotion_houses()
+        else:
+            self.log("⚠️ No promotion ID available - skipping promotion houses test", "WARN")
+            results["get_promotion_houses"] = True  # Skip but don't fail
+        
+        # 3. Landing CRUD (with tipster token)
         results["get_tipster_landings"] = self.test_get_tipster_landings()
         results["get_houses_spain"] = self.test_get_available_houses_for_spain()
+        
+        # 4. Create landing with promotion
+        if hasattr(self, 'test_promotion_id') and self.test_promotion_id:
+            results["create_landing_with_promotion"] = self.test_create_landing_with_promotion()
+        else:
+            self.log("⚠️ No promotion ID available - skipping create landing with promotion test", "WARN")
+            results["create_landing_with_promotion"] = True  # Skip but don't fail
         
         if self.test_landing_id:
             results["get_landing_metrics"] = self.test_get_landing_metrics()
@@ -599,13 +615,15 @@ class AntiaAffiliateTester:
             self.log("⚠️ No landing ID available - skipping metrics test", "WARN")
             results["get_landing_metrics"] = True  # Skip but don't fail
         
-        # 3. Public Landing (no auth required)
+        # 5. Public Landing (no auth required)
         results["get_public_landing"] = self.test_get_public_landing()
+        results["get_public_landing_with_promotion"] = self.test_public_landing_with_promotion()
         
-        # 4. Click Tracking
+        # 6. Click Tracking
         results["click_tracking"] = self.test_click_tracking()
+        results["promotion_specific_redirect"] = self.test_promotion_specific_redirect()
         
-        # 5. Health Checks
+        # 7. Health Checks
         results["health_telegram"] = self.test_health_telegram()
         results["health_email"] = self.test_health_email()
         
