@@ -1555,14 +1555,63 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log(`Processing webhook update: ${JSON.stringify(update).substring(0, 200)}`);
       
-      // Asegurar webhook antes de procesar
-      await this.ensureWebhook();
+      // Procesar my_chat_member directamente (no requiere bot inicializado)
+      if (update.my_chat_member) {
+        await this.handleMyChatMemberUpdate(update.my_chat_member);
+        this.logger.log('Webhook my_chat_member processed successfully');
+        return;
+      }
       
-      await this.bot.handleUpdate(update);
-      this.logger.log('Webhook update processed successfully');
+      // Para otros updates, usar el bot si está disponible
+      if (this.bot) {
+        await this.ensureWebhook();
+        await this.bot.handleUpdate(update);
+        this.logger.log('Webhook update processed successfully');
+      } else {
+        this.logger.warn('Bot not initialized, skipping non-critical update');
+      }
     } catch (error) {
       this.logger.error('Error handling update:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Manejar evento my_chat_member directamente (sin depender del bot)
+   */
+  private async handleMyChatMemberUpdate(myChatMember: any) {
+    try {
+      const { chat, new_chat_member, old_chat_member } = myChatMember;
+      const chatTitle = chat.title || 'N/A';
+      const chatId = chat.id.toString();
+      
+      this.logger.log(`📥 my_chat_member event: ${chatTitle} (${chatId}) - new status: ${new_chat_member?.status}`);
+      
+      // Verificar si el bot fue añadido como administrador
+      if (
+        new_chat_member?.status === 'administrator' &&
+        (chat.type === 'channel' || chat.type === 'supergroup')
+      ) {
+        this.logger.log(`🎉 Bot added to channel: ${chatTitle} (${chatId})`);
+        
+        // Guardar en la tabla de canales detectados
+        await this.saveDetectedChannel(chatId, chatTitle, chat.username, chat.type);
+        
+        // Legacy: manejar conexión automática para tipsters pendientes
+        await this.handleChannelConnection(chatId, chatTitle, chat.username);
+      }
+      
+      // Si el bot fue removido del canal, marcar como inactivo
+      if (
+        (old_chat_member?.status === 'administrator' || old_chat_member?.status === 'creator') &&
+        (new_chat_member?.status === 'left' || new_chat_member?.status === 'kicked') &&
+        (chat.type === 'channel' || chat.type === 'supergroup')
+      ) {
+        this.logger.log(`👋 Bot removed from channel: ${chatTitle} (${chatId})`);
+        await this.markChannelAsInactive(chatId);
+      }
+    } catch (error) {
+      this.logger.error('Error handling my_chat_member:', error);
     }
   }
 
