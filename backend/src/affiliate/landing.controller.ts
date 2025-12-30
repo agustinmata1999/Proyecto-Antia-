@@ -166,6 +166,43 @@ export class TipsterLandingController {
   }
 
   /**
+   * GET /api/tipster/landings/promotions
+   * Obtener promociones/campañas disponibles para crear landings
+   */
+  @Get('promotions')
+  async getAvailablePromotions() {
+    const result = await this.prisma.$runCommandRaw({
+      find: 'affiliate_promotions',
+      filter: { status: 'ACTIVE' },
+      projection: { name: 1, slug: 1, description: 1 },
+      sort: { created_at: -1 },
+    }) as any;
+    
+    const promotions = result.cursor?.firstBatch || [];
+    
+    // Get house counts for each promotion
+    const enriched = await Promise.all(promotions.map(async (p: any) => {
+      const promoId = p._id.$oid || p._id.toString();
+      const linksResult = await this.prisma.$runCommandRaw({
+        find: 'promotion_house_links',
+        filter: { promotion_id: promoId, is_active: true },
+        projection: { betting_house_id: 1, commission_cents: 1 },
+      }) as any;
+      const links = linksResult.cursor?.firstBatch || [];
+      
+      return {
+        id: promoId,
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        housesCount: links.length,
+      };
+    }));
+    
+    return enriched;
+  }
+
+  /**
    * GET /api/tipster/landings
    * Listar landings del tipster
    */
