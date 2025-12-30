@@ -687,6 +687,309 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Handle post-payment access flow via proxy (bypasses firewall)
+   */
+  private async handlePostPaymentAccessViaProxy(orderId: string, telegramUserId: string) {
+    // Helper to send messages via proxy
+    const sendMessage = async (text: string, options: any = {}) => {
+      try {
+        await this.httpService.sendMessage(telegramUserId, text, {
+          parseMode: options.parse_mode || 'Markdown',
+          replyMarkup: options.reply_markup,
+        });
+      } catch (err) {
+        this.logger.error('Failed to send via proxy:', err.message);
+      }
+    };
+
+    try {
+      this.logger.log(`🔍 [PROXY] Validating payment for order ${orderId}, user ${telegramUserId}`);
+
+      // Validate orderId format
+      if (!orderId || orderId.length < 10) {
+        this.logger.error(`❌ Invalid orderId format: ${orderId}`);
+        await sendMessage(
+          '❌ *Error en el enlace*\n\n' +
+          'El enlace de acceso parece estar incompleto.\n' +
+          'Por favor, usa el enlace original que recibiste.\n\n' +
+          'Si el problema persiste, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      // Find order function
+      const findOrder = async () => {
+        try {
+          const orderResult = await this.prisma.$runCommandRaw({
+            find: 'orders',
+            filter: { _id: { $oid: orderId } },
+            limit: 1,
+          }) as any;
+          return orderResult.cursor?.firstBatch?.[0];
+        } catch (err) {
+          this.logger.error(`Error finding order ${orderId}: ${err.message}`);
+          return null;
+        }
+      };
+
+      // Find order with retries
+      let order = await findOrder();
+      let retries = 0;
+      const maxRetries = 5;
+      const retryDelay = 2000;
+
+      while ((!order || order.status === 'PENDING') && retries < maxRetries) {
+        const reason = !order ? 'not found' : 'PENDING';
+        this.logger.log(`⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        order = await findOrder();
+        retries++;
+      }
+
+      if (!order) {
+        this.logger.warn(`❌ Order ${orderId} not found after ${retries} retries`);
+        await sendMessage(
+          '❌ *Orden no encontrada*\n\n' +
+          'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
+          '• El pago aún se está procesando (espera 1-2 min)\n' +
+          '• Hubo un problema con la transacción\n\n' +
+          '💡 *Solución:* Vuelve a hacer clic en el enlace del bot.\n\n' +
+          'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      // Verify payment status
+      if (order.status !== 'PAGADA' && order.status !== 'COMPLETED' && order.status !== 'paid') {
+        this.logger.warn(`❌ Order ${orderId} not paid. Status: ${order.status}`);
+        await sendMessage(
+          '⏳ *Pago en proceso*\n\n' +
+          'Tu pago está siendo procesado. Por favor:\n\n' +
+          '1️⃣ Espera 1-2 minutos\n' +
+          '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
+          'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+      
+      this.logger.log(`✅ Order ${orderId} is paid (status: ${order.status})`);
+
+      // Update order with telegram user ID
+      await this.prisma.$runCommandRaw({
+        update: 'orders',
+        updates: [{
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              telegram_user_id: telegramUserId,
+              updated_at: { $date: new Date().toISOString() },
+            },
+          },
+        }],
+      });
+
+      // Get product
+      const productId = order.product_id;
+      this.logger.log(`🔍 Looking for product: ${productId}`);
+      
+      let product: any = null;
+      try {
+        product = await this.prisma.product.findUnique({
+          where: { id: productId },
+        });
+      } catch (e) {
+        this.logger.warn(`Prisma findUnique failed: ${e.message}`);
+      }
+      
+      if (!product) {
+        try {
+          const productResult = await this.prisma.$runCommandRaw({
+            find: 'products',
+            filter: { _id: { $oid: productId } },
+            limit: 1,
+          }) as any;
+          const rawProduct = productResult.cursor?.firstBatch?.[0];
+          if (rawProduct) {
+            product = {
+              id: rawProduct._id?.$oid || productId,
+              title: rawProduct.title,
+              tipsterId: rawProduct.tipster_id,
+              telegramChannelId: rawProduct.telegram_channel_id,
+              priceCents: rawProduct.price_cents,
+            };
+          }
+        } catch (e) {
+          this.logger.error(`Raw query failed: ${e.message}`);
+        }
+      }
+
+      if (!product) {
+        this.logger.error(`❌ Product ${productId} not found`);
+        await sendMessage(
+          '❌ *Error al procesar tu compra*\n\n' +
+          'No pudimos encontrar el producto.\n\n' +
+          'Por favor, contacta con @AntiaSupport con este código:\n' +
+          `\`ORDER: ${orderId}\``,
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+      
+      this.logger.log(`✅ Product found: ${product.title}`);
+
+      // Get tipster
+      let tipster: any = null;
+      if (product.tipsterId) {
+        try {
+          const tipsterResult = await this.prisma.$runCommandRaw({
+            find: 'tipster_profiles',
+            filter: { _id: { $oid: product.tipsterId } },
+            limit: 1,
+          }) as any;
+          const rawTipster = tipsterResult.cursor?.firstBatch?.[0];
+          if (rawTipster) {
+            tipster = {
+              id: rawTipster._id?.$oid || product.tipsterId,
+              publicName: rawTipster.public_name,
+            };
+          }
+        } catch (e) {
+          this.logger.error(`Could not find tipster: ${e.message}`);
+        }
+      }
+
+      // Find channel for product
+      let channelLink: string | null = null;
+      let channelTitle: string = product.title;
+      let channelId: string | null = null;
+
+      if (product.telegramChannelId) {
+        this.logger.log(`🔍 Looking for channel: ${product.telegramChannelId}`);
+        
+        const channelResult = await this.prisma.$runCommandRaw({
+          find: 'telegram_channels',
+          filter: { 
+            channel_id: product.telegramChannelId,
+            is_active: true,
+          },
+          projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1 },
+          limit: 1,
+        }) as any;
+
+        const channel = channelResult.cursor?.firstBatch?.[0];
+        
+        if (channel) {
+          channelLink = channel.invite_link;
+          channelTitle = channel.channel_title || product.title;
+          channelId = channel.channel_id;
+          this.logger.log(`✅ Found channel: ${channelTitle} (link: ${channelLink ? 'YES' : 'NO'})`);
+          
+          // Generate invite link if not present - via proxy
+          if (!channelLink && channelId) {
+            this.logger.log(`⚠️ No invite link, generating via proxy...`);
+            try {
+              channelLink = await this.httpService.exportChatInviteLink(channelId);
+              this.logger.log(`✅ Generated invite link via proxy: ${channelLink}`);
+              
+              // Save to database
+              const channelOid = channel._id?.$oid || channel._id;
+              if (channelOid) {
+                await this.prisma.$runCommandRaw({
+                  update: 'telegram_channels',
+                  updates: [{
+                    q: { _id: { $oid: channelOid } },
+                    u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
+                  }],
+                });
+              }
+            } catch (e) {
+              this.logger.error(`Failed to generate invite link: ${e.message}`);
+              // Try creating new link
+              try {
+                const inviteResult = await this.httpService.createChatInviteLink(channelId, {
+                  createsJoinRequest: false,
+                });
+                channelLink = inviteResult.invite_link;
+              } catch (e2) {
+                this.logger.error(`Also failed: ${e2.message}`);
+              }
+            }
+          }
+        }
+      }
+
+      // Send confirmation message
+      await sendMessage(
+        `✅ *¡Pago verificado!*\n\n` +
+        `Gracias por tu compra de *${product.title}*.\n\n` +
+        `Tu acceso está listo.`,
+        { parse_mode: 'Markdown' }
+      );
+
+      // Send channel access
+      if (channelLink) {
+        await sendMessage(
+          `🎯 *Acceso a tu canal*\n\n` +
+          `Haz clic en el botón para unirte a *${channelTitle}*:`,
+          {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }],
+              ],
+            },
+          }
+        );
+
+        // Update order with access granted
+        await this.prisma.$runCommandRaw({
+          update: 'orders',
+          updates: [{
+            q: { _id: { $oid: orderId } },
+            u: {
+              $set: {
+                access_granted: true,
+                access_granted_at: { $date: new Date().toISOString() },
+                channel_link_sent: channelLink,
+              },
+            },
+          }],
+        });
+
+        this.logger.log(`✅ Access granted to user ${telegramUserId} for order ${orderId}`);
+      } else {
+        await sendMessage(
+          `ℹ️ *Acceso pendiente*\n\n` +
+          `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
+          `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
+          { parse_mode: 'Markdown' }
+        );
+      }
+
+      // Notify tipster about sale
+      if (tipster) {
+        await this.notifyTipsterNewSale(
+          tipster.id,
+          orderId,
+          product.id,
+          order.amount_cents || product.priceCents,
+          order.currency || 'EUR',
+          order.email_backup,
+        );
+      }
+
+    } catch (error) {
+      this.logger.error('Error in handlePostPaymentAccessViaProxy:', error);
+      await sendMessage(
+        '❌ Hubo un error al procesar tu acceso. Por favor, intenta de nuevo o contacta con @AntiaSupport'
+      );
+    }
+  }
+
+  /**
    * NUEVO: Manejar solicitudes de unión a canales
    * Aprueba automáticamente si el usuario tiene una compra válida
    */
