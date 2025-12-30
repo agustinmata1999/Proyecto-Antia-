@@ -35,16 +35,21 @@
 
 ## Test Results Summary
 
-### Backend Tests Completed: ✅ ALL PASSED (8/8)
+### Backend Tests Completed: ✅ ALL PASSED (13/13)
 
 | Test | Status | Details |
 |------|--------|---------|
 | Authentication | ✅ PASS | JWT login successful with tipster credentials |
-| Get Tipster Landings | ✅ PASS | Retrieved 1 landing: "Reto Navidad 2025" |
+| Get Active Promotions | ✅ PASS | Retrieved 1 promotion: "Reto Navidad 2025" |
+| Get Promotion Houses | ✅ PASS | Retrieved 2 houses with promotion-specific URLs (Bwin, Betway) |
+| Get Tipster Landings | ✅ PASS | Retrieved 2 landings including promotion-linked landing |
 | Get Houses for Spain | ✅ PASS | Retrieved 3 betting houses (Bwin, Betway, Test House) |
+| Create Landing with Promotion | ✅ PASS | Successfully created landing linked to promotion |
 | Get Landing Metrics | ✅ PASS | Metrics endpoint accessible (404 expected for new landing) |
 | Get Public Landing | ✅ PASS | Public landing with tipster info and betting houses |
-| Click Tracking | ✅ PASS | Click tracking generates redirect URL and click ID |
+| Get Public Landing with Promotion | ✅ PASS | Promotion-linked landing displays correctly |
+| Basic Click Tracking | ✅ PASS | Standard click tracking with master affiliate URL |
+| **Promotion-Specific Redirect** | ✅ PASS | **CRITICAL: Uses promotion URL instead of master URL** |
 | Telegram Health | ✅ PASS | Bot configured with webhook |
 | Email Health | ✅ PASS | Email service configured with Resend |
 
