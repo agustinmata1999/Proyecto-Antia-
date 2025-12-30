@@ -1035,7 +1035,7 @@ export class AffiliateService {
 
     // General stats
     const totalClicks = clicks.length;
-    const uniqueUsers = new Set(clicks.map(c => c.visitorId || c.ipHash)).size;
+    const uniqueUsers = new Set(clicks.map(c => (c as any).visitorId || c.ipAddress)).size;
     const totalConversions = conversions.filter(c => c.status === 'APPROVED').length;
     const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
