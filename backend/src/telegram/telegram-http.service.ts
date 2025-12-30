@@ -33,17 +33,25 @@ export class TelegramHttpService {
   }
 
   /**
-   * Make a direct API call to Telegram
+   * Make a direct API call to Telegram via proxy
+   * For GET requests (no body needed)
    */
-  private async callApi<T>(method: string, params: Record<string, any> = {}): Promise<T> {
-    const url = `${this.apiBaseUrl}/bot${this.botToken}/${method}`;
+  private async callApiGet<T>(method: string, params: Record<string, any> = {}): Promise<T> {
+    // Build query string
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+      }
+    }
+    
+    const queryString = queryParams.toString();
+    const telegramUrl = `${this.apiBaseUrl}/bot${this.botToken}/${method}${queryString ? '?' + queryString : ''}`;
+    const proxyUrl = `${this.proxyBaseUrl}${encodeURIComponent(telegramUrl)}`;
     
     try {
-      const response = await this.axiosInstance.post(url, params, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      this.logger.debug(`Calling Telegram API: ${method}`);
+      const response = await this.axiosInstance.get(proxyUrl);
 
       if (!response.data.ok) {
         throw new Error(response.data.description || 'Telegram API error');
@@ -51,35 +59,26 @@ export class TelegramHttpService {
 
       return response.data.result;
     } catch (error) {
-      // If direct connection fails, try through proxy if available
-      if (this.proxyUrl && error.code === 'ETIMEDOUT') {
-        return this.callApiViaProxy<T>(method, params);
-      }
+      this.logger.error(`Telegram API call failed (${method}):`, error.message);
       throw error;
     }
   }
 
   /**
-   * Make API call through proxy service
+   * Make a POST API call to Telegram via proxy
+   * For methods that require sending data in body
    */
-  private async callApiViaProxy<T>(method: string, params: Record<string, any> = {}): Promise<T> {
-    if (!this.proxyUrl) {
-      throw new Error('No proxy URL configured');
-    }
+  private async callApiPost<T>(method: string, params: Record<string, any> = {}): Promise<T> {
+    // For POST, we need to use a different approach since allorigins only supports GET
+    // We'll convert POST params to GET query params for methods that support it
+    return this.callApiGet<T>(method, params);
+  }
 
-    const proxyEndpoint = `${this.proxyUrl}/telegram/${method}`;
-    
-    try {
-      const response = await this.axiosInstance.post(proxyEndpoint, {
-        token: this.botToken,
-        params,
-      });
-
-      return response.data.result;
-    } catch (error) {
-      this.logger.error(`Proxy call failed for ${method}:`, error.message);
-      throw error;
-    }
+  /**
+   * Alias for callApiGet - main method for API calls
+   */
+  private async callApi<T>(method: string, params: Record<string, any> = {}): Promise<T> {
+    return this.callApiGet<T>(method, params);
   }
 
   /**
