@@ -532,7 +532,7 @@ export class LandingService {
     // Enriquecer clicks por casa con nombres
     const houseIds = (clicksByHouse.cursor?.firstBatch || []).map((c: any) => c._id);
     const houses = await this.getBettingHousesByIds(houseIds);
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h: any) => [h.id, h]));
 
     return {
       landing: {
@@ -547,7 +547,7 @@ export class LandingService {
         clicks: c.count,
       })),
       clicksByHouse: (clicksByHouse.cursor?.firstBatch || []).map((c: any) => {
-        const house = housesMap.get(c._id);
+        const house: any = housesMap.get(c._id);
         return {
           houseId: c._id,
           houseName: house?.name || 'Desconocida',
