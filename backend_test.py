@@ -25,12 +25,15 @@ class AntiaAffiliateTester:
     def __init__(self):
         self.session = requests.Session()
         self.access_token = None
+        self.admin_access_token = None
         self.test_landing_id = None
         self.test_click_id = None
         self.test_promotion_id = None
         self.test_promotion_house_id = None
         self.test_promotion_affiliate_url = None
         self.test_promotion_landing_slug = None
+        self.test_admin_promotion_id = None
+        self.test_admin_house_link_id = None
         
     def log(self, message: str, level: str = "INFO"):
         """Log test messages"""
