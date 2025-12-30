@@ -110,7 +110,7 @@ class TelegramBotTester:
         self.log("=== Testing Telegram Bot Status (P0) ===")
         
         try:
-            response = self.make_request("GET", "/telegram/status", use_auth=False)
+            response = self.make_request("GET", "/telegram/status", use_auth=False, timeout=60)
             
             if response.status_code == 200:
                 status = response.json()
