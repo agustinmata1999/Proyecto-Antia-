@@ -210,11 +210,29 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.log(`📦 Start payload: ${startPayload || 'NONE'}`);
         const telegramUserId = ctx.from.id.toString();
         
+        // Helper to send messages via proxy
+        const replyViaProxy = async (text: string, options: any = {}) => {
+          try {
+            await this.httpService.sendMessage(telegramUserId, text, {
+              parseMode: options.parse_mode || 'Markdown',
+              replyMarkup: options.reply_markup,
+            });
+          } catch (err) {
+            this.logger.error('Failed to send via proxy:', err.message);
+            // Fallback to direct (might fail but try anyway)
+            try {
+              await ctx.reply(text, options);
+            } catch (e) {
+              this.logger.error('Direct reply also failed:', e.message);
+            }
+          }
+        };
+        
         // NUEVO FLUJO: Si viene con order_, validar pago y dar acceso
         if (startPayload && startPayload.startsWith('order_')) {
           const orderId = startPayload.replace('order_', '');
           this.logger.log(`🎯 Post-payment flow for order: ${orderId}`);
-          await this.handlePostPaymentAccess(ctx, orderId, telegramUserId);
+          await this.handlePostPaymentAccessViaProxy(orderId, telegramUserId);
           return;
         }
 
@@ -226,7 +244,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           const appUrl = this.config.get('APP_URL');
           const checkoutUrl = `${appUrl}/checkout/${productId}`;
           
-          await ctx.reply(
+          await replyViaProxy(
             '👋 ¡Bienvenido a Antia!\n\n' +
             '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
             '_Serás redirigido a nuestra página de pago seguro._',
@@ -243,7 +261,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }
 
         // Sin payload válido - mensaje de bienvenida simple
-        await ctx.reply(
+        await replyViaProxy(
           '👋 ¡Bienvenido a Antia!\n\n' +
           '🛒 *¿Cómo comprar?*\n\n' +
           '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
@@ -258,7 +276,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         );
       } catch (error) {
         this.logger.error('Error in /start command:', error);
-        await ctx.reply('Hubo un error. Por favor, intenta nuevamente.');
+        try {
+          await this.httpService.sendMessage(ctx.from.id.toString(), 'Hubo un error. Por favor, intenta nuevamente.');
+        } catch (e) {
+          // Silently fail
+        }
       }
     });
 
