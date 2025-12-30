@@ -297,9 +297,18 @@ export class LandingService {
     }
 
     // Obtener tipster info
-    const tipster = await this.prisma.tipsterProfile.findFirst({
-      where: { id: landing.tipster_id },
-    });
+    const tipsterResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_profiles',
+      filter: { 
+        $or: [
+          { _id: landing.tipster_id },
+          { _id: { $oid: landing.tipster_id } },
+          { id: landing.tipster_id }
+        ]
+      },
+      limit: 1,
+    }) as any;
+    const tipster = tipsterResult.cursor?.firstBatch?.[0];
 
     // Obtener items para el país seleccionado
     const itemsResult = await this.prisma.$runCommandRaw({
