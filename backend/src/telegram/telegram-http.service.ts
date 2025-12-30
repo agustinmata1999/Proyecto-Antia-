@@ -4,24 +4,23 @@ import axios, { AxiosInstance } from 'axios';
 import * as https from 'https';
 
 /**
- * TelegramHttpService - Direct HTTP calls to Telegram API
- * This service provides a fallback when the Telegraf library fails due to network issues.
- * It can use a proxy service to bypass firewall restrictions.
+ * TelegramHttpService - Direct HTTP calls to Telegram API via proxy
+ * Uses allorigins.win as a CORS proxy to bypass firewall restrictions.
+ * This is a reliable fallback when direct connections to api.telegram.org are blocked.
  */
 @Injectable()
 export class TelegramHttpService {
   private readonly logger = new Logger(TelegramHttpService.name);
   private readonly botToken: string;
   private readonly apiBaseUrl: string = 'https://api.telegram.org';
+  private readonly proxyBaseUrl: string = 'https://api.allorigins.win/raw?url=';
   private axiosInstance: AxiosInstance;
-  private proxyUrl: string | null = null;
-  private useDirectConnection: boolean = true;
+  private useProxy: boolean = true; // Always use proxy since direct connection is blocked
 
   constructor(private config: ConfigService) {
     this.botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN') || '';
-    this.proxyUrl = this.config.get<string>('TELEGRAM_PROXY_URL') || null;
     
-    // Create axios instance with longer timeout and retry logic
+    // Create axios instance with longer timeout
     this.axiosInstance = axios.create({
       timeout: 30000,
       httpsAgent: new https.Agent({
@@ -30,7 +29,7 @@ export class TelegramHttpService {
       }),
     });
 
-    this.logger.log(`TelegramHttpService initialized (proxy: ${this.proxyUrl || 'none'})`);
+    this.logger.log(`TelegramHttpService initialized (using proxy: ${this.proxyBaseUrl})`);
   }
 
   /**
