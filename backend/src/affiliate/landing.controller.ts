@@ -13,9 +13,9 @@ import {
   Headers,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { LandingService } from './landing.service';
 import { CreateLandingDto, UpdateLandingDto } from './dto';
 
