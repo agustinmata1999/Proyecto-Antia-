@@ -283,6 +283,10 @@ export default function AffiliateSection() {
           {activeTab === 'landings' && (
             <TipsterLandingsSection />
           )}
+
+          {activeTab === 'stats' && (
+            <TipsterStatsSection />
+          )}
           
           {activeTab === 'houses' && (
             <>
