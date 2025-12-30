@@ -78,7 +78,7 @@ const COUNTRIES = [
 ];
 
 export default function AffiliateAdminPanel() {
-  const [activeTab, setActiveTab] = useState<AffiliateTab>('houses');
+  const [activeTab, setActiveTab] = useState<AffiliateTab>('promotions');
   const [loading, setLoading] = useState(true);
   
   // Data states
