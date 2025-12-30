@@ -198,6 +198,7 @@ export class PromotionService {
         bettingHouseId: link.betting_house_id,
         affiliateUrl: link.affiliate_url,
         trackingParamName: link.tracking_param_name,
+        commissionCents: link.commission_cents || 0,
         isActive: link.is_active,
         house: house ? {
           id: house.id,
