@@ -92,8 +92,9 @@ export default function PublicLandingPage() {
   const loadLanding = async (country?: string) => {
     try {
       setLoading(true);
+      const baseUrl = getBaseUrl();
       const countryParam = country || searchParams.get('country') || '';
-      const url = `${BASE_URL}/api/go/${slug}${countryParam ? `?country=${countryParam}` : ''}`;
+      const url = `${baseUrl}/api/go/${slug}${countryParam ? `?country=${countryParam}` : ''}`;
       
       const res = await fetch(url);
       if (!res.ok) {
