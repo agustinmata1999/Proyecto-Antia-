@@ -474,6 +474,11 @@ export default function AffiliateAdminPanel() {
         </div>
 
         <div className="p-6">
+          {/* PROMOTIONS TAB */}
+          {activeTab === 'promotions' && (
+            <PromotionsAdminSection />
+          )}
+
           {/* HOUSES TAB */}
           {activeTab === 'houses' && (
             <>
