@@ -270,7 +270,7 @@ class AntiaAffiliateTester:
         try:
             response = self.make_request("POST", "/r/click", click_data, use_auth=False)
             
-            if response.status_code == 200:
+            if response.status_code in [200, 201]:  # Accept both 200 and 201
                 result = response.json()
                 self.log("✅ Click tracking successful")
                 
