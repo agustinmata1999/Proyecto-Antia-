@@ -361,7 +361,7 @@ export default function PromotionsAdminSection() {
                   <div>
                     <h3 className="font-semibold text-gray-900">{promo.name}</h3>
                     <p className="text-sm text-gray-500">
-                      {promo.houseLinks?.length || 0} casas • Slug: {promo.slug}
+                      {promo.housesCount || promo.houseLinks?.length || 0} casas • Slug: {promo.slug}
                     </p>
                   </div>
                 </div>
