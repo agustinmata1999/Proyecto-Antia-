@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Plus, Trash2, ExternalLink, Edit, GripVertical, Eye, BarChart3, X } from 'lucide-react';
+import { Copy, Check, Plus, Trash2, ExternalLink, GripVertical, Eye, BarChart3, X } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_BACKEND_URL;
 
@@ -119,7 +119,6 @@ export default function TipsterLandingsSection() {
 
     if (current.includes(country)) {
       newCountries = current.filter(c => c !== country);
-      // Remove config for this country
       setFormData(prev => ({
         ...prev,
         countriesEnabled: newCountries,
@@ -127,7 +126,6 @@ export default function TipsterLandingsSection() {
       }));
     } else {
       newCountries = [...current, country];
-      // Load houses and add empty config
       loadHousesForCountry(country);
       setFormData(prev => ({
         ...prev,
@@ -205,7 +203,6 @@ export default function TipsterLandingsSection() {
       return;
     }
 
-    // Validate at least one house per country
     for (const country of formData.countriesEnabled) {
       const config = formData.countryConfigs.find(c => c.country === country);
       if (!config || config.items.length === 0) {
@@ -283,6 +280,7 @@ export default function TipsterLandingsSection() {
   const handleViewMetrics = async (landing: Landing) => {
     setSelectedLanding(landing);
     setShowMetricsDialog(true);
+    setMetrics(null);
 
     try {
       const token = localStorage.getItem('token');
@@ -351,329 +349,352 @@ export default function TipsterLandingsSection() {
 
       {/* Landings List */}
       {landings.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="text-gray-400 mb-4">
-              <ExternalLink className="w-12 h-12 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No tienes landings creadas
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Crea tu primera landing para compartir tus enlaces de afiliado
-            </p>
-            <Button onClick={openCreateDialog}>
-              Crear mi primera Landing
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <div className="text-gray-400 mb-4">
+            <ExternalLink className="w-12 h-12 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No tienes landings creadas
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Crea tu primera landing para compartir tus enlaces de afiliado
+          </p>
+          <Button onClick={openCreateDialog}>
+            Crear mi primera Landing
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {landings.map(landing => (
-            <Card key={landing.id} className={!landing.isActive ? 'opacity-60' : ''}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {landing.title || 'Landing sin título'}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {landing.countriesEnabled.map(c => COUNTRY_INFO[c]?.flag || c).join(' ')}
-                    </p>
-                  </div>
-                  <Badge variant={landing.isActive ? 'default' : 'secondary'}>
-                    {landing.isActive ? 'Activa' : 'Inactiva'}
-                  </Badge>
+            <div 
+              key={landing.id} 
+              className={`bg-white rounded-lg shadow p-4 ${!landing.isActive ? 'opacity-60' : ''}`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    {landing.title || 'Landing sin título'}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {landing.countriesEnabled.map(c => COUNTRY_INFO[c]?.flag || c).join(' ')}
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {/* Stats */}
-                <div className="flex gap-4 mb-4 text-sm">
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Eye className="w-4 h-4" />
-                    <span>{landing.totalImpressions} vistas</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <BarChart3 className="w-4 h-4" />
-                    <span>{landing.totalClicks} clicks</span>
-                  </div>
-                </div>
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  landing.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {landing.isActive ? 'Activa' : 'Inactiva'}
+                </span>
+              </div>
 
-                {/* Link */}
-                <div className="flex items-center gap-2 mb-4 p-2 bg-gray-100 rounded text-sm">
-                  <code className="flex-1 truncate text-gray-700">
-                    {baseUrl}/go/{landing.slug}
-                  </code>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(landing.slug)}
-                  >
-                    {copiedLink === landing.slug ? (
-                      <Check className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
+              {/* Stats */}
+              <div className="flex gap-4 mb-4 text-sm">
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Eye className="w-4 h-4" />
+                  <span>{landing.totalImpressions} vistas</span>
                 </div>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>{landing.totalClicks} clicks</span>
+                </div>
+              </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleViewMetrics(landing)}
-                  >
-                    <BarChart3 className="w-4 h-4 mr-1" />
-                    Métricas
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(`/go/${landing.slug}`, '_blank')}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-1" />
-                    Ver
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleToggleActive(landing)}
-                  >
-                    {landing.isActive ? 'Desactivar' : 'Activar'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDeleteLanding(landing.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Link */}
+              <div className="flex items-center gap-2 mb-4 p-2 bg-gray-100 rounded text-sm">
+                <code className="flex-1 truncate text-gray-700">
+                  {baseUrl}/go/{landing.slug}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(landing.slug)}
+                  className="p-1 hover:bg-gray-200 rounded"
+                >
+                  {copiedLink === landing.slug ? (
+                    <Check className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleViewMetrics(landing)}
+                >
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  Métricas
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.open(`/go/${landing.slug}`, '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4 mr-1" />
+                  Ver
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleToggleActive(landing)}
+                >
+                  {landing.isActive ? 'Desactivar' : 'Activar'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleDeleteLanding(landing.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {/* Create Landing Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Crear Nueva Landing</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-6">
-            {/* Título */}
-            <div>
-              <Label htmlFor="title">Título (opcional)</Label>
-              <Input
-                id="title"
-                placeholder="Ej: Reto Navidad, Mis casas favoritas..."
-                value={formData.title}
-                onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              />
-            </div>
-
-            {/* Descripción */}
-            <div>
-              <Label htmlFor="description">Descripción (opcional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Una breve descripción de tu landing..."
-                value={formData.description}
-                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              />
-            </div>
-
-            {/* Países */}
-            <div>
-              <Label>Países Objetivo</Label>
-              <p className="text-sm text-gray-500 mb-2">
-                Selecciona los países para los que quieres crear esta landing
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {ALL_COUNTRIES.map(country => (
-                  <Button
-                    key={country}
-                    size="sm"
-                    variant={formData.countriesEnabled.includes(country) ? 'default' : 'outline'}
-                    onClick={() => handleCountryToggle(country)}
-                  >
-                    {COUNTRY_INFO[country].flag} {COUNTRY_INFO[country].name}
-                  </Button>
-                ))}
+      {showCreateDialog && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">Crear Nueva Landing</h2>
+                <button onClick={() => setShowCreateDialog(false)} className="p-1 hover:bg-gray-100 rounded">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            </div>
-
-            {/* Casas por país */}
-            {formData.countriesEnabled.map(country => (
-              <div key={country} className="border rounded-lg p-4">
-                <h4 className="font-medium mb-3">
-                  {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
-                </h4>
-                
-                {/* Selected houses */}
-                <div className="space-y-2 mb-4">
-                  {formData.countryConfigs
-                    .find(c => c.country === country)
-                    ?.items.map((item, index) => {
-                      const house = availableHouses[country]?.find(h => h.id === item.bettingHouseId);
-                      if (!house) return null;
-                      
-                      return (
-                        <div
-                          key={item.bettingHouseId}
-                          className="flex items-center gap-2 p-2 bg-gray-50 rounded"
-                        >
-                          <GripVertical className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium">{index + 1}.</span>
-                          {house.logoUrl && (
-                            <img
-                              src={house.logoUrl}
-                              alt={house.name}
-                              className="w-8 h-8 object-contain"
-                            />
-                          )}
-                          <span className="flex-1">{house.name}</span>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={index === 0}
-                              onClick={() => handleMoveItem(country, item.bettingHouseId, 'up')}
-                            >
-                              ↑
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={index === (formData.countryConfigs.find(c => c.country === country)?.items.length || 0) - 1}
-                              onClick={() => handleMoveItem(country, item.bettingHouseId, 'down')}
-                            >
-                              ↓
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+              
+              <div className="space-y-6">
+                {/* Título */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Título (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Reto Navidad, Mis casas favoritas..."
+                    value={formData.title}
+                    onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
 
-                {/* Add house */}
-                <Select
-                  onValueChange={value => handleAddHouseToCountry(country, value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Añadir casa de apuestas..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableHouses[country]
-                      ?.filter(h => !formData.countryConfigs
-                        .find(c => c.country === country)
-                        ?.items.find(i => i.bettingHouseId === h.id)
-                      )
-                      .map(house => (
-                        <SelectItem key={house.id} value={house.id}>
-                          {house.name} ({house.commissionPerReferralEur}€/ref)
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                {/* Descripción */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción (opcional)
+                  </label>
+                  <textarea
+                    placeholder="Una breve descripción de tu landing..."
+                    value={formData.description}
+                    onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={2}
+                  />
+                </div>
 
-                {!availableHouses[country]?.length && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    No hay casas disponibles para este país
+                {/* Países */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Países Objetivo
+                  </label>
+                  <p className="text-sm text-gray-500 mb-2">
+                    Selecciona los países para los que quieres crear esta landing
                   </p>
+                  <div className="flex flex-wrap gap-2">
+                    {ALL_COUNTRIES.map(country => (
+                      <button
+                        key={country}
+                        onClick={() => handleCountryToggle(country)}
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          formData.countriesEnabled.includes(country)
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {COUNTRY_INFO[country].flag} {COUNTRY_INFO[country].name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Casas por país */}
+                {formData.countriesEnabled.map(country => (
+                  <div key={country} className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-3">
+                      {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
+                    </h4>
+                    
+                    {/* Selected houses */}
+                    <div className="space-y-2 mb-4">
+                      {formData.countryConfigs
+                        .find(c => c.country === country)
+                        ?.items.map((item, index) => {
+                          const house = availableHouses[country]?.find(h => h.id === item.bettingHouseId);
+                          if (!house) return null;
+                          
+                          return (
+                            <div
+                              key={item.bettingHouseId}
+                              className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+                            >
+                              <GripVertical className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium">{index + 1}.</span>
+                              {house.logoUrl && (
+                                <img
+                                  src={house.logoUrl}
+                                  alt={house.name}
+                                  className="w-8 h-8 object-contain"
+                                />
+                              )}
+                              <span className="flex-1">{house.name}</span>
+                              <div className="flex gap-1">
+                                <button
+                                  disabled={index === 0}
+                                  onClick={() => handleMoveItem(country, item.bettingHouseId, 'up')}
+                                  className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                                >
+                                  ↑
+                                </button>
+                                <button
+                                  disabled={index === (formData.countryConfigs.find(c => c.country === country)?.items.length || 0) - 1}
+                                  onClick={() => handleMoveItem(country, item.bettingHouseId, 'down')}
+                                  className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                                >
+                                  ↓
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
+                                  className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+
+                    {/* Add house */}
+                    <select
+                      onChange={e => {
+                        if (e.target.value) {
+                          handleAddHouseToCountry(country, e.target.value);
+                          e.target.value = '';
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="">Añadir casa de apuestas...</option>
+                      {availableHouses[country]
+                        ?.filter(h => !formData.countryConfigs
+                          .find(c => c.country === country)
+                          ?.items.find(i => i.bettingHouseId === h.id)
+                        )
+                        .map(house => (
+                          <option key={house.id} value={house.id}>
+                            {house.name} ({house.commissionPerReferralEur}€/ref)
+                          </option>
+                        ))}
+                    </select>
+
+                    {!availableHouses[country]?.length && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        Cargando casas disponibles...
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Error */}
+                {formError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
+                    {formError}
+                  </div>
                 )}
-              </div>
-            ))}
 
-            {/* Error */}
-            {formError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
-                {formError}
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreateLanding} disabled={saving}>
+                    {saving ? 'Creando...' : 'Crear Landing'}
+                  </Button>
+                </div>
               </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleCreateLanding} disabled={saving}>
-                {saving ? 'Creando...' : 'Crear Landing'}
-              </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* Metrics Dialog */}
-      <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              Métricas: {selectedLanding?.title || 'Landing'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {metrics ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded text-center">
-                  <div className="text-2xl font-bold">{metrics.landing?.totalImpressions || 0}</div>
-                  <div className="text-sm text-gray-500">Vistas</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded text-center">
-                  <div className="text-2xl font-bold">{metrics.landing?.totalClicks || 0}</div>
-                  <div className="text-sm text-gray-500">Clicks</div>
-                </div>
+      {showMetricsDialog && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">
+                  Métricas: {selectedLanding?.title || 'Landing'}
+                </h2>
+                <button onClick={() => setShowMetricsDialog(false)} className="p-1 hover:bg-gray-100 rounded">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-
-              {metrics.clicksByCountry?.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Clicks por País</h4>
-                  <div className="space-y-1">
-                    {metrics.clicksByCountry.map((c: any) => (
-                      <div key={c.country} className="flex justify-between text-sm">
-                        <span>
-                          {COUNTRY_INFO[c.country]?.flag} {COUNTRY_INFO[c.country]?.name || c.country}
-                        </span>
-                        <span className="font-medium">{c.clicks}</span>
-                      </div>
-                    ))}
+              
+              {metrics ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded text-center">
+                      <div className="text-2xl font-bold">{metrics.landing?.totalImpressions || 0}</div>
+                      <div className="text-sm text-gray-500">Vistas</div>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded text-center">
+                      <div className="text-2xl font-bold">{metrics.landing?.totalClicks || 0}</div>
+                      <div className="text-sm text-gray-500">Clicks</div>
+                    </div>
                   </div>
+
+                  {metrics.clicksByCountry?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-2">Clicks por País</h4>
+                      <div className="space-y-1">
+                        {metrics.clicksByCountry.map((c: any) => (
+                          <div key={c.country} className="flex justify-between text-sm">
+                            <span>
+                              {COUNTRY_INFO[c.country]?.flag} {COUNTRY_INFO[c.country]?.name || c.country}
+                            </span>
+                            <span className="font-medium">{c.clicks}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {metrics.clicksByHouse?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-2">Clicks por Casa</h4>
+                      <div className="space-y-1">
+                        {metrics.clicksByHouse.map((h: any) => (
+                          <div key={h.houseId} className="flex justify-between text-sm">
+                            <span>{h.houseName}</span>
+                            <span className="font-medium">{h.clicks}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {metrics.clicksByHouse?.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Clicks por Casa</h4>
-                  <div className="space-y-1">
-                    {metrics.clicksByHouse.map((h: any) => (
-                      <div key={h.houseId} className="flex justify-between text-sm">
-                        <span>{h.houseName}</span>
-                        <span className="font-medium">{h.clicks}</span>
-                      </div>
-                    ))}
-                  </div>
+              ) : (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
