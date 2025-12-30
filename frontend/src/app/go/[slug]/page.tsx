@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronRight, User, Shield, AlertTriangle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_BACKEND_URL;
@@ -129,42 +127,39 @@ export default function PublicLandingPage() {
   if (isAdult === null) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-gray-800 border-gray-700">
-          <CardContent className="p-6 text-center">
-            <div className="mb-6">
-              <Shield className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-              <h2 className="text-xl font-bold text-white mb-4">
-                Verificación de Edad
-              </h2>
-              <p className="text-gray-300 text-sm mb-6">
-                Estás a punto de entrar a un sitio web de información sobre juegos online 
-                cuyo contenido se dirige únicamente a <strong>mayores de 18 años</strong>.
-              </p>
-              <p className="text-white font-medium mb-6">
-                ¿Eres mayor de edad?
-              </p>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <Button
-                onClick={() => handleAdultConfirm(true)}
-                className="bg-blue-600 hover:bg-blue-700 px-8"
-              >
-                Sí
-              </Button>
-              <Button
-                onClick={() => handleAdultConfirm(false)}
-                variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 px-8"
-              >
-                No
-              </Button>
-            </div>
-            <p className="text-xs text-gray-500 mt-6">
-              Al continuar, confirmas que cumples con la edad legal para acceder 
-              a contenido relacionado con apuestas en tu jurisdicción.
+        <div className="max-w-md w-full bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+          <div className="mb-6">
+            <Shield className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
+            <h2 className="text-xl font-bold text-white mb-4">
+              Verificación de Edad
+            </h2>
+            <p className="text-gray-300 text-sm mb-6">
+              Estás a punto de entrar a un sitio web de información sobre juegos online 
+              cuyo contenido se dirige únicamente a <strong>mayores de 18 años</strong>.
             </p>
-          </CardContent>
-        </Card>
+            <p className="text-white font-medium mb-6">
+              ¿Eres mayor de edad?
+            </p>
+          </div>
+          <div className="flex gap-4 justify-center">
+            <Button
+              onClick={() => handleAdultConfirm(true)}
+              className="bg-blue-600 hover:bg-blue-700 px-8"
+            >
+              Sí
+            </Button>
+            <button
+              onClick={() => handleAdultConfirm(false)}
+              className="px-8 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700"
+            >
+              No
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-6">
+            Al continuar, confirmas que cumples con la edad legal para acceder 
+            a contenido relacionado con apuestas en tu jurisdicción.
+          </p>
+        </div>
       </div>
     );
   }
@@ -173,21 +168,19 @@ export default function PublicLandingPage() {
   if (isAdult === false) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-gray-800 border-gray-700">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-white mb-4">
-              Acceso Restringido
-            </h2>
-            <p className="text-gray-300">
-              Lo sentimos, no podemos mostrarte este contenido.
-              Este sitio está destinado únicamente a mayores de 18 años.
-            </p>
-            <p className="text-gray-400 text-sm mt-4">
-              Gracias por tu comprensión.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="max-w-md w-full bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+          <AlertTriangle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+          <h2 className="text-xl font-bold text-white mb-4">
+            Acceso Restringido
+          </h2>
+          <p className="text-gray-300">
+            Lo sentimos, no podemos mostrarte este contenido.
+            Este sitio está destinado únicamente a mayores de 18 años.
+          </p>
+          <p className="text-gray-400 text-sm mt-4">
+            Gracias por tu comprensión.
+          </p>
+        </div>
       </div>
     );
   }
@@ -205,17 +198,15 @@ export default function PublicLandingPage() {
   if (error || !landing) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-gray-800 border-gray-700">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-            <h2 className="text-xl font-bold text-white mb-4">
-              Landing no encontrada
-            </h2>
-            <p className="text-gray-300">
-              {error || 'No se pudo cargar la página solicitada.'}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="max-w-md w-full bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+          <AlertTriangle className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
+          <h2 className="text-xl font-bold text-white mb-4">
+            Landing no encontrada
+          </h2>
+          <p className="text-gray-300">
+            {error || 'No se pudo cargar la página solicitada.'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -258,24 +249,17 @@ export default function PublicLandingPage() {
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center gap-2">
             <span className="text-gray-400 text-sm">País:</span>
-            <Select value={selectedCountry} onValueChange={handleCountryChange}>
-              <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
-                <SelectValue>
-                  {COUNTRY_INFO[selectedCountry]?.flag} {COUNTRY_INFO[selectedCountry]?.name || selectedCountry}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                {landing.countriesEnabled.map(country => (
-                  <SelectItem 
-                    key={country} 
-                    value={country}
-                    className="text-white hover:bg-gray-700"
-                  >
-                    {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select 
+              value={selectedCountry} 
+              onChange={e => handleCountryChange(e.target.value)}
+              className="bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-lg"
+            >
+              {landing.countriesEnabled.map(country => (
+                <option key={country} value={country}>
+                  {COUNTRY_INFO[country]?.flag} {COUNTRY_INFO[country]?.name || country}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       )}
@@ -294,65 +278,61 @@ export default function PublicLandingPage() {
       <div className="max-w-2xl mx-auto px-4 pb-8">
         <div className="space-y-3">
           {landing.items.map((item) => (
-            <Card 
+            <div 
               key={item.id} 
-              className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors cursor-pointer"
+              className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-blue-500 transition-colors cursor-pointer"
               onClick={() => handleHouseClick(item.bettingHouseId)}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  {/* Logo de la casa */}
-                  <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {item.house.logoUrl ? (
-                      <Image
-                        src={item.house.logoUrl}
-                        alt={item.house.name}
-                        width={64}
-                        height={64}
-                        className="object-contain p-2"
-                      />
-                    ) : (
-                      <span className="text-gray-900 font-bold text-xs text-center px-1">
-                        {item.house.name}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-semibold">
+              <div className="flex items-center gap-4">
+                {/* Logo de la casa */}
+                <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {item.house.logoUrl ? (
+                    <Image
+                      src={item.house.logoUrl}
+                      alt={item.house.name}
+                      width={64}
+                      height={64}
+                      className="object-contain p-2"
+                    />
+                  ) : (
+                    <span className="text-gray-900 font-bold text-xs text-center px-1">
                       {item.house.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm truncate">
-                      {item.house.termsText}
-                    </p>
-                  </div>
-
-                  {/* Botón */}
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 flex-shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleHouseClick(item.bettingHouseId);
-                    }}
-                  >
-                    Regístrate
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                    </span>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+                
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-semibold">
+                    {item.house.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm truncate">
+                    {item.house.termsText}
+                  </p>
+                </div>
+
+                {/* Botón */}
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleHouseClick(item.bettingHouseId);
+                  }}
+                >
+                  Regístrate
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
 
         {landing.items.length === 0 && (
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <p className="text-gray-400">
-                No hay casas de apuestas disponibles para tu país.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+            <p className="text-gray-400">
+              No hay casas de apuestas disponibles para tu país.
+            </p>
+          </div>
         )}
       </div>
 
