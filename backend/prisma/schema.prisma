@@ -688,3 +688,115 @@ model SupportTicket {
   @@map("support_tickets")
 }
 
+
+
+// ==================== MÓDULO LANDING DE AFILIACIÓN ====================
+
+// Landing de Afiliación del Tipster (múltiples por tipster = "campañas")
+model TipsterAffiliateLanding {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String    @map("tipster_id")           // ID del tipster
+  slug              String    @unique                       // URL slug único (ej: "fausto-perez-reto-navidad")
+  title             String?                                 // Título opcional de la landing
+  description       String?                                 // Descripción opcional
+  countriesEnabled  String[]  @default([]) @map("countries_enabled") // Países habilitados ["ES", "MX", "AR"]
+  isActive          Boolean   @default(true) @map("is_active")
+  
+  // Estadísticas cache
+  totalClicks       Int       @default(0) @map("total_clicks")
+  totalImpressions  Int       @default(0) @map("total_impressions")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([tipsterId])
+  @@map("tipster_affiliate_landings")
+}
+
+// Items de la Landing (casas por país con orden)
+model TipsterLandingItem {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  landingId         String    @map("landing_id")           // ID de TipsterAffiliateLanding
+  country           String                                  // País (ej: "ES", "MX")
+  bettingHouseId    String    @map("betting_house_id")     // ID de BettingHouse
+  orderIndex        Int       @default(0) @map("order_index") // Orden de aparición
+  customTermsText   String?   @map("custom_terms_text")    // Override del texto de condiciones
+  isEnabled         Boolean   @default(true) @map("is_enabled")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([landingId, country, bettingHouseId])
+  @@index([landingId, country])
+  @@map("tipster_landing_items")
+}
+
+// Click Events para Landings (tracking más detallado)
+model LandingClickEvent {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  clickId           String    @unique @map("click_id")     // UUID interno para tracking
+  tipsterId         String    @map("tipster_id")
+  landingId         String    @map("landing_id")
+  bettingHouseId    String    @map("betting_house_id")
+  countryContext    String    @map("country_context")      // País seleccionado en la landing
+  
+  // Info del visitante
+  visitorId         String?   @map("visitor_id")           // Si está logueado
+  anonymousSessionId String?  @map("anonymous_session_id") // Cookie/localStorage ID
+  ipAddress         String?   @map("ip_address")
+  userAgent         String?   @map("user_agent")
+  referrer          String?
+  
+  // URL final generada
+  redirectUrl       String    @map("redirect_url")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@index([tipsterId, landingId])
+  @@index([createdAt])
+  @@map("landing_click_events")
+}
+
+// Impresiones de Landing (tracking de vistas)
+model LandingImpressionEvent {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId         String    @map("tipster_id")
+  landingId         String    @map("landing_id")
+  countryContext    String    @map("country_context")
+  anonymousSessionId String?  @map("anonymous_session_id")
+  ipAddress         String?   @map("ip_address")
+  userAgent         String?   @map("user_agent")
+  referrer          String?
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@index([landingId, createdAt])
+  @@map("landing_impression_events")
+}
+
+// Configuración de tracking por casa (extensible para cada casa)
+model BettingHouseTrackingConfig {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  bettingHouseId    String    @unique @map("betting_house_id")
+  
+  // Estrategia de tracking
+  trackingStrategy  String    @default("QUERY_PARAMS") @map("tracking_strategy") // QUERY_PARAMS, PATH, CUSTOM
+  
+  // Parámetros de tracking
+  subidParamName    String    @default("subid") @map("subid_param_name")    // Nombre del parámetro para tipsterId
+  clickIdParamName  String?   @map("clickid_param_name")  // Nombre del parámetro para clickId
+  extraParams       Json?     @map("extra_params")        // Parámetros adicionales { "aff_id": "123" }
+  
+  // URLs por país (override del masterAffiliateUrl)
+  urlByCountry      Json?     @map("url_by_country")      // { "ES": "https://...", "MX": "https://..." }
+  
+  // Postback config (futuro)
+  postbackEnabled   Boolean   @default(false) @map("postback_enabled")
+  postbackUrl       String?   @map("postback_url")
+  postbackSecret    String?   @map("postback_secret")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("betting_house_tracking_configs")
+}
+
