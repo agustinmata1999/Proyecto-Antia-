@@ -154,7 +154,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.bot.on('my_chat_member', async (ctx) => {
       try {
         const { chat, new_chat_member, old_chat_member } = ctx.myChatMember;
-        this.logger.log(`📥 my_chat_member event: ${chat.title} (${chat.id}) - status: ${new_chat_member.status}`);
+        const chatTitle = 'title' in chat ? chat.title : 'N/A';
+        this.logger.log(`📥 my_chat_member event: ${chatTitle} (${chat.id}) - status: ${new_chat_member.status}`);
         
         // Verificar si el bot fue añadido como administrador
         if (
