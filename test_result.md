@@ -188,6 +188,18 @@ backend:
         agent: "testing"
         comment: "❌ Webhook endpoint timing out after 15 seconds. This is likely due to slow proxy API calls to Telegram (api.allorigins.win returning 500 errors). The endpoint exists and processes requests but proxy integration is unreliable"
 
+  - task: "Public Landing Page API - GET /api/go/{slug}"
+    implemented: true
+    working: true
+    file: "/api/go/{slug}"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Public landing API GET /api/go/fausto-perez-reto-navidad-2025 returns complete landing data: id, slug, title, description, tipster info (publicName, id), countriesEnabled, selectedCountry, items with betting houses (Bwin, Betway) including house details (name, logoUrl, termsText). Country parameter ?country=ES working correctly. Click tracking POST /api/r/click generates proper redirect URLs with tracking parameters (subid, clickid). All required fields present for frontend redesign."
+
 frontend:
   - task: "Public Landing Page Redesign"
     implemented: true
