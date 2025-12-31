@@ -6,12 +6,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, User, Shield, AlertTriangle } from 'lucide-react';
 
-// For client-side, we need to use NEXT_PUBLIC_ prefix or window.location
+// For client-side, use relative URL that goes through Next.js proxy
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 
-           window.location.origin;
-  }
   return '';
 };
 
