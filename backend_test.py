@@ -232,7 +232,7 @@ class AntiaAffiliateTester:
                 landing = response.json()
                 self.log("✅ Successfully retrieved public landing")
                 
-                # Verify required fields
+                # Verify required fields from review request
                 required_fields = ["id", "slug", "title", "tipster", "countriesEnabled", "selectedCountry", "items"]
                 for field in required_fields:
                     if field in landing:
@@ -246,21 +246,32 @@ class AntiaAffiliateTester:
                 self.log(f"Slug: {landing.get('slug', 'No slug')}")
                 self.log(f"Selected country: {landing.get('selectedCountry', 'No country')}")
                 
-                # Check tipster info
+                # Check tipster info (should include publicName and avatarUrl)
                 tipster = landing.get('tipster', {})
                 if tipster:
                     self.log(f"✅ Tipster: {tipster.get('publicName', 'No name')} (ID: {tipster.get('id', 'No ID')})")
+                    if 'avatarUrl' in tipster:
+                        self.log(f"✅ Tipster has avatarUrl: {tipster.get('avatarUrl', 'None')}")
+                    else:
+                        self.log("⚠️ Tipster missing avatarUrl", "WARN")
                 else:
                     self.log("❌ No tipster info", "ERROR")
                     return False
                 
-                # Check betting house items
+                # Check betting house items (should include house details)
                 items = landing.get('items', [])
                 self.log(f"✅ Found {len(items)} betting house items")
                 for i, item in enumerate(items):
                     house = item.get('house', {})
                     if house:
                         self.log(f"  Item {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                        # Verify house has required fields for frontend display
+                        house_fields = ['name', 'logoUrl']
+                        for hfield in house_fields:
+                            if hfield in house:
+                                self.log(f"    ✅ House has {hfield}")
+                            else:
+                                self.log(f"    ⚠️ House missing {hfield}", "WARN")
                     
                 return True
             else:
@@ -269,6 +280,177 @@ class AntiaAffiliateTester:
                 
         except Exception as e:
             self.log(f"❌ Get public landing test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_public_landing_redesign_specific(self) -> bool:
+        """Test the redesigned public landing page endpoint specifically for review request"""
+        self.log("=== Testing Redesigned Public Landing Page ===")
+        
+        # Test with the specific slug from review request
+        slug = "fausto-perez-reto-navidad-2025"
+        
+        try:
+            # Test without country parameter (should auto-detect or default)
+            response = self.make_request("GET", f"/go/{slug}", use_auth=False)
+            
+            if response.status_code == 200:
+                landing = response.json()
+                self.log("✅ Successfully retrieved landing without country param")
+                
+                # Verify all required fields for the redesigned landing page
+                required_fields = ["id", "slug", "title", "description", "tipster", "countriesEnabled", "selectedCountry", "items"]
+                missing_fields = []
+                for field in required_fields:
+                    if field not in landing:
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    self.log(f"❌ Landing missing required fields: {missing_fields}", "ERROR")
+                    return False
+                
+                # Verify tipster info structure for frontend display
+                tipster = landing.get('tipster', {})
+                tipster_required = ['id', 'publicName']
+                tipster_missing = []
+                for field in tipster_required:
+                    if field not in tipster:
+                        tipster_missing.append(field)
+                
+                if tipster_missing:
+                    self.log(f"❌ Tipster missing required fields: {tipster_missing}", "ERROR")
+                    return False
+                
+                self.log(f"✅ Tipster info: {tipster.get('publicName')} (ID: {tipster.get('id')})")
+                
+                # Verify betting house items structure
+                items = landing.get('items', [])
+                if len(items) == 0:
+                    self.log("❌ No betting house items found", "ERROR")
+                    return False
+                
+                self.log(f"✅ Found {len(items)} betting house items")
+                
+                # Check each betting house item structure
+                for i, item in enumerate(items):
+                    house = item.get('house', {})
+                    if not house:
+                        self.log(f"❌ Item {i+1} missing house details", "ERROR")
+                        return False
+                    
+                    # Verify house has required fields for frontend cards
+                    house_required = ['id', 'name']
+                    house_missing = []
+                    for field in house_required:
+                        if field not in house:
+                            house_missing.append(field)
+                    
+                    if house_missing:
+                        self.log(f"❌ House {i+1} missing required fields: {house_missing}", "ERROR")
+                        return False
+                    
+                    self.log(f"  ✅ House {i+1}: {house.get('name')} (ID: {house.get('id')})")
+                    
+                    # Log optional fields that enhance the UI
+                    if 'logoUrl' in house:
+                        self.log(f"    ✅ Has logoUrl: {house.get('logoUrl')}")
+                    if 'termsText' in house:
+                        self.log(f"    ✅ Has termsText: {house.get('termsText')}")
+                
+                # Test with country parameter ES
+                self.log("--- Testing with country parameter ES ---")
+                response_es = self.make_request("GET", f"/go/{slug}?country=ES", use_auth=False)
+                
+                if response_es.status_code == 200:
+                    landing_es = response_es.json()
+                    if landing_es.get('selectedCountry') == 'ES':
+                        self.log("✅ Country parameter ES working correctly")
+                    else:
+                        self.log(f"⚠️ Expected selectedCountry=ES, got {landing_es.get('selectedCountry')}", "WARN")
+                else:
+                    self.log(f"❌ Request with country=ES failed: {response_es.status_code}", "ERROR")
+                    return False
+                
+                return True
+            else:
+                self.log(f"❌ Get redesigned public landing failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Redesigned public landing test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_click_tracking_redesign(self) -> bool:
+        """Test click tracking for the redesigned landing page"""
+        self.log("=== Testing Click Tracking for Redesigned Landing ===")
+        
+        # Use the specific slug from review request
+        slug = "fausto-perez-reto-navidad-2025"
+        
+        try:
+            # First get the landing to find available houses
+            response = self.make_request("GET", f"/go/{slug}?country=ES", use_auth=False)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Could not get landing for click tracking test: {response.status_code}", "ERROR")
+                return False
+            
+            landing = response.json()
+            items = landing.get('items', [])
+            
+            if len(items) == 0:
+                self.log("❌ No betting house items found for click tracking", "ERROR")
+                return False
+            
+            # Test click tracking with first available house
+            first_house = items[0].get('house', {})
+            house_id = first_house.get('id')
+            
+            if not house_id:
+                self.log("❌ No house ID found for click tracking", "ERROR")
+                return False
+            
+            self.log(f"Testing click tracking for house: {first_house.get('name')} (ID: {house_id})")
+            
+            # Test the redirect endpoint GET /api/r/{slug}/{houseId}
+            redirect_url = f"/r/{slug}/{house_id}?country=ES"
+            self.log(f"Testing redirect URL: {redirect_url}")
+            
+            # Note: We can't test the actual redirect in this test framework
+            # but we can test the POST /api/r/click endpoint which returns the URL
+            click_data = {
+                "slug": slug,
+                "houseId": house_id,
+                "country": "ES"
+            }
+            
+            click_response = self.make_request("POST", "/r/click", click_data, use_auth=False)
+            
+            if click_response.status_code in [200, 201]:
+                result = click_response.json()
+                self.log("✅ Click tracking successful")
+                
+                # Verify response structure
+                if "redirectUrl" in result and "clickId" in result:
+                    self.log(f"✅ Redirect URL: {result['redirectUrl']}")
+                    self.log(f"✅ Click ID: {result['clickId']}")
+                    
+                    # Verify the redirect URL contains tracking parameters
+                    redirect_url = result['redirectUrl']
+                    if 'clickid' in redirect_url or 'subid' in redirect_url:
+                        self.log("✅ Redirect URL contains tracking parameters")
+                    else:
+                        self.log("⚠️ Redirect URL may be missing tracking parameters", "WARN")
+                    
+                    return True
+                else:
+                    self.log("❌ Click response missing redirectUrl or clickId", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Click tracking failed with status {click_response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Click tracking test failed: {str(e)}", "ERROR")
             return False
 
     def test_get_active_promotions(self) -> bool:
