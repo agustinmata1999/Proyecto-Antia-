@@ -334,14 +334,25 @@ export default function PublicLandingPage() {
         </div>
       )}
 
+      {/* Título y descripción de la campaña (si están configurados) */}
+      {(landing.title || landing.description) && (
+        <div className="max-w-2xl mx-auto px-4 pt-8">
+          {landing.title && (
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {landing.title}
+            </h2>
+          )}
+          {landing.description && (
+            <p className="text-gray-600">{landing.description}</p>
+          )}
+        </div>
+      )}
+
       {/* Título de sección */}
-      <div className="max-w-2xl mx-auto px-4 pt-8 pb-4">
+      <div className="max-w-2xl mx-auto px-4 pt-6 pb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           Selecciona tu pronostico
         </h3>
-        {landing.description && (
-          <p className="text-gray-500 text-sm mt-1">{landing.description}</p>
-        )}
       </div>
 
       {/* Lista de casas de apuestas */}
@@ -353,11 +364,21 @@ export default function PublicLandingPage() {
               className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                {/* Logo de la casa - fondo oscuro con nombre */}
-                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <span className="text-white font-bold text-base tracking-tight">
-                    {item.house.name}
-                  </span>
+                {/* Logo de la casa */}
+                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                  {item.house.logoUrl ? (
+                    <Image
+                      src={item.house.logoUrl}
+                      alt={item.house.name}
+                      fill
+                      className="object-contain p-1"
+                      unoptimized
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-base tracking-tight">
+                      {item.house.name}
+                    </span>
+                  )}
                 </div>
                 
                 {/* Info de la casa */}
