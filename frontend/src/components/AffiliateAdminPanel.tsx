@@ -175,12 +175,6 @@ export default function AffiliateAdminPanel() {
   }, [activeTab]);
 
   const loadData = async () => {
-    // Campaigns tab handles its own loading
-    if (activeTab === 'campaigns') {
-      setLoading(false);
-      return;
-    }
-    
     // Stats tab handles its own loading
     if (activeTab === 'stats') {
       setLoading(false);
