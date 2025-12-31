@@ -438,19 +438,6 @@ export default function AffiliateSection() {
                           <td className="px-4 py-3 text-right text-sm font-medium text-green-600">
                             {formatPrice(ref.commissionCents)}
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              ref.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                              ref.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
-                              ref.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
-                              {ref.status === 'PENDING' ? '⏳ Pendiente' :
-                               ref.status === 'APPROVED' ? '✅ Validado' :
-                               ref.status === 'REJECTED' ? '❌ Rechazado' :
-                               ref.status}
-                            </span>
-                          </td>
                         </tr>
                       ))}
                     </tbody>
