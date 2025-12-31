@@ -115,8 +115,6 @@ export default function AffiliateAdminPanel() {
   // Modal states
   const [showHouseModal, setShowHouseModal] = useState(false);
   const [editingHouse, setEditingHouse] = useState<BettingHouse | null>(null);
-  const [showCampaignModal, setShowCampaignModal] = useState(false);
-  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<Payout | null>(null);
@@ -133,14 +131,6 @@ export default function AffiliateAdminPanel() {
     blockedCountries: [] as string[],
     description: '',
     websiteUrl: '',
-  });
-  
-  const [campaignForm, setCampaignForm] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    houseIds: [] as string[],
-    targetCountries: [] as string[],
   });
   
   const [importForm, setImportForm] = useState({
