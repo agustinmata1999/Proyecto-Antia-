@@ -659,7 +659,7 @@ export default function AffiliateAdminPanel() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-800">
                   <strong>Formato CSV estándar:</strong> tipster_tracking_id, event_type (REGISTER/DEPOSIT/QUALIFIED), 
-                  status (PENDING/APPROVED/REJECTED), occurred_at, external_ref_id (opcional), amount (opcional)
+                  occurred_at, external_ref_id (opcional), amount (opcional)
                 </p>
               </div>
 
