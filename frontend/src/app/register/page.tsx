@@ -150,7 +150,7 @@ export default function RegisterPage() {
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <div className="text-lg font-bold">Soy Tipster</div>
+              <div className="text-lg font-bold">Panel de Afiliados</div>
               <div className="text-sm text-gray-600 mt-1">Quiero vender pronósticos</div>
             </button>
           </div>
