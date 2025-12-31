@@ -269,8 +269,8 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "2.0"
-  test_sequence: 2
+  version: "2.1"
+  test_sequence: 3
   run_ui: false
 
 test_plan:
@@ -294,3 +294,5 @@ agent_communication:
     message: "✅ PUBLIC LANDING PAGE REDESIGN FRONTEND TESTING COMPLETED: Full UI testing successful at http://localhost:3000/go/fausto-perez-reto-navidad-2025. Age verification gate working perfectly with white background and amber shield icon. Main landing page displays clean minimalist design: Antia header centered, blue banner with Fausto Perez tipster info and verification badge (#A802), 'Selecciona tu pronostico' section, 2 betting house cards (Bwin, Betway) with dark logo boxes and blue 'Registrarse' buttons, footer with +18 badge and jugarbien.es link. Button interactions working correctly - opens tracking URLs in new tabs. Age gate bypass method with localStorage also functional. All design requirements met - redesign is complete and working."
   - agent: "testing"
     message: "✅ PUBLIC LANDING PAGE WITH LOGOS TESTING COMPLETED: Comprehensive UI testing successful at http://localhost:3000/go/fausto-perez-reto-navidad-2025. All 5 betting house logos (Bwin, Betway, Bet365, 888sport, Codere) displaying correctly from customer-assets.emergentagent.com. Title 'Reto Navidad 2025' and description 'Las mejores casas para el reto de Navidad' properly positioned above 'Selecciona tu pronostico' section. Complete page structure verified: Antia header, blue Fausto Perez banner with verification badge, title/description section, 5 betting house cards with logos and 'Registrarse →' buttons, footer with +18 and responsible gambling text. All button interactions working - opens tracking URLs in new tabs. Age gate bypass functional. All test requirements met successfully."
+  - agent: "testing"
+    message: "✅ REVIEW REQUEST ENDPOINT TESTING COMPLETED: All 7 requested endpoints tested successfully with 200 status and valid data. ✅ Login (POST /api/auth/login) working for both tipster (fausto.perez@antia.com) and admin (admin@antia.com) - returns valid JWT tokens. ✅ Affiliate Metrics (GET /api/affiliate/metrics) returns comprehensive data: 20 clicks, 9 referrals (5 pending, 3 approved, 1 rejected), €75 earnings, breakdown by house (Test House API, Bwin). ✅ Houses with Links (GET /api/affiliate/houses) returns 6 houses with affiliate links and tracking data. ✅ Tipster Landings (GET /api/tipster/landings) returns 10 landing pages with proper metadata. ✅ Public Landing (GET /api/go/fausto-perez-reto-navidad-2025?country=ES) returns complete landing data with 5 betting houses (Bwin, Betway, Bet365, 888sport, Codere) and tipster info. ✅ Admin Houses (GET /api/admin/affiliate/houses) returns 6 houses with commission data (Bwin €50, Betway €45, Bet365 €40, 888sport €35, Codere €30, Test House API €25). All endpoints functioning correctly with proper authentication and data validation."
