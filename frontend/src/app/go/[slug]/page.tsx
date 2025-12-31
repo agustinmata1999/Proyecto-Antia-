@@ -11,6 +11,41 @@ const getBaseUrl = () => {
   return '';
 };
 
+// Detectar país por timezone del navegador (sin servicios externos)
+const detectCountryByTimezone = (): string => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezoneCountryMap: Record<string, string> = {
+      // España
+      'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES',
+      // México
+      'America/Mexico_City': 'MX', 'America/Cancun': 'MX', 'America/Monterrey': 'MX',
+      'America/Tijuana': 'MX', 'America/Chihuahua': 'MX',
+      // Argentina
+      'America/Buenos_Aires': 'AR', 'America/Argentina/Buenos_Aires': 'AR',
+      'America/Cordoba': 'AR', 'America/Argentina/Cordoba': 'AR',
+      // Colombia
+      'America/Bogota': 'CO',
+      // Chile
+      'America/Santiago': 'CL',
+      // Perú
+      'America/Lima': 'PE',
+      // USA
+      'America/New_York': 'US', 'America/Los_Angeles': 'US', 'America/Chicago': 'US',
+      'America/Denver': 'US', 'America/Phoenix': 'US',
+      // UK
+      'Europe/London': 'UK',
+      // Portugal
+      'Europe/Lisbon': 'PT',
+      // Alemania
+      'Europe/Berlin': 'DE',
+    };
+    return timezoneCountryMap[timezone] || '';
+  } catch {
+    return '';
+  }
+};
+
 // Mapeo de países a nombres y banderas
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   ES: { name: 'España', flag: '🇪🇸' },
@@ -21,6 +56,8 @@ const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   PE: { name: 'Perú', flag: '🇵🇪' },
   US: { name: 'Estados Unidos', flag: '🇺🇸' },
   UK: { name: 'Reino Unido', flag: '🇬🇧' },
+  PT: { name: 'Portugal', flag: '🇵🇹' },
+  DE: { name: 'Alemania', flag: '🇩🇪' },
 };
 
 interface LandingData {
