@@ -233,10 +233,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Affiliate Stats Dashboard"
-    - "Tipster Stats Dashboard"
-    - "Tipster Promotions/Campaigns"
-    - "Conversion Postback"
+    - "New Affiliate System Architecture - Admin Betting Houses"
+    - "New Affiliate System Architecture - Tipster Houses for Country"
+    - "New Affiliate System Architecture - Tipster Create Campaign"
+    - "New Affiliate System Architecture - Admin Stats with Tipster Data"
+    - "New Affiliate System Architecture - Tipster Own Stats"
   stuck_tasks:
     - "Telegram Webhook Endpoint"
   test_all: false
