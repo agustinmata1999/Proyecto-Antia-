@@ -596,8 +596,6 @@ export default function AffiliateAdminPanel() {
                         <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">País</th>
                         <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tipo</th>
                         <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Comisión</th>
-                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
-                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -635,37 +633,6 @@ export default function AffiliateAdminPanel() {
                           </td>
                           <td className="px-3 py-3 text-right text-sm font-medium text-green-600">
                             €{(ref.commissionCents / 100).toFixed(2)}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              ref.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                              ref.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
-                              ref.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
-                              {ref.status === 'PENDING' ? '⏳ Pendiente' :
-                               ref.status === 'APPROVED' ? '✅ Aprobado' :
-                               ref.status === 'REJECTED' ? '❌ Rechazado' :
-                               ref.status}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            {ref.status === 'PENDING' && (
-                              <div className="flex gap-1 justify-center">
-                                <button
-                                  onClick={() => updateReferralStatus(ref.id, 'APPROVED')}
-                                  className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                                >
-                                  ✓
-                                </button>
-                                <button
-                                  onClick={() => updateReferralStatus(ref.id, 'REJECTED')}
-                                  className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                                >
-                                  ✗
-                                </button>
-                              </div>
-                            )}
                           </td>
                         </tr>
                       ))}
