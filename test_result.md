@@ -68,6 +68,66 @@ backend:
         agent: "testing"
         comment: "✅ P1 test passed. Conversion postback endpoint at /api/r/postback responds correctly (201 status). Handles POST requests with subid, house, event, amount, currency, txid parameters. Properly validates ObjectId format and returns appropriate error messages for invalid data."
 
+  - task: "New Affiliate System Architecture - Admin Betting Houses"
+    implemented: true
+    working: true
+    file: "/api/admin/affiliate/houses"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Admin betting houses endpoint GET /api/admin/affiliate/houses?includeInactive=true returns complete house data with commissions. Found Bwin (€50), Betway (€45), Test House API (€25) with proper structure including status, countries, tracking params. New architecture confirmed: Admin manages houses directly, no campaigns required."
+
+  - task: "New Affiliate System Architecture - Tipster Houses for Country"
+    implemented: true
+    working: true
+    file: "/api/tipster/landings/houses/ES"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Tipster houses endpoint GET /api/tipster/landings/houses/ES returns available houses for Spain with commission data. Successfully retrieved 3 houses (Bwin €50, Betway €45, Test House API €25) with proper structure for tipster campaign creation."
+
+  - task: "New Affiliate System Architecture - Tipster Create Campaign"
+    implemented: true
+    working: true
+    file: "/api/tipster/landings"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Tipster campaign creation POST /api/tipster/landings works without promotionId. Successfully created campaign 'Nueva Campaña Test' with slug 'fausto-perez-nueva-campana-test-1' selecting houses directly. New architecture confirmed: Tipsters create own campaigns selecting houses."
+
+  - task: "New Affiliate System Architecture - Admin Stats with Tipster Data"
+    implemented: true
+    working: true
+    file: "/api/admin/affiliate/stats"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Admin stats endpoint GET /api/admin/affiliate/stats returns comprehensive data including byTipster and byCampaign sections. Shows tipster campaigns data (14 clicks, 3 conversions, 21.4% rate) with proper breakdown by tipster (Fausto Perez) and campaign tracking."
+
+  - task: "New Affiliate System Architecture - Tipster Own Stats"
+    implemented: true
+    working: true
+    file: "/api/affiliate/tipster/stats"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Tipster stats endpoint GET /api/affiliate/tipster/stats returns own campaign data. Shows 14 clicks, 3 conversions, 21.4% rate, €75 earnings with proper breakdown by country, house, date, and campaign. Commission values correctly sourced from house configuration."
+
   - task: "Telegram Bot Status API"
     implemented: true
     working: true
