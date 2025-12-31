@@ -203,15 +203,18 @@ backend:
 frontend:
   - task: "Public Landing Page Redesign"
     implemented: true
-    working: pending
+    working: true
     file: "/app/frontend/src/app/go/[slug]/page.tsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: pending
         agent: "main"
         comment: "Landing page redesigned with clean minimalist design: white background, Antia header, blue tipster banner with verification badge, betting house cards with dark logo boxes showing house names, and blue 'Registrarse' buttons"
+      - working: true
+        agent: "testing"
+        comment: "✅ P0 test passed. Public Landing Page Redesign fully working. Age verification gate displays correctly with white background and amber shield icon. Main landing page shows clean white design with: Antia header centered, blue banner with Fausto Perez tipster info and verification badge (#A802), 'Selecciona tu pronostico' section title, 2 betting house cards (Bwin, Betway) with dark logo boxes and blue 'Registrarse' buttons, footer with +18 badge and jugarbien.es link. Button interactions working - opens tracking URLs in new tabs (e.g., https://www.bwin.com/registration?affiliate=antia&subid=...&clickid=...). Age gate bypass method with localStorage also working correctly. All design requirements met successfully."
 
   - task: "Tipster Affiliate Stats Dashboard"
     implemented: true
