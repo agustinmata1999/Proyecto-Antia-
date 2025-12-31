@@ -6,14 +6,11 @@ import { Plus, Trash2, Edit, ChevronDown, ChevronUp, ExternalLink, X, Save } fro
 
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    // Use REACT_APP_BACKEND_URL which doesn't have /api suffix
-    const backendUrl = process.env.REACT_APP_BACKEND_URL;
-    if (backendUrl) return backendUrl;
-    
-    // Fallback: NEXT_PUBLIC_API_URL has /api, so remove it
+    // NEXT_PUBLIC_API_URL already includes /api, so we remove it for base URL
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl) return apiUrl.replace(/\/api\/?$/, '');
-    
+    if (apiUrl) {
+      return apiUrl.replace(/\/api\/?$/, '');
+    }
     return window.location.origin;
   }
   return '';
