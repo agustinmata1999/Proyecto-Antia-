@@ -80,6 +80,7 @@ interface LandingData {
       name: string;
       slug: string;
       logoUrl: string | null;
+      logoBgColor: string | null;
       termsText: string;
       websiteUrl: string | null;
     };
