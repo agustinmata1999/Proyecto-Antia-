@@ -365,14 +365,17 @@ export default function PublicLandingPage() {
               className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                {/* Logo de la casa */}
-                <div className="w-36 h-16 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white rounded-lg p-2">
+                {/* Logo de la casa con color de fondo */}
+                <div 
+                  className="w-36 h-16 flex items-center justify-center overflow-hidden flex-shrink-0 rounded-lg"
+                  style={{ backgroundColor: item.house.logoBgColor || '#f3f4f6' }}
+                >
                   {item.house.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={item.house.logoUrl}
                       alt={item.house.name}
-                      className="max-w-full max-h-full object-contain"
+                      className="max-w-full max-h-full object-contain p-2"
                     />
                   ) : (
                     <span className="text-gray-900 font-bold text-xl">
