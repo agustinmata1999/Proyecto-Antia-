@@ -1629,44 +1629,38 @@ def main():
     """Main test runner"""
     tester = AntiaAffiliateTester()
     
-    try:
-        # Run the public landing redesign tests as requested in the review
-        results = tester.run_public_landing_redesign_tests()
-        
-        # Print summary
-        print("\n" + "=" * 60)
-        print("🏁 PUBLIC LANDING REDESIGN TEST SUMMARY")
-        print("=" * 60)
-        
-        passed = 0
-        failed = 0
-        
-        for test_name, result in results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
-            print(f"{test_name:<30} {status}")
-            
-            if result:
-                passed += 1
-            else:
-                failed += 1
-        
-        print(f"\nTotal: {len(results)} tests")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        
-        if failed == 0:
-            print("\n🎉 All public landing redesign tests passed!")
-            sys.exit(0)
+    print("🚀 Starting AFFILIA-GO Platform Tests - Review Request")
+    print("=" * 60)
+    
+    # Run the specific tests requested in the review
+    results = tester.test_review_request_endpoints()
+    
+    # Print summary
+    print("\n" + "=" * 60)
+    print("📊 TEST RESULTS SUMMARY")
+    print("=" * 60)
+    
+    passed = 0
+    failed = 0
+    
+    for test_name, result in results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"{status} {test_name}")
+        if result:
+            passed += 1
         else:
-            print(f"\n💥 {failed} test(s) failed!")
-            sys.exit(1)
-            
-    except KeyboardInterrupt:
-        print("\n⚠️ Tests interrupted by user")
-        sys.exit(1)
-    except Exception as e:
-        print(f"\n💥 Test runner failed: {str(e)}")
-        sys.exit(1)
+            failed += 1
+    
+    print(f"\n📈 Total: {len(results)} tests")
+    print(f"✅ Passed: {passed}")
+    print(f"❌ Failed: {failed}")
+    
+    if failed == 0:
+        print("\n🎉 All tests passed! AFFILIA-GO platform endpoints are working correctly.")
+    else:
+        print(f"\n⚠️  {failed} test(s) failed. Please check the logs above.")
+    
+    return failed == 0
 
 if __name__ == "__main__":
     main()
