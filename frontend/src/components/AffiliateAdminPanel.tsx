@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { affiliateApi } from '@/lib/api';
-import PromotionsAdminSection from './admin/PromotionsAdminSection';
 import AffiliateStatsSection from './admin/AffiliateStatsSection';
 
-type AffiliateTab = 'campaigns' | 'houses' | 'stats' | 'import' | 'conversions' | 'payouts';
+type AffiliateTab = 'houses' | 'stats' | 'import' | 'conversions' | 'payouts';
 
 interface BettingHouse {
   id: string;
