@@ -440,7 +440,7 @@ export default function AffiliateAdminPanel() {
     <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">🤝 Afiliación</h1>
-        <p className="text-gray-600 mt-1">Gestiona casas de apuestas, campañas y liquidaciones de afiliados</p>
+        <p className="text-gray-600 mt-1">Gestiona casas de apuestas y estadísticas de campañas de tipsters</p>
       </div>
 
       {error && (
@@ -455,7 +455,6 @@ export default function AffiliateAdminPanel() {
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px overflow-x-auto">
             {[
-              { id: 'campaigns', label: '📢 Campañas' },
               { id: 'houses', label: '🏠 Casas de Apuestas' },
               { id: 'stats', label: '📊 Estadísticas' },
               { id: 'conversions', label: '👥 Conversiones' },
@@ -483,11 +482,6 @@ export default function AffiliateAdminPanel() {
         </div>
 
         <div className="p-6">
-          {/* CAMPAIGNS TAB */}
-          {activeTab === 'campaigns' && (
-            <PromotionsAdminSection />
-          )}
-
           {/* HOUSES TAB */}
           {activeTab === 'houses' && (
             <>
