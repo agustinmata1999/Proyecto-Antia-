@@ -201,6 +201,18 @@ backend:
         comment: "✅ P0 test passed. Public landing API GET /api/go/fausto-perez-reto-navidad-2025 returns complete landing data: id, slug, title, description, tipster info (publicName, id), countriesEnabled, selectedCountry, items with betting houses (Bwin, Betway) including house details (name, logoUrl, termsText). Country parameter ?country=ES working correctly. Click tracking POST /api/r/click generates proper redirect URLs with tracking parameters (subid, clickid). All required fields present for frontend redesign."
 
 frontend:
+  - task: "Public Landing Page Redesign with Logos"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/app/go/[slug]/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Landing page updated with: 1) 5 betting house logos (Bwin, Betway, Bet365, 888sport, Codere) displayed correctly 2) Title shown in large text when configured by tipster 3) Description shown below title 4) All logos loading from customer-assets.emergentagent.com"
+
   - task: "Public Landing Page Redesign"
     implemented: true
     working: true
