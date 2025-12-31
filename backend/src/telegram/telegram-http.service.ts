@@ -13,9 +13,12 @@ export class TelegramHttpService {
   private readonly botToken: string;
   private readonly apiBaseUrl: string = 'https://api.telegram.org';
   
-  // Multiple proxies for redundancy
+  // Multiple proxies for redundancy - direct connection first, then proxies
+  private readonly useDirectConnection: boolean = true;
   private readonly proxyUrls: string[] = [
+    '', // Empty string = direct connection (no proxy)
     'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
   ];
   
   private axiosInstance: AxiosInstance;
