@@ -3,15 +3,8 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp, Users, MousePointer, Globe, Building2 } from 'lucide-react';
 
+// For client-side, use relative URL that goes through Next.js proxy
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    // NEXT_PUBLIC_API_URL already includes /api, so we remove it for base URL
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl) {
-      return apiUrl.replace(/\/api\/?$/, '');
-    }
-    return window.location.origin;
-  }
   return '';
 };
 
