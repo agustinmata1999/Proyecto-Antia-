@@ -22,17 +22,6 @@ interface BettingHouse {
   websiteUrl?: string;
 }
 
-interface Campaign {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  status: string;
-  houseIds: string[];
-  targetCountries: string[];
-  houses: BettingHouse[];
-}
-
 interface ImportBatch {
   id: string;
   houseId: string;
