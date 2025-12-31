@@ -27,7 +27,14 @@ const nextConfig = {
         hostname: '**.cloudfront.net',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.logo.wine',
+        pathname: '/**',
+      },
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   // Headers to control caching behavior
