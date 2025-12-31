@@ -374,6 +374,7 @@ export class LandingService {
           name: house.name,
           slug: house.slug,
           logoUrl: house.logoUrl,
+          logoBgColor: house.logoBgColor || null,
           termsText: item.custom_terms_text || house.description || 'Deposita al menos 10€',
           websiteUrl: house.websiteUrl,
         } : null,
