@@ -197,18 +197,14 @@ export default function AffiliateSection() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="text-sm text-gray-500 mb-2">Clicks Totales</div>
           <div className="text-3xl font-bold text-gray-900">{metrics?.clicks || 0}</div>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-500 mb-2">Referidos Pendientes</div>
-          <div className="text-3xl font-bold text-yellow-600">{metrics?.referrals?.pending || 0}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-500 mb-2">Referidos Validados</div>
-          <div className="text-3xl font-bold text-green-600">{metrics?.referrals?.approved || 0}</div>
+          <div className="text-sm text-gray-500 mb-2">Conversiones</div>
+          <div className="text-3xl font-bold text-green-600">{(metrics?.referrals?.approved || 0) + (metrics?.referrals?.pending || 0)}</div>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <div className="text-sm text-gray-500 mb-2">Ganancias Totales</div>
