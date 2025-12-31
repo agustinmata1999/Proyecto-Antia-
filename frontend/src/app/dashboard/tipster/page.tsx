@@ -1031,89 +1031,199 @@ export default function TipsterDashboard() {
         {activeView === 'dashboard' && (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Hola {user?.tipsterProfile?.publicName?.split(' ')[0] || 'Tipster'}, Bienvenido de nuevo!</h1>
-              <p className="text-gray-600 mt-1">Aquí está un resumen de tu actividad</p>
+              <h1 className="text-2xl font-semibold text-gray-900">Hola {user?.tipsterProfile?.publicName?.split(' ')[0] || 'Tipster'}</h1>
+              <p className="text-gray-500 mt-1">Bienvenido de nuevo!</p>
             </div>
 
-            {/* Stats Cards - Dinámicos según módulos habilitados */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${enabledModules.forecasts ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8`}>
-              {/* Ingresos Brutos - Solo si Pronósticos habilitado */}
-              {enabledModules.forecasts && (
-                <div className="bg-white rounded-lg shadow p-6 border-2 border-blue-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-gray-500">💰 Ingresos Brutos</div>
-                  </div>
-                  <div className="text-3xl font-bold text-blue-600">
-                    {formatPrice(salesStats?.grossEarningsCents || salesStats?.totalEarningsCents || 0)}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">Total facturado este mes</div>
-                </div>
-              )}
-
-              {/* Ventas - Solo si Pronósticos habilitado */}
-              {enabledModules.forecasts && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="text-sm text-gray-500 mb-2">💵 Ventas</div>
-                  <div className="text-3xl font-bold text-gray-900">{salesStats?.totalSales || 0}</div>
-                  <div className="text-xs text-gray-500 mt-1">Total de ventas</div>
-                </div>
-              )}
-
-              {/* Productos - Solo si Pronósticos habilitado */}
-              {enabledModules.forecasts && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="text-sm text-gray-500 mb-2">📦 Productos</div>
-                  <div className="text-3xl font-bold text-gray-900">{products.length}</div>
-                  <div className="text-xs text-gray-500 mt-1">{products.filter((p: any) => p.active).length} activos</div>
-                </div>
-              )}
-
-              {/* Stats de Afiliación - Solo si Afiliación habilitado */}
+            {/* Stats Cards - Estilo nuevo con iconos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+              {/* Afiliados */}
               {enabledModules.affiliate && (
-                <>
-                  <div className="bg-white rounded-lg shadow p-6 border-2 border-purple-100">
-                    <div className="text-sm text-gray-500 mb-2">🤝 Ganancias Afiliación</div>
-                    <div className="text-3xl font-bold text-purple-600">{formatPrice(metrics?.totalEarnings || 0)}</div>
-                    <div className="text-xs text-gray-500 mt-1">Comisiones pendientes</div>
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Afiliados</p>
+                      <p className="text-2xl font-semibold text-gray-900">{metrics?.ftds || 0}</p>
+                    </div>
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-sm text-gray-500 mb-2">👥 Referidos FTD</div>
-                    <div className="text-3xl font-bold text-gray-900">{metrics?.ftds || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">First Time Deposits</div>
+                  <div className="mt-3 flex items-center text-xs">
+                    <span className="text-green-500 flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                      12%
+                    </span>
+                    <span className="text-gray-400 ml-2">vs mes anterior</span>
                   </div>
-                </>
+                </div>
               )}
 
-              {/* Próxima Liquidación */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="text-sm text-gray-500 mb-2">📅 Próxima Liquidación</div>
-                <div className="text-xl font-bold text-gray-900">
-                  {(() => {
-                    const today = new Date();
-                    const dayOfWeek = today.getDay();
-                    const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
-                    const nextSunday = new Date(today);
-                    nextSunday.setDate(today.getDate() + daysUntilSunday);
-                    return nextSunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-                  })()}
+              {/* Clicks Únicos */}
+              <div className="bg-white rounded-xl p-5 border border-gray-100">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Clicks Únicos</p>
+                    <p className="text-2xl font-semibold text-gray-900">{metrics?.uniqueClicks || salesStats?.uniqueVisitors || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  <button 
-                    onClick={() => setActiveView('payouts')}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Ver liquidaciones →
-                  </button>
+                <div className="mt-3 flex items-center text-xs">
+                  <span className="text-green-500 flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    8%
+                  </span>
+                  <span className="text-gray-400 ml-2">vs mes anterior</span>
                 </div>
               </div>
+
+              {/* Clicks Totales */}
+              <div className="bg-white rounded-xl p-5 border border-gray-100">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Clicks Totales</p>
+                    <p className="text-2xl font-semibold text-gray-900">{metrics?.clicks || salesStats?.totalVisits || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center text-xs">
+                  <span className="text-red-500 flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    3%
+                  </span>
+                  <span className="text-gray-400 ml-2">vs mes anterior</span>
+                </div>
+              </div>
+
+              {/* Campañas activas */}
+              {enabledModules.affiliate && (
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Campañas activas</p>
+                      <p className="text-2xl font-semibold text-gray-900">{metrics?.campaigns || products.filter((p: any) => p.active).length || 0}</p>
+                    </div>
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center text-xs">
+                    <span className="text-green-500 flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                      5%
+                    </span>
+                    <span className="text-gray-400 ml-2">vs mes anterior</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Secciones adicionales con el nuevo estilo */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+              {/* Campañas mas populares */}
+              {enabledModules.affiliate && (
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                  <h3 className="font-medium text-gray-900 mb-4">Campañas mas populares</h3>
+                  <div className="space-y-4">
+                    {products.slice(0, 3).map((product: any, idx: number) => (
+                      <div key={product.id}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">{product.title}</span>
+                          <span className="text-gray-400">{Math.round(85 - idx * 15)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full" 
+                            style={{ width: `${85 - idx * 15}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {products.length === 0 && (
+                      <p className="text-sm text-gray-400 text-center py-4">Sin campañas</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* AntiaPay - Solo si Pronósticos habilitado */}
+              {enabledModules.forecasts && (
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                  <h3 className="font-medium text-gray-900 mb-4">AntiaPay</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Ingresos Brutos</span>
+                      <span className="font-semibold text-gray-900">{formatPrice(salesStats?.grossEarningsCents || 0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Ventas</span>
+                      <span className="font-semibold text-gray-900">{salesStats?.totalSales || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Productos</span>
+                      <span className="font-semibold text-gray-900">{products.length}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Afiliados - Solo si Afiliación habilitado */}
+              {enabledModules.affiliate && (
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                  <h3 className="font-medium text-gray-900 mb-4">Afiliados</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Ganancias</span>
+                      <span className="font-semibold text-gray-900">{formatPrice(metrics?.totalEarnings || 0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Referidos FTD</span>
+                      <span className="font-semibold text-gray-900">{metrics?.ftds || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Próxima liquidación</span>
+                      <span className="font-semibold text-gray-900">
+                        {(() => {
+                          const today = new Date();
+                          const dayOfWeek = today.getDay();
+                          const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
+                          const nextSunday = new Date(today);
+                          nextSunday.setDate(today.getDate() + daysUntilSunday);
+                          return nextSunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Recent Products and Sales - Solo si Pronósticos está habilitado */}
             {enabledModules.forecasts && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">Mis Productos</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="bg-white rounded-xl border border-gray-100">
+                  <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 className="font-medium text-gray-900">Mis Productos</h2>
                     <button 
                       onClick={handleCreateProduct}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
