@@ -497,25 +497,17 @@ export default function AffiliateAdminPanel() {
           {activeTab === 'conversions' && (
             <>
               <div className="mb-6">
-                <h2 className="text-xl font-bold mb-4">👥 Listado de Referidos</h2>
+                <h2 className="text-xl font-bold mb-4">👥 Listado de Conversiones</h2>
                 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-gray-900">{referralStats.total}</div>
-                    <div className="text-xs text-gray-500">Total</div>
-                  </div>
-                  <div className="bg-yellow-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{referralStats.pending}</div>
-                    <div className="text-xs text-gray-500">Pendientes</div>
+                    <div className="text-xs text-gray-500">Total Conversiones</div>
                   </div>
                   <div className="bg-green-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{referralStats.approved}</div>
-                    <div className="text-xs text-gray-500">Aprobados</div>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600">{referralStats.rejected}</div>
-                    <div className="text-xs text-gray-500">Rechazados</div>
+                    <div className="text-2xl font-bold text-green-600">{referralStats.approved + referralStats.pending}</div>
+                    <div className="text-xs text-gray-500">Registros</div>
                   </div>
                   <div className="bg-blue-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-600">€{(referralStats.totalCommissionCents / 100).toFixed(2)}</div>
@@ -525,7 +517,7 @@ export default function AffiliateAdminPanel() {
 
                 {/* Filters */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Tipster</label>
                       <select
@@ -550,19 +542,6 @@ export default function AffiliateAdminPanel() {
                         {houses.map((h) => (
                           <option key={h.id} value={h.id}>{h.name}</option>
                         ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Estado</label>
-                      <select
-                        value={referralFilters.status}
-                        onChange={(e) => setReferralFilters({ ...referralFilters, status: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      >
-                        <option value="">Todos</option>
-                        <option value="PENDING">Pendiente</option>
-                        <option value="APPROVED">Aprobado</option>
-                        <option value="REJECTED">Rechazado</option>
                       </select>
                     </div>
                     <div>
