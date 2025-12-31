@@ -354,27 +354,10 @@ export default function PublicLandingPage() {
             >
               <div className="flex items-center gap-4">
                 {/* Logo de la casa - fondo oscuro con nombre */}
-                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
-                  {item.house.logoUrl ? (
-                    <>
-                      <Image
-                        src={item.house.logoUrl}
-                        alt={item.house.name}
-                        fill
-                        className="object-contain p-2"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <span className="text-white font-bold text-sm absolute inset-0 flex items-center justify-center">
-                        {item.house.name}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-white font-bold text-sm">
-                      {item.house.name}
-                    </span>
-                  )}
+                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <span className="text-white font-bold text-base tracking-tight">
+                    {item.house.name}
+                  </span>
                 </div>
                 
                 {/* Info de la casa */}
