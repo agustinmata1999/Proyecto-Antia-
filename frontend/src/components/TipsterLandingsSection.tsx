@@ -4,17 +4,9 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Plus, Trash2, ExternalLink, Eye, BarChart3, X } from 'lucide-react';
 
-// For client-side, we need to use NEXT_PUBLIC_ prefix
+// For client-side, use relative URL that goes through Next.js proxy
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    // NEXT_PUBLIC_API_URL already includes /api, so we use it directly
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl) {
-      // Remove trailing /api if present to get base URL
-      return apiUrl.replace(/\/api\/?$/, '');
-    }
-    return window.location.origin;
-  }
+  // Use empty string for relative URLs - works through Next.js proxy
   return '';
 };
 
