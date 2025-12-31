@@ -1314,92 +1314,153 @@ export default function TipsterDashboard() {
               <p className="text-gray-600 mt-1">Conecta tu canal privado donde los clientes recibirán acceso después de pagar</p>
             </div>
 
-            {/* GUÍA DETALLADA - Siempre visible arriba */}
-            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-8 mb-8 shadow-sm">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  📖 Guía Completa: Cómo conectar tu canal premium
+            {/* GUÍA DETALLADA - Estilo Pretopay */}
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-8">
+              <div className="p-6 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Cómo conectar tu canal de Telegram
                 </h2>
-                <p className="text-gray-600">Sigue estos pasos para que tus clientes reciban acceso automático después de comprar</p>
+                <p className="text-gray-500 text-sm mt-1">Sigue estos 4 pasos simples</p>
               </div>
 
-              <div className="grid grid-cols-1 gap-6">
-                {/* PASO 1 */}
-                <div className="bg-white rounded-xl p-6 border-2 border-blue-100 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
-                      1
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* PASO 1 */}
+                  <div className="bg-gray-50 rounded-2xl p-5">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
+                      Paso 01
+                    </span>
+                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Crea tu canal privado en Telegram</h3>
-                      <div className="text-gray-600 space-y-2">
-                        <p>👉 Abre Telegram y ve a <strong>Nuevo Canal</strong></p>
-                        <p>👉 Ponle un nombre (ej: "VIP Pronósticos Premium")</p>
-                        <p>👉 <strong className="text-red-600">¡IMPORTANTE!</strong> Selecciona <strong>"Canal Privado"</strong></p>
-                        <p className="text-sm text-gray-500 mt-2">💡 El canal privado es donde tus clientes de pago recibirán tus pronósticos exclusivos.</p>
-                      </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Crea tu canal privado</h4>
+                    <p className="text-sm text-gray-600 mb-4">Abre Telegram y crea un nuevo canal privado.</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span>Abre Telegram</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span>Toca "Nuevo Canal"</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
+                        <span>Selecciona "Privado"</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* PASO 2 */}
+                  <div className="bg-gray-50 rounded-2xl p-5">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
+                      Paso 02
+                    </span>
+                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                      </svg>
                     </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Añade el bot</h4>
+                    <p className="text-sm text-gray-600 mb-4">Agrega @Antiabetbot como administrador.</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span>Ve a "Administradores"</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span>Busca @Antiabetbot</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
+                        <span>Dale los permisos</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* PASO 3 */}
+                  <div className="bg-gray-50 rounded-2xl p-5">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
+                      Paso 03
+                    </span>
+                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Conecta aquí</h4>
+                    <p className="text-sm text-gray-600 mb-4">Escribe el nombre de tu canal abajo.</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span>Clic en "Añadir Canal"</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span>Escribe el nombre</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
+                        <span>Pulsa "Conectar"</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* PASO 4 */}
+                  <div className="bg-gray-50 rounded-2xl p-5">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
+                      Paso 04
+                    </span>
+                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                      <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">¡Listo!</h4>
+                    <p className="text-sm text-gray-600 mb-4">Tus clientes reciben acceso automático.</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">✓</span>
+                        <span>Acceso automático tras compra</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">✓</span>
+                        <span>Publica tus pronósticos</span>
+                      </li>
+                      <li className="flex items-start gap-2 text-xs text-gray-500">
+                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">✓</span>
+                        <span>Sin trabajo manual</span>
+                      </li>
+                    </ul>
                   </div>
                 </div>
 
-                {/* PASO 2 */}
-                <div className="bg-white rounded-xl p-6 border-2 border-green-100 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
-                      2
+                {/* Bot Username */}
+                <div className="mt-6 p-4 bg-blue-50 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Agrega al bot como administrador</h3>
-                      <div className="text-gray-600 space-y-2">
-                        <p>👉 Entra a tu canal y toca el <strong>nombre del canal</strong> (arriba)</p>
-                        <p>👉 Toca <strong>"Administradores"</strong> → <strong>"Agregar Administrador"</strong></p>
-                        <p>👉 Busca: <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono font-bold">@Antiabetbot</code></p>
-                        <p>👉 Dale estos permisos:</p>
-                        <div className="ml-6 mt-2 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm">✅ <strong>Invitar usuarios mediante enlace</strong> (obligatorio)</p>
-                          <p className="text-sm text-gray-500">Los demás permisos puedes dejarlos desactivados</p>
-                        </div>
-                      </div>
+                    <div>
+                      <p className="text-sm text-blue-800">Bot de Telegram</p>
+                      <p className="font-mono font-bold text-blue-900">@Antiabetbot</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText('@Antiabetbot');
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Copiar nombre del bot
+                  </button>
                 </div>
-
-                {/* PASO 3 */}
-                <div className="bg-white rounded-xl p-6 border-2 border-purple-100 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0">
-                      3
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Conecta el canal aquí en Antia</h3>
-                      <div className="text-gray-600 space-y-2">
-                        <p>👉 Haz clic en el botón <strong className="text-blue-600">"+ Añadir Canal"</strong> de abajo</p>
-                        <p>👉 Escribe el <strong>nombre exacto de tu canal</strong></p>
-                        <p>👉 Haz clic en <strong>"Conectar Canal"</strong></p>
-                        <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                          <p className="text-sm text-green-800">✅ <strong>¡Listo!</strong> El sistema encontrará tu canal automáticamente y lo conectará. Una vez conectado, podrás asignar este canal a tus productos.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bot de Antia */}
-              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <h4 className="font-bold text-blue-800 mb-2">🤖 Bot de Antia:</h4>
-                <div className="bg-white rounded-lg p-3">
-                  <p className="font-medium text-gray-900">@Antiabetbot</p>
-                  <p className="text-sm text-gray-600">Agrégalo como administrador a tu canal privado</p>
-                </div>
-              </div>
-
-              {/* Nota importante */}
-              <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200">
-                <p className="text-red-800">
-                  ⚠️ <strong>¡No confundas!</strong> Solo conecta tu canal <strong>PRIVADO/PREMIUM</strong> (el de pago). 
-                  Tu canal público donde haces marketing NO necesita conectarse aquí.
-                </p>
               </div>
             </div>
 
