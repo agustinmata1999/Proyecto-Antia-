@@ -332,14 +332,14 @@ export default function TipsterLandingsSection() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Mis Landings</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Mis Campañas</h2>
           <p className="text-gray-600">
-            Crea páginas de afiliación personalizadas con tus casas de apuestas favoritas
+            Crea campañas de afiliación con las casas de apuestas que quieras promocionar
           </p>
         </div>
         <Button onClick={openCreateDialog} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Crear Landing
+          Nueva Campaña
         </Button>
       </div>
 
@@ -350,13 +350,13 @@ export default function TipsterLandingsSection() {
             <ExternalLink className="w-12 h-12 mx-auto" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No tienes landings creadas
+            No tienes campañas creadas
           </h3>
           <p className="text-gray-500 mb-4">
-            Crea tu primera landing para compartir tus enlaces de afiliado
+            Crea tu primera campaña para compartir tus enlaces de afiliado
           </p>
           <Button onClick={openCreateDialog}>
-            Crear mi primera Landing
+            Crear mi primera Campaña
           </Button>
         </div>
       ) : (
@@ -369,13 +369,8 @@ export default function TipsterLandingsSection() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-gray-900">
-                    {landing.title || 'Landing sin título'}
+                    {landing.title || 'Campaña sin título'}
                   </h3>
-                  {landing.promotionName && (
-                    <p className="text-sm text-blue-600 font-medium">
-                      🎁 {landing.promotionName}
-                    </p>
-                  )}
                   <p className="text-sm text-gray-500">
                     {landing.countriesEnabled.map(c => COUNTRY_INFO[c]?.flag || c).join(' ')}
                   </p>
