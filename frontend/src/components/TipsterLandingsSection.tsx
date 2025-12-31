@@ -449,54 +449,27 @@ export default function TipsterLandingsSection() {
         </div>
       )}
 
-      {/* Create Landing Dialog */}
+      {/* Create Campaign Dialog */}
       {showCreateDialog && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Crear Nueva Landing</h2>
+                <h2 className="text-xl font-bold">Crear Nueva Campaña</h2>
                 <button onClick={() => setShowCreateDialog(false)} className="p-1 hover:bg-gray-100 rounded">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
               <div className="space-y-6">
-                {/* Selección de Campaña */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Campaña <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-sm text-gray-500 mb-2">
-                    Selecciona la campaña que quieres promocionar
-                  </p>
-                  <select
-                    value={formData.promotionId}
-                    onChange={e => handlePromotionChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Selecciona una campaña...</option>
-                    {promotions.map(promo => (
-                      <option key={promo.id} value={promo.id}>
-                        🎁 {promo.name}
-                      </option>
-                    ))}
-                  </select>
-                  {promotions.length === 0 && (
-                    <p className="text-sm text-yellow-600 mt-1">
-                      No hay campañas disponibles. Contacta al administrador.
-                    </p>
-                  )}
-                </div>
-
                 {/* Título */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Título (opcional)
+                    Nombre de la Campaña <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej: Mi Campaña Navidad..."
+                    placeholder="Ej: Promoción Navidad 2025..."
                     value={formData.title}
                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -509,7 +482,7 @@ export default function TipsterLandingsSection() {
                     Descripción (opcional)
                   </label>
                   <textarea
-                    placeholder="Una breve descripción de tu landing..."
+                    placeholder="Una breve descripción de tu campaña..."
                     value={formData.description}
                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -523,12 +496,13 @@ export default function TipsterLandingsSection() {
                     Países Objetivo
                   </label>
                   <p className="text-sm text-gray-500 mb-2">
-                    Selecciona los países para los que quieres crear esta landing
+                    Selecciona los países para los que quieres crear esta campaña
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {ALL_COUNTRIES.map(country => (
                       <button
                         key={country}
+                        type="button"
                         onClick={() => handleCountryToggle(country)}
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
                           formData.countriesEnabled.includes(country)
@@ -542,12 +516,11 @@ export default function TipsterLandingsSection() {
                   </div>
                 </div>
 
-                {/* Casas por país - usando las casas de la promoción */}
-                {formData.promotionId && formData.countriesEnabled.map(country => {
-                  // Filtrar casas de la promoción que están disponibles en este país
-                  const housesForCountry = promotionHouses.filter(ph => 
-                    ph.house.allowedCountries.includes(country)
-                  );
+                {/* Casas por país */}
+                {formData.countriesEnabled.map(country => {
+                  const housesForCountry = availableHouses[country] || [];
+                  const selectedHouseIds = formData.countryConfigs
+                    .find(c => c.country === country)?.items.map(i => i.bettingHouseId) || [];
                   
                   return (
                     <div key={country} className="border rounded-lg p-4">
@@ -560,52 +533,39 @@ export default function TipsterLandingsSection() {
                         {formData.countryConfigs
                           .find(c => c.country === country)
                           ?.items.map((item, index) => {
-                            const promoHouse = promotionHouses.find(ph => ph.bettingHouseId === item.bettingHouseId);
-                            if (!promoHouse) return null;
+                            const house = housesForCountry.find(h => h.id === item.bettingHouseId);
+                            if (!house) return null;
                             
                             return (
                               <div
                                 key={item.bettingHouseId}
                                 className="flex items-center gap-2 p-2 bg-gray-50 rounded"
                               >
-                                <GripVertical className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium">{index + 1}.</span>
-                                {promoHouse.house.logoUrl && (
+                                <span className="font-medium text-gray-500">{index + 1}.</span>
+                                {house.logoUrl && (
                                   <img
-                                    src={promoHouse.house.logoUrl}
-                                    alt={promoHouse.house.name}
+                                    src={house.logoUrl}
+                                    alt={house.name}
                                     className="w-8 h-8 object-contain"
                                   />
                                 )}
-                                <span className="flex-1">{promoHouse.house.name}</span>
-                                <div className="flex gap-1">
-                                  <button
-                                    disabled={index === 0}
-                                    onClick={() => handleMoveItem(country, item.bettingHouseId, 'up')}
-                                    className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-                                  >
-                                    ↑
-                                  </button>
-                                  <button
-                                    disabled={index === (formData.countryConfigs.find(c => c.country === country)?.items.length || 0) - 1}
-                                    onClick={() => handleMoveItem(country, item.bettingHouseId, 'down')}
-                                    className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-                                  >
-                                    ↓
-                                  </button>
-                                  <button
-                                    onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
-                                    className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </div>
+                                <span className="flex-1">{house.name}</span>
+                                <span className="text-sm text-green-600 font-medium">
+                                  €{house.commissionPerReferralEur}/ref
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveHouseFromCountry(country, item.bettingHouseId)}
+                                  className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
                             );
                           })}
                       </div>
 
-                      {/* Add house from promotion */}
+                      {/* Add house */}
                       <select
                         onChange={e => {
                           if (e.target.value) {
@@ -615,36 +575,24 @@ export default function TipsterLandingsSection() {
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       >
-                        <option value="">Añadir casa de apuestas...</option>
+                        <option value="">+ Añadir casa de apuestas...</option>
                         {housesForCountry
-                          .filter(ph => !formData.countryConfigs
-                            .find(c => c.country === country)
-                            ?.items.find(i => i.bettingHouseId === ph.bettingHouseId)
-                          )
-                          .map(ph => (
-                            <option key={ph.bettingHouseId} value={ph.bettingHouseId}>
-                              {ph.house.name}
+                          .filter(h => !selectedHouseIds.includes(h.id))
+                          .map(h => (
+                            <option key={h.id} value={h.id}>
+                              {h.name} (€{h.commissionPerReferralEur}/ref)
                             </option>
                           ))}
                       </select>
 
                       {housesForCountry.length === 0 && (
                         <p className="text-sm text-yellow-600 mt-2">
-                          No hay casas disponibles para {COUNTRY_INFO[country]?.name} en esta campaña.
+                          Cargando casas de apuestas...
                         </p>
                       )}
                     </div>
                   );
                 })}
-
-                {/* Mensaje si no hay promoción seleccionada */}
-                {!formData.promotionId && formData.countriesEnabled.length > 0 && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-yellow-700 text-sm">
-                      Selecciona una campaña para ver las casas de apuestas disponibles.
-                    </p>
-                  </div>
-                )}
 
                 {/* Error */}
                 {formError && (
@@ -659,7 +607,7 @@ export default function TipsterLandingsSection() {
                     Cancelar
                   </Button>
                   <Button onClick={handleCreateLanding} disabled={saving}>
-                    {saving ? 'Creando...' : 'Crear Landing'}
+                    {saving ? 'Creando...' : 'Crear Campaña'}
                   </Button>
                 </div>
               </div>
