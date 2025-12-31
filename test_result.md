@@ -189,6 +189,18 @@ backend:
         comment: "❌ Webhook endpoint timing out after 15 seconds. This is likely due to slow proxy API calls to Telegram (api.allorigins.win returning 500 errors). The endpoint exists and processes requests but proxy integration is unreliable"
 
 frontend:
+  - task: "Public Landing Page Redesign"
+    implemented: true
+    working: pending
+    file: "/app/frontend/src/app/go/[slug]/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: pending
+        agent: "main"
+        comment: "Landing page redesigned with clean minimalist design: white background, Antia header, blue tipster banner with verification badge, betting house cards with dark logo boxes showing house names, and blue 'Registrarse' buttons"
+
   - task: "Tipster Affiliate Stats Dashboard"
     implemented: true
     working: true
