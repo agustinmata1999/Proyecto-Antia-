@@ -72,7 +72,6 @@ export default function AffiliateAdminPanel() {
   
   // Data states
   const [houses, setHouses] = useState<BettingHouse[]>([]);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [importBatches, setImportBatches] = useState<ImportBatch[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   
