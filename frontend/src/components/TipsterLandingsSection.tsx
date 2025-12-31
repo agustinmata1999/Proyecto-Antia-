@@ -2,19 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Plus, Trash2, ExternalLink, GripVertical, Eye, BarChart3, X } from 'lucide-react';
+import { Copy, Check, Plus, Trash2, ExternalLink, Eye, BarChart3, X } from 'lucide-react';
 
 // For client-side, we need to use NEXT_PUBLIC_ prefix or hardcode
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    // Client-side: use window.location or env var
-    return process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 
+    return process.env.REACT_APP_BACKEND_URL || 
+           process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 
            window.location.origin;
   }
   return process.env.REACT_APP_BACKEND_URL || '';
 };
-
-const BASE_URL = getBaseUrl();
 
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   ES: { name: 'España', flag: '🇪🇸' },
@@ -25,6 +23,8 @@ const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
   PE: { name: 'Perú', flag: '🇵🇪' },
   US: { name: 'Estados Unidos', flag: '🇺🇸' },
   UK: { name: 'Reino Unido', flag: '🇬🇧' },
+  PT: { name: 'Portugal', flag: '🇵🇹' },
+  DE: { name: 'Alemania', flag: '🇩🇪' },
 };
 
 const ALL_COUNTRIES = Object.keys(COUNTRY_INFO);
@@ -32,8 +32,6 @@ const ALL_COUNTRIES = Object.keys(COUNTRY_INFO);
 interface Landing {
   id: string;
   slug: string;
-  promotionId: string | null;
-  promotionName: string | null;
   title: string | null;
   description: string | null;
   countriesEnabled: string[];
@@ -44,25 +42,6 @@ interface Landing {
   createdAt: string;
 }
 
-interface Promotion {
-  id: string;
-  name: string;
-  description: string | null;
-  slug: string;
-}
-
-interface PromotionHouse {
-  bettingHouseId: string;
-  affiliateUrl: string;
-  house: {
-    id: string;
-    name: string;
-    slug: string;
-    logoUrl: string | null;
-    allowedCountries: string[];
-  };
-}
-
 interface BettingHouse {
   id: string;
   name: string;
@@ -70,6 +49,7 @@ interface BettingHouse {
   logoUrl: string | null;
   description: string | null;
   commissionPerReferralEur: number;
+  allowedCountries: string[];
 }
 
 interface LandingItem {
@@ -92,19 +72,16 @@ export default function TipsterLandingsSection() {
   const [metrics, setMetrics] = useState<any>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
-  // Promotions state
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [promotionHouses, setPromotionHouses] = useState<PromotionHouse[]>([]);
+  // Available houses by country (from admin)
+  const [availableHouses, setAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
 
   // Create/Edit form state
   const [formData, setFormData] = useState({
-    promotionId: '' as string,
     title: '',
     description: '',
     countriesEnabled: ['ES'] as string[],
     countryConfigs: [] as CountryConfig[],
   });
-  const [availableHouses, setAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -112,7 +89,6 @@ export default function TipsterLandingsSection() {
 
   useEffect(() => {
     loadLandings();
-    loadPromotions();
   }, []);
 
   const loadLandings = async () => {
@@ -133,47 +109,7 @@ export default function TipsterLandingsSection() {
     }
   };
 
-  const loadPromotions = async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${getBaseUrl()}/api/promotions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPromotions(data);
-      }
-    } catch (err) {
-      console.error('Error loading promotions:', err);
-    }
-  };
-
-  const loadPromotionHouses = async (promotionId: string) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${getBaseUrl()}/api/promotions/${promotionId}/houses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPromotionHouses(data);
-        // Reset country configs when promotion changes
-        setFormData(prev => ({
-          ...prev,
-          countryConfigs: [],
-        }));
-      }
-    } catch (err) {
-      console.error('Error loading promotion houses:', err);
-    }
-  };
-
   const loadHousesForCountry = async (country: string) => {
-    // Si hay promoción seleccionada, usar las casas de la promoción
-    if (formData.promotionId) {
-      return; // Ya tenemos las casas de la promoción
-    }
-
     if (availableHouses[country]) return;
 
     try {
@@ -187,18 +123,6 @@ export default function TipsterLandingsSection() {
       }
     } catch (err) {
       console.error('Error loading houses:', err);
-    }
-  };
-
-  const handlePromotionChange = (promotionId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      promotionId,
-      countryConfigs: [],
-    }));
-    setPromotionHouses([]);
-    if (promotionId) {
-      loadPromotionHouses(promotionId);
     }
   };
 
@@ -263,32 +187,9 @@ export default function TipsterLandingsSection() {
     });
   };
 
-  const handleMoveItem = (country: string, houseId: string, direction: 'up' | 'down') => {
-    setFormData(prev => {
-      const configs = [...prev.countryConfigs];
-      const configIndex = configs.findIndex(c => c.country === country);
-      
-      if (configIndex !== -1) {
-        const items = [...configs[configIndex].items];
-        const itemIndex = items.findIndex(i => i.bettingHouseId === houseId);
-        
-        if (itemIndex !== -1) {
-          const newIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
-          if (newIndex >= 0 && newIndex < items.length) {
-            [items[itemIndex], items[newIndex]] = [items[newIndex], items[itemIndex]];
-            items.forEach((item, i) => item.orderIndex = i);
-            configs[configIndex].items = items;
-          }
-        }
-      }
-      
-      return { ...prev, countryConfigs: configs };
-    });
-  };
-
   const handleCreateLanding = async () => {
-    if (!formData.promotionId) {
-      setFormError('Selecciona una campaña');
+    if (!formData.title.trim()) {
+      setFormError('El título de la campaña es obligatorio');
       return;
     }
 
@@ -317,8 +218,7 @@ export default function TipsterLandingsSection() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          promotionId: formData.promotionId,
-          title: formData.title || undefined,
+          title: formData.title,
           description: formData.description || undefined,
           countriesEnabled: formData.countriesEnabled,
           countryConfigs: formData.countryConfigs,
@@ -327,7 +227,7 @@ export default function TipsterLandingsSection() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.message || 'Error al crear landing');
+        throw new Error(err.message || 'Error al crear campaña');
       }
 
       await loadLandings();
@@ -341,7 +241,7 @@ export default function TipsterLandingsSection() {
   };
 
   const handleDeleteLanding = async (landingId: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta landing?')) return;
+    if (!confirm('¿Estás seguro de eliminar esta campaña?')) return;
 
     try {
       const token = localStorage.getItem('access_token');
@@ -404,18 +304,18 @@ export default function TipsterLandingsSection() {
 
   const resetForm = () => {
     setFormData({
-      promotionId: '',
       title: '',
       description: '',
       countriesEnabled: ['ES'],
       countryConfigs: [],
     });
-    setPromotionHouses([]);
     setFormError('');
   };
 
   const openCreateDialog = () => {
     resetForm();
+    // Pre-load houses for default country
+    loadHousesForCountry('ES');
     setShowCreateDialog(true);
   };
 
