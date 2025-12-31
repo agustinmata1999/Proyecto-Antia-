@@ -404,7 +404,6 @@ export default function AffiliateSection() {
                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">País</th>
                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tipo</th>
                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ganancia</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
