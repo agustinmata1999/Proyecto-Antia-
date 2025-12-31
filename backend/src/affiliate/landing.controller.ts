@@ -39,10 +39,36 @@ export class LandingPublicController {
     // Detectar país por IP si no se proporciona
     let countryCode = country;
     if (!countryCode) {
-      // Intentar detectar por header de geolocalización (Cloudflare, etc.)
+      // Intentar detectar por headers de geolocalización
       countryCode = req.headers['cf-ipcountry'] as string || 
+                    req.headers['x-vercel-ip-country'] as string ||
                     req.headers['x-country-code'] as string ||
-                    'ES'; // Default
+                    '';
+      
+      // Fallback: usar Accept-Language para inferir país
+      if (!countryCode) {
+        const acceptLang = req.headers['accept-language'] as string || '';
+        const langCountryMap: Record<string, string> = {
+          'es-es': 'ES', 'es-mx': 'MX', 'es-ar': 'AR', 'es-co': 'CO',
+          'es-cl': 'CL', 'es-pe': 'PE', 'es': 'ES',
+          'en-us': 'US', 'en-gb': 'UK', 'en': 'US',
+          'pt-br': 'BR', 'pt': 'PT', 'de': 'DE', 'fr': 'FR'
+        };
+        
+        const langParts = acceptLang.toLowerCase().split(',');
+        for (const part of langParts) {
+          const lang = part.split(';')[0].trim();
+          if (langCountryMap[lang]) {
+            countryCode = langCountryMap[lang];
+            break;
+          }
+        }
+      }
+      
+      // Si todavía no hay país, usar ES como default
+      if (!countryCode) {
+        countryCode = 'ES';
+      }
     }
 
     // Registrar impresión
