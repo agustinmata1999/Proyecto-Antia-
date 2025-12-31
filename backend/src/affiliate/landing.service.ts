@@ -741,6 +741,7 @@ export class LandingService {
         name: h.name,
         slug: h.slug,
         logoUrl: h.logo_url,
+        logoBgColor: h.logo_bg_color || null,
         status: h.status,
         masterAffiliateUrl: h.master_affiliate_url,
         trackingParamName: h.tracking_param_name || 'subid',
