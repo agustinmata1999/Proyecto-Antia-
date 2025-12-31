@@ -107,11 +107,16 @@ export class TelegramHttpService {
     
     const queryString = queryParams.toString();
     const telegramUrl = `${this.apiBaseUrl}/bot${this.botToken}/${method}${queryString ? '?' + queryString : ''}`;
-    const proxyUrl = `${this.getCurrentProxy()}${encodeURIComponent(telegramUrl)}`;
+    
+    // Get current proxy (empty string means direct connection)
+    const currentProxy = this.getCurrentProxy();
+    const finalUrl = currentProxy 
+      ? `${currentProxy}${encodeURIComponent(telegramUrl)}`
+      : telegramUrl;
     
     try {
-      this.logger.debug(`Calling Telegram API: ${method}`);
-      const response = await this.axiosInstance.get(proxyUrl);
+      this.logger.debug(`Calling Telegram API: ${method} (${currentProxy ? 'via proxy' : 'direct'})`);
+      const response = await this.axiosInstance.get(finalUrl);
 
       if (!response.data.ok) {
         throw new Error(response.data.description || 'Telegram API error');
