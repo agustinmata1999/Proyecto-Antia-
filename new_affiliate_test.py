@@ -272,13 +272,13 @@ class NewAffiliateTester:
             return False
 
     def test_admin_stats(self) -> bool:
-        """Test GET /api/affiliate/admin/stats - Admin Get Stats"""
+        """Test GET /api/admin/affiliate/stats - Admin Get Stats"""
         self.log("=== Testing Admin - Get Stats ===")
         
         try:
             # Test with date range parameters
             params = "?startDate=2024-01-01&endDate=2025-12-31"
-            response = self.make_request("GET", f"/affiliate/admin/stats{params}", token=self.admin_token)
+            response = self.make_request("GET", f"/admin/affiliate/stats{params}", token=self.admin_token)
             
             if response.status_code == 200:
                 stats = response.json()
