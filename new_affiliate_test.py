@@ -143,11 +143,11 @@ class NewAffiliateTester:
             return False
 
     def test_admin_betting_houses(self) -> bool:
-        """Test GET /api/affiliate/admin/houses?includeInactive=true"""
+        """Test GET /api/admin/affiliate/houses?includeInactive=true"""
         self.log("=== Testing Admin - Betting Houses ===")
         
         try:
-            response = self.make_request("GET", "/affiliate/admin/houses?includeInactive=true", token=self.admin_token)
+            response = self.make_request("GET", "/admin/affiliate/houses?includeInactive=true", token=self.admin_token)
             
             if response.status_code == 200:
                 houses = response.json()
