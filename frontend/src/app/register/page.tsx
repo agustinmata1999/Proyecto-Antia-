@@ -159,13 +159,10 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {userType === 'tipster' && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="font-medium text-blue-900 mb-2">📋 Proceso de registro para Tipsters</h3>
-              <ol className="text-sm text-blue-800 space-y-1">
-                <li>1. Completa el formulario con tus datos</li>
-                <li>2. Un administrador revisará tu solicitud</li>
-                <li>3. Si eres aprobado, podrás acceder al panel</li>
-                <li>4. Deberás completar tus datos de cobro antes de poder retirar ganancias</li>
-              </ol>
+              <h3 className="font-medium text-blue-900 mb-2">📋 Registro de Afiliado</h3>
+              <p className="text-sm text-blue-800">
+                Completa el formulario para acceder al panel de afiliados y comenzar a generar ingresos.
+              </p>
             </div>
           )}
 
