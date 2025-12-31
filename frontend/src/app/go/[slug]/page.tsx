@@ -364,8 +364,8 @@ export default function PublicLandingPage() {
               className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                {/* Logo de la casa - sin fondo, más grande */}
-                <div className="w-36 h-20 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {/* Logo de la casa */}
+                <div className="w-36 h-16 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white rounded-lg p-2">
                   {item.house.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
