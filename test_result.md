@@ -260,7 +260,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Public Landing Page Redesign"
+    []
   stuck_tasks:
     - "Telegram Webhook Endpoint"
   test_all: false
@@ -275,3 +275,5 @@ agent_communication:
     message: "✅ NEW AFFILIATE SYSTEM ARCHITECTURE TESTING COMPLETED: All 5 critical endpoints tested successfully. ✅ Admin manages betting houses directly (GET /api/admin/affiliate/houses) - found Bwin €50, Betway €45 commissions. ✅ Tipsters get available houses by country (GET /api/tipster/landings/houses/ES). ✅ Tipsters create campaigns without promotionId (POST /api/tipster/landings) - new architecture confirmed. ✅ Admin stats show tipster campaign data (GET /api/admin/affiliate/stats). ✅ Tipster stats show own campaigns (GET /api/affiliate/tipster/stats). Commission values correctly sourced from house configuration. System architecture successfully migrated from admin-managed campaigns to tipster-managed campaigns selecting houses."
   - agent: "testing"
     message: "✅ PUBLIC LANDING PAGE REDESIGN API TESTING COMPLETED: Backend API GET /api/go/fausto-perez-reto-navidad-2025 working perfectly. Returns complete landing data with all required fields: id, slug, title, description, tipster info (publicName: 'Fausto Perez', id), countriesEnabled ['ES'], selectedCountry 'ES', and 2 betting house items (Bwin, Betway) with full house details including name, logoUrl, termsText. Country parameter ?country=ES working correctly. Click tracking POST /api/r/click generates proper redirect URLs with tracking parameters (subid, clickid). All 3 backend tests passed - ready for frontend integration. Minor: Tipster missing avatarUrl field but not critical for functionality."
+  - agent: "testing"
+    message: "✅ PUBLIC LANDING PAGE REDESIGN FRONTEND TESTING COMPLETED: Full UI testing successful at http://localhost:3000/go/fausto-perez-reto-navidad-2025. Age verification gate working perfectly with white background and amber shield icon. Main landing page displays clean minimalist design: Antia header centered, blue banner with Fausto Perez tipster info and verification badge (#A802), 'Selecciona tu pronostico' section, 2 betting house cards (Bwin, Betway) with dark logo boxes and blue 'Registrarse' buttons, footer with +18 badge and jugarbien.es link. Button interactions working correctly - opens tracking URLs in new tabs. Age gate bypass method with localStorage also functional. All design requirements met - redesign is complete and working."
