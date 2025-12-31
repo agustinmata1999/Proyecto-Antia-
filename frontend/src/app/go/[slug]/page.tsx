@@ -370,9 +370,12 @@ export default function PublicLandingPage() {
                   )}
                 </div>
                 
-                {/* Texto de términos */}
+                {/* Info de la casa */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-700 text-sm">
+                  <h4 className="text-gray-900 font-semibold">
+                    {item.house.name}
+                  </h4>
+                  <p className="text-gray-500 text-sm">
                     {item.house.termsText || 'Deposita al menos 10€'}
                   </p>
                 </div>
