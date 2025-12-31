@@ -353,16 +353,23 @@ export default function PublicLandingPage() {
               className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                {/* Logo de la casa - fondo oscuro */}
-                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {/* Logo de la casa - fondo oscuro con nombre */}
+                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                   {item.house.logoUrl ? (
-                    <Image
-                      src={item.house.logoUrl}
-                      alt={item.house.name}
-                      width={100}
-                      height={50}
-                      className="object-contain p-2"
-                    />
+                    <>
+                      <Image
+                        src={item.house.logoUrl}
+                        alt={item.house.name}
+                        fill
+                        className="object-contain p-2"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <span className="text-white font-bold text-sm absolute inset-0 flex items-center justify-center">
+                        {item.house.name}
+                      </span>
+                    </>
                   ) : (
                     <span className="text-white font-bold text-sm">
                       {item.house.name}
@@ -372,10 +379,7 @@ export default function PublicLandingPage() {
                 
                 {/* Info de la casa */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-gray-900 font-semibold">
-                    {item.house.name}
-                  </h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-600 text-sm">
                     {item.house.termsText || 'Deposita al menos 10€'}
                   </p>
                 </div>
