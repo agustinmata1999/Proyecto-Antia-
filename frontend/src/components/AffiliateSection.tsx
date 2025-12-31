@@ -374,16 +374,6 @@ export default function AffiliateSection() {
                       <option key={house.id} value={house.id}>{house.name}</option>
                     ))}
                   </select>
-                  <select
-                    value={referralFilters.status}
-                    onChange={(e) => setReferralFilters({ ...referralFilters, status: e.target.value })}
-                    className="border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="">Todos los estados</option>
-                    <option value="PENDING">Pendientes</option>
-                    <option value="APPROVED">Aprobados</option>
-                    <option value="REJECTED">Rechazados</option>
-                  </select>
                   <button
                     onClick={loadMyReferrals}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
