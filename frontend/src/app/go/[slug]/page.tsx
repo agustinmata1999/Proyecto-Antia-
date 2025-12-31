@@ -364,18 +364,18 @@ export default function PublicLandingPage() {
               className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                {/* Logo de la casa */}
-                <div className="w-28 h-14 rounded-lg bg-gray-900 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                {/* Logo de la casa - sin fondo, más grande */}
+                <div className="w-32 h-16 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                   {item.house.logoUrl ? (
                     <Image
                       src={item.house.logoUrl}
                       alt={item.house.name}
                       fill
-                      className="object-contain p-1"
+                      className="object-contain"
                       unoptimized
                     />
                   ) : (
-                    <span className="text-white font-bold text-base tracking-tight">
+                    <span className="text-gray-900 font-bold text-lg">
                       {item.house.name}
                     </span>
                   )}
