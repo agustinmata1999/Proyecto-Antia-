@@ -1342,6 +1342,24 @@ class AntiaAffiliateTester:
         
         return results
 
+    def run_public_landing_redesign_tests(self) -> Dict[str, bool]:
+        """Run tests for the redesigned public landing page as requested in review"""
+        self.log("🚀 Starting Public Landing Page Redesign Tests")
+        self.log("=" * 60)
+        
+        results = {}
+        
+        # 1. Test the redesigned public landing endpoint
+        results["public_landing_redesign"] = self.test_public_landing_redesign_specific()
+        
+        # 2. Test click tracking for the redesigned landing
+        results["click_tracking_redesign"] = self.test_click_tracking_redesign()
+        
+        # 3. Test the original public landing endpoint for compatibility
+        results["public_landing_original"] = self.test_get_public_landing()
+        
+        return results
+
     def run_affiliate_landing_tests(self) -> Dict[str, bool]:
         """Run all affiliate landing system tests"""
         self.log("🚀 Starting Antia Affiliate Landing System Tests")
