@@ -300,35 +300,11 @@ export default function RegisterPage() {
                   type="checkbox"
                   required
                   className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.consent18}
-                  onChange={(e) => setFormData({ ...formData, consent18: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  Confirmo que tengo +18 años *
-                </span>
-              </label>
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  required
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   checked={formData.consentTerms}
-                  onChange={(e) => setFormData({ ...formData, consentTerms: e.target.checked })}
+                  onChange={(e) => setFormData({ ...formData, consentTerms: e.target.checked, consent18: e.target.checked, consentPrivacy: e.target.checked })}
                 />
                 <span className="ml-2 text-sm text-gray-700">
                   Acepto los <a href="#" className="text-blue-600 underline">Términos y Condiciones</a> *
-                </span>
-              </label>
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  required
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.consentPrivacy}
-                  onChange={(e) => setFormData({ ...formData, consentPrivacy: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  Acepto la <a href="#" className="text-blue-600 underline">Política de Privacidad</a> *
                 </span>
               </label>
             </div>
