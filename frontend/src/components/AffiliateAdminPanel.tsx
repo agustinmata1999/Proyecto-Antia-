@@ -277,48 +277,6 @@ export default function AffiliateAdminPanel() {
     }
   };
 
-  // CAMPAIGN HANDLERS
-  const openCampaignModal = (campaign?: Campaign) => {
-    if (campaign) {
-      setEditingCampaign(campaign);
-      setCampaignForm({
-        name: campaign.name,
-        slug: campaign.slug,
-        description: campaign.description || '',
-        houseIds: campaign.houseIds,
-        targetCountries: campaign.targetCountries,
-      });
-    } else {
-      setEditingCampaign(null);
-      setCampaignForm({
-        name: '',
-        slug: '',
-        description: '',
-        houseIds: [],
-        targetCountries: [],
-      });
-    }
-    setShowCampaignModal(true);
-  };
-
-  const saveCampaign = async () => {
-    setSaving(true);
-    setError(null);
-    try {
-      if (editingCampaign) {
-        await affiliateApi.admin.updateCampaign(editingCampaign.id, campaignForm);
-      } else {
-        await affiliateApi.admin.createCampaign(campaignForm);
-      }
-      setShowCampaignModal(false);
-      loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al guardar campaña');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // IMPORT HANDLERS
   const handleImportCsv = async () => {
     if (!importForm.file || !importForm.houseId) {
