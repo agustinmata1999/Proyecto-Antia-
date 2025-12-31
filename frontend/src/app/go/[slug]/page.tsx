@@ -126,7 +126,13 @@ export default function PublicLandingPage() {
     try {
       setLoading(true);
       const baseUrl = getBaseUrl();
-      const countryParam = country || searchParams.get('country') || '';
+      
+      // Prioridad: 1. País pasado, 2. Query param, 3. Detección por timezone
+      let countryParam = country || searchParams.get('country') || '';
+      if (!countryParam) {
+        countryParam = detectCountryByTimezone();
+      }
+      
       const url = `${baseUrl}/api/go/${slug}${countryParam ? `?country=${countryParam}` : ''}`;
       
       const res = await fetch(url);
