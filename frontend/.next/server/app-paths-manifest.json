@@ -7,8 +7,8 @@
   "/dashboard/admin/page": "app/dashboard/admin/page.js",
   "/go/[slug]/page": "app/go/[slug]/page.js",
   "/health/route": "app/health/route.js",
-  "/dashboard/tipster/page": "app/dashboard/tipster/page.js",
   "/login/page": "app/login/page.js",
+  "/dashboard/tipster/page": "app/dashboard/tipster/page.js",
   "/page": "app/page.js",
   "/r/[code]/page": "app/r/[code]/page.js",
   "/register/page": "app/register/page.js"
