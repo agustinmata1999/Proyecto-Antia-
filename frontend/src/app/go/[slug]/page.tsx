@@ -365,7 +365,7 @@ export default function PublicLandingPage() {
             >
               <div className="flex items-center gap-4">
                 {/* Logo de la casa - sin fondo, más grande */}
-                <div className="w-32 h-16 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                <div className="w-36 h-20 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                   {item.house.logoUrl ? (
                     <Image
                       src={item.house.logoUrl}
@@ -375,7 +375,7 @@ export default function PublicLandingPage() {
                       unoptimized
                     />
                   ) : (
-                    <span className="text-gray-900 font-bold text-lg">
+                    <span className="text-gray-900 font-bold text-xl">
                       {item.house.name}
                     </span>
                   )}
