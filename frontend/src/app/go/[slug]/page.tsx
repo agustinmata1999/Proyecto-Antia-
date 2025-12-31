@@ -365,14 +365,13 @@ export default function PublicLandingPage() {
             >
               <div className="flex items-center gap-4">
                 {/* Logo de la casa - sin fondo, más grande */}
-                <div className="w-36 h-20 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                <div className="w-36 h-20 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {item.house.logoUrl ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={item.house.logoUrl}
                       alt={item.house.name}
-                      fill
-                      className="object-contain"
-                      unoptimized
+                      className="max-w-full max-h-full object-contain"
                     />
                   ) : (
                     <span className="text-gray-900 font-bold text-xl">
