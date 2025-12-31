@@ -1433,6 +1433,198 @@ class AntiaAffiliateTester:
         
         return results
 
+    def test_review_request_endpoints(self) -> Dict[str, bool]:
+        """Test the specific endpoints mentioned in the review request"""
+        self.log("🚀 Starting Review Request Endpoint Tests")
+        self.log("=" * 60)
+        
+        results = {}
+        
+        # 1. Login - POST /api/auth/login (Tipster)
+        results["login_tipster"] = self.test_login()
+        
+        # 2. Admin Login - POST /api/auth/login (Admin)
+        results["login_admin"] = self.test_admin_login()
+        
+        if not results["login_tipster"]:
+            self.log("❌ Tipster authentication failed - skipping tipster tests", "ERROR")
+        
+        if not results["login_admin"]:
+            self.log("❌ Admin authentication failed - skipping admin tests", "ERROR")
+        
+        # 3. Affiliate Metrics - GET /api/affiliate/metrics (with Bearer token)
+        if results["login_tipster"]:
+            results["affiliate_metrics"] = self.test_affiliate_metrics()
+        else:
+            results["affiliate_metrics"] = False
+        
+        # 4. Houses with Links - GET /api/affiliate/houses (with Bearer token)
+        if results["login_tipster"]:
+            results["affiliate_houses"] = self.test_affiliate_houses()
+        else:
+            results["affiliate_houses"] = False
+        
+        # 5. Tipster Landings - GET /api/tipster/landings (with Bearer token)
+        if results["login_tipster"]:
+            results["tipster_landings"] = self.test_get_tipster_landings()
+        else:
+            results["tipster_landings"] = False
+        
+        # 6. Public Landing - GET /api/go/fausto-perez-reto-navidad-2025?country=ES
+        results["public_landing"] = self.test_public_landing_specific()
+        
+        # 7. Admin Houses - GET /api/admin/affiliate/houses (admin token)
+        if results["login_admin"]:
+            results["admin_houses"] = self.test_admin_houses()
+        else:
+            results["admin_houses"] = False
+        
+        return results
+
+    def test_affiliate_metrics(self) -> bool:
+        """Test GET /api/affiliate/metrics - Affiliate Metrics endpoint"""
+        self.log("=== Testing Affiliate Metrics ===")
+        
+        try:
+            response = self.make_request("GET", "/affiliate/metrics")
+            
+            if response.status_code == 200:
+                metrics = response.json()
+                self.log("✅ Affiliate metrics retrieved successfully")
+                
+                # Log metrics details
+                self.log(f"Metrics data: {json.dumps(metrics, indent=2)}")
+                
+                # Verify expected structure (basic validation)
+                if isinstance(metrics, dict):
+                    self.log("✅ Metrics returned as valid JSON object")
+                    return True
+                else:
+                    self.log("❌ Metrics not returned as JSON object", "ERROR")
+                    return False
+                    
+            else:
+                self.log(f"❌ Affiliate metrics failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Affiliate metrics test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_affiliate_houses(self) -> bool:
+        """Test GET /api/affiliate/houses - Houses with Links endpoint"""
+        self.log("=== Testing Affiliate Houses ===")
+        
+        try:
+            response = self.make_request("GET", "/affiliate/houses")
+            
+            if response.status_code == 200:
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} houses with links")
+                
+                # Log house details
+                for i, house in enumerate(houses):
+                    self.log(f"House {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                    if 'link' in house:
+                        link = house['link']
+                        self.log(f"  Link ID: {link.get('id', 'No ID')}")
+                        self.log(f"  Redirect Code: {link.get('redirectCode', 'No code')}")
+                        self.log(f"  Total Clicks: {link.get('totalClicks', 0)}")
+                        self.log(f"  Total Referrals: {link.get('totalReferrals', 0)}")
+                
+                return True
+            else:
+                self.log(f"❌ Affiliate houses failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Affiliate houses test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_public_landing_specific(self) -> bool:
+        """Test GET /api/go/fausto-perez-reto-navidad-2025?country=ES - Specific Public Landing"""
+        self.log("=== Testing Specific Public Landing ===")
+        
+        try:
+            response = self.make_request("GET", "/go/fausto-perez-reto-navidad-2025?country=ES", use_auth=False)
+            
+            if response.status_code == 200:
+                landing = response.json()
+                self.log("✅ Successfully retrieved specific public landing")
+                
+                # Verify required fields
+                required_fields = ["id", "slug", "title", "tipster", "countriesEnabled", "selectedCountry", "items"]
+                for field in required_fields:
+                    if field in landing:
+                        self.log(f"✅ Landing has {field}")
+                    else:
+                        self.log(f"❌ Landing missing {field}", "ERROR")
+                        return False
+                
+                # Log landing details
+                self.log(f"Landing title: {landing.get('title', 'No title')}")
+                self.log(f"Slug: {landing.get('slug', 'No slug')}")
+                self.log(f"Selected country: {landing.get('selectedCountry', 'No country')}")
+                
+                # Check tipster info
+                tipster = landing.get('tipster', {})
+                if tipster:
+                    self.log(f"✅ Tipster: {tipster.get('publicName', 'No name')} (ID: {tipster.get('id', 'No ID')})")
+                else:
+                    self.log("❌ No tipster info", "ERROR")
+                    return False
+                
+                # Check betting house items
+                items = landing.get('items', [])
+                self.log(f"✅ Found {len(items)} betting house items")
+                for i, item in enumerate(items):
+                    house = item.get('house', {})
+                    if house:
+                        self.log(f"  Item {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                
+                return True
+            else:
+                self.log(f"❌ Specific public landing failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Specific public landing test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_admin_houses(self) -> bool:
+        """Test GET /api/admin/affiliate/houses - Admin Houses endpoint"""
+        self.log("=== Testing Admin Houses ===")
+        
+        # Temporarily switch to admin token
+        original_token = self.access_token
+        self.access_token = self.admin_access_token
+        
+        try:
+            response = self.make_request("GET", "/admin/affiliate/houses")
+            
+            if response.status_code == 200:
+                houses = response.json()
+                self.log(f"✅ Successfully retrieved {len(houses)} admin houses")
+                
+                # Log house details
+                for i, house in enumerate(houses):
+                    self.log(f"House {i+1}: {house.get('name', 'No name')} (ID: {house.get('id', 'No ID')})")
+                    self.log(f"  Commission: €{house.get('commissionPerReferralEur', 0)}")
+                    self.log(f"  Status: {house.get('status', 'Unknown')}")
+                    self.log(f"  Countries: {house.get('allowedCountries', [])}")
+                
+                return True
+            else:
+                self.log(f"❌ Admin houses failed with status {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Admin houses test failed: {str(e)}", "ERROR")
+            return False
+        finally:
+            # Restore original token
+            self.access_token = original_token
+
 def main():
     """Main test runner"""
     tester = AntiaAffiliateTester()
