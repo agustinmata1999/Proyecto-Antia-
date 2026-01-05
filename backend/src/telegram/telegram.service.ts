@@ -2583,6 +2583,116 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   }
 
   /**
+   * NUEVO: Buscar canal por invite link
+   * Soporta formatos:
+   * - https://t.me/+abc123xyz
+   * - t.me/+abc123xyz  
+   * - https://t.me/joinchat/abc123xyz (formato antiguo)
+   * - https://t.me/channelname (canales públicos)
+   */
+  async findChannelByInviteLink(inviteLink: string): Promise<{
+    found: boolean;
+    channel?: {
+      channelId: string;
+      channelTitle: string;
+      channelUsername?: string;
+      channelType: string;
+    };
+    error?: string;
+  }> {
+    try {
+      const link = inviteLink.trim();
+      
+      // Extraer el hash o username del link
+      // Patrones: t.me/+HASH, t.me/joinchat/HASH, t.me/USERNAME
+      let searchPattern: string | null = null;
+      let isPublicChannel = false;
+      
+      // Formato: t.me/+HASH o https://t.me/+HASH
+      const plusMatch = link.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
+      if (plusMatch) {
+        searchPattern = plusMatch[1];
+      }
+      
+      // Formato antiguo: t.me/joinchat/HASH
+      if (!searchPattern) {
+        const joinchatMatch = link.match(/t\.me\/joinchat\/([a-zA-Z0-9_-]+)/);
+        if (joinchatMatch) {
+          searchPattern = joinchatMatch[1];
+        }
+      }
+      
+      // Formato público: t.me/USERNAME
+      if (!searchPattern) {
+        const usernameMatch = link.match(/t\.me\/([a-zA-Z][a-zA-Z0-9_]{4,})/);
+        if (usernameMatch && !usernameMatch[1].startsWith('+')) {
+          searchPattern = usernameMatch[1];
+          isPublicChannel = true;
+        }
+      }
+      
+      if (!searchPattern) {
+        return {
+          found: false,
+          error: 'Formato de link no válido. Usa el link de invitación de tu canal (ej: https://t.me/+abc123)',
+        };
+      }
+      
+      // Buscar en la base de datos
+      let filter: any;
+      
+      if (isPublicChannel) {
+        // Buscar por username
+        filter = {
+          is_active: true,
+          channel_username: { $regex: `^${this.escapeRegex(searchPattern)}$`, $options: 'i' },
+        };
+      } else {
+        // Buscar por invite link que contenga el hash
+        filter = {
+          is_active: true,
+          $or: [
+            { invite_link: { $regex: searchPattern, $options: 'i' } },
+            { invite_link: { $regex: `\\+${searchPattern}`, $options: 'i' } },
+            { invite_link: { $regex: `joinchat/${searchPattern}`, $options: 'i' } },
+          ],
+        };
+      }
+      
+      const result = await this.prisma.$runCommandRaw({
+        find: 'detected_telegram_channels',
+        filter,
+        limit: 1,
+      }) as any;
+
+      const channel = result.cursor?.firstBatch?.[0];
+      
+      if (!channel) {
+        return {
+          found: false,
+          error: 'Canal no encontrado. Asegúrate de que:\n1. El bot (@Antiabetbot) sea administrador del canal\n2. Hayas quitado y vuelto a añadir el bot después de que el sistema se actualizara',
+        };
+      }
+
+      return {
+        found: true,
+        channel: {
+          channelId: channel.channel_id,
+          channelTitle: channel.channel_title,
+          channelUsername: channel.channel_username || undefined,
+          channelType: channel.channel_type,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error finding channel by invite link:', error);
+      return {
+        found: false,
+        error: 'Error al buscar el canal. Por favor, intenta de nuevo.',
+      };
+    }
+  }
+
+  /**
    * NUEVO: Conectar canal por nombre (método simplificado)
    */
   async connectChannelByName(
