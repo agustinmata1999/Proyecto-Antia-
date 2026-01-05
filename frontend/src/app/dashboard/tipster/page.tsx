@@ -2483,17 +2483,17 @@ export default function TipsterDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre del Canal <span className="text-red-500">*</span>
+                  Link de invitación del canal <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text" 
                   value={channelInput}
                   onChange={(e) => setChannelInput(e.target.value)}
-                  placeholder="Ej: Mi Canal Premium"
+                  placeholder="https://t.me/+abc123xyz"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Escribe el nombre exacto de tu canal tal como aparece en Telegram
+                  Pega el link de invitación de tu canal (Telegram → Info del canal → Invitar)
                 </p>
               </div>
 
