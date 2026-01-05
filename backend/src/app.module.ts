@@ -28,6 +28,7 @@ import { TipsterModule } from './tipster/tipster.module';
 import { EmailsModule } from './emails/emails.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { UploadModule } from './upload/upload.module';
+import { SimulatorModule } from './simulator/simulator.module';
 import { HealthController } from './health.controller';
 
 @Module({
