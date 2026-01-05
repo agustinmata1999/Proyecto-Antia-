@@ -112,7 +112,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         botUsername: null,
         webhookUrl: null,
         webhookConfigured: false,
-        proxyMode: true,
+        pollingMode: true,
         lastError: error.message,
       };
     }
