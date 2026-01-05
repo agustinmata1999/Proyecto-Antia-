@@ -34,56 +34,37 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // Always initialize using HTTP service via proxy (bypasses firewall)
+    // Always use POLLING mode for preview environments
+    // Polling works in any environment because the bot actively fetches updates from Telegram
     try {
       const botInfo = await this.httpService.getMe();
-      this.logger.log(`📱 Bot info (via proxy): @${botInfo.username}`);
+      this.logger.log(`📱 Bot info: @${botInfo.username}`);
       
-      // Configure webhook using HTTP service
-      const appUrl = this.config.get<string>('APP_URL');
-      if (appUrl && appUrl.includes('preview.emergentagent.com')) {
-        const webhookUrl = `${appUrl}/api/telegram/webhook`;
-        this.logger.log(`🔧 Setting up webhook via proxy at: ${webhookUrl}`);
+      // Delete any existing webhook to enable polling
+      this.logger.log('🔄 Removing webhook to enable polling mode...');
+      await this.httpService.deleteWebhook();
+      
+      // Start polling mode using Telegraf
+      if (this.bot) {
+        this.logger.log('🚀 Starting Telegram bot in POLLING mode...');
         
-        // Store webhook URL for later use
-        (this as any).webhookUrl = webhookUrl;
-        
-        // Set webhook using HTTP service (via proxy)
-        await this.httpService.setWebhook(webhookUrl, {
-          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
+        // Launch bot in polling mode
+        this.bot.launch({
           dropPendingUpdates: false,
-          maxConnections: 100,
+          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
+        }).then(() => {
+          this.logger.log('✅ Telegram bot started successfully in POLLING mode');
+        }).catch((err) => {
+          this.logger.error('Failed to start bot polling:', err.message);
         });
         
-        // Verify webhook
-        const webhookInfo = await this.httpService.getWebhookInfo();
-        this.logger.log(`📡 Webhook configured: ${webhookInfo.url}`);
-        
-        // Periodic webhook verification (every 30 seconds)
-        setInterval(async () => {
-          try {
-            const info = await this.httpService.getWebhookInfo();
-            if (!info.url || info.url !== webhookUrl) {
-              this.logger.log(`🔄 Re-configuring webhook...`);
-              await this.httpService.setWebhook(webhookUrl, {
-                allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
-                dropPendingUpdates: false,
-                maxConnections: 100,
-              });
-            }
-          } catch (error) {
-            this.logger.warn(`Webhook check failed: ${error.message}`);
-          }
-        }, 30000); // 30 seconds
-        
         this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized via PROXY (webhook mode)');
+        this.logger.log('✅ TelegramService initialized (POLLING mode - works in any environment)');
       } else {
-        this.logger.log('✅ TelegramService initialized via PROXY (no webhook - production mode)');
-        this.isInitialized = true;
+        this.logger.warn('⚠️ Bot instance not available');
       }
     } catch (error) {
-      this.logger.error('Failed to initialize Telegram via proxy:', error.message);
+      this.logger.error('Failed to initialize Telegram:', error.message);
       this.logger.warn('⚠️  Telegram features may not work correctly');
     }
   }
