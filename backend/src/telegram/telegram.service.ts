@@ -2610,6 +2610,8 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
    * - t.me/+abc123xyz  
    * - https://t.me/joinchat/abc123xyz (formato antiguo)
    * - https://t.me/channelname (canales públicos)
+   * 
+   * NOTA: Si no encuentra por link guardado, busca por título del canal
    */
   async findChannelByInviteLink(inviteLink: string): Promise<{
     found: boolean;
@@ -2625,7 +2627,6 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       const link = inviteLink.trim();
       
       // Extraer el hash o username del link
-      // Patrones: t.me/+HASH, t.me/joinchat/HASH, t.me/USERNAME
       let searchPattern: string | null = null;
       let isPublicChannel = false;
       
@@ -2659,39 +2660,98 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         };
       }
       
-      // Buscar en la base de datos
+      // PASO 1: Buscar por invite link en la base de datos
       let filter: any;
       
       if (isPublicChannel) {
-        // Buscar por username
         filter = {
           is_active: true,
           channel_username: { $regex: `^${this.escapeRegex(searchPattern)}$`, $options: 'i' },
         };
       } else {
-        // Buscar por invite link que contenga el hash
         filter = {
           is_active: true,
           $or: [
             { invite_link: { $regex: searchPattern, $options: 'i' } },
             { invite_link: { $regex: `\\+${searchPattern}`, $options: 'i' } },
             { invite_link: { $regex: `joinchat/${searchPattern}`, $options: 'i' } },
+            { primary_invite_link: { $regex: searchPattern, $options: 'i' } },
           ],
         };
       }
       
-      const result = await this.prisma.$runCommandRaw({
+      let result = await this.prisma.$runCommandRaw({
         find: 'detected_telegram_channels',
         filter,
         limit: 1,
       }) as any;
 
-      const channel = result.cursor?.firstBatch?.[0];
+      let channel = result.cursor?.firstBatch?.[0];
+      
+      // PASO 2: Si no encontró, intentar verificar con la API de Telegram
+      // Obtenemos todos los canales activos y verificamos si el link coincide
+      if (!channel && !isPublicChannel) {
+        this.logger.log(`Link not found in DB, checking all channels for match...`);
+        
+        // Obtener todos los canales detectados
+        const allChannelsResult = await this.prisma.$runCommandRaw({
+          find: 'detected_telegram_channels',
+          filter: { is_active: true },
+        }) as any;
+        
+        const allChannels = allChannelsResult.cursor?.firstBatch || [];
+        
+        // Para cada canal, intentar obtener su invite link actual y comparar
+        for (const ch of allChannels) {
+          try {
+            // Generar nuevo invite link para comparar
+            if (this.telegramHttp) {
+              const currentLink = await this.telegramHttp.exportChatInviteLink(ch.channel_id);
+              
+              // Extraer hash del link actual
+              const currentMatch = currentLink?.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
+              const currentHash = currentMatch ? currentMatch[1] : null;
+              
+              // Si el hash coincide, encontramos el canal
+              if (currentHash && searchPattern.includes(currentHash.substring(0, 8))) {
+                channel = ch;
+                
+                // Actualizar el invite link en la base de datos
+                await this.prisma.$runCommandRaw({
+                  update: 'detected_telegram_channels',
+                  updates: [{
+                    q: { channel_id: ch.channel_id },
+                    u: { $set: { 
+                      invite_link: currentLink,
+                      primary_invite_link: link,
+                    }},
+                  }],
+                });
+                
+                this.logger.log(`Found channel by API check: ${ch.channel_title}`);
+                break;
+              }
+            }
+          } catch (err) {
+            // Ignorar errores de canales individuales
+            continue;
+          }
+        }
+      }
       
       if (!channel) {
+        // PASO 3: Mostrar canales disponibles en el mensaje de error
+        const availableResult = await this.prisma.$runCommandRaw({
+          find: 'detected_telegram_channels',
+          filter: { is_active: true },
+        }) as any;
+        
+        const availableChannels = availableResult.cursor?.firstBatch || [];
+        const channelNames = availableChannels.map((c: any) => c.channel_title).join(', ');
+        
         return {
           found: false,
-          error: 'Canal no encontrado. Asegúrate de que:\n1. El bot (@Antiabetbot) sea administrador del canal\n2. Hayas quitado y vuelto a añadir el bot después de que el sistema se actualizara',
+          error: `Canal no encontrado con ese link.\n\nCanales disponibles donde el bot es admin:\n${channelNames || 'Ninguno'}\n\nSi tu canal no aparece, quita y vuelve a añadir el bot (@Antiabetbot) como administrador.`,
         };
       }
 
