@@ -49,24 +49,7 @@ curl "https://api.telegram.org/bot$BOT_TOKEN/getWebhookInfo"
 
 ---
 
-## 3. Stripe (Pagos)
-
-Si usas Stripe en producción, actualizar en el panel de Stripe:
-- **Ubicación:** Stripe Dashboard → Developers → Webhooks
-- **URL a actualizar:** `https://NUEVO-DOMINIO/api/stripe/webhook`
-
----
-
-## 4. Redsys (Pagos España)
-
-Si usas Redsys, actualizar en el panel del TPV Virtual:
-- URL de notificación
-- URL OK
-- URL KO
-
----
-
-## 5. Reiniciar Servicios
+## 3. Reiniciar Servicios
 
 Después de actualizar las variables de entorno:
 
