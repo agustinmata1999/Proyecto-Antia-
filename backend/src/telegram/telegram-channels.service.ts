@@ -81,18 +81,30 @@ export class TelegramChannelsService {
     });
 
     if (existing) {
-      // Si existe pero está inactivo, reactivarlo
+      // Si existe pero está inactivo, reactivarlo usando $runCommandRaw
       if (!existing.isActive) {
-        return this.prisma.telegramChannel.update({
-          where: { id: existing.id },
-          data: { 
-            isActive: true,
-            channelTitle: dto.channelTitle,
-            channelName: dto.channelName,
-            inviteLink: dto.inviteLink,
-            updatedAt: new Date(),
-          },
+        const now = new Date().toISOString();
+        await this.prisma.$runCommandRaw({
+          update: 'telegram_channels',
+          updates: [{
+            q: { _id: { $oid: existing.id } },
+            u: { 
+              $set: {
+                is_active: true,
+                channel_title: dto.channelTitle,
+                channel_name: dto.channelName || null,
+                invite_link: dto.inviteLink || null,
+                updated_at: { $date: now },
+              }
+            },
+          }],
         });
+        
+        // Obtener el canal actualizado
+        const updated = await this.prisma.telegramChannel.findUnique({
+          where: { id: existing.id },
+        });
+        return updated;
       }
       throw new BadRequestException('Este canal ya está conectado');
     }
