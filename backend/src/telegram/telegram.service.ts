@@ -2425,8 +2425,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   }
 
   /**
-   * NUEVO: Guardar canal detectado automáticamente
-   * Se llama cuando el bot es añadido como admin a un canal
+   * NUEVO: Guardar canal detectado (cuando el bot es añadido como admin)
    */
   private async saveDetectedChannel(
     channelId: string,
@@ -2436,6 +2435,17 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   ) {
     try {
       const now = new Date().toISOString();
+      
+      // Intentar obtener el invite link del canal
+      let inviteLink: string | null = null;
+      try {
+        if (this.httpService) {
+          inviteLink = await this.httpService.exportChatInviteLink(channelId);
+          this.logger.log(`📎 Got invite link for channel ${channelTitle}: ${inviteLink}`);
+        }
+      } catch (inviteError) {
+        this.logger.warn(`Could not get invite link for ${channelTitle}: ${inviteError.message}`);
+      }
       
       // Verificar si ya existe
       const existingResult = await this.prisma.$runCommandRaw({
@@ -2448,37 +2458,48 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       
       if (existing) {
         // Actualizar el registro existente
+        const updateData: any = {
+          channel_title: channelTitle,
+          channel_username: channelUsername || null,
+          channel_type: channelType || 'channel',
+          last_seen_at: { $date: now },
+          is_active: true,
+        };
+        
+        // Solo actualizar invite_link si se obtuvo uno nuevo
+        if (inviteLink) {
+          updateData.invite_link = inviteLink;
+        }
+        
         await this.prisma.$runCommandRaw({
           update: 'detected_telegram_channels',
           updates: [{
             q: { channel_id: channelId },
-            u: {
-              $set: {
-                channel_title: channelTitle,
-                channel_username: channelUsername || null,
-                channel_type: channelType || 'channel',
-                last_seen_at: { $date: now },
-                is_active: true,
-              },
-            },
+            u: { $set: updateData },
           }],
         });
         this.logger.log(`📝 Updated detected channel: ${channelTitle} (${channelId})`);
       } else {
         // Crear nuevo registro
+        const newDoc: any = {
+          channel_id: channelId,
+          channel_title: channelTitle,
+          channel_username: channelUsername || null,
+          channel_type: channelType || 'channel',
+          detected_at: { $date: now },
+          last_seen_at: { $date: now },
+          is_active: true,
+        };
+        
+        if (inviteLink) {
+          newDoc.invite_link = inviteLink;
+        }
+        
         await this.prisma.$runCommandRaw({
           insert: 'detected_telegram_channels',
-          documents: [{
-            channel_id: channelId,
-            channel_title: channelTitle,
-            channel_username: channelUsername || null,
-            channel_type: channelType || 'channel',
-            detected_at: { $date: now },
-            last_seen_at: { $date: now },
-            is_active: true,
-          }],
+          documents: [newDoc],
         });
-        this.logger.log(`✅ Saved new detected channel: ${channelTitle} (${channelId})`);
+        this.logger.log(`✅ Saved new detected channel: ${channelTitle} (${channelId})${inviteLink ? ' with invite link' : ''}`);
       }
     } catch (error) {
       this.logger.error('Error saving detected channel:', error);
