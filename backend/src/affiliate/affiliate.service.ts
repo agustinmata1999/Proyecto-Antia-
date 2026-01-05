@@ -519,9 +519,16 @@ export class AffiliateService {
     // Build redirect URL with tracking param
     let redirectedTo: string | null = null;
     if (!wasBlocked) {
-      const url = new URL(house.masterAffiliateUrl);
-      url.searchParams.set(house.trackingParamName, tipsterId);
-      redirectedTo = url.toString();
+      // Special handling for simulator house
+      if (house.slug === 'simulator' || house.masterAffiliateUrl === 'INTERNAL_SIMULATOR') {
+        // Redirect to internal simulator
+        const appUrl = process.env.APP_URL || 'http://localhost:8001';
+        redirectedTo = `${appUrl}/api/simulator/landing?subid=${tipsterId}&affiliate=antia`;
+      } else {
+        const url = new URL(house.masterAffiliateUrl);
+        url.searchParams.set(house.trackingParamName, tipsterId);
+        redirectedTo = url.toString();
+      }
     }
 
     // Get link
