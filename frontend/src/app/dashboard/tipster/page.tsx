@@ -408,8 +408,8 @@ export default function TipsterDashboard() {
     setAddChannelError('');
 
     try {
-      // Conectar por nombre
-      const response = await telegramApi.channels.connectByName(channelInput.trim());
+      // Conectar por link de invitación
+      const response = await telegramApi.channels.connectByInviteLink(channelInput.trim());
       
       if (response.data.success) {
         // Reload channels
