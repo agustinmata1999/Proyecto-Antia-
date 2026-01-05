@@ -415,8 +415,8 @@ export class SimulatorController {
         
         <div class="postback-status ${postbackResult.success ? 'success' : 'error'}">
             <strong>${postbackResult.success ? '✅ Postback enviado correctamente' : '❌ Error en postback'}</strong>
-            ${!postbackResult.success ? `<br><small>Error: ${postbackResult.error || 'Unknown'}</small>` : ''}
-            ${postbackResult.success && postbackResult.conversionId ? `<br><small>Conversion ID: ${postbackResult.conversionId}</small>` : ''}
+            ${!postbackResult.success ? `<br><small>Error: ${(postbackResult as any).error || 'Unknown'}</small>` : ''}
+            ${postbackResult.success && (postbackResult as any).conversionId ? `<br><small>Conversion ID: ${(postbackResult as any).conversionId}</small>` : ''}
         </div>
         
         <div class="info-box">
