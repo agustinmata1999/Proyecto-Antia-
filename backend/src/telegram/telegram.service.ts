@@ -2705,8 +2705,8 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
         for (const ch of allChannels) {
           try {
             // Generar nuevo invite link para comparar
-            if (this.telegramHttp) {
-              const currentLink = await this.telegramHttp.exportChatInviteLink(ch.channel_id);
+            if (this.httpService) {
+              const currentLink = await this.httpService.exportChatInviteLink(ch.channel_id);
               
               // Extraer hash del link actual
               const currentMatch = currentLink?.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
