@@ -69,6 +69,7 @@ import { HealthController } from './health.controller';
     EmailsModule,
     NotificationsModule,
     UploadModule,
+    SimulatorModule,
   ],
   controllers: [HealthController],
 })
