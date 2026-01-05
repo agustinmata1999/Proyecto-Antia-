@@ -7,7 +7,7 @@ import requests
 import json
 import time
 
-BASE_URL = "https://affiliboost-2.preview.emergentagent.com"
+BASE_URL = "https://tipster-platform-1.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 def test_webhook_quick():

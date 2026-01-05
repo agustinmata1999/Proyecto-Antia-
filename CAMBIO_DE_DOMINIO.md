@@ -3,8 +3,8 @@
 ## Cuando hacer un Fork o Restaurar a otro Chat
 
 Cuando cambies de chat en Emergent (fork/restore), el dominio de preview cambiará. Ejemplo:
-- Dominio anterior: `https://affiliboost-2.preview.emergentagent.com`
-- Dominio nuevo: `https://affiliboost-3.preview.emergentagent.com`
+- Dominio anterior: `https://tipster-platform-1.preview.emergentagent.com`
+- Dominio nuevo: `https://tipster-platform-1.preview.emergentagent.com`
 
 **IMPORTANTE:** Debes actualizar las siguientes configuraciones para que todo funcione correctamente.
 
@@ -15,14 +15,14 @@ Cuando cambies de chat en Emergent (fork/restore), el dominio de preview cambiar
 ### Frontend (`/app/frontend/.env`)
 ```bash
 # Actualizar con el nuevo dominio
-REACT_APP_BACKEND_URL=https://NUEVO-DOMINIO.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://tipster-platform-1.preview.emergentagent.com
 ```
 
 ### Backend (`/app/backend/.env`)
 ```bash
 # Actualizar estas variables
-FRONTEND_URL=https://NUEVO-DOMINIO.preview.emergentagent.com
-WEBHOOK_BASE_URL=https://NUEVO-DOMINIO.preview.emergentagent.com
+FRONTEND_URL=https://tipster-platform-1.preview.emergentagent.com
+WEBHOOK_BASE_URL=https://tipster-platform-1.preview.emergentagent.com
 ```
 
 ---
@@ -36,7 +36,7 @@ El bot de Telegram debe apuntar al nuevo dominio. Ejecutar este comando:
 BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /app/backend/.env | cut -d'=' -f2)
 
 # Configurar el nuevo webhook
-NUEVO_DOMINIO="https://TU-NUEVO-DOMINIO.preview.emergentagent.com"
+NUEVO_DOMINIO="https://tipster-platform-1.preview.emergentagent.com"
 
 curl "https://api.telegram.org/bot$BOT_TOKEN/setWebhook?url=${NUEVO_DOMINIO}/api/telegram/webhook&allowed_updates=%5B%22message%22%2C%22callback_query%22%2C%22my_chat_member%22%2C%22chat_join_request%22%5D"
 ```
