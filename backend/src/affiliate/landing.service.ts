@@ -762,6 +762,12 @@ export class LandingService {
     let baseUrl = house.masterAffiliateUrl;
     let trackingParamName = house.trackingParamName || 'subid';
 
+    // Special handling for simulator house
+    if (house.slug === 'simulator' || baseUrl === 'INTERNAL_SIMULATOR') {
+      const appUrl = process.env.APP_URL || 'http://localhost:8001';
+      return `${appUrl}/api/simulator/landing?subid=${tipsterId}&affiliate=antia&clickid=${clickId}`;
+    }
+
     // Si hay promotionId, buscar el link específico de la promoción
     if (promotionId && bettingHouseId) {
       const promotionLinkResult = await this.prisma.$runCommandRaw({
