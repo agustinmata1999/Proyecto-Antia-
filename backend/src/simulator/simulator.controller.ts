@@ -21,7 +21,7 @@ import { ObjectId } from 'mongodb';
  * - Estado: /api/simulator/status
  * - Historial: /api/simulator/history
  */
-@Controller('api/simulator')
+@Controller('simulator')
 export class SimulatorController {
   private readonly logger = new Logger('BettingHouseSimulator');
   
