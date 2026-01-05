@@ -59,7 +59,7 @@ sudo supervisorctl restart backend frontend
 
 ---
 
-## 6. Verificación Post-Cambio
+## 4. Verificación Post-Cambio
 
 ### Checklist:
 - [ ] Variables de entorno actualizadas en frontend/.env
