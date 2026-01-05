@@ -136,6 +136,8 @@ export const telegramApi = {
     generateInviteLink: (id: string) => api.post(`/telegram/channels/${id}/invite-link`),
     // NUEVO: Conectar canal por nombre (sin necesidad de ID)
     connectByName: (channelName: string) => api.post('/telegram/channels/connect-by-name', { channelName }),
+    // NUEVO: Conectar canal por link de invitación
+    connectByInviteLink: (inviteLink: string) => api.post('/telegram/channels/connect-by-invite-link', { inviteLink }),
     // NUEVO: Buscar canal por nombre
     searchByName: (channelName: string) => api.post('/telegram/channels/search-by-name', { channelName }),
     // NUEVO: Conectar canal por ID (verifica que el bot sea admin)
