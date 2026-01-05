@@ -157,6 +157,79 @@ export class TelegramChannelsController {
   }
 
   /**
+   * POST /api/telegram/channels/connect-by-invite-link - Conectar canal por link de invitación
+   * El tipster pega el link de invitación y el sistema busca el canal automáticamente
+   */
+  @Post('connect-by-invite-link')
+  @HttpCode(HttpStatus.OK)
+  async connectByInviteLink(@Body() body: { inviteLink: string }, @Request() req) {
+    if (!body.inviteLink || body.inviteLink.trim().length === 0) {
+      return {
+        success: false,
+        message: 'El link de invitación es obligatorio',
+      };
+    }
+
+    const tipsterId = await this.getTipsterId(req.user.id);
+    
+    // Extraer el hash del invite link
+    // Formatos posibles:
+    // - https://t.me/+abc123xyz
+    // - t.me/+abc123xyz
+    // - https://t.me/joinchat/abc123xyz (formato antiguo)
+    // - https://t.me/channelname (canales públicos)
+    const inviteLink = body.inviteLink.trim();
+    
+    // Buscar el canal en la base de datos por invite link
+    const searchResult = await this.telegramService.findChannelByInviteLink(inviteLink);
+    
+    if (!searchResult.found || !searchResult.channel) {
+      return {
+        success: false,
+        message: searchResult.error || 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+      };
+    }
+
+    // Verificar si el canal ya está conectado para este tipster
+    const existingChannel = await this.channelsService.findByChannelId(
+      tipsterId, 
+      searchResult.channel.channelId
+    );
+    
+    if (existingChannel) {
+      return {
+        success: false,
+        message: 'Este canal ya está conectado a tu cuenta',
+        channel: existingChannel,
+      };
+    }
+
+    // Crear el canal usando el servicio existente
+    try {
+      const isPrivate = !searchResult.channel.channelUsername;
+      
+      const channel = await this.channelsService.create(tipsterId, {
+        channelId: searchResult.channel.channelId,
+        channelTitle: searchResult.channel.channelTitle,
+        channelName: searchResult.channel.channelUsername ? `@${searchResult.channel.channelUsername}` : undefined,
+        channelType: isPrivate ? 'private' : 'public',
+        inviteLink: inviteLink,
+      });
+
+      return {
+        success: true,
+        message: 'Canal conectado correctamente',
+        channel,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Error al conectar el canal',
+      };
+    }
+  }
+
+  /**
    * POST /api/telegram/channels/connect-by-name - Conectar canal por nombre (NUEVO)
    * El tipster solo ingresa el nombre del canal y el sistema busca el ID automáticamente
    */
