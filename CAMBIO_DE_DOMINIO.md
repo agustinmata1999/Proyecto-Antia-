@@ -1,137 +1,82 @@
-# Guía de Cambio de Dominio - AFFILIA-GO
+# 🔄 Cambio de Dominio - AFFILIA-GO
 
-## Cuando hacer un Fork o Restaurar a otro Chat
+## Resumen
 
-Cuando cambies de chat en Emergent (fork/restore), el dominio de preview cambiará. Ejemplo:
-- Dominio anterior: `https://tipster-platform-1.preview.emergentagent.com`
-- Dominio nuevo: `https://tipster-platform-1.preview.emergentagent.com`
+Cuando forkeas este proyecto a un nuevo chat, el dominio de preview cambia. Este documento explica cómo actualizar todas las configuraciones necesarias.
 
-**IMPORTANTE:** Debes actualizar las siguientes configuraciones para que todo funcione correctamente.
+## 🤖 Bot de Telegram - Modo POLLING
 
----
+**IMPORTANTE:** El bot de Telegram ahora usa **POLLING** en lugar de webhooks.
 
-## 1. Variables de Entorno (.env)
+### ¿Qué significa esto?
+- ✅ El bot funciona **automáticamente** en cualquier entorno preview
+- ✅ No necesita configuración de webhooks
+- ✅ No depende del dominio externo
+- ✅ Funciona aunque cambies de chat/dominio
 
-### Frontend (`/app/frontend/.env`)
-```bash
-# Actualizar con el nuevo dominio
-REACT_APP_BACKEND_URL=https://tipster-platform-1.preview.emergentagent.com
-```
+### ¿Por qué POLLING?
+El sistema de preview de Emergent (`*.preview.emergentagent.com`) envuelve las respuestas en un iframe, lo que impide que los webhooks de Telegram funcionen correctamente. Con POLLING, el bot consulta activamente a Telegram por nuevas actualizaciones, evitando este problema.
 
-### Backend (`/app/backend/.env`)
-```bash
-# Actualizar estas variables
-FRONTEND_URL=https://tipster-platform-1.preview.emergentagent.com
-WEBHOOK_BASE_URL=https://tipster-platform-1.preview.emergentagent.com
-```
+## 🛠️ Script Automático
 
----
-
-## 2. Webhook de Telegram (CRÍTICO)
-
-El bot de Telegram debe apuntar al nuevo dominio. Ejecutar este comando:
+Ejecuta el siguiente comando reemplazando `NUEVO-DOMINIO` con tu dominio actual:
 
 ```bash
-# Obtener el token del bot
-BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /app/backend/.env | cut -d'=' -f2)
-
-# Configurar el nuevo webhook
-NUEVO_DOMINIO="https://tipster-platform-1.preview.emergentagent.com"
-
-curl "https://api.telegram.org/bot$BOT_TOKEN/setWebhook?url=${NUEVO_DOMINIO}/api/telegram/webhook&allowed_updates=%5B%22message%22%2C%22callback_query%22%2C%22my_chat_member%22%2C%22chat_join_request%22%5D"
+/app/cambiar_dominio.sh NUEVO-DOMINIO.preview.emergentagent.com
 ```
 
-### Verificar que el webhook está configurado:
-```bash
-BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /app/backend/.env | cut -d'=' -f2)
-curl "https://api.telegram.org/bot$BOT_TOKEN/getWebhookInfo"
-```
-
----
-
-## 3. Reiniciar Servicios
-
-Después de actualizar las variables de entorno:
+### Ejemplo:
+Si tu preview es `https://tipster-platform.preview.emergentagent.com`, ejecuta:
 
 ```bash
-sudo supervisorctl restart backend frontend
+/app/cambiar_dominio.sh tipster-platform.preview.emergentagent.com
 ```
 
----
+## 📝 Lo que hace el script
 
-## 4. Verificación Post-Cambio
+1. **Frontend (.env)**: Actualiza `REACT_APP_BACKEND_URL` y `NEXT_PUBLIC_API_URL`
+2. **Backend (.env)**: Actualiza `APP_URL`
+3. **Supervisor**: Actualiza la variable `APP_URL` en la configuración del servicio
+4. **Servicios**: Reinicia frontend y backend
 
-### Checklist:
-- [ ] Variables de entorno actualizadas en frontend/.env
-- [ ] Variables de entorno actualizadas en backend/.env
-- [ ] Webhook de Telegram configurado con nuevo dominio
-- [ ] Servicios reiniciados
-- [ ] Probar login de usuario
-- [ ] Probar conexión de canal de Telegram (quitar y volver a añadir bot)
-- [ ] Probar landing pages de afiliados (/go/[slug])
+## 📋 Verificación Manual
 
-### Comandos de verificación:
-```bash
-# Ver dominio actual del frontend
-grep REACT_APP_BACKEND_URL /app/frontend/.env
-
-# Ver webhook de Telegram actual
-BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /app/backend/.env | cut -d'=' -f2)
-curl -s "https://api.telegram.org/bot$BOT_TOKEN/getWebhookInfo" | python3 -c "import sys,json; d=json.load(sys.stdin); print('Webhook URL:', d['result']['url'])"
-
-# Ver logs del backend
-tail -20 /var/log/supervisor/backend.out.log
-```
-
----
-
-## 5. Script Automático de Cambio de Dominio
-
-Ejecutar este script pasando el nuevo dominio como argumento:
+Después de ejecutar el script, verifica:
 
 ```bash
-#!/bin/bash
-# Uso: ./cambiar_dominio.sh nuevo-dominio.preview.emergentagent.com
+# Ver configuración del frontend
+cat /app/frontend/.env
 
-NUEVO_DOMINIO=$1
+# Ver configuración del backend
+cat /app/backend/.env | head -10
 
-if [ -z "$NUEVO_DOMINIO" ]; then
-    echo "Uso: $0 <nuevo-dominio>"
-    exit 1
-fi
+# Verificar servicios
+sudo supervisorctl status
 
-echo "Actualizando a: https://$NUEVO_DOMINIO"
-
-# 1. Actualizar frontend/.env
-sed -i "s|REACT_APP_BACKEND_URL=.*|REACT_APP_BACKEND_URL=https://$NUEVO_DOMINIO|" /app/frontend/.env
-
-# 2. Actualizar backend/.env
-sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$NUEVO_DOMINIO|" /app/backend/.env
-sed -i "s|WEBHOOK_BASE_URL=.*|WEBHOOK_BASE_URL=https://$NUEVO_DOMINIO|" /app/backend/.env
-
-# 3. Actualizar webhook de Telegram
-BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /app/backend/.env | cut -d'=' -f2)
-curl -s "https://api.telegram.org/bot$BOT_TOKEN/setWebhook?url=https://$NUEVO_DOMINIO/api/telegram/webhook&allowed_updates=%5B%22message%22%2C%22callback_query%22%2C%22my_chat_member%22%2C%22chat_join_request%22%5D"
-
-# 4. Reiniciar servicios
-sudo supervisorctl restart backend frontend
-
-echo "✅ Dominio actualizado a: https://$NUEVO_DOMINIO"
-echo "⚠️  Recuerda actualizar Stripe y Redsys manualmente si los usas"
+# Verificar bot de Telegram
+curl -s http://localhost:8001/api/health
 ```
 
----
+## ⚠️ Notas Importantes
 
-## Notas Importantes
+1. **El bot NO necesita webhook** - Funciona con polling automáticamente
+2. **Los canales de Telegram existentes siguen funcionando** - No es necesario reconectar
+3. **Si hay problemas con el bot**, simplemente reinicia el backend:
+   ```bash
+   sudo supervisorctl restart backend
+   ```
 
-1. **Links de Afiliados:** Los links compartidos (`/go/slug`) cambiarán de dominio. Notifica a los tipsters si es necesario.
+## 📧 Mensaje para el Nuevo Chat
 
-2. **Canales de Telegram:** Si un canal no se conecta después del cambio, el tipster debe:
-   - Quitar el bot @Antiabetbot del canal
-   - Volver a añadirlo como administrador
+Copia y pega esto al inicio de un nuevo fork:
 
-3. **Sesiones de Usuario:** Los usuarios pueden necesitar volver a iniciar sesión.
+```
+CAMBIO DE DOMINIO - Ejecuta esto primero:
 
----
+1. Identifica tu dominio de preview (aparece en la URL)
+2. Ejecuta: /app/cambiar_dominio.sh TU-DOMINIO.preview.emergentagent.com
 
-*Última actualización: Enero 2025*
+Ejemplo: /app/cambiar_dominio.sh tipster-platform.preview.emergentagent.com
+
+El bot de Telegram usa POLLING, así que funciona automáticamente sin configuración adicional.
+```
