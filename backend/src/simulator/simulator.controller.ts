@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Query, Body, Res, Req, Logger } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { Public } from '../auth/decorators/public.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectId } from 'mongodb';
 
