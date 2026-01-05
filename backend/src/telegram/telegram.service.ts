@@ -90,7 +90,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     botUsername: string | null;
     webhookUrl: string | null;
     webhookConfigured: boolean;
-    proxyMode: boolean;
+    pollingMode: boolean;
     lastError: string | null;
   }> {
     try {
@@ -103,7 +103,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         botUsername: botInfo?.username || null,
         webhookUrl: webhookInfo?.url || null,
         webhookConfigured: !!webhookInfo?.url,
-        proxyMode: true,
+        pollingMode: true, // Always polling mode now
         lastError: null,
       };
     } catch (error) {
