@@ -115,17 +115,17 @@ export default function TipsterTelegramView({
           <form onSubmit={handleConnect} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del canal
+                Link de invitación del canal
               </label>
               <input
                 type="text"
                 value={channelInput}
                 onChange={(e) => setChannelInput(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                placeholder="Mi Canal Premium"
+                placeholder="https://t.me/+abc123xyz"
               />
               <p className="text-sm text-gray-500 mt-2">
-                Escribe el nombre exacto de tu canal tal como aparece en Telegram
+                Pega el link de invitación de tu canal. Lo puedes obtener desde Telegram → Info del canal → Invitar vía enlace
               </p>
             </div>
 
