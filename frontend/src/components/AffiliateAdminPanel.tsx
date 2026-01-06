@@ -610,7 +610,7 @@ export default function AffiliateAdminPanel() {
                           <td className="px-3 py-3 text-sm text-gray-600">{ref.houseName}</td>
                           <td className="px-3 py-3">
                             <div className="text-sm text-gray-900">
-                              {ref.userEmail || ref.userTelegram || ref.userName || ref.externalRefId || 'Sin datos'}
+                              {ref.userEmail || ref.userTelegram || ref.externalRefId || 'Sin datos'}
                             </div>
                             {ref.userTelegram && ref.userEmail && (
                               <div className="text-xs text-gray-500">📱 {ref.userTelegram}</div>
