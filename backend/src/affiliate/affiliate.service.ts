@@ -1036,10 +1036,34 @@ export class AffiliateService {
     if (filters.tipsterId) conversionWhere.tipsterId = filters.tipsterId;
     if (filters.houseId) conversionWhere.houseId = filters.houseId;
 
-    // Get all clicks
-    const clicks = await this.prisma.affiliateClickEvent.findMany({
-      where: clickWhere,
-    });
+    // Get all clicks from landing_click_events (campaigns)
+    const landingClicksFilter: any = {
+      created_at: {
+        $gte: { $date: startDate.toISOString() },
+        $lte: { $date: endDate.toISOString() },
+      },
+    };
+    if (filters.tipsterId) landingClicksFilter.tipster_id = filters.tipsterId;
+    if (filters.campaignId) landingClicksFilter.landing_id = filters.campaignId;
+    if (filters.houseId) landingClicksFilter.betting_house_id = filters.houseId;
+
+    const landingClicksResult = (await this.prisma.$runCommandRaw({
+      find: 'landing_click_events',
+      filter: landingClicksFilter,
+    })) as any;
+    const landingClicks = landingClicksResult.cursor?.firstBatch || [];
+
+    // Map landing clicks to a standard format
+    const clicks = landingClicks.map((c: any) => ({
+      id: c._id.$oid || c._id,
+      tipsterId: c.tipster_id,
+      landingId: c.landing_id,
+      houseId: c.betting_house_id,
+      countryCode: c.country_context,
+      clickedAt: c.created_at?.$date ? new Date(c.created_at.$date) : new Date(),
+      ipAddress: c.ip_address,
+      wasBlocked: false,
+    }));
 
     // Get all conversions
     const conversions = await this.prisma.affiliateConversion.findMany({
