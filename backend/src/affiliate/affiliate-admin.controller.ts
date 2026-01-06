@@ -261,6 +261,11 @@ export class AffiliateAdminController {
       houseName: housesMap.get(c.houseId) || 'Unknown',
       tipsterName: c.tipsterId ? tipstersMap.get(c.tipsterId) || 'Unknown' : 'Sin asignar',
       commissionEur: c.commissionCents ? c.commissionCents / 100 : null,
+      // User data
+      userEmail: c.userEmail || null,
+      userTelegram: c.userTelegram || null,
+      externalRefId: c.externalRefId || null,
+      userName: c.userEmail || c.userTelegram || c.externalRefId || null,
     }));
   }
 
