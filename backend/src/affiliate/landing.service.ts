@@ -577,19 +577,26 @@ export class LandingService {
       throw new BadRequestException('No tienes permiso para ver estas métricas');
     }
 
-    const dateFilter: any = {};
-    if (startDate) {
-      dateFilter.$gte = { $date: startDate.toISOString() };
-    }
-    if (endDate) {
-      dateFilter.$lte = { $date: endDate.toISOString() };
-    }
+    // Build date filter for MongoDB query
+    const buildDateMatch = () => {
+      const match: any = { landing_id: landingId };
+      if (startDate || endDate) {
+        match.created_at = {};
+        if (startDate) {
+          match.created_at.$gte = { $date: startDate.toISOString() };
+        }
+        if (endDate) {
+          match.created_at.$lte = { $date: endDate.toISOString() };
+        }
+      }
+      return match;
+    };
 
     // Clicks por país
     const clicksByCountry = await this.prisma.$runCommandRaw({
       aggregate: 'landing_click_events',
       pipeline: [
-        { $match: { landing_id: landingId, ...(Object.keys(dateFilter).length ? { created_at: dateFilter } : {}) } },
+        { $match: buildDateMatch() },
         { $group: { _id: '$country_context', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ],
@@ -600,17 +607,52 @@ export class LandingService {
     const clicksByHouse = await this.prisma.$runCommandRaw({
       aggregate: 'landing_click_events',
       pipeline: [
-        { $match: { landing_id: landingId, ...(Object.keys(dateFilter).length ? { created_at: dateFilter } : {}) } },
+        { $match: buildDateMatch() },
         { $group: { _id: '$betting_house_id', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ],
       cursor: {},
     }) as any;
 
+    // Clicks por día (últimos 30 días)
+    const clicksByDate = await this.prisma.$runCommandRaw({
+      aggregate: 'landing_click_events',
+      pipeline: [
+        { $match: buildDateMatch() },
+        { 
+          $group: { 
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } }, 
+            count: { $sum: 1 } 
+          } 
+        },
+        { $sort: { _id: 1 } },
+        { $limit: 30 },
+      ],
+      cursor: {},
+    }) as any;
+
+    // Conversiones/Referidos de este landing (por tipsterId)
+    const conversions = await this.prisma.affiliateConversion.findMany({
+      where: { tipsterId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
     // Enriquecer clicks por casa con nombres
     const houseIds = (clicksByHouse.cursor?.firstBatch || []).map((c: any) => c._id);
     const houses = await this.getBettingHousesByIds(houseIds);
     const housesMap = new Map(houses.map((h: any) => [h.id, h]));
+
+    // Stats de conversiones
+    const conversionStats = {
+      total: conversions.length,
+      approved: conversions.filter(c => c.status === 'APPROVED').length,
+      pending: conversions.filter(c => c.status === 'PENDING').length,
+      rejected: conversions.filter(c => c.status === 'REJECTED').length,
+      totalEarningsCents: conversions
+        .filter(c => c.status === 'APPROVED')
+        .reduce((sum, c) => sum + (c.commissionCents || 0), 0),
+    };
 
     return {
       landing: {
@@ -620,8 +662,17 @@ export class LandingService {
         totalClicks: landing.totalClicks,
         totalImpressions: landing.totalImpressions,
       },
+      general: {
+        clicks: landing.totalClicks,
+        impressions: landing.totalImpressions,
+        conversions: conversionStats.approved,
+        conversionRate: landing.totalClicks > 0 
+          ? ((conversionStats.approved / landing.totalClicks) * 100).toFixed(1)
+          : '0',
+        earnings: conversionStats.totalEarningsCents,
+      },
       clicksByCountry: (clicksByCountry.cursor?.firstBatch || []).map((c: any) => ({
-        country: c._id,
+        country: c._id || 'UNKNOWN',
         clicks: c.count,
       })),
       clicksByHouse: (clicksByHouse.cursor?.firstBatch || []).map((c: any) => {
@@ -632,6 +683,18 @@ export class LandingService {
           clicks: c.count,
         };
       }),
+      clicksByDate: (clicksByDate.cursor?.firstBatch || []).map((c: any) => ({
+        date: c._id,
+        clicks: c.count,
+      })),
+      conversions: conversionStats,
+      recentReferrals: conversions.slice(0, 10).map(c => ({
+        id: c.id,
+        status: c.status,
+        eventType: c.eventType,
+        commissionCents: c.commissionCents,
+        createdAt: c.createdAt,
+      })),
     };
   }
 
