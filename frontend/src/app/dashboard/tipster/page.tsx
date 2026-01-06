@@ -466,6 +466,40 @@ export default function TipsterDashboard() {
     }
   };
 
+  // Conectar canal por nombre (y opcionalmente link para diferenciar)
+  const handleConnectChannelByNameAndLink = async () => {
+    if (!channelInput.trim()) {
+      setAddChannelError('Por favor, ingresa el nombre del canal');
+      return;
+    }
+
+    setConnectingChannel(true);
+    setAddChannelError('');
+
+    try {
+      // Conectar por nombre del canal (y link opcional)
+      const response = await telegramApi.channels.connectByName(channelInput.trim(), channelLinkInput.trim() || undefined);
+      
+      if (response.data.success) {
+        // Reload channels
+        const channelsRes = await telegramApi.channels.getAll();
+        setTelegramChannels(channelsRes.data.channels || []);
+        
+        // Reset form
+        setShowAddChannelForm(false);
+        setChannelInput('');
+        setChannelLinkInput('');
+        alert('✅ Canal conectado correctamente');
+      } else {
+        setAddChannelError(response.data.message || 'No se encontró el canal. Verifica que el bot sea administrador y el nombre sea correcto.');
+      }
+    } catch (error: any) {
+      setAddChannelError(error.response?.data?.message || 'Error al conectar el canal. Verifica el nombre.');
+    } finally {
+      setConnectingChannel(false);
+    }
+  };
+
   // Conectar canal por nombre
   const handleConnectChannelByName = async () => {
     if (!channelInput.trim()) {
