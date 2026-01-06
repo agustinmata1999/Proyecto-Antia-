@@ -57,6 +57,18 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-06 - Mejora Conexión de Canales de Telegram
+**Completado:**
+- ✅ **Nuevo método de conexión por Channel ID**
+  - Problema: Cuando un usuario crea un nuevo canal y añade el bot, a veces el sistema no lo detecta con el link de invitación
+  - Solución: Agregado tab "Por Channel ID" en el modal de conexión
+  - El usuario puede obtener el ID usando @userinfobot en Telegram
+  - El backend verifica que el bot sea admin y conecta el canal automáticamente
+- ✅ **Mejoradas las instrucciones de error**
+  - Cuando el link no funciona, se muestran instrucciones claras
+  - Se sugiere enviar un mensaje en el canal para ayudar a la detección
+  - Se ofrece la alternativa de conectar por ID
+
 ### 2026-01-06 - Corrección Completa Sistema de Métricas de Afiliación
 **Completado:**
 - ✅ **Tarjetas de Campañas**: Ahora muestran vistas y clicks reales
