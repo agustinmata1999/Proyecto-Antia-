@@ -118,7 +118,7 @@ export default function AffiliateStatsSection() {
       if (selectedHouse) params.append('houseId', selectedHouse);
       
       // Fetch stats
-      const res = await fetch(`${getBaseUrl()}/api/affiliate/admin/stats?${params.toString()}`, { headers });
+      const res = await fetch(`${getBaseUrl()}/api/admin/affiliate/stats?${params.toString()}`, { headers });
       
       if (res.ok) {
         const data = await res.json();
