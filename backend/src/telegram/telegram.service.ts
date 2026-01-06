@@ -1970,6 +1970,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
+      // Process channel_post directly (critical for detecting new channels)
+      if (update.channel_post) {
+        const chat = update.channel_post.chat;
+        if (chat && chat.type === 'channel') {
+          this.logger.log(`📬 Webhook channel_post: ${chat.title} (${chat.id})`);
+          await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+          this.logger.log('Webhook channel_post processed - channel saved');
+        }
+        return;
+      }
+
       // Process message updates directly (bypass Telegraf to use proxy)
       if (update.message) {
         setImmediate(async () => {
