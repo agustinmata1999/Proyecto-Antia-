@@ -461,9 +461,13 @@ export class AffiliateRedirectController {
     const amount = body.amount || body.commission || body.revenue;
     const currency = body.currency || 'EUR';
     const transactionId = body.txid || body.transaction_id || body.conversion_id;
+    // User data from postback
+    const userEmail = body.user_email || body.email || body.player_email;
+    const userTelegram = body.user_telegram || body.telegram || body.player_telegram;
+    const externalRefId = body.external_ref_id || body.player_id || body.user_id || transactionId;
 
     this.logger.log(
-      `📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}`,
+      `📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}, user=${userEmail || 'N/A'}`,
     );
 
     if (!subid) {
@@ -478,6 +482,9 @@ export class AffiliateRedirectController {
         amount: amount ? parseFloat(amount) : undefined,
         currency,
         transactionId,
+        userEmail,
+        userTelegram,
+        externalRefId,
       });
 
       return result;
