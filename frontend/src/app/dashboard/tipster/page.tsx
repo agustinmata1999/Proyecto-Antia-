@@ -1712,242 +1712,283 @@ export default function TipsterDashboard() {
         )}
 
         {activeView === 'payouts' && (
-          <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">💵 Liquidaciones</h1>
-              <p className="text-gray-600 mt-1">Gestiona tus ingresos y pagos</p>
-            </div>
-
-            {/* Sub-navegación estilo Mollie/Stripe */}
-            <div className="bg-white rounded-lg shadow mb-6">
-              <div className="border-b border-gray-200">
-                <nav className="flex -mb-px">
-                  <button
-                    onClick={() => setPayoutsSubView('liquidaciones')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                      payoutsSubView === 'liquidaciones'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    📊 Liquidaciones
-                  </button>
-                  <button
-                    onClick={() => setPayoutsSubView('facturas')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                      payoutsSubView === 'facturas'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    📄 Facturas
-                  </button>
-                  <button
-                    onClick={() => setPayoutsSubView('pagos')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                      payoutsSubView === 'pagos'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    💳 Pagos Recibidos
-                  </button>
-                </nav>
+          <div className="min-h-screen bg-gray-50">
+            {/* Header AntiaPay */}
+            <div className="bg-white border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span className="font-medium text-gray-900">AntiaPay</span>
+                <span>/</span>
+                <span>Liquidaciones</span>
               </div>
             </div>
 
-            {/* Sub-vista: Liquidaciones */}
-            {payoutsSubView === 'liquidaciones' && (
-              <div className="space-y-6">
-                {/* Resumen de Balance */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-sm text-gray-500 mb-2">Balance Pendiente</div>
-                    <div className="text-3xl font-bold text-blue-600">
-                      {formatPrice(salesStats?.netEarningsCents || 0)}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">Próxima liquidación: Domingo</div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-sm text-gray-500 mb-2">Total Liquidado (Histórico)</div>
-                    <div className="text-3xl font-bold text-green-600">€0.00</div>
-                    <div className="text-xs text-gray-400 mt-1">Desde el inicio</div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-sm text-gray-500 mb-2">Próxima Liquidación</div>
-                    <div className="text-xl font-bold text-gray-900">
-                      {(() => {
-                        const today = new Date();
-                        const dayOfWeek = today.getDay();
-                        const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
-                        const nextSunday = new Date(today);
-                        nextSunday.setDate(today.getDate() + daysUntilSunday);
-                        return nextSunday.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-                      })()}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">Pronósticos: cada 7 días</div>
-                  </div>
+            {/* Main Content */}
+            <div className="p-6">
+              {/* Tabs */}
+              <div className="bg-white rounded-lg shadow-sm mb-6">
+                <div className="border-b border-gray-100">
+                  <nav className="flex">
+                    <button
+                      onClick={() => setPayoutsSubView('liquidaciones')}
+                      className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
+                        payoutsSubView === 'liquidaciones'
+                          ? 'border-blue-500 text-blue-600 bg-blue-50/50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      Liquidaciones
+                    </button>
+                    <button
+                      onClick={() => setPayoutsSubView('facturas')}
+                      className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
+                        payoutsSubView === 'facturas'
+                          ? 'border-blue-500 text-blue-600 bg-blue-50/50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      Facturas
+                    </button>
+                    <button
+                      onClick={() => setPayoutsSubView('pagos')}
+                      className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
+                        payoutsSubView === 'pagos'
+                          ? 'border-blue-500 text-blue-600 bg-blue-50/50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      Informe de saldo
+                    </button>
+                  </nav>
                 </div>
+              </div>
 
-                {/* Desglose Detallado de Comisiones */}
-                <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-bold text-gray-900">📊 Desglose del Período Actual</h2>
-                    <p className="text-sm text-gray-500 mt-1">Detalle de comisiones y neto a recibir</p>
+              {/* Sub-vista: Liquidaciones */}
+              {payoutsSubView === 'liquidaciones' && (
+                <div className="space-y-6">
+                  {/* Filters */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">Cartera</span>
+                      <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>Todas</option>
+                        <option>Pronósticos</option>
+                        <option>Afiliación</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">Año</span>
+                      <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option>2025</option>
+                        <option>2024</option>
+                      </select>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <tbody className="divide-y divide-gray-100">
+
+                  {/* Table */}
+                  <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Liquidaciones</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ingresos</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Deducidos</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {/* Sample data - will be replaced with real data */}
+                        {settlementsData?.settlements?.length > 0 ? (
+                          settlementsData.settlements.map((settlement: any, index: number) => (
+                            <tr key={settlement.id || index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                {settlement.reference || `LIQ-${String(index + 1).padStart(4, '0')}`}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-500">
+                                {settlement.date ? new Date(settlement.date).toLocaleDateString('es-ES') : '-'}
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  settlement.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                                  settlement.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                  settlement.status === 'PROCESSING' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {settlement.status === 'PAID' ? 'Pagado' :
+                                   settlement.status === 'PENDING' ? 'Pendiente' :
+                                   settlement.status === 'PROCESSING' ? 'En proceso' :
+                                   settlement.status || 'Abandonado'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-right text-gray-900">
+                                {formatPrice(settlement.grossAmount || 0)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-right text-red-600">
+                                -{formatPrice(settlement.deductions || 0)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-right text-orange-600">
+                                -{formatPrice(settlement.expenses || 0)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-right font-semibold text-gray-900">
+                                {formatPrice(settlement.netAmount || 0)}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button className="text-gray-400 hover:text-red-600 transition">
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd"/>
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
                           <tr>
-                            <td className="py-4 text-gray-600">Ingresos Brutos</td>
-                            <td className="py-4 text-right font-semibold text-gray-900">
-                              {formatPrice(salesStats?.grossEarningsCents || 0)}
+                            <td colSpan={8} className="px-6 py-12 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                </div>
+                                <p className="text-gray-500 font-medium">No hay liquidaciones procesadas aún</p>
+                                <p className="text-sm text-gray-400 mt-1">Tu primera liquidación se procesará automáticamente</p>
+                              </div>
                             </td>
                           </tr>
-                          <tr className="bg-red-50">
-                            <td className="py-4 text-gray-600">
-                              <span className="flex items-center gap-2">
-                                <span className="text-red-500">−</span>
-                                Comisión Pasarela (Stripe/Redsys)
-                              </span>
-                            </td>
-                            <td className="py-4 text-right font-semibold text-red-600">
-                              -{formatPrice(salesStats?.gatewayFeesCents || 0)}
-                            </td>
-                          </tr>
-                          <tr className="bg-orange-50">
-                            <td className="py-4 text-gray-600">
-                              <span className="flex items-center gap-2">
-                                <span className="text-orange-500">−</span>
-                                Comisión Antia (Plataforma)
-                              </span>
-                            </td>
-                            <td className="py-4 text-right font-semibold text-orange-600">
-                              -{formatPrice(salesStats?.platformFeesCents || 0)}
-                            </td>
-                          </tr>
-                          <tr className="bg-green-50 border-t-2 border-green-200">
-                            <td className="py-4 text-gray-900 font-semibold">
-                              <span className="flex items-center gap-2">
-                                <span className="text-green-600">=</span>
-                                Neto a Recibir
-                              </span>
-                            </td>
-                            <td className="py-4 text-right font-bold text-green-600 text-xl">
-                              {formatPrice(salesStats?.netEarningsCents || 0)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tipos de Liquidación */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Pronósticos */}
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-xl">🎯</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">Pronósticos</h3>
-                        <p className="text-xs text-gray-500">Venta de productos</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Frecuencia</span>
-                        <span className="font-medium">Cada 7 días</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Comisión Antia</span>
-                        <span className="font-medium text-orange-600">10% (7% alto volumen)</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Pendiente</span>
-                        <span className="font-bold text-blue-600">
-                          {formatPrice(salesStats?.netEarningsCents || 0)}
-                        </span>
-                      </div>
-                    </div>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
 
-                  {/* Afiliación */}
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <span className="text-xl">🤝</span>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-lg shadow-sm p-5">
+                      <div className="text-sm text-gray-500 mb-1">Balance Pendiente</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {formatPrice(salesStats?.netEarningsCents || 0)}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">Afiliación</h3>
-                        <p className="text-xs text-gray-500">Casas de apuestas</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Frecuencia</span>
-                        <span className="font-medium">1 vez al mes</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Comisión Antia</span>
-                        <span className="font-medium text-green-600">Sin comisión</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Pendiente</span>
-                        <span className="font-bold text-purple-600">€0.00</span>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Próxima liquidación: {(() => {
+                          const today = new Date();
+                          const dayOfWeek = today.getDay();
+                          const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
+                          const nextSunday = new Date(today);
+                          nextSunday.setDate(today.getDate() + daysUntilSunday);
+                          return nextSunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                        })()}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Historial de Liquidaciones */}
-                <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-bold text-gray-900">📋 Historial de Liquidaciones</h2>
-                  </div>
-                  <div className="p-6">
-                    <div className="text-center py-8">
-                      <div className="text-4xl mb-4">📭</div>
-                      <p className="text-gray-500">No hay liquidaciones procesadas aún</p>
-                      <p className="text-sm text-gray-400 mt-2">
-                        Tu primera liquidación se procesará el próximo domingo
-                      </p>
+                    <div className="bg-white rounded-lg shadow-sm p-5">
+                      <div className="text-sm text-gray-500 mb-1">Total Liquidado</div>
+                      <div className="text-2xl font-bold text-green-600">€0.00</div>
+                      <div className="text-xs text-gray-400 mt-1">Histórico total</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-5">
+                      <div className="text-sm text-gray-500 mb-1">Comisiones Antia</div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {formatPrice(salesStats?.platformFeesCents || 0)}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">10% de las ventas</div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Sub-vista: Facturas */}
-            {payoutsSubView === 'facturas' && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900">📄 Facturas</h2>
-                  <p className="text-sm text-gray-500 mt-1">Descarga tus facturas de liquidación</p>
+              {/* Sub-vista: Facturas */}
+              {payoutsSubView === 'facturas' && (
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factura</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Importe</th>
+                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-gray-500 font-medium">No hay facturas disponibles</p>
+                            <p className="text-sm text-gray-400 mt-1">Las facturas se generan con cada liquidación</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <div className="text-4xl mb-4">📄</div>
-                    <p className="text-gray-500">No hay facturas disponibles</p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      Las facturas se generan automáticamente con cada liquidación
-                    </p>
+              )}
+
+              {/* Sub-vista: Informe de Saldo */}
+              {payoutsSubView === 'pagos' && (
+                <div className="space-y-6">
+                  {/* Balance Overview */}
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen de Saldo</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <div className="text-sm text-blue-600">Ingresos Brutos</div>
+                        <div className="text-xl font-bold text-blue-700">{formatPrice(salesStats?.grossEarningsCents || 0)}</div>
+                      </div>
+                      <div className="p-4 bg-red-50 rounded-lg">
+                        <div className="text-sm text-red-600">Comisión Pasarela</div>
+                        <div className="text-xl font-bold text-red-700">-{formatPrice(salesStats?.gatewayFeesCents || 0)}</div>
+                      </div>
+                      <div className="p-4 bg-orange-50 rounded-lg">
+                        <div className="text-sm text-orange-600">Comisión Antia</div>
+                        <div className="text-xl font-bold text-orange-700">-{formatPrice(salesStats?.platformFeesCents || 0)}</div>
+                      </div>
+                      <div className="p-4 bg-green-50 rounded-lg">
+                        <div className="text-sm text-green-600">Neto a Recibir</div>
+                        <div className="text-xl font-bold text-green-700">{formatPrice(salesStats?.netEarningsCents || 0)}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment History */}
+                  <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100">
+                      <h3 className="font-semibold text-gray-900">Historial de Transferencias</h3>
+                    </div>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Referencia</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                          <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase">Importe</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center">
+                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                              </div>
+                              <p className="text-gray-500 font-medium">No hay transferencias registradas</p>
+                              <p className="text-sm text-gray-400 mt-1">Las transferencias aparecerán aquí cuando se procesen</p>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Sub-vista: Pagos Recibidos */}
-            {payoutsSubView === 'pagos' && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900">💳 Pagos Recibidos</h2>
-                  <p className="text-sm text-gray-500 mt-1">Historial de transferencias a tu cuenta</p>
-                </div>
-                <div className="p-6">
+              )}
                   <div className="text-center py-12">
                     <div className="text-4xl mb-4">💸</div>
                     <p className="text-gray-500">No hay pagos recibidos aún</p>
