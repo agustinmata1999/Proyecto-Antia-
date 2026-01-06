@@ -134,8 +134,8 @@ export const telegramApi = {
     delete: (id: string) => api.delete(`/telegram/channels/${id}`),
     refresh: (id: string) => api.post(`/telegram/channels/${id}/refresh`),
     generateInviteLink: (id: string) => api.post(`/telegram/channels/${id}/invite-link`),
-    // NUEVO: Conectar canal por nombre (sin necesidad de ID)
-    connectByName: (channelName: string) => api.post('/telegram/channels/connect-by-name', { channelName }),
+    // NUEVO: Conectar canal por nombre (con link opcional para diferenciar)
+    connectByName: (channelName: string, inviteLink?: string) => api.post('/telegram/channels/connect-by-name', { channelName, inviteLink }),
     // NUEVO: Conectar canal por link de invitación
     connectByInviteLink: (inviteLink: string) => api.post('/telegram/channels/connect-by-invite-link', { inviteLink }),
     // NUEVO: Buscar canal por nombre
