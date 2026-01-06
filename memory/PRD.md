@@ -77,8 +77,22 @@ Red de afiliación premium:
 - ✅ **Admin Estadísticas**: Corregida URL del endpoint (`/api/admin/affiliate/stats`)
   - Filtros funcionando: Tipster, Campaña, Casa, Fechas
   - Stats por tipster con clicks, conversiones y comisiones
+  - **Filtro Campaña ahora muestra las landings del tipster** (no retos del admin)
 - ✅ **Admin Conversiones**: Mostrando datos de referidos con emails
   - Columna Usuario muestra: email, telegram, ID externo
+  - Actualizado postback para guardar datos de usuario (user_email, user_telegram, external_ref_id)
+  - Simulador ahora envía datos del usuario en postbacks
+
+### 2025-01-06 - Rediseño Panel Liquidaciones (Tipster)
+**Completado:**
+- ✅ Nuevo diseño estilo AntiaPay según captura de referencia
+- ✅ Header "AntiaPay / Liquidaciones"
+- ✅ Tabs: Liquidaciones, Facturas, Informe de saldo
+- ✅ Filtros: Cartera y Año (dropdowns)
+- ✅ Tabla con columnas: Liquidaciones, Fecha, Estado, Ingresos, Deducidos, Gastos, Total
+- ✅ Cards de resumen: Balance Pendiente, Total Liquidado, Comisiones Antia
+- ✅ Tab Facturas con tabla limpia
+- ✅ Tab Informe de saldo con Resumen de Saldo + Historial de Transferencias
 
 ### Sesión Anterior - Correcciones Críticas
 - ✅ Bot Telegram: Migrado de webhooks a polling (más robusto)
