@@ -2791,47 +2791,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       }
 
       if (!channel) {
-        // PASO 3: Si no se encontró, intentar forzar un refresh de canales 
-        this.logger.log(`Channel not found, attempting to force refresh...`);
-        
-        // Intentar procesar updates pendientes del bot
-        try {
-          if (this.bot) {
-            // Obtener updates pendientes para detectar canales nuevos
-            const updates = await this.bot.telegram.callApi('getUpdates', {
-              timeout: 2,
-              allowed_updates: ['my_chat_member'],
-            });
-            
-            if (updates && Array.isArray(updates) && updates.length > 0) {
-              // Procesar cada update para detectar nuevos canales
-              for (const update of updates) {
-                if (update.my_chat_member) {
-                  await this.handleMyChatMemberUpdate(update.my_chat_member);
-                }
-              }
-              
-              // Buscar de nuevo después del refresh
-              const retryResult = (await this.prisma.$runCommandRaw({
-                find: 'detected_telegram_channels',
-                filter,
-                limit: 1,
-              })) as any;
-              
-              channel = retryResult.cursor?.firstBatch?.[0];
-              
-              if (channel) {
-                this.logger.log(`Channel found after refresh: ${channel.channel_title}`);
-              }
-            }
-          }
-        } catch (refreshError) {
-          this.logger.warn('Error during refresh attempt:', refreshError);
-        }
-      }
-
-      if (!channel) {
-        // PASO 4: Mostrar canales disponibles en el mensaje de error con instrucciones adicionales
+        // PASO 3: Si no se encontró, mostrar canales disponibles con instrucciones claras
         const availableResult = (await this.prisma.$runCommandRaw({
           find: 'detected_telegram_channels',
           filter: { is_active: true },
@@ -2842,7 +2802,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
 
         return {
           found: false,
-          error: `Canal no encontrado con ese link.\n\nCanales detectados donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n💡 Si tu canal no aparece:\n1. Verifica que @Antiabetbot sea administrador del canal\n2. Envía cualquier mensaje en el canal (esto ayuda al bot a detectarlo)\n3. Espera 30 segundos e intenta de nuevo\n4. O usa el botón "Conectar por ID" si conoces el ID del canal`,
+          error: `Canal no encontrado con ese link.\n\nCanales detectados donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n💡 Si tu canal no aparece:\n1. Verifica que @Antiabetbot sea administrador del canal\n2. Envía cualquier mensaje en el canal (esto ayuda al bot a detectarlo)\n3. Espera 30 segundos e intenta de nuevo\n4. O usa "Conectar por ID" e ingresa el ID del canal (ej: -1001234567890)`,
           availableChannels: availableChannels.map((c: any) => ({
             id: c.channel_id,
             title: c.channel_title,
