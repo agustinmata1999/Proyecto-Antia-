@@ -2617,7 +2617,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
    * Busca en la tabla de canales detectados
    * OPTIMIZADO: No hace verificación con Telegram para evitar timeouts
    */
-  async findChannelByName(channelName: string): Promise<{
+  async findChannelByName(channelName: string, inviteLink?: string): Promise<{
     found: boolean;
     channel?: {
       channelId: string;
@@ -2644,13 +2644,12 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
             { channel_username: { $regex: `^${this.escapeRegex(searchName)}$`, $options: 'i' } },
           ],
         },
-        limit: 1,
       })) as any;
 
-      let channel = result.cursor?.firstBatch?.[0];
+      let channels = result.cursor?.firstBatch || [];
 
       // PASO 2: Si no se encontró, forzar refresh de updates de Telegram
-      if (!channel) {
+      if (channels.length === 0) {
         this.logger.log(`🔄 Canal "${normalizedName}" no encontrado en DB, forzando refresh de updates...`);
         
         try {
@@ -2699,21 +2698,23 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
                 { channel_username: { $regex: `^${this.escapeRegex(searchName)}$`, $options: 'i' } },
               ],
             },
-            limit: 1,
           })) as any;
           
-          channel = result.cursor?.firstBatch?.[0];
+          channels = result.cursor?.firstBatch || [];
           
-          if (channel) {
-            this.logger.log(`✅ Canal encontrado después del refresh: ${channel.channel_title}`);
+          if (channels.length > 0) {
+            this.logger.log(`✅ Canal(es) encontrado(s) después del refresh: ${channels.length}`);
           }
         } catch (refreshError) {
           this.logger.warn('Error during refresh:', refreshError.message);
         }
       }
 
-      if (!channel) {
-        // Listar canales disponibles para el mensaje de error
+      // PASO 3: Si hay múltiples canales con el mismo nombre, usar el link para diferenciar
+      let channel = null;
+      
+      if (channels.length === 0) {
+        // No se encontró ningún canal
         const availableResult = (await this.prisma.$runCommandRaw({
           find: 'detected_telegram_channels',
           filter: { is_active: true },
@@ -2725,6 +2726,68 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           found: false,
           error: `Canal "${normalizedName}" no encontrado.\n\nCanales detectados: ${channelNames || 'Ninguno'}\n\n💡 Para detectar tu canal:\n1. Verifica que @Antiabetbot sea admin\n2. Envía un mensaje en el canal\n3. Vuelve a intentar`,
         };
+      } else if (channels.length === 1) {
+        // Solo hay un canal con ese nombre
+        channel = channels[0];
+      } else {
+        // Hay múltiples canales con el mismo nombre
+        this.logger.log(`⚠️ Se encontraron ${channels.length} canales con el nombre "${normalizedName}"`);
+        
+        if (inviteLink) {
+          // Extraer el hash del link proporcionado
+          const hashMatch = inviteLink.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
+          const searchHash = hashMatch ? hashMatch[1] : null;
+          
+          if (searchHash) {
+            // Buscar el canal que coincida con el invite link
+            for (const ch of channels) {
+              // Comparar con el invite_link guardado
+              if (ch.invite_link) {
+                const chHashMatch = ch.invite_link.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
+                const chHash = chHashMatch ? chHashMatch[1] : null;
+                if (chHash && (chHash === searchHash || searchHash.includes(chHash) || chHash.includes(searchHash))) {
+                  channel = ch;
+                  this.logger.log(`✅ Canal diferenciado por invite link: ${ch.channel_title}`);
+                  break;
+                }
+              }
+              
+              // También intentar exportar el link actual del canal para comparar
+              if (!channel) {
+                try {
+                  const currentLink = await this.httpService.exportChatInviteLink(ch.channel_id);
+                  if (currentLink) {
+                    const currentHashMatch = currentLink.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
+                    const currentHash = currentHashMatch ? currentHashMatch[1] : null;
+                    if (currentHash && (currentHash === searchHash || searchHash.includes(currentHash) || currentHash.includes(searchHash))) {
+                      channel = ch;
+                      
+                      // Guardar el invite link para futuras búsquedas
+                      await this.prisma.$runCommandRaw({
+                        update: 'detected_telegram_channels',
+                        updates: [{ q: { channel_id: ch.channel_id }, u: { $set: { invite_link: currentLink } } }],
+                      });
+                      
+                      this.logger.log(`✅ Canal diferenciado por API invite link: ${ch.channel_title}`);
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  // Ignorar errores de API
+                }
+              }
+            }
+          }
+        }
+        
+        // Si no se pudo diferenciar por link, devolver error pidiendo el link
+        if (!channel) {
+          const channelList = channels.map((c: any) => `• ${c.channel_title} (ID: ${c.channel_id})`).join('\n');
+          return {
+            found: false,
+            error: `Se encontraron ${channels.length} canales con el nombre "${normalizedName}":\n${channelList}\n\n💡 Por favor, proporciona el link de invitación para diferenciarlos.`,
+          };
+        }
       }
 
       return {
