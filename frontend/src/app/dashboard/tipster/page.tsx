@@ -1662,8 +1662,8 @@ export default function TipsterDashboard() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Copia el link de invitación</h4>
-                    <p className="text-sm text-gray-600 mb-4">Obtén el enlace de invitación del canal.</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Copia los datos del canal</h4>
+                    <p className="text-sm text-gray-600 mb-4">Obtén el nombre y link de invitación.</p>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
@@ -1671,11 +1671,11 @@ export default function TipsterDashboard() {
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Toca "Link de invitación"</span>
+                        <span>Copia el <strong>nombre</strong> del canal</span>
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Copia el enlace</span>
+                        <span>Copia el <strong>link de invitación</strong></span>
                       </li>
                     </ul>
                   </div>
@@ -1690,8 +1690,8 @@ export default function TipsterDashboard() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Pega el link aquí</h4>
-                    <p className="text-sm text-gray-600 mb-4">Conecta tu canal pegando el enlace.</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Conecta tu canal aquí</h4>
+                    <p className="text-sm text-gray-600 mb-4">Ingresa los datos en el formulario.</p>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
@@ -1699,7 +1699,7 @@ export default function TipsterDashboard() {
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Pega el link de invitación</span>
+                        <span>Ingresa <strong>nombre</strong> y <strong>link</strong></span>
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
