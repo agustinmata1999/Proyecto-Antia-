@@ -163,7 +163,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link
-                href="/register"
+                href="/antiapay"
                 className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg transition font-medium"
                 data-testid="antiapay-cta-btn"
               >
@@ -190,13 +190,13 @@ export default function Home() {
                   Convierte tu alcance en ingresos
                 </li>
               </ul>
-              <a
-                href="#contact"
+              <Link
+                href="/antialink"
                 className="inline-block bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg transition font-medium"
-                data-testid="antialink-contact-btn"
+                data-testid="antialink-cta-btn"
               >
-                Hablar con ventas
-              </a>
+                Más información
+              </Link>
             </div>
           </div>
 
