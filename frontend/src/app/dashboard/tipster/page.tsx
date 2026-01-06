@@ -2614,17 +2614,17 @@ export default function TipsterDashboard() {
 
               {wizardStep === 2 && (
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                   </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Añade el bot como admin</h4>
-                  <p className="text-gray-600 mb-6">Agrega <strong>@Antiabetbot</strong> como administrador de tu canal.</p>
-                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                  <h4 className="text-lg font-bold text-gray-900 mb-1">Añade el bot como admin</h4>
+                  <p className="text-gray-600 text-sm mb-3">Agrega <strong>@Antiabetbot</strong> como administrador.</p>
+                  <div className="bg-gray-50 rounded-xl p-3 text-left space-y-2">
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                      <span className="text-sm text-gray-700">Entra a tu canal y ve a "Administradores"</span>
+                      <span className="text-sm text-gray-700">Ve a "Administradores" del canal</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
@@ -2632,38 +2632,33 @@ export default function TipsterDashboard() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                      <span className="text-sm text-gray-700">Otórgale permisos de administrador</span>
+                      <span className="text-sm text-gray-700">Dale permisos de admin</span>
                     </div>
-                  </div>
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-700">
-                      <strong>Bot:</strong> <span className="font-mono">@Antiabetbot</span>
-                    </p>
                   </div>
                 </div>
               )}
 
               {wizardStep === 3 && (
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                   </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Copia los datos del canal</h4>
-                  <p className="text-gray-600 mb-6">Necesitarás el <strong>nombre</strong> y el <strong>link de invitación</strong> de tu canal.</p>
-                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                  <h4 className="text-lg font-bold text-gray-900 mb-1">Copia los datos del canal</h4>
+                  <p className="text-gray-600 text-sm mb-3">Necesitas el <strong>nombre</strong> y el <strong>link de invitación</strong>.</p>
+                  <div className="bg-gray-50 rounded-xl p-3 text-left space-y-2">
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                       <span className="text-sm text-gray-700">Ve a "Info del canal"</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                      <span className="text-sm text-gray-700">Copia el <strong>nombre</strong> exacto del canal</span>
+                      <span className="text-sm text-gray-700">Copia el <strong>nombre</strong> del canal</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                      <span className="text-sm text-gray-700">Toca "Link de invitación" y cópialo</span>
+                      <span className="text-sm text-gray-700">Copia el <strong>link de invitación</strong></span>
                     </div>
                   </div>
                 </div>
@@ -2671,21 +2666,21 @@ export default function TipsterDashboard() {
 
               {wizardStep === 4 && (
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">¡Conecta tu canal!</h4>
-                  <p className="text-gray-600 mb-6">Haz clic en "Añadir Canal" e ingresa los datos.</p>
-                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                  <h4 className="text-lg font-bold text-gray-900 mb-1">¡Conecta tu canal!</h4>
+                  <p className="text-gray-600 text-sm mb-3">Haz clic en "Añadir Canal" e ingresa los datos.</p>
+                  <div className="bg-gray-50 rounded-xl p-3 text-left space-y-2">
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                      <span className="text-sm text-gray-700">Clic en el botón <strong>"+ Añadir Canal"</strong></span>
+                      <span className="text-sm text-gray-700">Clic en <strong>"+ Añadir Canal"</strong></span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                      <span className="text-sm text-gray-700">Ingresa el <strong>nombre</strong> del canal</span>
+                      <span className="text-sm text-gray-700">Ingresa el <strong>nombre</strong></span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
