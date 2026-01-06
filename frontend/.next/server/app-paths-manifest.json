@@ -14,6 +14,6 @@
   "/dashboard/tipster/page": "app/dashboard/tipster/page.js",
   "/page": "app/page.js",
   "/r/[code]/page": "app/r/[code]/page.js",
-  "/telegram-webhook/route": "app/telegram-webhook/route.js",
-  "/register/page": "app/register/page.js"
+  "/register/page": "app/register/page.js",
+  "/telegram-webhook/route": "app/telegram-webhook/route.js"
 }
