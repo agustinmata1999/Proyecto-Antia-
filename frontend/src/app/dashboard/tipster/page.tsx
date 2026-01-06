@@ -2541,6 +2541,188 @@ export default function TipsterDashboard() {
         )}
       </main>
 
+      {/* Wizard: Guía de Telegram (primera vez) */}
+      {showTelegramWizard && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={handleCloseWizard}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Conecta tu Canal de Telegram</h3>
+                    <p className="text-blue-100 text-sm">Paso {wizardStep} de 4</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={handleCloseWizard}
+                  className="text-white/80 hover:text-white"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Progress bar */}
+              <div className="mt-4 flex gap-1">
+                {[1, 2, 3, 4].map((step) => (
+                  <div 
+                    key={step}
+                    className={`h-1 flex-1 rounded-full ${step <= wizardStep ? 'bg-white' : 'bg-white/30'}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {wizardStep === 1 && (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Crea tu canal privado</h4>
+                  <p className="text-gray-600 mb-6">Abre Telegram y crea un nuevo canal privado para tus clientes.</p>
+                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                      <span className="text-sm text-gray-700">Abre la app de Telegram</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                      <span className="text-sm text-gray-700">Toca "Nuevo Canal"</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm text-gray-700">Selecciona <strong>"Privado"</strong></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {wizardStep === 2 && (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Añade el bot como admin</h4>
+                  <p className="text-gray-600 mb-6">Agrega <strong>@Antiabetbot</strong> como administrador de tu canal.</p>
+                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                      <span className="text-sm text-gray-700">Entra a tu canal y ve a "Administradores"</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                      <span className="text-sm text-gray-700">Busca <strong>@Antiabetbot</strong></span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm text-gray-700">Otórgale permisos de administrador</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-700">
+                      <strong>Bot:</strong> <span className="font-mono">@Antiabetbot</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {wizardStep === 3 && (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Copia los datos del canal</h4>
+                  <p className="text-gray-600 mb-6">Necesitarás el <strong>nombre</strong> y el <strong>link de invitación</strong> de tu canal.</p>
+                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                      <span className="text-sm text-gray-700">Ve a "Info del canal"</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                      <span className="text-sm text-gray-700">Copia el <strong>nombre</strong> exacto del canal</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm text-gray-700">Toca "Link de invitación" y cópialo</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {wizardStep === 4 && (
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">¡Conecta tu canal!</h4>
+                  <p className="text-gray-600 mb-6">Haz clic en "Añadir Canal" e ingresa los datos.</p>
+                  <div className="bg-gray-50 rounded-xl p-4 text-left space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                      <span className="text-sm text-gray-700">Clic en el botón <strong>"+ Añadir Canal"</strong></span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                      <span className="text-sm text-gray-700">Ingresa el <strong>nombre</strong> del canal</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm text-gray-700">Pega el <strong>link de invitación</strong></span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                      <span className="text-sm text-gray-700">Pulsa <strong>"Conectar"</strong></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 pt-0 flex justify-between">
+              <button
+                onClick={() => wizardStep > 1 ? setWizardStep(wizardStep - 1) : handleCloseWizard()}
+                className="px-6 py-2 text-gray-600 hover:text-gray-800 font-medium"
+              >
+                {wizardStep === 1 ? 'Cerrar' : '← Atrás'}
+              </button>
+              {wizardStep < 4 ? (
+                <button
+                  onClick={() => setWizardStep(wizardStep + 1)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  Siguiente →
+                </button>
+              ) : (
+                <button
+                  onClick={handleCloseWizard}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                >
+                  ¡Entendido!
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal: Confirmar Compartir en Telegram */}
       {showShareConfirmModal && productToShare && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={cancelPublishToTelegram}>
