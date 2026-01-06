@@ -66,18 +66,18 @@ Red de afiliación premium:
   - Corregido: Usaba `affiliate_click_events` vacío en lugar de `landing_click_events` 
   - Corregido: Filtro de fechas con `{ $date: ... }` no funcionaba en MongoDB raw commands
   - Solución: Obtener todos los clicks y filtrar por fecha en memoria
-  - Stats: 30 clicks, 3 conversiones, €75.00, 10% tasa conversión
-  - Por País: España (21), Argentina (9), Estados Unidos (0)
-  - Por Casa: Bwin (15), TestBet (8), Betway (4)
-  - Por Campaña: Muestra cada landing con sus clicks
 - ✅ **Estadísticas Admin**: Panel completo funcionando
   - Mismo fix de filtro de fechas aplicado
-  - Por Tipster: Fausto Perez - 30 clicks, 3 conv., €75.00
   - Filtros por Tipster, Campaña, Casa y Fechas funcionando
 - ✅ **Modal Métricas (por campaña)**: Funcionando correctamente
   - Vistas, Clicks, Conversiones, Ganancias
   - Tasa de conversión calculada correctamente
   - Clicks por País y por Casa
+- ✅ **Conversiones del Simulador**: Ahora se aprueban automáticamente
+  - Problema: Las conversiones se creaban con status `PENDING` y nunca cambiaban
+  - Solución: Agregado parámetro `auto_approve` en el postback
+  - El simulador ahora envía `auto_approve: true` para testing
+  - Conversiones y ganancias se actualizan en tiempo real
 
 ### 2025-01-06 - Rediseño Frontend Landing Pages
 **Completado:**
