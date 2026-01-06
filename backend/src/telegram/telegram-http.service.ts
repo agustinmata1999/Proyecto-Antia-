@@ -338,4 +338,22 @@ export class TelegramHttpService {
       };
     }
   }
+
+  /**
+   * Get updates from Telegram (for polling)
+   */
+  async getUpdates(options: {
+    offset?: number;
+    limit?: number;
+    timeout?: number;
+    allowedUpdates?: string[];
+  } = {}): Promise<any[]> {
+    const params: Record<string, any> = {};
+    if (options.offset !== undefined) params.offset = options.offset;
+    if (options.limit !== undefined) params.limit = options.limit;
+    if (options.timeout !== undefined) params.timeout = options.timeout;
+    if (options.allowedUpdates) params.allowed_updates = JSON.stringify(options.allowedUpdates);
+
+    return this.callApi('getUpdates', params);
+  }
 }
