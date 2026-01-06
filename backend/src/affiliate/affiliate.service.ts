@@ -1031,14 +1031,14 @@ export class AffiliateService {
     const tipsters = tipstersResult.cursor?.firstBatch || [];
     const tipstersMap = new Map(tipsters.map((t: any) => [t._id.$oid || t._id, t]));
 
-    // Get campaigns/promotions
-    const promotionsResult = await this.prisma.$runCommandRaw({
-      find: 'affiliate_promotions',
-      filter: { status: 'ACTIVE' },
-      projection: { _id: 1, name: 1 },
+    // Get tipster landings (campaigns created by tipsters)
+    const landingsResult = await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_landings',
+      filter: {},
+      projection: { _id: 1, title: 1, slug: 1, tipster_id: 1 },
     }) as any;
-    const promotions = promotionsResult.cursor?.firstBatch || [];
-    const promotionsMap = new Map(promotions.map((p: any) => [p._id.$oid || p._id, p]));
+    const landings = landingsResult.cursor?.firstBatch || [];
+    const landingsMap = new Map(landings.map((l: any) => [l._id.$oid || l._id || l._id.toString(), l]));
 
     // General stats
     const totalClicks = clicks.length;
