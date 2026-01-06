@@ -272,6 +272,8 @@ export class SimulatorController {
           user_email: email,
           user_telegram: `@${username}`,
           external_ref_id: userId,
+          // Auto-approve for simulator (testing purposes)
+          auto_approve: true,
         };
 
         this.logger.log(`📤 [SIMULATOR] Sending postback to ${postbackUrl}`);
