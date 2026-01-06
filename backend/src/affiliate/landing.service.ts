@@ -132,6 +132,7 @@ export class LandingService {
 
     // Obtener conteo real de clicks e impresiones desde las colecciones de eventos
     const landingIds = landings.map((l: any) => l._id.$oid || l._id.toString());
+    console.log('[DEBUG] Landing IDs:', landingIds.slice(0, 5));
     
     // Agregar clicks por landing_id
     const clicksResult = (await this.prisma.$runCommandRaw({
@@ -142,6 +143,7 @@ export class LandingService {
       ],
       cursor: {},
     })) as any;
+    console.log('[DEBUG] Clicks aggregation result:', JSON.stringify(clicksResult.cursor?.firstBatch || []));
     const clicksMap = new Map(
       (clicksResult.cursor?.firstBatch || []).map((c: any) => [c._id, c.count])
     );
