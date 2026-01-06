@@ -1538,24 +1538,23 @@ export default function TipsterDashboard() {
                     </span>
                     <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
                       <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Conecta aquí</h4>
-                    <p className="text-sm text-gray-600 mb-4">Escribe el nombre de tu canal abajo.</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Copia el link de invitación</h4>
+                    <p className="text-sm text-gray-600 mb-4">Obtén el enlace de invitación del canal.</p>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
-                        <span>Clic en "Añadir Canal"</span>
+                        <span>Ve a "Info del canal"</span>
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Escribe el nombre</span>
+                        <span>Toca "Link de invitación"</span>
                       </li>
                       <li className="flex items-start gap-2 text-xs text-gray-500">
                         <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Pulsa "Conectar"</span>
+                        <span>Copia el enlace</span>
                       </li>
                     </ul>
                   </div>
