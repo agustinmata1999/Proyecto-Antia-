@@ -57,6 +57,28 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-06 - Corrección Completa Sistema de Métricas de Afiliación
+**Completado:**
+- ✅ **Tarjetas de Campañas**: Ahora muestran vistas y clicks reales
+  - Corregido: Los contadores `total_clicks` y `total_impressions` no se actualizaban por problema con ObjectId
+  - Solución: Queries agregadas a `landing_click_events` y `landing_impression_events` para obtener conteos reales
+- ✅ **Estadísticas Tipster**: Panel completo funcionando
+  - Corregido: Usaba `affiliate_click_events` vacío en lugar de `landing_click_events` 
+  - Corregido: Filtro de fechas con `{ $date: ... }` no funcionaba en MongoDB raw commands
+  - Solución: Obtener todos los clicks y filtrar por fecha en memoria
+  - Stats: 30 clicks, 3 conversiones, €75.00, 10% tasa conversión
+  - Por País: España (21), Argentina (9), Estados Unidos (0)
+  - Por Casa: Bwin (15), TestBet (8), Betway (4)
+  - Por Campaña: Muestra cada landing con sus clicks
+- ✅ **Estadísticas Admin**: Panel completo funcionando
+  - Mismo fix de filtro de fechas aplicado
+  - Por Tipster: Fausto Perez - 30 clicks, 3 conv., €75.00
+  - Filtros por Tipster, Campaña, Casa y Fechas funcionando
+- ✅ **Modal Métricas (por campaña)**: Funcionando correctamente
+  - Vistas, Clicks, Conversiones, Ganancias
+  - Tasa de conversión calculada correctamente
+  - Clicks por País y por Casa
+
 ### 2025-01-06 - Rediseño Frontend Landing Pages
 **Completado:**
 - ✅ Rediseño completo del Home principal (tema oscuro, estilo premium)
