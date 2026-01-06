@@ -2701,28 +2701,44 @@ export default function TipsterDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="p-6 pt-0 flex justify-between">
-              <button
-                onClick={() => wizardStep > 1 ? setWizardStep(wizardStep - 1) : handleCloseWizard()}
-                className="px-6 py-2 text-gray-600 hover:text-gray-800 font-medium"
-              >
-                {wizardStep === 1 ? 'Cerrar' : '← Atrás'}
-              </button>
-              {wizardStep < 4 ? (
+            <div className="p-6 pt-0">
+              {/* Checkbox: No mostrar de nuevo */}
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id="dontShowWizard"
+                  checked={dontShowWizardAgain}
+                  onChange={(e) => setDontShowWizardAgain(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="dontShowWizard" className="ml-2 text-sm text-gray-600">
+                  No mostrar esto de nuevo
+                </label>
+              </div>
+              
+              <div className="flex justify-between">
                 <button
-                  onClick={() => setWizardStep(wizardStep + 1)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                  onClick={() => wizardStep > 1 ? setWizardStep(wizardStep - 1) : handleCloseWizard()}
+                  className="px-6 py-2 text-gray-600 hover:text-gray-800 font-medium"
                 >
-                  Siguiente →
+                  {wizardStep === 1 ? 'Cerrar' : '← Atrás'}
                 </button>
-              ) : (
-                <button
-                  onClick={handleCloseWizard}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-                >
-                  ¡Entendido!
-                </button>
-              )}
+                {wizardStep < 4 ? (
+                  <button
+                    onClick={() => setWizardStep(wizardStep + 1)}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                  >
+                    Siguiente →
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleCloseWizard}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                  >
+                    ¡Entendido!
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
