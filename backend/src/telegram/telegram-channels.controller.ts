@@ -235,11 +235,11 @@ export class TelegramChannelsController {
 
   /**
    * POST /api/telegram/channels/connect-by-name - Conectar canal por nombre (NUEVO)
-   * El tipster solo ingresa el nombre del canal y el sistema busca el ID automáticamente
+   * El tipster ingresa el nombre del canal y opcionalmente el link para diferenciar
    */
   @Post('connect-by-name')
   @HttpCode(HttpStatus.OK)
-  async connectByName(@Body() body: { channelName: string }, @Request() req) {
+  async connectByName(@Body() body: { channelName: string; inviteLink?: string }, @Request() req) {
     if (!body.channelName || body.channelName.trim().length === 0) {
       return {
         success: false,
@@ -250,7 +250,7 @@ export class TelegramChannelsController {
     const tipsterId = await this.getTipsterId(req.user.id);
 
     // Buscar el canal por nombre en la tabla de canales detectados
-    const searchResult = await this.telegramService.findChannelByName(body.channelName);
+    const searchResult = await this.telegramService.findChannelByName(body.channelName, body.inviteLink);
 
     if (!searchResult.found || !searchResult.channel) {
       return {
@@ -289,6 +289,7 @@ export class TelegramChannelsController {
           ? `@${searchResult.channel.channelUsername}`
           : undefined,
         channelType: isPrivate ? 'private' : 'public',
+        inviteLink: body.inviteLink || undefined, // Guardar el link de invitación
       });
 
       return {
