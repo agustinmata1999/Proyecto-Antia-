@@ -1384,8 +1384,11 @@ export class AffiliateService {
     amount?: number;
     currency?: string;
     transactionId?: string;
+    userEmail?: string;
+    userTelegram?: string;
+    externalRefId?: string;
   }) {
-    const { subid, houseSlug, event, amount, currency, transactionId } = params;
+    const { subid, houseSlug, event, amount, currency, transactionId, userEmail, userTelegram, externalRefId } = params;
 
     // Parse subid: format is tipsterId_clickId or just tipsterId
     const [tipsterId, clickId] = subid.split('_');
@@ -1445,6 +1448,10 @@ export class AffiliateService {
           clicked_at: click?.clickedAt ? { $date: click.clickedAt } : null,
           occurred_at: { $date: now },
           external_transaction_id: transactionId || null,
+          // User data
+          user_email: userEmail || null,
+          user_telegram: userTelegram || null,
+          external_ref_id: externalRefId || null,
           metadata: {
             subid,
             houseSlug,
