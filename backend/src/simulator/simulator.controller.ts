@@ -525,6 +525,8 @@ export class SimulatorController {
           amount: depositAmount,
           currency: 'EUR',
           txid: `dep_${userId}_${Date.now()}`,
+          // Auto-approve for simulator (testing purposes)
+          auto_approve: true,
         };
 
         this.logger.log(`📤 [SIMULATOR] Sending DEPOSIT postback: ${JSON.stringify(postbackData)}`);
