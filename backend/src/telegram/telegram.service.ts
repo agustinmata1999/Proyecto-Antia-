@@ -42,23 +42,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     // Always use POLLING mode for preview environments
-    // Polling works in any environment because the bot actively fetches updates from Telegram
+    // Use WEBHOOK mode for reliable event delivery
     try {
       const botInfo = await this.httpService.getMe();
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
 
-      // Delete any existing webhook to enable polling
-      this.logger.log('🔄 Removing webhook to enable polling mode...');
-      await this.httpService.deleteWebhook();
-
-      // Start polling mode using Telegraf
-      if (this.bot) {
-        this.logger.log('🚀 Starting Telegram bot in POLLING mode...');
-
-        // Launch bot in polling mode
-        this.bot
-          .launch({
-            dropPendingUpdates: false,
+      // Configure webhook
+      const appUrl = this.config.get<string>('APP_URL');
+      if (appUrl) {
+        const webhookUrl = `${appUrl}/api/telegram/webhook`;
+        this.logger.log(`🔗 Setting up webhook: ${webhookUrl}`);
+        
+        try {
+          await this.httpService.setWebhook(webhookUrl, {
             allowedUpdates: [
               'message',
               'callback_query',
@@ -66,22 +62,50 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               'chat_join_request',
               'channel_post',
             ],
-          })
-          .then(() => {
-            this.logger.log('✅ Telegram bot started successfully in POLLING mode');
-          })
-          .catch((err) => {
-            this.logger.error('Failed to start bot polling:', err.message);
+            dropPendingUpdates: false,
           });
-
-        this.isInitialized = true;
-        this.logger.log('✅ TelegramService initialized (POLLING mode - works in any environment)');
+          this.logger.log('✅ Webhook configured successfully');
+        } catch (webhookError) {
+          this.logger.warn(`Webhook setup failed: ${webhookError.message}, falling back to polling`);
+          // Fallback to polling
+          await this.startPollingMode();
+        }
       } else {
-        this.logger.warn('⚠️ Bot instance not available');
+        this.logger.warn('APP_URL not configured, falling back to polling');
+        await this.startPollingMode();
       }
+
+      this.isInitialized = true;
+      this.logger.log('✅ TelegramService initialized');
     } catch (error) {
       this.logger.error('Failed to initialize Telegram:', error.message);
       this.logger.warn('⚠️  Telegram features may not work correctly');
+    }
+  }
+
+  private async startPollingMode() {
+    if (this.bot) {
+      this.logger.log('🔄 Removing webhook to enable polling mode...');
+      await this.httpService.deleteWebhook();
+      
+      this.logger.log('🚀 Starting Telegram bot in POLLING mode...');
+      this.bot
+        .launch({
+          dropPendingUpdates: false,
+          allowedUpdates: [
+            'message',
+            'callback_query',
+            'my_chat_member',
+            'chat_join_request',
+            'channel_post',
+          ],
+        })
+        .then(() => {
+          this.logger.log('✅ Telegram bot started successfully in POLLING mode');
+        })
+        .catch((err) => {
+          this.logger.error('Failed to start bot polling:', err.message);
+        });
     }
   }
 
