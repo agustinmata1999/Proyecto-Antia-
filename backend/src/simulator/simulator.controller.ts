@@ -261,13 +261,17 @@ export class SimulatorController {
 
     if (subid) {
       try {
-        // Send postback for REGISTRATION event
+        // Send postback for REGISTRATION event with user data
         const postbackUrl = `http://localhost:8001/api/r/postback`;
         const postbackData = {
           subid: subid,
           house: 'simulator',
           event: 'REGISTRATION',
           txid: userId,
+          // Include user data for tracking
+          user_email: email,
+          user_telegram: `@${username}`,
+          external_ref_id: userId,
         };
 
         this.logger.log(`📤 [SIMULATOR] Sending postback to ${postbackUrl}`);
