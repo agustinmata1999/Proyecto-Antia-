@@ -2792,14 +2792,18 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
 
       if (!channel) {
         // PASO 3: Si no se encontró, intentar forzar un refresh de canales 
-        // consultando los getUpdates más recientes
         this.logger.log(`Channel not found, attempting to force refresh...`);
         
-        // Intentar obtener nuevos updates (esto puede detectar canales recién añadidos)
+        // Intentar procesar updates pendientes del bot
         try {
-          if (this.httpService) {
-            const updates = await this.httpService.getUpdates({ timeout: 2, allowed_updates: ['my_chat_member'] });
-            if (updates && updates.length > 0) {
+          if (this.bot) {
+            // Obtener updates pendientes para detectar canales nuevos
+            const updates = await this.bot.telegram.callApi('getUpdates', {
+              timeout: 2,
+              allowed_updates: ['my_chat_member'],
+            });
+            
+            if (updates && Array.isArray(updates) && updates.length > 0) {
               // Procesar cada update para detectar nuevos canales
               for (const update of updates) {
                 if (update.my_chat_member) {
