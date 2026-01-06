@@ -1013,7 +1013,7 @@ export default function TipsterDashboard() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    Canal Premium
+                    Telegram
                   </span>
                   {telegramChannels.length > 0 && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
@@ -1561,7 +1561,7 @@ export default function TipsterDashboard() {
         {activeView === 'telegram' && (
           <>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">📱 Canal Premium</h1>
+              <h1 className="text-3xl font-bold text-gray-900">📱 Telegram</h1>
               <p className="text-gray-600 mt-1">Conecta tu canal privado donde los clientes recibirán acceso después de pagar</p>
             </div>
 
