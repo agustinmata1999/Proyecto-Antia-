@@ -244,10 +244,34 @@ export class LandingService {
       throw new NotFoundException('Landing no encontrada');
     }
 
+    const landingIdStr = landing._id.$oid || landing._id.toString();
+
+    // Obtener conteo real de clicks desde landing_click_events
+    const clicksCountResult = (await this.prisma.$runCommandRaw({
+      aggregate: 'landing_click_events',
+      pipeline: [
+        { $match: { landing_id: landingIdStr } },
+        { $count: 'total' },
+      ],
+      cursor: {},
+    })) as any;
+    const realClicks = clicksCountResult.cursor?.firstBatch?.[0]?.total || landing.total_clicks || 0;
+
+    // Obtener conteo real de impresiones desde landing_impression_events
+    const impressionsCountResult = (await this.prisma.$runCommandRaw({
+      aggregate: 'landing_impression_events',
+      pipeline: [
+        { $match: { landing_id: landingIdStr } },
+        { $count: 'total' },
+      ],
+      cursor: {},
+    })) as any;
+    const realImpressions = impressionsCountResult.cursor?.firstBatch?.[0]?.total || landing.total_impressions || 0;
+
     // Obtener items
     const itemsResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_landing_items',
-      filter: { landing_id: landingId },
+      filter: { landing_id: landingIdStr },
       sort: { country: 1, order_index: 1 },
     })) as any;
 
@@ -270,15 +294,15 @@ export class LandingService {
     }
 
     return {
-      id: landing._id.$oid || landing._id.toString(),
+      id: landingIdStr,
       tipsterId: landing.tipster_id,
       slug: landing.slug,
       title: landing.title,
       description: landing.description,
       countriesEnabled: landing.countries_enabled || [],
       isActive: landing.is_active,
-      totalClicks: landing.total_clicks || 0,
-      totalImpressions: landing.total_impressions || 0,
+      totalClicks: realClicks,
+      totalImpressions: realImpressions,
       countryConfigs,
       shareUrl: `/go/${landing.slug}`,
       createdAt: landing.created_at?.$date || landing.created_at,
