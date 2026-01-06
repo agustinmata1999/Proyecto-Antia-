@@ -127,7 +127,7 @@ Ejemplo: /app/cambiar_dominio.sh affiliboost-3.preview.emergentagent.com) to aut
 -   : The URL for this webhook was corrected, which was a critical fix for allowing the bot to detect when it's added to new channels.
 
 **Critical Info for New Agent**
--   **MUST RUN DOMAIN CHANGE SCRIPT:** The very first action in this new fork must be to execute the domain update script. The user has provided a template message for this. Run 🔄 Actualizando dominio a: https://NUEVO-DOMINIO.preview.emergentagent.com
+-   **MUST RUN DOMAIN CHANGE SCRIPT:** The very first action in this new fork must be to execute the domain update script. The user has provided a template message for this. Run 🔄 Actualizando dominio a: https://affiliate-simulator.preview.emergentagent.com
 
 1️⃣ Actualizando frontend/.env...
    ✅ Frontend actualizado
@@ -143,12 +143,12 @@ frontend: started
    ✅ Servicios reiniciados
 
 ═══════════════════════════════════════════════════════
-✅ DOMINIO ACTUALIZADO: https://NUEVO-DOMINIO.preview.emergentagent.com
+✅ DOMINIO ACTUALIZADO: https://affiliate-simulator.preview.emergentagent.com
 ═══════════════════════════════════════════════════════
 
 📋 Verificación:
-   - Frontend URL: https://NUEVO-DOMINIO.preview.emergentagent.com
-   - Webhook Telegram: https://NUEVO-DOMINIO.preview.emergentagent.com/api/telegram/webhook
+   - Frontend URL: https://affiliate-simulator.preview.emergentagent.com
+   - Webhook Telegram: https://affiliate-simulator.preview.emergentagent.com/api/telegram/webhook
 
 ⚠️  Si los canales de Telegram no funcionan, pide a los tipsters
    que quiten y vuelvan a añadir el bot @Antiabetbot, replacing  with the new subdomain from the preview URL. Failure to do this will result in a non-functional application (broken API calls, broken Telegram integration).

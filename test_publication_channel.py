@@ -9,7 +9,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://tipster-platform-1.preview.emergentagent.com"
+BASE_URL = "https://affiliate-simulator.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
