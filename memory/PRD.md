@@ -57,6 +57,16 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-06 - Sistema de Conexión de Canales Simplificado
+**Completado:**
+- ✅ **Nuevo modal simplificado**: Solo 2 campos
+  - **Nombre del canal** (obligatorio) - El usuario escribe el nombre exacto
+  - **Link de invitación** (opcional) - Solo necesario si hay múltiples canales con el mismo nombre
+- ✅ **Búsqueda inteligente**: El sistema busca por nombre y si hay duplicados, usa el link para diferenciar
+- ✅ **El link se guarda**: Cuando se conecta un canal con link, este se almacena para futuras referencias
+- ✅ **Instrucciones claras**: Se indica que deben añadir el bot como admin y enviar un mensaje
+- ✅ **Refresh automático**: Si el canal no está en la BD, intenta obtener updates de Telegram
+
 ### 2026-01-06 - Mejora Conexión de Canales de Telegram
 **Completado:**
 - ✅ **Nuevo método de conexión por Channel ID**
