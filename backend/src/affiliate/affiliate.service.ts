@@ -1105,19 +1105,20 @@ export class AffiliateService {
       .map(([date, data]) => ({ date, ...data }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // By Campaign
+    // By Campaign (using landing_id from clicks)
     const byCampaignMap: Record<string, { clicks: number; conversions: number }> = {};
     for (const click of clicks) {
-      const campaignId = (click as any).campaignId || (click as any).promotionId || 'NO_CAMPAIGN';
+      // Use landingId if available, otherwise campaignId/promotionId
+      const campaignId = (click as any).landingId || (click as any).campaignId || (click as any).promotionId || 'NO_CAMPAIGN';
       if (!byCampaignMap[campaignId]) byCampaignMap[campaignId] = { clicks: 0, conversions: 0 };
       byCampaignMap[campaignId].clicks++;
     }
     const byCampaign = Object.entries(byCampaignMap)
       .map(([campaignId, data]) => {
-        const campaign = promotionsMap.get(campaignId) as any;
+        const landing = landingsMap.get(campaignId) as any;
         return {
           campaignId,
-          campaignName: campaign?.name || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
+          campaignName: landing?.title || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : `Landing ${campaignId.slice(-6)}`),
           ...data,
         };
       })
