@@ -2701,7 +2701,7 @@ export default function TipsterDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="p-6 pt-4 border-t border-gray-100">
+            <div className="p-4 border-t border-gray-100 rounded-b-2xl bg-gray-50">
               <div className="flex items-center justify-between">
                 {/* Checkbox: No mostrar de nuevo */}
                 <label className="flex items-center cursor-pointer">
@@ -2717,21 +2717,21 @@ export default function TipsterDashboard() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => wizardStep > 1 ? setWizardStep(wizardStep - 1) : handleCloseWizard()}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium text-sm"
                   >
                     {wizardStep === 1 ? 'Cerrar' : '← Atrás'}
                   </button>
                   {wizardStep < 4 ? (
                     <button
                       onClick={() => setWizardStep(wizardStep + 1)}
-                      className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
                     >
                       Siguiente →
                     </button>
                   ) : (
                     <button
                       onClick={handleCloseWizard}
-                      className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm"
                     >
                       ¡Entendido!
                     </button>
