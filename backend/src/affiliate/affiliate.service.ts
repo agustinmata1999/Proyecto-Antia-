@@ -1432,8 +1432,9 @@ export class AffiliateService {
     userEmail?: string;
     userTelegram?: string;
     externalRefId?: string;
+    autoApprove?: boolean;
   }) {
-    const { subid, houseSlug, event, amount, currency, transactionId, userEmail, userTelegram, externalRefId } = params;
+    const { subid, houseSlug, event, amount, currency, transactionId, userEmail, userTelegram, externalRefId, autoApprove } = params;
 
     // Parse subid: format is tipsterId_clickId or just tipsterId
     const [tipsterId, clickId] = subid.split('_');
@@ -1474,6 +1475,10 @@ export class AffiliateService {
       commissionCents = house.commissionPerReferralCents || 5000;
     }
 
+    // Determine status - auto approve if flag is set (for simulator/testing)
+    // In production, conversions from real betting houses would be approved manually or via webhook confirmation
+    const status = autoApprove ? 'APPROVED' : 'PENDING';
+
     // Create conversion using raw MongoDB command
     const now = new Date().toISOString();
     const conversionId = new ObjectId();
@@ -1487,11 +1492,12 @@ export class AffiliateService {
           house_id: house?.id || click?.houseId,
           click_id: clickId || null,
           event_type: event || 'REGISTRATION',
-          status: 'PENDING',
+          status: status,
           commission_cents: commissionCents,
           country_code: click?.countryCode || null,
           clicked_at: click?.clickedAt ? { $date: click.clickedAt } : null,
           occurred_at: { $date: now },
+          approved_at: autoApprove ? { $date: now } : null,
           external_transaction_id: transactionId || null,
           // User data
           user_email: userEmail || null,
@@ -1513,7 +1519,8 @@ export class AffiliateService {
     return {
       success: true,
       conversionId: conversionId.toHexString(),
-      message: 'Conversion recorded successfully',
+      status: status,
+      message: `Conversion recorded successfully (${status})`,
     };
   }
 }
