@@ -130,10 +130,45 @@ export class LandingService {
     const promotionIds = landings.map((l: any) => l.promotion_id).filter(Boolean);
     const promotionsMap = await this.getPromotionsMap(promotionIds);
 
+    // Obtener conteo real de clicks e impresiones desde las colecciones de eventos
+    const landingIds = landings.map((l: any) => l._id.$oid || l._id.toString());
+    
+    // Agregar clicks por landing_id
+    const clicksResult = (await this.prisma.$runCommandRaw({
+      aggregate: 'landing_click_events',
+      pipeline: [
+        { $match: { landing_id: { $in: landingIds } } },
+        { $group: { _id: '$landing_id', count: { $sum: 1 } } },
+      ],
+      cursor: {},
+    })) as any;
+    const clicksMap = new Map(
+      (clicksResult.cursor?.firstBatch || []).map((c: any) => [c._id, c.count])
+    );
+
+    // Agregar impresiones por landing_id
+    const impressionsResult = (await this.prisma.$runCommandRaw({
+      aggregate: 'landing_impression_events',
+      pipeline: [
+        { $match: { landing_id: { $in: landingIds } } },
+        { $group: { _id: '$landing_id', count: { $sum: 1 } } },
+      ],
+      cursor: {},
+    })) as any;
+    const impressionsMap = new Map(
+      (impressionsResult.cursor?.firstBatch || []).map((i: any) => [i._id, i.count])
+    );
+
     return landings.map((l: any) => {
       const promotion = l.promotion_id ? promotionsMap.get(l.promotion_id) : null;
+      const landingId = l._id.$oid || l._id.toString();
+      
+      // Usar conteo real de eventos, fallback a los contadores guardados
+      const realClicks = clicksMap.get(landingId) || l.total_clicks || 0;
+      const realImpressions = impressionsMap.get(landingId) || l.total_impressions || 0;
+      
       return {
-        id: l._id.$oid || l._id.toString(),
+        id: landingId,
         slug: l.slug,
         promotionId: l.promotion_id,
         promotionName: promotion?.name || null,
@@ -141,8 +176,8 @@ export class LandingService {
         description: l.description,
         countriesEnabled: l.countries_enabled || [],
         isActive: l.is_active,
-        totalClicks: l.total_clicks || 0,
-        totalImpressions: l.total_impressions || 0,
+        totalClicks: realClicks,
+        totalImpressions: realImpressions,
         shareUrl: `/go/${l.slug}`,
         createdAt: l.created_at?.$date || l.created_at,
       };
