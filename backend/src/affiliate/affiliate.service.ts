@@ -1259,17 +1259,30 @@ export class AffiliateService {
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const endDate = endDateStr ? new Date(endDateStr + 'T23:59:59') : new Date();
 
-    // Get clicks for this tipster
-    const clicks = await this.prisma.affiliateClickEvent.findMany({
-      where: {
-        tipsterId,
-        wasBlocked: false,
-        clickedAt: {
-          gte: startDate,
-          lte: endDate,
-        },
+    // Get clicks from landing_click_events (primary source for campaign clicks)
+    const landingClicksFilter: any = {
+      tipster_id: tipsterId,
+      created_at: {
+        $gte: { $date: startDate.toISOString() },
+        $lte: { $date: endDate.toISOString() },
       },
-    });
+    };
+
+    const landingClicksResult = (await this.prisma.$runCommandRaw({
+      find: 'landing_click_events',
+      filter: landingClicksFilter,
+    })) as any;
+    const landingClicks = landingClicksResult.cursor?.firstBatch || [];
+
+    // Map clicks to a standard format
+    const clicks = landingClicks.map((c: any) => ({
+      id: c._id.$oid || c._id,
+      tipsterId: c.tipster_id,
+      landingId: c.landing_id,
+      houseId: c.betting_house_id,
+      countryCode: c.country_context,
+      clickedAt: c.created_at?.$date ? new Date(c.created_at.$date) : new Date(),
+    }));
 
     // Get conversions for this tipster
     const conversions = await this.prisma.affiliateConversion.findMany({
@@ -1286,14 +1299,16 @@ export class AffiliateService {
     const houses = await this.prisma.bettingHouse.findMany();
     const housesMap = new Map(houses.map((h) => [h.id, h]));
 
-    // Get promotions for mapping
-    const promotionsResult = (await this.prisma.$runCommandRaw({
-      find: 'affiliate_promotions',
-      filter: {},
-      projection: { _id: 1, name: 1 },
+    // Get landings for mapping (tipster's campaigns)
+    const landingsResult = (await this.prisma.$runCommandRaw({
+      find: 'tipster_affiliate_landings',
+      filter: { tipster_id: tipsterId },
+      projection: { _id: 1, title: 1, slug: 1 },
     })) as any;
-    const promotions = promotionsResult.cursor?.firstBatch || [];
-    const promotionsMap = new Map(promotions.map((p: any) => [p._id.$oid || p._id, p]));
+    const landings = landingsResult.cursor?.firstBatch || [];
+    const landingsMap = new Map(
+      landings.map((l: any) => [l._id.$oid || l._id.toString(), l])
+    );
 
     // General stats
     const totalClicks = clicks.length;
@@ -1365,21 +1380,21 @@ export class AffiliateService {
       .map(([date, data]) => ({ date, ...data }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // By Campaign
+    // By Campaign (using landing_id from clicks)
     const byCampaignMap: Record<string, { clicks: number; conversions: number }> = {};
     for (const click of clicks) {
-      const campaignId = (click as any).campaignId || (click as any).promotionId || 'NO_CAMPAIGN';
-      if (!byCampaignMap[campaignId]) byCampaignMap[campaignId] = { clicks: 0, conversions: 0 };
-      byCampaignMap[campaignId].clicks++;
+      const landingId = click.landingId || 'NO_CAMPAIGN';
+      if (!byCampaignMap[landingId]) byCampaignMap[landingId] = { clicks: 0, conversions: 0 };
+      byCampaignMap[landingId].clicks++;
     }
     const byCampaign = Object.entries(byCampaignMap)
-      .map(([campaignId, data]) => {
-        const campaign = promotionsMap.get(campaignId) as any;
+      .map(([landingId, data]) => {
+        const landing = landingsMap.get(landingId) as any;
         return {
-          campaignId,
+          campaignId: landingId,
           campaignName:
-            campaign?.name ||
-            (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
+            landing?.title ||
+            (landingId === 'NO_CAMPAIGN' ? 'Sin Campaña' : `Campaña ${landingId.slice(-6)}`),
           ...data,
         };
       })
