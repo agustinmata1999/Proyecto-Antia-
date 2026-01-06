@@ -2541,23 +2541,31 @@ export default function TipsterDashboard() {
                 </p>
               </div>
 
-              {/* Toggle entre Link e ID */}
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+              {/* Toggle entre Nombre, Link e ID */}
+              <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                <button
+                  onClick={() => { setInputMode('title'); setChannelInput(''); setAddChannelError(''); }}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    inputMode === 'title' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📝 Por Nombre
+                </button>
                 <button
                   onClick={() => { setInputMode('name'); setChannelInput(''); setAddChannelError(''); }}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
                     inputMode === 'name' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  📎 Por Link de Invitación
+                  📎 Por Link
                 </button>
                 <button
                   onClick={() => { setInputMode('id'); setChannelInput(''); setAddChannelError(''); }}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
                     inputMode === 'id' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  🔢 Por Channel ID
+                  🔢 Por ID
                 </button>
               </div>
 
@@ -2567,7 +2575,23 @@ export default function TipsterDashboard() {
                 </div>
               )}
 
-              {inputMode === 'name' ? (
+              {inputMode === 'title' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre del canal <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={channelInput}
+                    onChange={(e) => setChannelInput(e.target.value)}
+                    placeholder="Pronosticos Futbol"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Escribe el nombre exacto de tu canal (como aparece en Telegram)
+                  </p>
+                </div>
+              ) : inputMode === 'name' ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Link de invitación del canal <span className="text-red-500">*</span>
@@ -2613,7 +2637,7 @@ export default function TipsterDashboard() {
                   Cancelar
                 </button>
                 <button 
-                  onClick={inputMode === 'name' ? handleConnectChannel : handleConnectChannelById}
+                  onClick={inputMode === 'title' ? handleConnectChannelByName : (inputMode === 'name' ? handleConnectChannel : handleConnectChannelById)}
                   disabled={connectingChannel || !channelInput.trim()}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
