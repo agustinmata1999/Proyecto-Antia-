@@ -2781,8 +2781,15 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
               const currentMatch = currentLink?.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
               const currentHash = currentMatch ? currentMatch[1] : null;
 
-              // Si el hash coincide, encontramos el canal
-              if (currentHash && searchPattern.includes(currentHash.substring(0, 8))) {
+              // Si el hash coincide (comparaciÃ³n completa o parcial), encontramos el canal
+              const hashMatches = currentHash && (
+                currentHash === searchPattern ||
+                searchPattern === currentHash ||
+                currentHash.startsWith(searchPattern) ||
+                searchPattern.startsWith(currentHash)
+              );
+              
+              if (hashMatches) {
                 channel = ch;
 
                 // Actualizar el invite link en la base de datos
@@ -2801,7 +2808,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
                   ],
                 });
 
-                this.logger.log(`Found channel by API check: ${ch.channel_title}`);
+                this.logger.log(`âœ… Found channel by invite link match: ${ch.channel_title}`);
                 break;
               }
             }
