@@ -699,8 +699,6 @@ export default function TipsterLandingsSection() {
                       </div>
                     )}
                   </div>
-                    </div>
-                  )}
 
                   {/* No data message */}
                   {(!metrics.clicksByCountry?.length && !metrics.clicksByHouse?.length) && (
