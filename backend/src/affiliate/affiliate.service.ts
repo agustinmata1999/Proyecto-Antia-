@@ -1260,19 +1260,23 @@ export class AffiliateService {
     const endDate = endDateStr ? new Date(endDateStr + 'T23:59:59') : new Date();
 
     // Get clicks from landing_click_events (primary source for campaign clicks)
+    // Note: We fetch all clicks for the tipster and filter in memory because
+    // MongoDB $date comparison in raw commands doesn't work well with Prisma
     const landingClicksFilter: any = {
       tipster_id: tipsterId,
-      created_at: {
-        $gte: { $date: startDate.toISOString() },
-        $lte: { $date: endDate.toISOString() },
-      },
     };
 
     const landingClicksResult = (await this.prisma.$runCommandRaw({
       find: 'landing_click_events',
       filter: landingClicksFilter,
     })) as any;
-    const landingClicks = landingClicksResult.cursor?.firstBatch || [];
+    
+    // Filter by date in memory
+    const landingClicks = (landingClicksResult.cursor?.firstBatch || []).filter((c: any) => {
+      const clickDate = c.created_at?.$date ? new Date(c.created_at.$date) : (c.created_at ? new Date(c.created_at) : null);
+      if (!clickDate) return false;
+      return clickDate >= startDate && clickDate <= endDate;
+    });
 
     // Map clicks to a standard format
     const clicks = landingClicks.map((c: any) => ({
