@@ -60,13 +60,25 @@ Red de afiliación premium:
 ### 2025-01-06 - Rediseño Frontend Landing Pages
 **Completado:**
 - ✅ Rediseño completo del Home principal (tema oscuro, estilo premium)
-- ✅ Nueva página `/antiapay` con hero, features, pricing
-- ✅ Nueva página `/antialink` con hero, features, partners, formulario
+- ✅ Nueva página `/antiapay` con hero 3D mockup, selección Particular/Empresa, features con iconos 3D, dashboard mockup, pricing
+- ✅ Nueva página `/antialink` con hero + mockup móvil, logos partners, 4 pasos, sección Telegram, campañas (Deportivas/Casino/Póker)
 - ✅ Diseño consistente entre las 3 páginas (paleta oscura #0a0a0a)
 - ✅ Imagen de fondo en hero (portería de fútbol)
-- ✅ Secciones: Tipo de usuario, Productos, Features, Mockups de afiliación
-- ✅ Responsive design
-- ✅ Test IDs para testing
+- ✅ Navegación: Home → AntiaPay/AntiaLink
+- ✅ AntiaPay: Particular → /register?role=client | Empresa → /register?role=tipster
+- ✅ Responsive design + Test IDs
+
+### 2025-01-06 - Corrección Sistema de Métricas
+**Completado:**
+- ✅ **Tipster Métricas**: Corregido bug donde modal se quedaba cargando
+  - Arreglado `getLandingById()` para buscar IDs como string (no solo ObjectId)
+  - Modal ahora muestra: Vistas, Clicks, Conversiones, Ganancias, Tasa conversión
+  - Clicks por País y Casa, Estado de conversiones (Aprobadas/Pendientes/Rechazadas)
+- ✅ **Admin Estadísticas**: Corregida URL del endpoint (`/api/admin/affiliate/stats`)
+  - Filtros funcionando: Tipster, Campaña, Casa, Fechas
+  - Stats por tipster con clicks, conversiones y comisiones
+- ✅ **Admin Conversiones**: Mostrando datos de referidos con emails
+  - Columna Usuario muestra: email, telegram, ID externo
 
 ### Sesión Anterior - Correcciones Críticas
 - ✅ Bot Telegram: Migrado de webhooks a polling (más robusto)
