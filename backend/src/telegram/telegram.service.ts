@@ -2820,7 +2820,32 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       }
 
       if (!channel) {
-        // PASO 3: Si no se encontró, mostrar canales disponibles con instrucciones claras
+        // PASO 3: Si no se encontró, guardar el invite link como pendiente
+        // para que cuando llegue el evento my_chat_member, se conecte automáticamente
+        this.logger.log(`📝 Saving pending invite link for future detection: ${link}`);
+        
+        try {
+          await this.prisma.$runCommandRaw({
+            update: 'pending_channel_connections',
+            updates: [
+              {
+                q: { invite_link: link },
+                u: {
+                  $set: {
+                    invite_link: link,
+                    search_pattern: searchPattern,
+                    requested_at: { $date: new Date().toISOString() },
+                  },
+                },
+                upsert: true,
+              },
+            ],
+          });
+        } catch (saveError) {
+          this.logger.warn('Could not save pending invite link:', saveError);
+        }
+
+        // Mostrar canales disponibles con instrucciones claras
         const availableResult = (await this.prisma.$runCommandRaw({
           find: 'detected_telegram_channels',
           filter: { is_active: true },
@@ -2831,7 +2856,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
 
         return {
           found: false,
-          error: `Canal no encontrado con ese link.\n\nCanales detectados donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n💡 Si tu canal no aparece:\n1. Verifica que @Antiabetbot sea administrador del canal\n2. Envía cualquier mensaje en el canal (esto ayuda al bot a detectarlo)\n3. Espera 30 segundos e intenta de nuevo\n4. O usa "Conectar por ID" e ingresa el ID del canal (ej: -1001234567890)`,
+          error: `Canal no encontrado con ese link.\n\nCanales detectados donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n💡 Para que el bot detecte tu canal:\n1. Asegúrate que @Antiabetbot sea administrador\n2. Envía un mensaje en el canal (cualquier mensaje)\n3. Vuelve aquí e intenta de nuevo\n\nSi el problema persiste, usa "Por Channel ID" (obtén el ID con @userinfobot)`,
           availableChannels: availableChannels.map((c: any) => ({
             id: c.channel_id,
             title: c.channel_title,
