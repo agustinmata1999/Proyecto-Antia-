@@ -2858,7 +2858,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
 
         return {
           found: false,
-          error: `Canal no encontrado con ese link.\n\nCanales detectados donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n💡 Para que el bot detecte tu canal:\n1. Asegúrate que @Antiabetbot sea administrador\n2. Envía un mensaje en el canal (cualquier mensaje)\n3. Vuelve aquí e intenta de nuevo\n\nSi el problema persiste, usa "Por Channel ID" (obtén el ID con @userinfobot)`,
+          error: `⚠️ Canal no encontrado con ese link.\n\n📋 Canales donde el bot es admin:\n${channelNames || 'Ninguno'}\n\n🔧 SOLUCIÓN:\n1. Ve a tu canal de Telegram\n2. Envía cualquier mensaje (ej: "test")\n3. Vuelve aquí e intenta conectar de nuevo\n\nEsto es necesario para que el bot detecte tu canal.\n\n💡 Alternativa: Usa "Por Channel ID" y obtén el ID con @userinfobot`,
           availableChannels: availableChannels.map((c: any) => ({
             id: c.channel_id,
             title: c.channel_title,
