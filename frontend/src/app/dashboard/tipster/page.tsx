@@ -1989,17 +1989,8 @@ export default function TipsterDashboard() {
                   </div>
                 </div>
               )}
-                  <div className="text-center py-12">
-                    <div className="text-4xl mb-4">💸</div>
-                    <p className="text-gray-500">No hay pagos recibidos aún</p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      Aquí verás el historial de pagos realizados a tu cuenta bancaria
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+            </div>
+          </div>
         )}
 
         {activeView === 'profile' && (
