@@ -56,10 +56,10 @@ export class AffiliateTipsterController {
   @Get('houses/:houseId')
   async getHouseWithLink(@Param('houseId') houseId: string, @Request() req) {
     const profile = await this.getTipsterProfile(req.user.id);
-    
+
     const house = await this.affiliateService.getBettingHouse(houseId);
     const link = await this.affiliateService.getOrCreateTipsterLink(profile.id, houseId);
-    
+
     return {
       house: {
         id: house.id,
@@ -94,14 +94,14 @@ export class AffiliateTipsterController {
   @Post('houses/:houseId/link')
   async generateLink(@Param('houseId') houseId: string, @Request() req) {
     const profile = await this.getTipsterProfile(req.user.id);
-    
+
     const house = await this.affiliateService.getBettingHouse(houseId);
     const link = await this.affiliateService.getOrCreateTipsterLink(profile.id, houseId);
-    
+
     // Build the redirect URL
     const baseUrl = process.env.FRONTEND_URL || 'https://antia.com';
     const redirectUrl = `${baseUrl}/r/${link.redirectCode}`;
-    
+
     return {
       success: true,
       link: {
@@ -182,8 +182,8 @@ export class AffiliateTipsterController {
   async getMyPayouts(@Request() req) {
     const profile = await this.getTipsterProfile(req.user.id);
     const payouts = await this.affiliateService.getTipsterPayouts(profile.id);
-    
-    return payouts.map(p => ({
+
+    return payouts.map((p) => ({
       ...p,
       totalAmountEur: p.totalAmountCents / 100,
     }));
@@ -195,13 +195,13 @@ export class AffiliateTipsterController {
   @Get('payouts/:id')
   async getPayoutDetails(@Param('id') id: string, @Request() req) {
     const profile = await this.getTipsterProfile(req.user.id);
-    
+
     const payout = await this.prisma.affiliatePayout.findUnique({ where: { id } });
-    
+
     if (!payout || payout.tipsterId !== profile.id) {
       throw new ForbiddenException('Liquidación no encontrada');
     }
-    
+
     return {
       ...payout,
       totalAmountEur: payout.totalAmountCents / 100,

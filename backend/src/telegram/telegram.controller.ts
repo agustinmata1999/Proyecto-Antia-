@@ -60,10 +60,7 @@ export class TelegramController {
   @Roles('TIPSTER')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Connect Telegram channel manually' })
-  async connectChannel(
-    @CurrentUser() user: any,
-    @Body() body: { channelIdentifier: string },
-  ) {
+  async connectChannel(@CurrentUser() user: any, @Body() body: { channelIdentifier: string }) {
     // Obtener el perfil del tipster
     const tipster = await this.prisma.tipsterProfile.findUnique({
       where: { userId: user.id },
@@ -76,10 +73,7 @@ export class TelegramController {
       };
     }
 
-    return this.telegramService.connectChannelManually(
-      tipster.id,
-      body.channelIdentifier,
-    );
+    return this.telegramService.connectChannelManually(tipster.id, body.channelIdentifier);
   }
 
   @Delete('disconnect')
@@ -121,13 +115,13 @@ export class TelegramController {
     const channel = await this.telegramService.getConnectedChannel(tipster.id);
 
     // Get premium channel link from tipster profile
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: tipster.id } },
       projection: { premium_channel_link: 1 },
       limit: 1,
-    }) as any;
-    
+    })) as any;
+
     const premiumChannelLink = result.cursor?.firstBatch?.[0]?.premium_channel_link || null;
 
     return {
@@ -160,18 +154,22 @@ export class TelegramController {
     // Update the premium channel link
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: tipster.id } },
-        u: {
-          $set: {
-            premium_channel_link: body.premiumChannelLink || null,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: tipster.id } },
+          u: {
+            $set: {
+              premium_channel_link: body.premiumChannelLink || null,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
-    this.logger.log(`Updated premium channel link for tipster ${tipster.id}: ${body.premiumChannelLink}`);
+    this.logger.log(
+      `Updated premium channel link for tipster ${tipster.id}: ${body.premiumChannelLink}`,
+    );
 
     return {
       success: true,
@@ -201,18 +199,18 @@ export class TelegramController {
     }
 
     // Get publication channel from tipster profile
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: tipster.id } },
-      projection: { 
-        publication_channel_id: 1, 
+      projection: {
+        publication_channel_id: 1,
         publication_channel_title: 1,
         publication_channel_username: 1,
         publication_channel_pending: 1,
       },
       limit: 1,
-    }) as any;
-    
+    })) as any;
+
     const profile = result.cursor?.firstBatch?.[0];
 
     return {
@@ -244,22 +242,25 @@ export class TelegramController {
     // Set pending flag for automatic detection
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: tipster.id } },
-        u: {
-          $set: {
-            publication_channel_pending: true,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: tipster.id } },
+          u: {
+            $set: {
+              publication_channel_pending: true,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     this.logger.log(`Started publication channel linking for tipster ${tipster.id}`);
 
     return {
       success: true,
-      message: 'Proceso de vinculación iniciado. Ahora añade @Antiabetbot como administrador a tu canal.',
+      message:
+        'Proceso de vinculación iniciado. Ahora añade @Antiabetbot como administrador a tu canal.',
       botUsername: 'Antiabetbot',
     };
   }
@@ -284,15 +285,17 @@ export class TelegramController {
     // Remove pending flag
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: tipster.id } },
-        u: {
-          $set: {
-            publication_channel_pending: false,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: tipster.id } },
+          u: {
+            $set: {
+              publication_channel_pending: false,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     return {
@@ -322,37 +325,44 @@ export class TelegramController {
     }
 
     // Clean the channel identifier (support both @username and numeric ID)
-    let channelIdentifier = body.channelId.trim();
-    
+    const channelIdentifier = body.channelId.trim();
+
     // Verify the channel exists and bot is admin
     try {
       const chatInfo = await this.telegramService.verifyChannelAccess(channelIdentifier);
-      
+
       if (!chatInfo.valid) {
         return {
           success: false,
-          message: chatInfo.error || 'No se pudo verificar el canal. Asegúrate de que @Antiabetbot sea administrador del canal.',
+          message:
+            chatInfo.error ||
+            'No se pudo verificar el canal. Asegúrate de que @Antiabetbot sea administrador del canal.',
         };
       }
 
       // Update the publication channel
       await this.prisma.$runCommandRaw({
         update: 'tipster_profiles',
-        updates: [{
-          q: { _id: { $oid: tipster.id } },
-          u: {
-            $set: {
-              publication_channel_id: channelIdentifier,
-              publication_channel_title: body.channelTitle || chatInfo.title || 'Canal de Publicación',
-              publication_channel_username: chatInfo.username ? `@${chatInfo.username}` : null,
-              publication_channel_pending: false,
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: tipster.id } },
+            u: {
+              $set: {
+                publication_channel_id: channelIdentifier,
+                publication_channel_title:
+                  body.channelTitle || chatInfo.title || 'Canal de Publicación',
+                publication_channel_username: chatInfo.username ? `@${chatInfo.username}` : null,
+                publication_channel_pending: false,
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
-      this.logger.log(`Updated publication channel for tipster ${tipster.id}: ${channelIdentifier}`);
+      this.logger.log(
+        `Updated publication channel for tipster ${tipster.id}: ${channelIdentifier}`,
+      );
 
       return {
         success: true,
@@ -390,16 +400,18 @@ export class TelegramController {
 
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: tipster.id } },
-        u: {
-          $set: {
-            publication_channel_id: null,
-            publication_channel_title: null,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: tipster.id } },
+          u: {
+            $set: {
+              publication_channel_id: null,
+              publication_channel_title: null,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     this.logger.log(`Removed publication channel for tipster ${tipster.id}`);
@@ -409,5 +421,4 @@ export class TelegramController {
       message: 'Canal de publicación eliminado',
     };
   }
-
 }

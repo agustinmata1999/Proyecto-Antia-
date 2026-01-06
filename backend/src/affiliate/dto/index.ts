@@ -170,7 +170,7 @@ export class ImportCsvDto {
   houseId: string;
 
   @IsString()
-  periodMonth: string;  // "2025-01"
+  periodMonth: string; // "2025-01"
 
   @IsOptional()
   @IsObject()
@@ -180,7 +180,7 @@ export class ImportCsvDto {
 // Standard CSV row format (internal)
 export interface StandardCsvRow {
   house_id?: string;
-  tipster_tracking_id: string;  // subid
+  tipster_tracking_id: string; // subid
   event_type: 'REGISTER' | 'DEPOSIT' | 'QUALIFIED';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   occurred_at: string;
@@ -231,7 +231,7 @@ export class LandingCountryConfigDto {
 export class CreateLandingDto {
   @IsOptional()
   @IsString()
-  promotionId?: string;  // ID del reto/promoción seleccionado
+  promotionId?: string; // ID del reto/promoción seleccionado
 
   @IsOptional()
   @IsString()

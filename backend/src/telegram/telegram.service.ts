@@ -1,4 +1,11 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { Telegraf, Context } from 'telegraf';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -17,7 +24,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   ) {
     // Create HTTP service for proxy-based API calls
     this.httpService = new TelegramHttpService(config);
-    
+
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     if (!token) {
       this.logger.warn('TELEGRAM_BOT_TOKEN is not configured - Telegram features disabled');
@@ -39,25 +46,34 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     try {
       const botInfo = await this.httpService.getMe();
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
-      
+
       // Delete any existing webhook to enable polling
       this.logger.log('🔄 Removing webhook to enable polling mode...');
       await this.httpService.deleteWebhook();
-      
+
       // Start polling mode using Telegraf
       if (this.bot) {
         this.logger.log('🚀 Starting Telegram bot in POLLING mode...');
-        
+
         // Launch bot in polling mode
-        this.bot.launch({
-          dropPendingUpdates: false,
-          allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
-        }).then(() => {
-          this.logger.log('✅ Telegram bot started successfully in POLLING mode');
-        }).catch((err) => {
-          this.logger.error('Failed to start bot polling:', err.message);
-        });
-        
+        this.bot
+          .launch({
+            dropPendingUpdates: false,
+            allowedUpdates: [
+              'message',
+              'callback_query',
+              'my_chat_member',
+              'chat_join_request',
+              'channel_post',
+            ],
+          })
+          .then(() => {
+            this.logger.log('✅ Telegram bot started successfully in POLLING mode');
+          })
+          .catch((err) => {
+            this.logger.error('Failed to start bot polling:', err.message);
+          });
+
         this.isInitialized = true;
         this.logger.log('✅ TelegramService initialized (POLLING mode - works in any environment)');
       } else {
@@ -97,7 +113,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Test connection via proxy
       const botInfo = await this.httpService.getMe();
       const webhookInfo = await this.httpService.getWebhookInfo();
-      
+
       return {
         initialized: this.isInitialized,
         botUsername: botInfo?.username || null,
@@ -120,28 +136,30 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private setupBot() {
     if (!this.bot) return;
-    
+
     // Handler cuando el bot es añadido a un canal
     this.bot.on('my_chat_member', async (ctx) => {
       try {
         const { chat, new_chat_member, old_chat_member } = ctx.myChatMember;
         const chatTitle = 'title' in chat ? chat.title : 'N/A';
-        this.logger.log(`📥 my_chat_member event: ${chatTitle} (${chat.id}) - status: ${new_chat_member.status}`);
-        
+        this.logger.log(
+          `📥 my_chat_member event: ${chatTitle} (${chat.id}) - status: ${new_chat_member.status}`,
+        );
+
         // Verificar si el bot fue añadido como administrador
         if (
           new_chat_member.status === 'administrator' &&
           (chat.type === 'channel' || chat.type === 'supergroup')
         ) {
           this.logger.log(`🎉 Bot added to channel: ${chat.title} (${chat.id})`);
-          
+
           // NUEVO: Guardar en la tabla de canales detectados
           await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
-          
+
           // Legacy: manejar conexión automática para tipsters pendientes
           await this.handleChannelConnection(chat.id.toString(), chat.title, chat.username);
         }
-        
+
         // Si el bot fue removido del canal, marcar como inactivo
         if (
           (old_chat_member?.status === 'administrator' || old_chat_member?.status === 'creator') &&
@@ -185,7 +203,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const startPayload = ctx.message.text.split(' ')[1];
         this.logger.log(`📦 Start payload: ${startPayload || 'NONE'}`);
         const telegramUserId = ctx.from.id.toString();
-        
+
         // Helper to send messages via proxy
         const replyViaProxy = async (text: string, options: any = {}) => {
           try {
@@ -203,7 +221,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             }
           }
         };
-        
+
         // NUEVO FLUJO: Si viene con order_, validar pago y dar acceso
         if (startPayload && startPayload.startsWith('order_')) {
           const orderId = startPayload.replace('order_', '');
@@ -216,22 +234,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         if (startPayload && startPayload.startsWith('product_')) {
           const productId = startPayload.replace('product_', '');
           this.logger.log(`🔄 Redirecting to web checkout for product: ${productId}`);
-          
+
           const appUrl = this.config.get('APP_URL');
           const checkoutUrl = `${appUrl}/checkout/${productId}`;
-          
+
           await replyViaProxy(
             '👋 ¡Bienvenido a Antia!\n\n' +
-            '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
-            '_Serás redirigido a nuestra página de pago seguro._',
+              '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
+              '_Serás redirigido a nuestra página de pago seguro._',
             {
               parse_mode: 'Markdown',
               reply_markup: {
-                inline_keyboard: [
-                  [{ text: '💳 Ir al Checkout', url: checkoutUrl }],
-                ],
+                inline_keyboard: [[{ text: '💳 Ir al Checkout', url: checkoutUrl }]],
               },
-            }
+            },
           );
           return;
         }
@@ -239,21 +255,24 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         // Sin payload válido - mensaje de bienvenida simple
         await replyViaProxy(
           '👋 ¡Bienvenido a Antia!\n\n' +
-          '🛒 *¿Cómo comprar?*\n\n' +
-          '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
-          '2️⃣ Haz clic en el enlace de compra\n' +
-          '3️⃣ Completa el pago en nuestra web\n' +
-          '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
-          '✅ *¿Ya pagaste?*\n' +
-          'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
-          '❓ *¿Necesitas ayuda?*\n' +
-          'Contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            '🛒 *¿Cómo comprar?*\n\n' +
+            '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
+            '2️⃣ Haz clic en el enlace de compra\n' +
+            '3️⃣ Completa el pago en nuestra web\n' +
+            '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
+            '✅ *¿Ya pagaste?*\n' +
+            'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
+            '❓ *¿Necesitas ayuda?*\n' +
+            'Contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
       } catch (error) {
         this.logger.error('Error in /start command:', error);
         try {
-          await this.httpService.sendMessage(ctx.from.id.toString(), 'Hubo un error. Por favor, intenta nuevamente.');
+          await this.httpService.sendMessage(
+            ctx.from.id.toString(),
+            'Hubo un error. Por favor, intenta nuevamente.',
+          );
         } catch (e) {
           // Silently fail
         }
@@ -266,15 +285,18 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const chatType = ctx.chat.type;
       const chatTitle = 'title' in ctx.chat ? ctx.chat.title : 'N/A';
       const chatUsername = 'username' in ctx.chat ? ctx.chat.username : 'N/A';
-      
-      await ctx.reply(`
+
+      await ctx.reply(
+        `
 📊 **Información del Chat**
 
 🆔 Chat ID: \`${chatId}\`
 📝 Tipo: ${chatType}
 🏷️ Título: ${chatTitle}
 👤 Username: @${chatUsername}
-      `, { parse_mode: 'Markdown' });
+      `,
+        { parse_mode: 'Markdown' },
+      );
     });
 
     // Handler para mensajes de texto - ya no procesa compras, solo ayuda
@@ -287,13 +309,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         // Mensaje simple de ayuda
         await ctx.reply(
           '👋 ¡Hola! Soy el bot de Antia.\n\n' +
-          '🛒 Para comprar un producto:\n' +
-          '1️⃣ Busca el enlace de compra en el canal del tipster\n' +
-          '2️⃣ Haz clic para ir al checkout\n' +
-          '3️⃣ Completa el pago\n' +
-          '4️⃣ Volverás aquí para recibir tu acceso\n\n' +
-          '❓ ¿Necesitas ayuda? Contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            '🛒 Para comprar un producto:\n' +
+            '1️⃣ Busca el enlace de compra en el canal del tipster\n' +
+            '2️⃣ Haz clic para ir al checkout\n' +
+            '3️⃣ Completa el pago\n' +
+            '4️⃣ Volverás aquí para recibir tu acceso\n\n' +
+            '❓ ¿Necesitas ayuda? Contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
       } catch (error) {
         this.logger.error('Error processing text message:', error);
@@ -314,10 +336,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.error(`❌ Invalid orderId format: ${orderId}`);
         await ctx.reply(
           '❌ *Error en el enlace*\n\n' +
-          'El enlace de acceso parece estar incompleto.\n' +
-          'Por favor, usa el enlace original que recibiste.\n\n' +
-          'Si el problema persiste, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'El enlace de acceso parece estar incompleto.\n' +
+            'Por favor, usa el enlace original que recibiste.\n\n' +
+            'Si el problema persiste, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
@@ -325,11 +347,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Función para buscar la orden
       const findOrder = async () => {
         try {
-          const orderResult = await this.prisma.$runCommandRaw({
+          const orderResult = (await this.prisma.$runCommandRaw({
             find: 'orders',
             filter: { _id: { $oid: orderId } },
             limit: 1,
-          }) as any;
+          })) as any;
           return orderResult.cursor?.firstBatch?.[0];
         } catch (err) {
           this.logger.error(`Error finding order ${orderId}: ${err.message}`);
@@ -346,8 +368,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Reintentar si la orden no existe O si está PENDING
       while ((!order || order.status === 'PENDING') && retries < maxRetries) {
         const reason = !order ? 'not found' : 'PENDING';
-        this.logger.log(`⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        this.logger.log(
+          `⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
         order = await findOrder();
         retries++;
       }
@@ -356,52 +380,56 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.warn(`❌ Order ${orderId} not found after ${retries} retries`);
         await ctx.reply(
           '❌ *Orden no encontrada*\n\n' +
-          'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
-          '• El pago aún se está procesando (espera 1-2 min)\n' +
-          '• Hubo un problema con la transacción\n\n' +
-          '💡 *Solución:* Vuelve a hacer clic en el enlace del bot que te apareció después del pago.\n\n' +
-          'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
+            '• El pago aún se está procesando (espera 1-2 min)\n' +
+            '• Hubo un problema con la transacción\n\n' +
+            '💡 *Solución:* Vuelve a hacer clic en el enlace del bot que te apareció después del pago.\n\n' +
+            'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
 
       // Verificar que el pago está completado
       if (order.status !== 'PAGADA' && order.status !== 'COMPLETED' && order.status !== 'paid') {
-        this.logger.warn(`❌ Order ${orderId} not paid after ${retries} retries. Status: ${order.status}`);
+        this.logger.warn(
+          `❌ Order ${orderId} not paid after ${retries} retries. Status: ${order.status}`,
+        );
         await ctx.reply(
           '⏳ *Pago en proceso*\n\n' +
-          'Tu pago está siendo procesado. Por favor:\n\n' +
-          '1️⃣ Espera 1-2 minutos\n' +
-          '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
-          'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'Tu pago está siendo procesado. Por favor:\n\n' +
+            '1️⃣ Espera 1-2 minutos\n' +
+            '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
+            'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
-      
-      this.logger.log(`✅ Order ${orderId} is paid (status: ${order.status})`)
+
+      this.logger.log(`✅ Order ${orderId} is paid (status: ${order.status})`);
 
       // Actualizar la orden con el telegramUserId del cliente
       await this.prisma.$runCommandRaw({
         update: 'orders',
-        updates: [{
-          q: { _id: { $oid: orderId } },
-          u: {
-            $set: {
-              telegram_user_id: telegramUserId,
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: orderId } },
+            u: {
+              $set: {
+                telegram_user_id: telegramUserId,
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
       // Obtener producto - intentar por id y también con $oid
       let product: any = null;
       const productId = order.product_id;
-      
+
       this.logger.log(`🔍 Looking for product: ${productId}`);
-      
+
       // Primero intentar con Prisma normal
       try {
         product = await this.prisma.product.findUnique({
@@ -410,16 +438,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       } catch (e) {
         this.logger.warn(`Prisma findUnique failed for product ${productId}: ${e.message}`);
       }
-      
+
       // Si no lo encuentra, intentar con $runCommandRaw
       if (!product) {
         this.logger.log(`Trying raw query for product ${productId}`);
         try {
-          const productResult = await this.prisma.$runCommandRaw({
+          const productResult = (await this.prisma.$runCommandRaw({
             find: 'products',
             filter: { _id: { $oid: productId } },
             limit: 1,
-          }) as any;
+          })) as any;
           const rawProduct = productResult.cursor?.firstBatch?.[0];
           if (rawProduct) {
             product = {
@@ -442,14 +470,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.error(`❌ Product ${productId} not found by any method`);
         await ctx.reply(
           '❌ *Error al procesar tu compra*\n\n' +
-          'No pudimos encontrar el producto asociado a tu compra.\n\n' +
-          'Por favor, contacta con @AntiaSupport con este código:\n' +
-          `\`ORDER: ${orderId}\``,
-          { parse_mode: 'Markdown' }
+            'No pudimos encontrar el producto asociado a tu compra.\n\n' +
+            'Por favor, contacta con @AntiaSupport con este código:\n' +
+            `\`ORDER: ${orderId}\``,
+          { parse_mode: 'Markdown' },
         );
         return;
       }
-      
+
       this.logger.log(`✅ Product found: ${product.title} (tipsterId: ${product.tipsterId})`);
 
       // Obtener tipster
@@ -461,15 +489,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       } catch (e) {
         this.logger.warn(`Could not find tipster profile: ${e.message}`);
       }
-      
+
       // Si no encuentra por Prisma, intentar raw query
       if (!tipster && product.tipsterId) {
         try {
-          const tipsterResult = await this.prisma.$runCommandRaw({
+          const tipsterResult = (await this.prisma.$runCommandRaw({
             find: 'tipster_profiles',
             filter: { _id: { $oid: product.tipsterId } },
             limit: 1,
-          }) as any;
+          })) as any;
           const rawTipster = tipsterResult.cursor?.firstBatch?.[0];
           if (rawTipster) {
             tipster = {
@@ -490,59 +518,70 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       let channelId: string | null = null;
 
       if (product.telegramChannelId) {
-        this.logger.log(`🔍 Looking for channel: ${product.telegramChannelId} for tipster: ${tipster?.id || 'unknown'}`);
-        
+        this.logger.log(
+          `🔍 Looking for channel: ${product.telegramChannelId} for tipster: ${tipster?.id || 'unknown'}`,
+        );
+
         // Buscar canal - primero con tipster_id, luego sin él como fallback
-        let channelResult = await this.prisma.$runCommandRaw({
+        let channelResult = (await this.prisma.$runCommandRaw({
           find: 'telegram_channels',
-          filter: { 
+          filter: {
             channel_id: product.telegramChannelId,
             ...(tipster?.id ? { tipster_id: tipster.id } : {}),
             is_active: true,
           },
           projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1, tipster_id: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
 
         let channel = channelResult.cursor?.firstBatch?.[0];
-        
+
         // Si no encontró con tipster_id, buscar solo por channel_id
         if (!channel) {
           this.logger.log(`⚠️ Channel not found with tipster filter, trying without...`);
-          channelResult = await this.prisma.$runCommandRaw({
+          channelResult = (await this.prisma.$runCommandRaw({
             find: 'telegram_channels',
-            filter: { 
+            filter: {
               channel_id: product.telegramChannelId,
               is_active: true,
             },
             projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1, tipster_id: 1 },
             limit: 1,
-          }) as any;
+          })) as any;
           channel = channelResult.cursor?.firstBatch?.[0];
         }
-        
+
         if (channel) {
           channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
-          this.logger.log(`✅ Found channel: ${channelTitle} (ID: ${channelId}, link: ${channelLink ? 'YES' : 'NO'})`);
-          
+          this.logger.log(
+            `✅ Found channel: ${channelTitle} (ID: ${channelId}, link: ${channelLink ? 'YES' : 'NO'})`,
+          );
+
           // Si no hay invite_link, intentar generarlo ahora
           if (!channelLink && channelId) {
             this.logger.log(`⚠️ Channel ${channelId} has no invite_link, trying to generate...`);
             try {
               channelLink = await this.bot.telegram.exportChatInviteLink(channelId);
               this.logger.log(`✅ Generated invite link: ${channelLink}`);
-              
+
               // Guardar el link generado en la base de datos
               const channelOid = channel._id?.$oid || channel._id;
               if (channelOid) {
                 await this.prisma.$runCommandRaw({
                   update: 'telegram_channels',
-                  updates: [{
-                    q: { _id: { $oid: channelOid } },
-                    u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
-                  }],
+                  updates: [
+                    {
+                      q: { _id: { $oid: channelOid } },
+                      u: {
+                        $set: {
+                          invite_link: channelLink,
+                          updated_at: { $date: new Date().toISOString() },
+                        },
+                      },
+                    },
+                  ],
                 });
                 this.logger.log(`✅ Saved invite link to database`);
               }
@@ -569,12 +608,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Si no hay canal del producto, buscar legacy premium_channel_link
       if (!channelLink && tipster) {
-        const tipsterResult = await this.prisma.$runCommandRaw({
+        const tipsterResult = (await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
           filter: { _id: { $oid: tipster.id } },
           projection: { premium_channel_link: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
         channelLink = tipsterResult.cursor?.firstBatch?.[0]?.premium_channel_link;
         if (channelLink) {
           this.logger.log(`✅ Using legacy premium_channel_link: ${channelLink}`);
@@ -584,39 +623,38 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Mensaje de confirmación
       await ctx.reply(
         `✅ *¡Pago verificado!*\n\n` +
-        `Gracias por tu compra de *${product.title}*.\n\n` +
-        `Tu acceso está listo.`,
-        { parse_mode: 'Markdown' }
+          `Gracias por tu compra de *${product.title}*.\n\n` +
+          `Tu acceso está listo.`,
+        { parse_mode: 'Markdown' },
       );
 
       // Mostrar acceso al canal
       if (channelLink) {
         await ctx.reply(
-          `🎯 *Acceso a tu canal*\n\n` +
-          `Haz clic en el botón para unirte a *${channelTitle}*:`,
+          `🎯 *Acceso a tu canal*\n\n` + `Haz clic en el botón para unirte a *${channelTitle}*:`,
           {
             parse_mode: 'Markdown',
             reply_markup: {
-              inline_keyboard: [
-                [{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }],
-              ],
+              inline_keyboard: [[{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }]],
             },
-          }
+          },
         );
 
         // Guardar registro de acceso otorgado
         await this.prisma.$runCommandRaw({
           update: 'orders',
-          updates: [{
-            q: { _id: { $oid: orderId } },
-            u: {
-              $set: {
-                access_granted: true,
-                access_granted_at: { $date: new Date().toISOString() },
-                channel_link_sent: channelLink,
+          updates: [
+            {
+              q: { _id: { $oid: orderId } },
+              u: {
+                $set: {
+                  access_granted: true,
+                  access_granted_at: { $date: new Date().toISOString() },
+                  channel_link_sent: channelLink,
+                },
               },
             },
-          }],
+          ],
         });
 
         this.logger.log(`✅ Access granted to user ${telegramUserId} for order ${orderId}`);
@@ -626,18 +664,18 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           // Producto sin canal - Solo confirmación
           await ctx.reply(
             `✅ *¡Compra completada!*\n\n` +
-            `Tu compra de *${product.title}* ha sido procesada correctamente.\n\n` +
-            `📧 Recibirás información adicional en tu correo electrónico.\n\n` +
-            `Si tienes alguna duda, contacta con @AntiaSupport`,
-            { parse_mode: 'Markdown' }
+              `Tu compra de *${product.title}* ha sido procesada correctamente.\n\n` +
+              `📧 Recibirás información adicional en tu correo electrónico.\n\n` +
+              `Si tienes alguna duda, contacta con @AntiaSupport`,
+            { parse_mode: 'Markdown' },
           );
         } else {
           // Producto con canal pero no se encontró el link
           await ctx.reply(
             `ℹ️ *Acceso pendiente*\n\n` +
-            `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
-            `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
-            { parse_mode: 'Markdown' }
+              `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
+              `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
+            { parse_mode: 'Markdown' },
           );
         }
       }
@@ -653,11 +691,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           order.email_backup,
         );
       }
-
     } catch (error) {
       this.logger.error('Error in handlePostPaymentAccess:', error);
       await ctx.reply(
-        '❌ Hubo un error al procesar tu acceso. Por favor, intenta de nuevo o contacta con @AntiaSupport'
+        '❌ Hubo un error al procesar tu acceso. Por favor, intenta de nuevo o contacta con @AntiaSupport',
       );
     }
   }
@@ -686,10 +723,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.error(`❌ Invalid orderId format: ${orderId}`);
         await sendMessage(
           '❌ *Error en el enlace*\n\n' +
-          'El enlace de acceso parece estar incompleto.\n' +
-          'Por favor, usa el enlace original que recibiste.\n\n' +
-          'Si el problema persiste, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'El enlace de acceso parece estar incompleto.\n' +
+            'Por favor, usa el enlace original que recibiste.\n\n' +
+            'Si el problema persiste, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
@@ -697,11 +734,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Find order function
       const findOrder = async () => {
         try {
-          const orderResult = await this.prisma.$runCommandRaw({
+          const orderResult = (await this.prisma.$runCommandRaw({
             find: 'orders',
             filter: { _id: { $oid: orderId } },
             limit: 1,
-          }) as any;
+          })) as any;
           return orderResult.cursor?.firstBatch?.[0];
         } catch (err) {
           this.logger.error(`Error finding order ${orderId}: ${err.message}`);
@@ -717,8 +754,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       while ((!order || order.status === 'PENDING') && retries < maxRetries) {
         const reason = !order ? 'not found' : 'PENDING';
-        this.logger.log(`⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        this.logger.log(
+          `⏳ Order ${orderId} ${reason}, waiting ${retryDelay}ms (retry ${retries + 1}/${maxRetries})`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
         order = await findOrder();
         retries++;
       }
@@ -727,12 +766,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.warn(`❌ Order ${orderId} not found after ${retries} retries`);
         await sendMessage(
           '❌ *Orden no encontrada*\n\n' +
-          'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
-          '• El pago aún se está procesando (espera 1-2 min)\n' +
-          '• Hubo un problema con la transacción\n\n' +
-          '💡 *Solución:* Vuelve a hacer clic en el enlace del bot.\n\n' +
-          'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'No pudimos encontrar tu compra. Esto puede ocurrir si:\n' +
+            '• El pago aún se está procesando (espera 1-2 min)\n' +
+            '• Hubo un problema con la transacción\n\n' +
+            '💡 *Solución:* Vuelve a hacer clic en el enlace del bot.\n\n' +
+            'Si después de 5 minutos sigue sin funcionar, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
@@ -742,35 +781,37 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.warn(`❌ Order ${orderId} not paid. Status: ${order.status}`);
         await sendMessage(
           '⏳ *Pago en proceso*\n\n' +
-          'Tu pago está siendo procesado. Por favor:\n\n' +
-          '1️⃣ Espera 1-2 minutos\n' +
-          '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
-          'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
-          { parse_mode: 'Markdown' }
+            'Tu pago está siendo procesado. Por favor:\n\n' +
+            '1️⃣ Espera 1-2 minutos\n' +
+            '2️⃣ Vuelve a hacer clic en el enlace del bot\n\n' +
+            'Si después de 5 minutos no recibes acceso, contacta con @AntiaSupport',
+          { parse_mode: 'Markdown' },
         );
         return;
       }
-      
+
       this.logger.log(`✅ Order ${orderId} is paid (status: ${order.status})`);
 
       // Update order with telegram user ID
       await this.prisma.$runCommandRaw({
         update: 'orders',
-        updates: [{
-          q: { _id: { $oid: orderId } },
-          u: {
-            $set: {
-              telegram_user_id: telegramUserId,
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: orderId } },
+            u: {
+              $set: {
+                telegram_user_id: telegramUserId,
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
       // Get product
       const productId = order.product_id;
       this.logger.log(`🔍 Looking for product: ${productId}`);
-      
+
       let product: any = null;
       try {
         product = await this.prisma.product.findUnique({
@@ -779,14 +820,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       } catch (e) {
         this.logger.warn(`Prisma findUnique failed: ${e.message}`);
       }
-      
+
       if (!product) {
         try {
-          const productResult = await this.prisma.$runCommandRaw({
+          const productResult = (await this.prisma.$runCommandRaw({
             find: 'products',
             filter: { _id: { $oid: productId } },
             limit: 1,
-          }) as any;
+          })) as any;
           const rawProduct = productResult.cursor?.firstBatch?.[0];
           if (rawProduct) {
             product = {
@@ -806,25 +847,25 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.error(`❌ Product ${productId} not found`);
         await sendMessage(
           '❌ *Error al procesar tu compra*\n\n' +
-          'No pudimos encontrar el producto.\n\n' +
-          'Por favor, contacta con @AntiaSupport con este código:\n' +
-          `\`ORDER: ${orderId}\``,
-          { parse_mode: 'Markdown' }
+            'No pudimos encontrar el producto.\n\n' +
+            'Por favor, contacta con @AntiaSupport con este código:\n' +
+            `\`ORDER: ${orderId}\``,
+          { parse_mode: 'Markdown' },
         );
         return;
       }
-      
+
       this.logger.log(`✅ Product found: ${product.title}`);
 
       // Get tipster
       let tipster: any = null;
       if (product.tipsterId) {
         try {
-          const tipsterResult = await this.prisma.$runCommandRaw({
+          const tipsterResult = (await this.prisma.$runCommandRaw({
             find: 'tipster_profiles',
             filter: { _id: { $oid: product.tipsterId } },
             limit: 1,
-          }) as any;
+          })) as any;
           const rawTipster = tipsterResult.cursor?.firstBatch?.[0];
           if (rawTipster) {
             tipster = {
@@ -844,41 +885,50 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       if (product.telegramChannelId) {
         this.logger.log(`🔍 Looking for channel: ${product.telegramChannelId}`);
-        
-        const channelResult = await this.prisma.$runCommandRaw({
+
+        const channelResult = (await this.prisma.$runCommandRaw({
           find: 'telegram_channels',
-          filter: { 
+          filter: {
             channel_id: product.telegramChannelId,
             is_active: true,
           },
           projection: { invite_link: 1, channel_title: 1, channel_id: 1, _id: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
 
         const channel = channelResult.cursor?.firstBatch?.[0];
-        
+
         if (channel) {
           channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
-          this.logger.log(`✅ Found channel: ${channelTitle} (link: ${channelLink ? 'YES' : 'NO'})`);
-          
+          this.logger.log(
+            `✅ Found channel: ${channelTitle} (link: ${channelLink ? 'YES' : 'NO'})`,
+          );
+
           // Generate invite link if not present - via proxy
           if (!channelLink && channelId) {
             this.logger.log(`⚠️ No invite link, generating via proxy...`);
             try {
               channelLink = await this.httpService.exportChatInviteLink(channelId);
               this.logger.log(`✅ Generated invite link via proxy: ${channelLink}`);
-              
+
               // Save to database
               const channelOid = channel._id?.$oid || channel._id;
               if (channelOid) {
                 await this.prisma.$runCommandRaw({
                   update: 'telegram_channels',
-                  updates: [{
-                    q: { _id: { $oid: channelOid } },
-                    u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
-                  }],
+                  updates: [
+                    {
+                      q: { _id: { $oid: channelOid } },
+                      u: {
+                        $set: {
+                          invite_link: channelLink,
+                          updated_at: { $date: new Date().toISOString() },
+                        },
+                      },
+                    },
+                  ],
                 });
               }
             } catch (e) {
@@ -900,48 +950,47 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Send confirmation message
       await sendMessage(
         `✅ *¡Pago verificado!*\n\n` +
-        `Gracias por tu compra de *${product.title}*.\n\n` +
-        `Tu acceso está listo.`,
-        { parse_mode: 'Markdown' }
+          `Gracias por tu compra de *${product.title}*.\n\n` +
+          `Tu acceso está listo.`,
+        { parse_mode: 'Markdown' },
       );
 
       // Send channel access
       if (channelLink) {
         await sendMessage(
-          `🎯 *Acceso a tu canal*\n\n` +
-          `Haz clic en el botón para unirte a *${channelTitle}*:`,
+          `🎯 *Acceso a tu canal*\n\n` + `Haz clic en el botón para unirte a *${channelTitle}*:`,
           {
             parse_mode: 'Markdown',
             reply_markup: {
-              inline_keyboard: [
-                [{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }],
-              ],
+              inline_keyboard: [[{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }]],
             },
-          }
+          },
         );
 
         // Update order with access granted
         await this.prisma.$runCommandRaw({
           update: 'orders',
-          updates: [{
-            q: { _id: { $oid: orderId } },
-            u: {
-              $set: {
-                access_granted: true,
-                access_granted_at: { $date: new Date().toISOString() },
-                channel_link_sent: channelLink,
+          updates: [
+            {
+              q: { _id: { $oid: orderId } },
+              u: {
+                $set: {
+                  access_granted: true,
+                  access_granted_at: { $date: new Date().toISOString() },
+                  channel_link_sent: channelLink,
+                },
               },
             },
-          }],
+          ],
         });
 
         this.logger.log(`✅ Access granted to user ${telegramUserId} for order ${orderId}`);
       } else {
         await sendMessage(
           `ℹ️ *Acceso pendiente*\n\n` +
-          `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
-          `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
-          { parse_mode: 'Markdown' }
+            `El tipster *${tipster?.publicName || 'desconocido'}* te contactará pronto con los detalles de acceso.\n\n` +
+            `Si no recibes noticias en 24h, contacta con @AntiaSupport`,
+          { parse_mode: 'Markdown' },
         );
       }
 
@@ -956,11 +1005,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           order.email_backup,
         );
       }
-
     } catch (error) {
       this.logger.error('Error in handlePostPaymentAccessViaProxy:', error);
       await sendMessage(
-        '❌ Hubo un error al procesar tu acceso. Por favor, intenta de nuevo o contacta con @AntiaSupport'
+        '❌ Hubo un error al procesar tu acceso. Por favor, intenta de nuevo o contacta con @AntiaSupport',
       );
     }
   }
@@ -978,7 +1026,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`📥 Join request from user ${telegramUserId} to channel ${channelId}`);
 
       // Buscar si el usuario tiene una orden pagada para este canal
-      const orderResult = await this.prisma.$runCommandRaw({
+      const orderResult = (await this.prisma.$runCommandRaw({
         find: 'orders',
         filter: {
           telegram_user_id: telegramUserId,
@@ -986,7 +1034,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         },
         sort: { created_at: -1 },
         limit: 10,
-      }) as any;
+      })) as any;
 
       const orders = orderResult.cursor?.firstBatch || [];
 
@@ -1000,15 +1048,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           // ¡Usuario autorizado! Aprobar solicitud
           try {
             await this.bot.telegram.approveChatJoinRequest(channelId, parseInt(telegramUserId));
-            this.logger.log(`✅ Approved join request for user ${telegramUserId} to channel ${channelId}`);
-            
+            this.logger.log(
+              `✅ Approved join request for user ${telegramUserId} to channel ${channelId}`,
+            );
+
             // Enviar mensaje privado de confirmación
             await this.bot.telegram.sendMessage(
               telegramUserId,
               `✅ *¡Bienvenido!*\n\n` +
-              `Tu solicitud de unión a *${chat.title}* ha sido aprobada.\n\n` +
-              `Disfruta del contenido premium 🎯`,
-              { parse_mode: 'Markdown' }
+                `Tu solicitud de unión a *${chat.title}* ha sido aprobada.\n\n` +
+                `Disfruta del contenido premium 🎯`,
+              { parse_mode: 'Markdown' },
             );
             return;
           } catch (approveError) {
@@ -1019,20 +1069,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Usuario no autorizado - rechazar o ignorar
       this.logger.warn(`❌ User ${telegramUserId} not authorized for channel ${channelId}`);
-      
+
       // Opcional: Enviar mensaje de que necesita comprar
       try {
         await this.bot.telegram.sendMessage(
           telegramUserId,
           `❌ *Acceso denegado*\n\n` +
-          `No tienes una compra válida para este canal.\n\n` +
-          `Para obtener acceso, busca el enlace de compra en el canal público del tipster.`,
-          { parse_mode: 'Markdown' }
+            `No tienes una compra válida para este canal.\n\n` +
+            `Para obtener acceso, busca el enlace de compra en el canal público del tipster.`,
+          { parse_mode: 'Markdown' },
         );
       } catch (msgError) {
         this.logger.warn('Could not send denial message:', msgError);
       }
-
     } catch (error) {
       this.logger.error('Error in handleJoinRequest:', error);
     }
@@ -1045,54 +1094,56 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     channelUsername?: string,
   ) {
     this.logger.log(`🔗 Processing channel connection: ${channelTitle} (${channelId})`);
-    
+
     // 1. Buscar tipsters que están esperando vincular un canal de publicación
-    const pendingResult = await this.prisma.$runCommandRaw({
+    const pendingResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
-      filter: { 
+      filter: {
         publication_channel_pending: true,
       },
-      projection: { 
-        _id: 1, 
+      projection: {
+        _id: 1,
         public_name: 1,
         user_id: 1,
       },
-    }) as any;
+    })) as any;
 
     const pendingTipsters = pendingResult.cursor?.firstBatch || [];
-    
+
     if (pendingTipsters.length > 0) {
       // Vincular al primer tipster que está esperando (FIFO)
       const tipster = pendingTipsters[0];
       const tipsterId = tipster._id.$oid || tipster._id;
-      
+
       await this.prisma.$runCommandRaw({
         update: 'tipster_profiles',
-        updates: [{
-          q: { _id: { $oid: tipsterId } },
-          u: {
-            $set: {
-              publication_channel_id: channelId,
-              publication_channel_title: channelTitle,
-              publication_channel_username: channelUsername ? `@${channelUsername}` : null,
-              publication_channel_pending: false,
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: tipsterId } },
+            u: {
+              $set: {
+                publication_channel_id: channelId,
+                publication_channel_title: channelTitle,
+                publication_channel_username: channelUsername ? `@${channelUsername}` : null,
+                publication_channel_pending: false,
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
       this.logger.log(`✅ Auto-configured publication channel for tipster: ${tipster.public_name}`);
-      
+
       // Enviar mensaje de confirmación al canal
       await this.bot.telegram.sendMessage(
         channelId,
         `✅ *¡Canal de Publicación Configurado\\!*\n\n` +
-        `Este canal ha sido vinculado como canal de publicación para *${this.escapeMarkdownV2(tipster.public_name || 'Tipster')}*\\.\n\n` +
-        `Ahora puedes usar el botón "📱 Compartir" en tus productos para publicarlos aquí automáticamente\\.`,
-        { parse_mode: 'MarkdownV2' }
+          `Este canal ha sido vinculado como canal de publicación para *${this.escapeMarkdownV2(tipster.public_name || 'Tipster')}*\\.\n\n` +
+          `Ahora puedes usar el botón "📱 Compartir" en tus productos para publicarlos aquí automáticamente\\.`,
+        { parse_mode: 'MarkdownV2' },
       );
-      
+
       return;
     }
 
@@ -1111,22 +1162,24 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         // Actualizar con la conexión automática
         await this.prisma.$runCommandRaw({
           update: 'tipster_profiles',
-          updates: [{
-            q: { _id: { $oid: tipster.id } },
-            u: {
-              $set: {
-                telegram_channel_id: channelId,
-                telegram_channel_title: channelTitle,
-                telegram_connected_at: { $date: new Date().toISOString() },
-                telegram_connection_type: 'auto',
-                updated_at: { $date: new Date().toISOString() },
+          updates: [
+            {
+              q: { _id: { $oid: tipster.id } },
+              u: {
+                $set: {
+                  telegram_channel_id: channelId,
+                  telegram_channel_title: channelTitle,
+                  telegram_connected_at: { $date: new Date().toISOString() },
+                  telegram_connection_type: 'auto',
+                  updated_at: { $date: new Date().toISOString() },
+                },
               },
             },
-          }],
+          ],
         });
 
         this.logger.log(`✅ Auto-connected channel for tipster: ${tipster.publicName}`);
-        
+
         // Enviar mensaje de confirmación al canal
         await this.sendMessage(
           channelId,
@@ -1135,7 +1188,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       }
     }
   }
-  
+
   /**
    * Escapar caracteres para MarkdownV2
    */
@@ -1156,11 +1209,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         message: 'Telegram bot no está disponible',
       };
     }
-    
+
     try {
       // Verificar si es un username o un ID
       let chatInfo;
-      
+
       try {
         if (channelIdentifier.startsWith('@') || !channelIdentifier.startsWith('-')) {
           // Es un username
@@ -1179,12 +1232,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Verificar que el bot es administrador
       const botInfo = await this.bot.telegram.getMe();
       let botMember;
-      
+
       try {
-        botMember = await this.bot.telegram.getChatMember(
-          chatInfo.id.toString(),
-          botInfo.id,
-        );
+        botMember = await this.bot.telegram.getChatMember(chatInfo.id.toString(), botInfo.id);
       } catch (error) {
         // Si no podemos obtener info del bot, probablemente no está en el canal
         return {
@@ -1203,19 +1253,21 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Actualizar el perfil del tipster
       await this.prisma.$runCommandRaw({
         update: 'tipster_profiles',
-        updates: [{
-          q: { _id: { $oid: tipsterId } },
-          u: {
-            $set: {
-              telegram_channel_id: chatInfo.id.toString(),
-              telegram_channel_name: 'username' in chatInfo ? `@${chatInfo.username}` : null,
-              telegram_channel_title: 'title' in chatInfo ? chatInfo.title : null,
-              telegram_connected_at: { $date: new Date().toISOString() },
-              telegram_connection_type: 'manual',
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: tipsterId } },
+            u: {
+              $set: {
+                telegram_channel_id: chatInfo.id.toString(),
+                telegram_channel_name: 'username' in chatInfo ? `@${chatInfo.username}` : null,
+                telegram_channel_title: 'title' in chatInfo ? chatInfo.title : null,
+                telegram_connected_at: { $date: new Date().toISOString() },
+                telegram_connection_type: 'manual',
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
       this.logger.log(`✅ Manually connected channel for tipster ID: ${tipsterId}`);
@@ -1233,7 +1285,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       this.logger.error('Error connecting channel manually:', error);
       return {
         success: false,
-        message: error.message || 'Error al conectar el canal. Verifica que el ID/username sea correcto y que el bot sea administrador.',
+        message:
+          error.message ||
+          'Error al conectar el canal. Verifica que el ID/username sea correcto y que el bot sea administrador.',
       };
     }
   }
@@ -1244,19 +1298,21 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   async disconnectChannel(tipsterId: string): Promise<void> {
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: tipsterId } },
-        u: {
-          $set: {
-            telegram_channel_id: null,
-            telegram_channel_name: null,
-            telegram_channel_title: null,
-            telegram_connected_at: null,
-            telegram_connection_type: null,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: tipsterId } },
+          u: {
+            $set: {
+              telegram_channel_id: null,
+              telegram_channel_name: null,
+              telegram_channel_title: null,
+              telegram_connected_at: null,
+              telegram_connection_type: null,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     this.logger.log(`✅ Disconnected channel for tipster ID: ${tipsterId}`);
@@ -1275,10 +1331,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         message: 'Telegram bot no está disponible',
       };
     }
-    
+
     try {
       const message = this.formatProductMessage(product);
-      
+
       await this.bot.telegram.sendMessage(channelId, message, {
         parse_mode: 'Markdown',
       });
@@ -1302,14 +1358,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
    * Formatear mensaje del producto
    */
   private formatProductMessage(product: any): string {
-    const {
-      title,
-      description,
-      priceCents,
-      currency,
-      validityDays,
-      id,
-    } = product;
+    const { title, description, priceCents, currency, validityDays, id } = product;
 
     const price = (priceCents / 100).toFixed(2);
     const botLink = `https://t.me/${process.env.TELEGRAM_BOT_NAME || 'Antiabetbot'}?start=product_${id}`;
@@ -1380,14 +1429,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // 2. Mensaje de bienvenida
       await ctx.reply(
         `🎯 *¡Bienvenido a Antia!*\n\n` +
-        `Estás a punto de adquirir un pronóstico de *${tipster?.publicName || 'Tipster'}*\n\n` +
-        `Para continuar, necesitamos que aceptes nuestros términos.`,
-        { parse_mode: 'Markdown' }
+          `Estás a punto de adquirir un pronóstico de *${tipster?.publicName || 'Tipster'}*\n\n` +
+          `Para continuar, necesitamos que aceptes nuestros términos.`,
+        { parse_mode: 'Markdown' },
       );
 
       // 3. Mostrar términos y condiciones
       await this.showTermsAndConditions(ctx, productId);
-      
     } catch (error) {
       this.logger.error('Error in handleProductPurchaseFlow:', error);
       await ctx.reply('Hubo un error al procesar tu solicitud. Por favor, intenta nuevamente.');
@@ -1398,7 +1446,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
    * Mostrar términos y condiciones
    */
   private async showTermsAndConditions(ctx: any, productId: string) {
-    const termsMessage = 
+    const termsMessage =
       `📋 *Términos y Condiciones*\n\n` +
       `Antes de continuar, confirma lo siguiente:\n\n` +
       `✅ Soy mayor de 18 años\n` +
@@ -1438,7 +1486,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Cancelar compra
     this.bot.action('cancel_purchase', async (ctx) => {
       await ctx.answerCbQuery();
-      await ctx.reply('Compra cancelada. Si cambias de opinión, vuelve a usar el link del producto.');
+      await ctx.reply(
+        'Compra cancelada. Si cambias de opinión, vuelve a usar el link del producto.',
+      );
     });
 
     // Proceder al pago
@@ -1472,8 +1522,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       });
 
       const price = (product.priceCents / 100).toFixed(2);
-      
-      const productMessage = 
+
+      const productMessage =
         `🎯 *${product.title}*\n\n` +
         `${product.description || 'Pronóstico premium'}\n\n` +
         `💰 *Precio:* €${price}\n` +
@@ -1485,12 +1535,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
-            [
-              { text: '💳 Proceder al Pago', callback_data: `proceed_payment_${productId}` },
-            ],
-            [
-              { text: '❌ Cancelar', callback_data: 'cancel_purchase' },
-            ],
+            [{ text: '💳 Proceder al Pago', callback_data: `proceed_payment_${productId}` }],
+            [{ text: '❌ Cancelar', callback_data: 'cancel_purchase' }],
           ],
         },
       });
@@ -1522,29 +1568,24 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       await ctx.reply(
         `💳 *Realizar Pago*\n\n` +
-        `Haz clic en el botón de abajo para ir a la página de pago segura.\n\n` +
-        `Podrás pagar como:\n` +
-        `• 👤 Usuario invitado (solo email)\n` +
-        `• 📝 Registrarte para futuras compras\n\n` +
-        `Métodos de pago: Tarjeta de crédito/débito`,
+          `Haz clic en el botón de abajo para ir a la página de pago segura.\n\n` +
+          `Podrás pagar como:\n` +
+          `• 👤 Usuario invitado (solo email)\n` +
+          `• 📝 Registrarte para futuras compras\n\n` +
+          `Métodos de pago: Tarjeta de crédito/débito`,
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: [
-              [
-                { text: '💳 Ir a Pagar', url: checkoutUrl },
-              ],
-            ],
+            inline_keyboard: [[{ text: '💳 Ir a Pagar', url: checkoutUrl }]],
           },
-        }
+        },
       );
 
       // Mensaje informativo
       await ctx.reply(
         `⏳ Una vez que completes el pago, regresa aquí.\n` +
-        `Te notificaré automáticamente cuando el pago sea confirmado y te daré acceso al canal premium.`
+          `Te notificaré automáticamente cuando el pago sea confirmado y te daré acceso al canal premium.`,
       );
-
     } catch (error) {
       this.logger.error('Error generating checkout link:', error);
       await ctx.reply('Hubo un error al generar el link de pago. Por favor, intenta nuevamente.');
@@ -1554,24 +1595,30 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   /**
    * Crear orden pendiente
    */
-  private async createPendingOrder(productId: string, telegramUserId: string, username: string): Promise<string> {
+  private async createPendingOrder(
+    productId: string,
+    telegramUserId: string,
+    username: string,
+  ): Promise<string> {
     const orderId = this.generateOrderId();
     const now = new Date();
 
     // Guardar orden en base de datos
     await this.prisma.$runCommandRaw({
       insert: 'orders',
-      documents: [{
-        _id: orderId,
-        product_id: productId,
-        telegram_user_id: telegramUserId,
-        telegram_username: username,
-        status: 'PENDING',
-        payment_method: null,
-        amount_cents: null,
-        created_at: { $date: now.toISOString() },
-        updated_at: { $date: now.toISOString() },
-      }],
+      documents: [
+        {
+          _id: orderId,
+          product_id: productId,
+          telegram_user_id: telegramUserId,
+          telegram_username: username,
+          status: 'PENDING',
+          payment_method: null,
+          amount_cents: null,
+          created_at: { $date: now.toISOString() },
+          updated_at: { $date: now.toISOString() },
+        },
+      ],
     });
 
     this.logger.log(`Created pending order ${orderId} for Telegram user ${telegramUserId}`);
@@ -1590,7 +1637,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
    */
   async notifyPaymentSuccess(telegramUserId: string, orderId: string, productId: string) {
     try {
-      this.logger.log(`Processing payment success notification for user ${telegramUserId}, order ${orderId}`);
+      this.logger.log(
+        `Processing payment success notification for user ${telegramUserId}, order ${orderId}`,
+      );
 
       // Obtener producto e información del tipster
       const product: any = await this.prisma.product.findUnique({
@@ -1626,7 +1675,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       };
 
       // Mensaje 1: Agradecimiento y soporte
-      const thankYouMessage = 
+      const thankYouMessage =
         `✅ *Gracias por su compra*\n\n` +
         `A continuación recibirá acceso a su servicio.\n\n` +
         `Si tiene alguna consulta, puede contactar con soporte en @AntiaSupport`;
@@ -1640,16 +1689,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       if (product.telegramChannelId) {
         // Buscar el canal en la colección telegram_channels
-        const channelResult = await this.prisma.$runCommandRaw({
+        const channelResult = (await this.prisma.$runCommandRaw({
           find: 'telegram_channels',
-          filter: { 
+          filter: {
             channel_id: product.telegramChannelId,
             tipster_id: tipster.id,
             is_active: true,
           },
           projection: { invite_link: 1, channel_title: 1, channel_id: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
 
         const channel = channelResult.cursor?.firstBatch?.[0];
         if (channel) {
@@ -1658,22 +1707,29 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           channelId = channel.channel_id;
           this.logger.log(`Found product channel: ${channelTitle} with link: ${channelLink}`);
         }
-        
+
         // Si no hay invite_link, intentar generarlo via proxy
         if (!channelLink && channelId) {
           this.logger.log(`No invite link found, trying to generate one for channel ${channelId}`);
           try {
             channelLink = await this.httpService.exportChatInviteLink(channelId);
             this.logger.log(`✅ Generated invite link via proxy: ${channelLink}`);
-            
+
             // Guardar el link en la base de datos
             if (channel._id) {
               await this.prisma.$runCommandRaw({
                 update: 'telegram_channels',
-                updates: [{
-                  q: { _id: channel._id },
-                  u: { $set: { invite_link: channelLink, updated_at: { $date: new Date().toISOString() } } },
-                }],
+                updates: [
+                  {
+                    q: { _id: channel._id },
+                    u: {
+                      $set: {
+                        invite_link: channelLink,
+                        updated_at: { $date: new Date().toISOString() },
+                      },
+                    },
+                  },
+                ],
               });
             }
           } catch (e) {
@@ -1694,13 +1750,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Si no hay canal específico del producto, buscar el canal legacy del tipster
       if (!channelLink) {
-        const tipsterProfileResult = await this.prisma.$runCommandRaw({
+        const tipsterProfileResult = (await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
           filter: { _id: { $oid: tipster.id } },
           projection: { premium_channel_link: 1 },
           limit: 1,
-        }) as any;
-        
+        })) as any;
+
         channelLink = tipsterProfileResult.cursor?.firstBatch?.[0]?.premium_channel_link || null;
         if (channelLink) {
           this.logger.log(`Using legacy tipster premium channel link: ${channelLink}`);
@@ -1710,7 +1766,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Si hay un enlace de canal configurado, enviarlo
       if (channelLink) {
         // Mensaje 2: Acceso al canal premium
-        const accessMessage = 
+        const accessMessage =
           `🎯 *Compra autorizada*\n\n` +
           `Puede entrar al canal del servicio *${channelTitle}* pinchando aquí:\n\n` +
           `${channelLink}`;
@@ -1718,35 +1774,34 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         await sendMessageViaProxy(telegramUserId, accessMessage, {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: [
-              [
-                { text: '🚀 Entrar al Canal', url: channelLink },
-              ],
-            ],
+            inline_keyboard: [[{ text: '🚀 Entrar al Canal', url: channelLink }]],
           },
         });
 
         // Mensaje 3: Confirmación final
-        await sendMessageViaProxy(telegramUserId, 
-          `✅ *Compra finalizada*\n\nYa tienes acceso al contenido premium.`
+        await sendMessageViaProxy(
+          telegramUserId,
+          `✅ *Compra finalizada*\n\nYa tienes acceso al contenido premium.`,
         );
 
-        this.logger.log(`✅ Payment success notification with channel link sent to ${telegramUserId}`);
+        this.logger.log(
+          `✅ Payment success notification with channel link sent to ${telegramUserId}`,
+        );
         return { success: true, inviteLink: channelLink };
-
       } else {
         // El tipster no tiene canal premium configurado - solo confirmar la compra
-        const noChannelMessage = 
+        const noChannelMessage =
           `🎯 *Compra autorizada*\n\n` +
           `Su compra ha sido procesada correctamente.\n\n` +
           `El tipster *${tipster.publicName}* le contactará pronto con los detalles de acceso.`;
 
         await sendMessageViaProxy(telegramUserId, noChannelMessage);
 
-        this.logger.log(`Payment success notification (no premium channel) sent to ${telegramUserId}`);
+        this.logger.log(
+          `Payment success notification (no premium channel) sent to ${telegramUserId}`,
+        );
         return { success: true, inviteLink: null };
       }
-
     } catch (error) {
       this.logger.error('Error notifying payment success:', error);
       return { success: false, error: error.message };
@@ -1791,7 +1846,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Get tipster's Telegram ID to send notification
       if (tipster.telegramUserId) {
-        const saleMessage = 
+        const saleMessage =
           `💰 *¡Nueva Venta!*\n\n` +
           `Has recibido una nueva compra:\n\n` +
           `📦 *Producto:* ${product?.title || 'Producto'}\n` +
@@ -1815,7 +1870,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       await this.updateTipsterEarnings(tipsterId, amountCents, currency);
 
       return { success: true };
-
     } catch (error) {
       this.logger.error('Error notifying tipster of sale:', error);
       return { success: false, error: error.message };
@@ -1828,12 +1882,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private async updateTipsterEarnings(tipsterId: string, amountCents: number, currency: string) {
     try {
       // Get current earnings
-      const result = await this.prisma.$runCommandRaw({
+      const result = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: { $oid: tipsterId } },
         projection: { total_earnings_cents: 1, total_sales: 1 },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const currentEarnings = result.cursor?.firstBatch?.[0]?.total_earnings_cents || 0;
       const currentSales = result.cursor?.firstBatch?.[0]?.total_sales || 0;
@@ -1841,17 +1895,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       // Update earnings
       await this.prisma.$runCommandRaw({
         update: 'tipster_profiles',
-        updates: [{
-          q: { _id: { $oid: tipsterId } },
-          u: {
-            $set: {
-              total_earnings_cents: currentEarnings + amountCents,
-              total_sales: currentSales + 1,
-              last_sale_at: { $date: new Date().toISOString() },
-              updated_at: { $date: new Date().toISOString() },
+        updates: [
+          {
+            q: { _id: { $oid: tipsterId } },
+            u: {
+              $set: {
+                total_earnings_cents: currentEarnings + amountCents,
+                total_sales: currentSales + 1,
+                last_sale_at: { $date: new Date().toISOString() },
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
-        }],
+        ],
       });
 
       this.logger.log(`Updated earnings for tipster ${tipsterId}: +${amountCents} cents`);
@@ -1879,7 +1935,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private ensureWebhookAsync(): void {
     const webhookUrl = (this as any).webhookUrl;
     if (!webhookUrl) return;
-    
+
     // Run in background without blocking the webhook response
     setImmediate(async () => {
       try {
@@ -1904,14 +1960,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   async handleUpdate(update: any) {
     try {
       this.logger.log(`Processing webhook update: ${JSON.stringify(update).substring(0, 200)}`);
-      
+
       // Process my_chat_member directly (critical - needs sync processing)
       if (update.my_chat_member) {
         await this.handleMyChatMemberUpdate(update.my_chat_member);
         this.logger.log('Webhook my_chat_member processed successfully');
         return;
       }
-      
+
       // Process message updates directly (bypass Telegraf to use proxy)
       if (update.message) {
         setImmediate(async () => {
@@ -1947,7 +2003,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         });
         return;
       }
-      
+
       // For other updates, try using Telegraf as fallback
       if (this.bot) {
         setImmediate(async () => {
@@ -1959,7 +2015,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           }
         });
       }
-      
+
       // Ensure webhook is still configured (non-blocking)
       this.ensureWebhookAsync();
     } catch (error) {
@@ -1974,7 +2030,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     const chatId = message.chat?.id?.toString();
     const text = message.text || '';
     const userId = message.from?.id?.toString();
-    
+
     if (!chatId || !userId) {
       this.logger.warn('Message missing chatId or userId');
       return;
@@ -1986,7 +2042,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     if (text.startsWith('/start')) {
       const parts = text.split(' ');
       const payload = parts[1] || '';
-      
+
       this.logger.log(`📥 /start command from user ${userId}, payload: ${payload || 'NONE'}`);
 
       // Handle order_ payload (post-payment access)
@@ -2001,39 +2057,39 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       if (payload.startsWith('product_')) {
         const productId = payload.replace('product_', '');
         this.logger.log(`🔄 Redirecting to web checkout for product: ${productId}`);
-        
+
         const appUrl = this.config.get('APP_URL');
         const checkoutUrl = `${appUrl}/checkout/${productId}`;
-        
-        await this.httpService.sendMessage(userId, 
+
+        await this.httpService.sendMessage(
+          userId,
           '👋 ¡Bienvenido a Antia!\n\n' +
-          '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
-          '_Serás redirigido a nuestra página de pago seguro._',
+            '💳 Para completar tu compra, haz clic en el botón de abajo:\n\n' +
+            '_Serás redirigido a nuestra página de pago seguro._',
           {
             parseMode: 'Markdown',
             replyMarkup: {
-              inline_keyboard: [
-                [{ text: '💳 Ir al Checkout', url: checkoutUrl }],
-              ],
+              inline_keyboard: [[{ text: '💳 Ir al Checkout', url: checkoutUrl }]],
             },
-          }
+          },
         );
         return;
       }
 
       // Default welcome message
-      await this.httpService.sendMessage(userId,
+      await this.httpService.sendMessage(
+        userId,
         '👋 ¡Bienvenido a Antia!\n\n' +
-        '🛒 *¿Cómo comprar?*\n\n' +
-        '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
-        '2️⃣ Haz clic en el enlace de compra\n' +
-        '3️⃣ Completa el pago en nuestra web\n' +
-        '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
-        '✅ *¿Ya pagaste?*\n' +
-        'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
-        '❓ *¿Necesitas ayuda?*\n' +
-        'Contacta con @AntiaSupport',
-        { parseMode: 'Markdown' }
+          '🛒 *¿Cómo comprar?*\n\n' +
+          '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
+          '2️⃣ Haz clic en el enlace de compra\n' +
+          '3️⃣ Completa el pago en nuestra web\n' +
+          '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
+          '✅ *¿Ya pagaste?*\n' +
+          'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
+          '❓ *¿Necesitas ayuda?*\n' +
+          'Contacta con @AntiaSupport',
+        { parseMode: 'Markdown' },
       );
       return;
     }
@@ -2041,24 +2097,26 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Handle /info command
     if (text.startsWith('/info')) {
       const chat = message.chat;
-      await this.httpService.sendMessage(chatId,
+      await this.httpService.sendMessage(
+        chatId,
         `📊 *Información del Chat*\n\n` +
-        `🆔 Chat ID: \`${chatId}\`\n` +
-        `📝 Tipo: ${chat.type}\n` +
-        `🏷️ Título: ${chat.title || 'N/A'}\n` +
-        `👤 Username: @${chat.username || 'N/A'}`,
-        { parseMode: 'Markdown' }
+          `🆔 Chat ID: \`${chatId}\`\n` +
+          `📝 Tipo: ${chat.type}\n` +
+          `🏷️ Título: ${chat.title || 'N/A'}\n` +
+          `👤 Username: @${chat.username || 'N/A'}`,
+        { parseMode: 'Markdown' },
       );
       return;
     }
 
     // For other messages, send a help message
     if (message.chat?.type === 'private') {
-      await this.httpService.sendMessage(userId,
+      await this.httpService.sendMessage(
+        userId,
         '👋 Hola! Soy el bot de Antia.\n\n' +
-        'Usa /start para ver las opciones disponibles.\n' +
-        'Si necesitas ayuda, contacta con @AntiaSupport',
-        { parseMode: 'Markdown' }
+          'Usa /start para ver las opciones disponibles.\n' +
+          'Si necesitas ayuda, contacta con @AntiaSupport',
+        { parseMode: 'Markdown' },
       );
     }
   }
@@ -2069,9 +2127,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private async handleCallbackQueryViaProxy(callbackQuery: any) {
     const userId = callbackQuery.from?.id?.toString();
     const data = callbackQuery.data || '';
-    
+
     this.logger.log(`📲 Callback query from ${userId}: ${data}`);
-    
+
     // Handle different callback types here if needed
     // For now, just acknowledge
   }
@@ -2083,12 +2141,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     const { chat, from } = joinRequest;
     const chatId = chat.id.toString();
     const userId = from.id.toString();
-    
+
     this.logger.log(`📥 Join request from ${userId} for chat ${chatId}`);
-    
+
     // Check if user has a valid purchase for this channel
     try {
-      const orderResult = await this.prisma.$runCommandRaw({
+      const orderResult = (await this.prisma.$runCommandRaw({
         find: 'orders',
         filter: {
           telegram_user_id: userId,
@@ -2096,7 +2154,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         },
         sort: { created_at: -1 },
         limit: 5,
-      }) as any;
+      })) as any;
 
       const orders = orderResult.cursor?.firstBatch || [];
       let hasAccess = false;
@@ -2104,13 +2162,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       for (const order of orders) {
         // Get product
         const productId = order.product_id;
-        const productResult = await this.prisma.$runCommandRaw({
+        const productResult = (await this.prisma.$runCommandRaw({
           find: 'products',
           filter: { _id: { $oid: productId } },
           projection: { telegram_channel_id: 1 },
           limit: 1,
-        }) as any;
-        
+        })) as any;
+
         const product = productResult.cursor?.firstBatch?.[0];
         if (product?.telegram_channel_id === chatId) {
           hasAccess = true;
@@ -2121,22 +2179,24 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       if (hasAccess) {
         await this.httpService.approveChatJoinRequest(chatId, parseInt(userId));
         this.logger.log(`✅ Approved join request for ${userId} in ${chatId}`);
-        
-        await this.httpService.sendMessage(userId,
+
+        await this.httpService.sendMessage(
+          userId,
           '✅ *¡Solicitud aprobada!*\n\n' +
-          `Has sido añadido al canal *${chat.title}*.\n` +
-          '¡Disfruta del contenido!',
-          { parseMode: 'Markdown' }
+            `Has sido añadido al canal *${chat.title}*.\n` +
+            '¡Disfruta del contenido!',
+          { parseMode: 'Markdown' },
         );
       } else {
         await this.httpService.declineChatJoinRequest(chatId, parseInt(userId));
         this.logger.log(`❌ Declined join request for ${userId} in ${chatId} (no purchase)`);
-        
-        await this.httpService.sendMessage(userId,
+
+        await this.httpService.sendMessage(
+          userId,
           '❌ *Solicitud denegada*\n\n' +
-          'No encontramos una compra válida para este canal.\n' +
-          'Si crees que es un error, contacta con @AntiaSupport',
-          { parseMode: 'Markdown' }
+            'No encontramos una compra válida para este canal.\n' +
+            'Si crees que es un error, contacta con @AntiaSupport',
+          { parseMode: 'Markdown' },
         );
       }
     } catch (error) {
@@ -2152,23 +2212,25 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const { chat, new_chat_member, old_chat_member } = myChatMember;
       const chatTitle = chat.title || 'N/A';
       const chatId = chat.id.toString();
-      
-      this.logger.log(`📥 my_chat_member event: ${chatTitle} (${chatId}) - new status: ${new_chat_member?.status}`);
-      
+
+      this.logger.log(
+        `📥 my_chat_member event: ${chatTitle} (${chatId}) - new status: ${new_chat_member?.status}`,
+      );
+
       // Verificar si el bot fue añadido como administrador
       if (
         new_chat_member?.status === 'administrator' &&
         (chat.type === 'channel' || chat.type === 'supergroup')
       ) {
         this.logger.log(`🎉 Bot added to channel: ${chatTitle} (${chatId})`);
-        
+
         // Guardar en la tabla de canales detectados
         await this.saveDetectedChannel(chatId, chatTitle, chat.username, chat.type);
-        
+
         // Legacy: manejar conexión automática para tipsters pendientes
         await this.handleChannelConnection(chatId, chatTitle, chat.username);
       }
-      
+
       // Si el bot fue removido del canal, marcar como inactivo
       if (
         (old_chat_member?.status === 'administrator' || old_chat_member?.status === 'creator') &&
@@ -2229,16 +2291,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const chat = await this.bot.telegram.getChat(channelId);
-      
+
       // Verify bot is admin
       const botInfo = await this.bot.telegram.getMe();
       const admins = await this.bot.telegram.getChatAdministrators(channelId);
-      const isAdmin = admins.some(admin => admin.user.id === botInfo.id);
+      const isAdmin = admins.some((admin) => admin.user.id === botInfo.id);
 
       if (!isAdmin) {
         return {
           valid: false,
-          error: 'El bot no es administrador de este canal. Por favor, añade @Antiabetbot como administrador.',
+          error:
+            'El bot no es administrador de este canal. Por favor, añade @Antiabetbot como administrador.',
         };
       }
 
@@ -2274,16 +2337,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       }
 
       // Get tipster profile with publication channel
-      const tipsterResult = await this.prisma.$runCommandRaw({
+      const tipsterResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: { $oid: tipsterId } },
-        projection: { 
-          publication_channel_id: 1, 
+        projection: {
+          publication_channel_id: 1,
           publication_channel_title: 1,
           public_name: 1,
         },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const tipsterProfile = tipsterResult.cursor?.firstBatch?.[0];
 
@@ -2295,9 +2358,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const channelId = targetChannelId || tipsterProfile.publication_channel_id;
 
       if (!channelId) {
-        return { 
-          success: false, 
-          message: 'No tienes un canal de publicación configurado. Configúralo en la sección de Telegram.',
+        return {
+          success: false,
+          message:
+            'No tienes un canal de publicación configurado. Configúralo en la sección de Telegram.',
         };
       }
 
@@ -2307,7 +2371,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const checkoutUrl = `${appUrl}/checkout/${product.id}`;
       const validityDays = product.validityDays || 30;
       const tipsterName = this.escapeMarkdown(tipsterProfile.public_name || 'Tipster');
-      
+
       const message = `
 🎯 *${this.escapeMarkdown(product.title)}*
 
@@ -2321,9 +2385,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       await this.bot.telegram.sendMessage(channelId, message, {
         parse_mode: 'MarkdownV2',
         reply_markup: {
-          inline_keyboard: [
-            [{ text: '💳 Comprar Ahora', url: checkoutUrl }],
-          ],
+          inline_keyboard: [[{ text: '💳 Comprar Ahora', url: checkoutUrl }]],
         },
       });
 
@@ -2349,7 +2411,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     try {
       const webhookInfo = await this.bot.telegram.getWebhookInfo();
       const botInfo = await this.bot.telegram.getMe();
-      
+
       return {
         isInitialized: this.isInitialized,
         botUsername: botInfo.username,
@@ -2357,8 +2419,8 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         webhookUrl: webhookInfo.url || null,
         pendingUpdates: webhookInfo.pending_update_count || 0,
         lastError: webhookInfo.last_error_message || null,
-        lastErrorDate: webhookInfo.last_error_date 
-          ? new Date(webhookInfo.last_error_date * 1000).toISOString() 
+        lastErrorDate: webhookInfo.last_error_date
+          ? new Date(webhookInfo.last_error_date * 1000).toISOString()
           : null,
       };
     } catch (error) {
@@ -2379,14 +2441,14 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     }
 
     const webhookUrl = `${appUrl}/api/telegram/webhook`;
-    
+
     try {
       await this.bot.telegram.setWebhook(webhookUrl, {
         allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request'],
         drop_pending_updates: false,
         max_connections: 40,
       });
-      
+
       const webhookInfo = await this.bot.telegram.getWebhookInfo();
       return {
         success: true,
@@ -2411,7 +2473,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   ) {
     try {
       const now = new Date().toISOString();
-      
+
       // Intentar obtener el invite link del canal
       let inviteLink: string | null = null;
       try {
@@ -2422,16 +2484,16 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       } catch (inviteError) {
         this.logger.warn(`Could not get invite link for ${channelTitle}: ${inviteError.message}`);
       }
-      
+
       // Verificar si ya existe
-      const existingResult = await this.prisma.$runCommandRaw({
+      const existingResult = (await this.prisma.$runCommandRaw({
         find: 'detected_telegram_channels',
         filter: { channel_id: channelId },
         limit: 1,
-      }) as any;
-      
+      })) as any;
+
       const existing = existingResult.cursor?.firstBatch?.[0];
-      
+
       if (existing) {
         // Actualizar el registro existente
         const updateData: any = {
@@ -2441,18 +2503,20 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           last_seen_at: { $date: now },
           is_active: true,
         };
-        
+
         // Solo actualizar invite_link si se obtuvo uno nuevo
         if (inviteLink) {
           updateData.invite_link = inviteLink;
         }
-        
+
         await this.prisma.$runCommandRaw({
           update: 'detected_telegram_channels',
-          updates: [{
-            q: { channel_id: channelId },
-            u: { $set: updateData },
-          }],
+          updates: [
+            {
+              q: { channel_id: channelId },
+              u: { $set: updateData },
+            },
+          ],
         });
         this.logger.log(`📝 Updated detected channel: ${channelTitle} (${channelId})`);
       } else {
@@ -2466,16 +2530,18 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           last_seen_at: { $date: now },
           is_active: true,
         };
-        
+
         if (inviteLink) {
           newDoc.invite_link = inviteLink;
         }
-        
+
         await this.prisma.$runCommandRaw({
           insert: 'detected_telegram_channels',
           documents: [newDoc],
         });
-        this.logger.log(`✅ Saved new detected channel: ${channelTitle} (${channelId})${inviteLink ? ' with invite link' : ''}`);
+        this.logger.log(
+          `✅ Saved new detected channel: ${channelTitle} (${channelId})${inviteLink ? ' with invite link' : ''}`,
+        );
       }
     } catch (error) {
       this.logger.error('Error saving detected channel:', error);
@@ -2488,18 +2554,20 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   private async markChannelAsInactive(channelId: string) {
     try {
       const now = new Date().toISOString();
-      
+
       await this.prisma.$runCommandRaw({
         update: 'detected_telegram_channels',
-        updates: [{
-          q: { channel_id: channelId },
-          u: {
-            $set: {
-              is_active: false,
-              last_seen_at: { $date: now },
+        updates: [
+          {
+            q: { channel_id: channelId },
+            u: {
+              $set: {
+                is_active: false,
+                last_seen_at: { $date: now },
+              },
             },
           },
-        }],
+        ],
       });
       this.logger.log(`🚫 Marked channel ${channelId} as inactive`);
     } catch (error) {
@@ -2525,11 +2593,11 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     try {
       // Normalizar el nombre para búsqueda (case-insensitive)
       const normalizedName = channelName.trim();
-      
+
       // Buscar por título exacto o username (sin @)
       const searchName = normalizedName.replace(/^@/, '');
-      
-      const result = await this.prisma.$runCommandRaw({
+
+      const result = (await this.prisma.$runCommandRaw({
         find: 'detected_telegram_channels',
         filter: {
           is_active: true,
@@ -2539,14 +2607,15 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           ],
         },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const channel = result.cursor?.firstBatch?.[0];
-      
+
       if (!channel) {
         return {
           found: false,
-          error: 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+          error:
+            'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
         };
       }
 
@@ -2583,10 +2652,10 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
    * NUEVO: Buscar canal por invite link
    * Soporta formatos:
    * - https://t.me/+abc123xyz
-   * - t.me/+abc123xyz  
+   * - t.me/+abc123xyz
    * - https://t.me/joinchat/abc123xyz (formato antiguo)
    * - https://t.me/channelname (canales públicos)
-   * 
+   *
    * NOTA: Si no encuentra por link guardado, busca por título del canal
    */
   async findChannelByInviteLink(inviteLink: string): Promise<{
@@ -2601,17 +2670,17 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   }> {
     try {
       const link = inviteLink.trim();
-      
+
       // Extraer el hash o username del link
       let searchPattern: string | null = null;
       let isPublicChannel = false;
-      
+
       // Formato: t.me/+HASH o https://t.me/+HASH
       const plusMatch = link.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
       if (plusMatch) {
         searchPattern = plusMatch[1];
       }
-      
+
       // Formato antiguo: t.me/joinchat/HASH
       if (!searchPattern) {
         const joinchatMatch = link.match(/t\.me\/joinchat\/([a-zA-Z0-9_-]+)/);
@@ -2619,7 +2688,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           searchPattern = joinchatMatch[1];
         }
       }
-      
+
       // Formato público: t.me/USERNAME
       if (!searchPattern) {
         const usernameMatch = link.match(/t\.me\/([a-zA-Z][a-zA-Z0-9_]{4,})/);
@@ -2628,17 +2697,18 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           isPublicChannel = true;
         }
       }
-      
+
       if (!searchPattern) {
         return {
           found: false,
-          error: 'Formato de link no válido. Usa el link de invitación de tu canal (ej: https://t.me/+abc123)',
+          error:
+            'Formato de link no válido. Usa el link de invitación de tu canal (ej: https://t.me/+abc123)',
         };
       }
-      
+
       // PASO 1: Buscar por invite link en la base de datos
       let filter: any;
-      
+
       if (isPublicChannel) {
         filter = {
           is_active: true,
@@ -2655,55 +2725,59 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           ],
         };
       }
-      
-      let result = await this.prisma.$runCommandRaw({
+
+      const result = (await this.prisma.$runCommandRaw({
         find: 'detected_telegram_channels',
         filter,
         limit: 1,
-      }) as any;
+      })) as any;
 
       let channel = result.cursor?.firstBatch?.[0];
-      
+
       // PASO 2: Si no encontró, intentar verificar con la API de Telegram
       // Obtenemos todos los canales activos y verificamos si el link coincide
       if (!channel && !isPublicChannel) {
         this.logger.log(`Link not found in DB, checking all channels for match...`);
-        
+
         // Obtener todos los canales detectados
-        const allChannelsResult = await this.prisma.$runCommandRaw({
+        const allChannelsResult = (await this.prisma.$runCommandRaw({
           find: 'detected_telegram_channels',
           filter: { is_active: true },
-        }) as any;
-        
+        })) as any;
+
         const allChannels = allChannelsResult.cursor?.firstBatch || [];
-        
+
         // Para cada canal, intentar obtener su invite link actual y comparar
         for (const ch of allChannels) {
           try {
             // Generar nuevo invite link para comparar
             if (this.httpService) {
               const currentLink = await this.httpService.exportChatInviteLink(ch.channel_id);
-              
+
               // Extraer hash del link actual
               const currentMatch = currentLink?.match(/t\.me\/\+([a-zA-Z0-9_-]+)/);
               const currentHash = currentMatch ? currentMatch[1] : null;
-              
+
               // Si el hash coincide, encontramos el canal
               if (currentHash && searchPattern.includes(currentHash.substring(0, 8))) {
                 channel = ch;
-                
+
                 // Actualizar el invite link en la base de datos
                 await this.prisma.$runCommandRaw({
                   update: 'detected_telegram_channels',
-                  updates: [{
-                    q: { channel_id: ch.channel_id },
-                    u: { $set: { 
-                      invite_link: currentLink,
-                      primary_invite_link: link,
-                    }},
-                  }],
+                  updates: [
+                    {
+                      q: { channel_id: ch.channel_id },
+                      u: {
+                        $set: {
+                          invite_link: currentLink,
+                          primary_invite_link: link,
+                        },
+                      },
+                    },
+                  ],
                 });
-                
+
                 this.logger.log(`Found channel by API check: ${ch.channel_title}`);
                 break;
               }
@@ -2714,17 +2788,17 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           }
         }
       }
-      
+
       if (!channel) {
         // PASO 3: Mostrar canales disponibles en el mensaje de error
-        const availableResult = await this.prisma.$runCommandRaw({
+        const availableResult = (await this.prisma.$runCommandRaw({
           find: 'detected_telegram_channels',
           filter: { is_active: true },
-        }) as any;
-        
+        })) as any;
+
         const availableChannels = availableResult.cursor?.firstBatch || [];
         const channelNames = availableChannels.map((c: any) => c.channel_title).join(', ');
-        
+
         return {
           found: false,
           error: `Canal no encontrado con ese link.\n\nCanales disponibles donde el bot es admin:\n${channelNames || 'Ninguno'}\n\nSi tu canal no aparece, quita y vuelve a añadir el bot (@Antiabetbot) como administrador.`,
@@ -2758,7 +2832,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   ): Promise<{ success: boolean; message: string; channelInfo?: any }> {
     // Buscar el canal por nombre
     const searchResult = await this.findChannelByName(channelName);
-    
+
     if (!searchResult.found || !searchResult.channel) {
       return {
         success: false,
@@ -2791,7 +2865,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
 
       // Intentar obtener información del canal
       const chat = await this.bot.telegram.getChat(channelId);
-      
+
       if (chat.type !== 'channel' && chat.type !== 'supergroup') {
         return { success: false, error: 'El ID no corresponde a un canal o grupo' };
       }
@@ -2799,18 +2873,18 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       // Verificar que el bot es admin
       const botInfo = await this.bot.telegram.getMe();
       const botMember = await this.bot.telegram.getChatMember(channelId, botInfo.id);
-      
+
       if (botMember.status !== 'administrator' && botMember.status !== 'creator') {
-        return { 
-          success: false, 
-          error: 'El bot no es administrador de este canal. Añádelo como admin primero.' 
+        return {
+          success: false,
+          error: 'El bot no es administrador de este canal. Añádelo como admin primero.',
         };
       }
 
       // Guardar en la base de datos
       const chatTitle = 'title' in chat ? chat.title : 'Canal sin nombre';
       const chatUsername = 'username' in chat ? chat.username : undefined;
-      
+
       await this.saveDetectedChannel(channelId, chatTitle, chatUsername, chat.type);
 
       this.logger.log(`✅ Canal verificado y registrado: ${chatTitle} (${channelId})`);
@@ -2826,14 +2900,14 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       };
     } catch (error: any) {
       this.logger.error('Error verifying channel by ID:', error);
-      
+
       if (error.message?.includes('chat not found')) {
         return { success: false, error: 'Canal no encontrado. Verifica que el ID sea correcto.' };
       }
       if (error.message?.includes('bot was kicked') || error.message?.includes('not a member')) {
         return { success: false, error: 'El bot no tiene acceso a este canal.' };
       }
-      
+
       return { success: false, error: 'Error al verificar el canal. Intenta de nuevo.' };
     }
   }
@@ -2847,7 +2921,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   ): Promise<{ success: boolean; message: string; channelInfo?: any }> {
     // Primero verificar y registrar el canal
     const verifyResult = await this.verifyAndRegisterChannelById(channelId);
-    
+
     if (!verifyResult.success || !verifyResult.channel) {
       return {
         success: false,

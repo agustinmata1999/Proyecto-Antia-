@@ -6,15 +6,15 @@ import { ObjectId } from 'mongodb';
 
 /**
  * SIMULADOR DE CASA DE APUESTAS
- * 
+ *
  * Este controlador simula el comportamiento de una casa de apuestas real para testing.
  * Permite probar el flujo completo de tracking de afiliados:
- * 
+ *
  * 1. Usuario hace clic en link de afiliado → Landing de Antía
  * 2. Landing redirige a casa con subid → Este simulador
  * 3. Usuario se "registra" en el simulador
  * 4. Simulador envía postback a Antía → Conversión registrada
- * 
+ *
  * URLs del simulador:
  * - Landing: /api/simulator/landing?subid=xxx
  * - Registro: /api/simulator/register (POST)
@@ -24,17 +24,20 @@ import { ObjectId } from 'mongodb';
 @Controller('simulator')
 export class SimulatorController {
   private readonly logger = new Logger('BettingHouseSimulator');
-  
+
   // In-memory storage for simulation (in production this would be a database)
-  private simulatedUsers: Map<string, {
-    id: string;
-    email: string;
-    subid: string;
-    registeredAt: Date;
-    hasDeposited: boolean;
-    depositAmount?: number;
-    postbackSent: boolean;
-  }> = new Map();
+  private simulatedUsers: Map<
+    string,
+    {
+      id: string;
+      email: string;
+      subid: string;
+      registeredAt: Date;
+      hasDeposited: boolean;
+      depositAmount?: number;
+      postbackSent: boolean;
+    }
+  > = new Map();
 
   private clickHistory: Array<{
     subid: string;
@@ -58,7 +61,7 @@ export class SimulatorController {
     @Res() res: Response,
   ) {
     this.logger.log(`🎰 [SIMULATOR] User arrived with subid=${subid}, affiliate=${affiliate}`);
-    
+
     // Record the click
     this.clickHistory.push({
       subid: subid || 'unknown',
@@ -237,7 +240,7 @@ export class SimulatorController {
     @Res() res: Response,
   ) {
     const { email, username, subid, affiliate } = body;
-    
+
     this.logger.log(`🎰 [SIMULATOR] Registration: email=${email}, subid=${subid}`);
 
     // Create simulated user
@@ -250,12 +253,12 @@ export class SimulatorController {
       hasDeposited: false,
       postbackSent: false,
     };
-    
+
     this.simulatedUsers.set(userId, user);
 
     // Send postback to Antía
     let postbackResult = { success: false, error: 'No subid provided' };
-    
+
     if (subid) {
       try {
         // Send postback for REGISTRATION event
@@ -266,19 +269,19 @@ export class SimulatorController {
           event: 'REGISTRATION',
           txid: userId,
         };
-        
+
         this.logger.log(`📤 [SIMULATOR] Sending postback to ${postbackUrl}`);
         this.logger.log(`📤 [SIMULATOR] Postback data: ${JSON.stringify(postbackData)}`);
-        
+
         const response = await fetch(postbackUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(postbackData),
         });
-        
+
         postbackResult = await response.json();
         user.postbackSent = postbackResult.success;
-        
+
         this.logger.log(`📥 [SIMULATOR] Postback response: ${JSON.stringify(postbackResult)}`);
       } catch (error) {
         this.logger.error(`❌ [SIMULATOR] Postback failed: ${error.message}`);
@@ -505,7 +508,7 @@ export class SimulatorController {
 
     // Send deposit postback
     let postbackResult = { success: false, error: 'No subid' };
-    
+
     if (user.subid) {
       try {
         const postbackUrl = `http://localhost:8001/api/r/postback`;
@@ -517,20 +520,22 @@ export class SimulatorController {
           currency: 'EUR',
           txid: `dep_${userId}_${Date.now()}`,
         };
-        
+
         this.logger.log(`📤 [SIMULATOR] Sending DEPOSIT postback: ${JSON.stringify(postbackData)}`);
-        
+
         const response = await fetch(postbackUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(postbackData),
         });
-        
+
         postbackResult = await response.json();
         user.hasDeposited = true;
         user.depositAmount = depositAmount;
-        
-        this.logger.log(`📥 [SIMULATOR] Deposit postback response: ${JSON.stringify(postbackResult)}`);
+
+        this.logger.log(
+          `📥 [SIMULATOR] Deposit postback response: ${JSON.stringify(postbackResult)}`,
+        );
       } catch (error) {
         this.logger.error(`❌ [SIMULATOR] Deposit postback failed: ${error.message}`);
         postbackResult = { success: false, error: error.message };
@@ -669,11 +674,11 @@ export class SimulatorController {
                 <div class="label">Registros Simulados</div>
             </div>
             <div class="stat-card">
-                <div class="number">${users.filter(u => u.hasDeposited).length}</div>
+                <div class="number">${users.filter((u) => u.hasDeposited).length}</div>
                 <div class="label">Depósitos Simulados</div>
             </div>
             <div class="stat-card">
-                <div class="number">${users.filter(u => u.postbackSent).length}</div>
+                <div class="number">${users.filter((u) => u.postbackSent).length}</div>
                 <div class="label">Postbacks Enviados</div>
             </div>
         </div>
@@ -699,13 +704,18 @@ export class SimulatorController {
                 </thead>
                 <tbody>
                     ${clicks.length === 0 ? '<tr><td colspan="3">No hay clics registrados</td></tr>' : ''}
-                    ${clicks.reverse().map(c => `
+                    ${clicks
+                      .reverse()
+                      .map(
+                        (c) => `
                         <tr>
                             <td><code>${c.subid}</code></td>
                             <td>${c.timestamp.toISOString()}</td>
                             <td>${(c.userAgent || 'N/A').substring(0, 50)}...</td>
                         </tr>
-                    `).join('')}
+                    `,
+                      )
+                      .join('')}
                 </tbody>
             </table>
         </div>
@@ -724,7 +734,9 @@ export class SimulatorController {
                 </thead>
                 <tbody>
                     ${users.length === 0 ? '<tr><td colspan="5">No hay usuarios registrados</td></tr>' : ''}
-                    ${users.map(u => `
+                    ${users
+                      .map(
+                        (u) => `
                         <tr>
                             <td>${u.email}</td>
                             <td><code>${u.subid}</code></td>
@@ -732,7 +744,9 @@ export class SimulatorController {
                             <td>${u.hasDeposited ? `${u.depositAmount}€` : '-'}</td>
                             <td><span class="badge ${u.postbackSent ? 'success' : 'pending'}">${u.postbackSent ? '✓ Enviado' : 'Pendiente'}</span></td>
                         </tr>
-                    `).join('')}
+                    `,
+                      )
+                      .join('')}
                 </tbody>
             </table>
         </div>
@@ -755,7 +769,7 @@ export class SimulatorController {
   async clearSimulator(@Res() res: Response) {
     this.simulatedUsers.clear();
     this.clickHistory = [];
-    
+
     res.redirect('/api/simulator/status');
   }
 
@@ -768,8 +782,8 @@ export class SimulatorController {
     return {
       totalClicks: this.clickHistory.length,
       totalUsers: this.simulatedUsers.size,
-      totalDeposits: Array.from(this.simulatedUsers.values()).filter(u => u.hasDeposited).length,
-      totalPostbacks: Array.from(this.simulatedUsers.values()).filter(u => u.postbackSent).length,
+      totalDeposits: Array.from(this.simulatedUsers.values()).filter((u) => u.hasDeposited).length,
+      totalPostbacks: Array.from(this.simulatedUsers.values()).filter((u) => u.postbackSent).length,
       recentClicks: this.clickHistory.slice(-10),
       users: Array.from(this.simulatedUsers.values()),
     };

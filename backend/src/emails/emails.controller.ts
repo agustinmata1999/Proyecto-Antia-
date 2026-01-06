@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { EmailService } from './emails.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -46,8 +41,8 @@ export class EmailsController {
     return {
       configured: this.emailService.isReady(),
       mode: this.emailService.isReady() ? 'production' : 'development',
-      message: this.emailService.isReady() 
-        ? 'Resend API configured and ready' 
+      message: this.emailService.isReady()
+        ? 'Resend API configured and ready'
         : 'Running in dev mode - emails logged only',
     };
   }

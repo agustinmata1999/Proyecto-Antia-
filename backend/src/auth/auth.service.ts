@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -43,22 +49,24 @@ export class AuthService {
     if (user.status === 'PENDING') {
       if (user.role === 'TIPSTER') {
         throw new UnauthorizedException({
-          message: 'Tu solicitud de tipster está pendiente de aprobación. Te notificaremos cuando sea revisada.',
+          message:
+            'Tu solicitud de tipster está pendiente de aprobación. Te notificaremos cuando sea revisada.',
           code: 'PENDING_APPROVAL',
           status: 'PENDING',
         });
       }
       throw new UnauthorizedException('Tu cuenta está pendiente de activación');
     }
-    
+
     if (user.status === 'REJECTED') {
       throw new UnauthorizedException({
-        message: 'Tu solicitud de registro ha sido rechazada. Contacta a soporte para más información.',
+        message:
+          'Tu solicitud de registro ha sido rechazada. Contacta a soporte para más información.',
         code: 'REJECTED',
         status: 'REJECTED',
       });
     }
-    
+
     if (user.status === 'SUSPENDED') {
       throw new UnauthorizedException('Tu cuenta ha sido suspendida. Contacta a soporte.');
     }
@@ -92,11 +100,11 @@ export class AuthService {
 
   async registerTipster(dto: RegisterTipsterDto) {
     // Check if email exists using raw query
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'users',
       filter: { email: dto.email },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new ConflictException('Email already registered');
@@ -116,48 +124,52 @@ export class AuthService {
       this.logger.log(`[REGISTER] User ID: ${userIdHex}, Profile ID: ${profileIdHex}`);
 
       // Create user using raw MongoDB with PENDING status (requires admin approval)
-      const userResult = await this.prisma.$runCommandRaw({
+      const userResult = (await this.prisma.$runCommandRaw({
         insert: 'users',
-        documents: [{
-          _id: { $oid: userIdHex },
-          email: dto.email,
-          phone: dto.phone,
-          password_hash: passwordHash,
-          role: 'TIPSTER',
-          status: 'PENDING', // Requires admin approval
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
-      }) as any;
-      
+        documents: [
+          {
+            _id: { $oid: userIdHex },
+            email: dto.email,
+            phone: dto.phone,
+            password_hash: passwordHash,
+            role: 'TIPSTER',
+            status: 'PENDING', // Requires admin approval
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
+      })) as any;
+
       this.logger.log(`[REGISTER] User insert result: ${JSON.stringify(userResult)}`);
 
       // Create tipster profile with application details
-      const profileResult = await this.prisma.$runCommandRaw({
+      const profileResult = (await this.prisma.$runCommandRaw({
         insert: 'tipster_profiles',
-        documents: [{
-          _id: { $oid: profileIdHex },
-          user_id: userIdHex,
-          public_name: dto.name,
-          telegram_username: dto.telegramUsername || null,
-          locale: 'es',
-          timezone: 'Europe/Madrid',
-          module_forecasts: true,
-          module_affiliate: false,
-          // Application details (para validación del admin)
-          application_status: 'PENDING',
-          application_notes: dto.applicationNotes || null,
-          application_country: dto.countryIso || null,
-          application_experience: dto.experience || null,
-          application_social_media: dto.socialMedia || null,
-          application_website: dto.website || null,
-          promotion_channel: dto.promotionChannel || null,
-          // KYC fields (vacíos, se completan post-aprobación)
-          kyc_completed: false,
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
-      }) as any;
+        documents: [
+          {
+            _id: { $oid: profileIdHex },
+            user_id: userIdHex,
+            public_name: dto.name,
+            telegram_username: dto.telegramUsername || null,
+            locale: 'es',
+            timezone: 'Europe/Madrid',
+            module_forecasts: true,
+            module_affiliate: false,
+            // Application details (para validación del admin)
+            application_status: 'PENDING',
+            application_notes: dto.applicationNotes || null,
+            application_country: dto.countryIso || null,
+            application_experience: dto.experience || null,
+            application_social_media: dto.socialMedia || null,
+            application_website: dto.website || null,
+            promotion_channel: dto.promotionChannel || null,
+            // KYC fields (vacíos, se completan post-aprobación)
+            kyc_completed: false,
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
+      })) as any;
 
       this.logger.log(`[REGISTER] Profile insert result: ${JSON.stringify(profileResult)}`);
       this.logger.log(`[REGISTER] New tipster application received: ${dto.email}`);
@@ -171,11 +183,14 @@ export class AuthService {
         });
         this.logger.log(`[REGISTER] Application received email sent to: ${dto.email}`);
       } catch (emailError) {
-        this.logger.warn(`[REGISTER] Failed to send application received email: ${emailError.message}`);
+        this.logger.warn(
+          `[REGISTER] Failed to send application received email: ${emailError.message}`,
+        );
       }
 
       return {
-        message: 'Solicitud de registro enviada correctamente. Un administrador revisará tu solicitud.',
+        message:
+          'Solicitud de registro enviada correctamente. Un administrador revisará tu solicitud.',
         userId: userIdHex,
         status: 'PENDING',
         requiresApproval: true,
@@ -188,11 +203,11 @@ export class AuthService {
 
   async registerClient(dto: RegisterClientDto) {
     // Check if email exists using raw query
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'users',
       filter: { email: dto.email },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new ConflictException('Email already registered');
@@ -210,33 +225,37 @@ export class AuthService {
       // Create user using raw MongoDB
       await this.prisma.$runCommandRaw({
         insert: 'users',
-        documents: [{
-          _id: { $oid: userIdHex },
-          email: dto.email,
-          phone: dto.phone || null,
-          password_hash: passwordHash,
-          role: 'CLIENT',
-          status: 'ACTIVE',
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
+        documents: [
+          {
+            _id: { $oid: userIdHex },
+            email: dto.email,
+            phone: dto.phone || null,
+            password_hash: passwordHash,
+            role: 'CLIENT',
+            status: 'ACTIVE',
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
       });
 
       // Create client profile using raw MongoDB
       await this.prisma.$runCommandRaw({
         insert: 'client_profiles',
-        documents: [{
-          _id: { $oid: profileIdHex },
-          user_id: userIdHex,
-          country_iso: dto.countryIso,
-          consent_18: dto.consent18 || false,
-          consent_terms: dto.consentTerms || false,
-          consent_privacy: dto.consentPrivacy || false,
-          locale: 'es',
-          timezone: 'Europe/Madrid',
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
+        documents: [
+          {
+            _id: { $oid: profileIdHex },
+            user_id: userIdHex,
+            country_iso: dto.countryIso,
+            consent_18: dto.consent18 || false,
+            consent_terms: dto.consentTerms || false,
+            consent_privacy: dto.consentPrivacy || false,
+            locale: 'es',
+            timezone: 'Europe/Madrid',
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
       });
 
       // Return login data

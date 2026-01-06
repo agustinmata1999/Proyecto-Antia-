@@ -20,11 +20,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       const sanitized = dbUrl.replace(/:[^:@]+@/, ':***@');
       this.logger.log(`DATABASE_URL: ${sanitized}`);
     }
-    
+
     try {
       await this.$connect();
       this.logger.log('✅ Database connected successfully');
-      
+
       // Test query to verify connection works
       const collections = await this.$runCommandRaw({ listCollections: 1 });
       this.logger.log(`✅ Database accessible, collections found`);

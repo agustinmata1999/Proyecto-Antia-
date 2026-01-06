@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Req,
-  Res,
-  Headers,
-  Body,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Req, Res, Headers, Body, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
@@ -35,7 +25,7 @@ async function getCountryFromIp(ip: string): Promise<string | null> {
 @Controller('r')
 export class AffiliateRedirectController {
   private readonly logger = new Logger(AffiliateRedirectController.name);
-  
+
   constructor(
     private affiliateService: AffiliateService,
     private prisma: PrismaService,
@@ -59,11 +49,11 @@ export class AffiliateRedirectController {
   ) {
     try {
       // Find the link using raw query (redirectCode is not unique in Prisma)
-      const linkResult = await this.prisma.$runCommandRaw({
+      const linkResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_affiliate_links',
         filter: { redirect_code: redirectCode },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const linkDoc = linkResult.cursor?.firstBatch?.[0];
       if (!linkDoc || linkDoc.status !== 'ACTIVE') {
@@ -77,9 +67,10 @@ export class AffiliateRedirectController {
       const houseId = linkDoc.house_id;
 
       // Get IP
-      const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-        || req.socket.remoteAddress
-        || '';
+      const ip =
+        (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+        req.socket.remoteAddress ||
+        '';
 
       // Detect country
       const countryCode = await getCountryFromIp(ip);
@@ -105,7 +96,7 @@ export class AffiliateRedirectController {
           code: 'COUNTRY_BLOCKED',
           houseName: result.house.name,
           countryCode,
-          alternatives: alternatives.slice(0, 5).map(h => ({
+          alternatives: alternatives.slice(0, 5).map((h) => ({
             name: h.name,
             slug: h.slug,
             logoUrl: h.logoUrl,
@@ -115,7 +106,6 @@ export class AffiliateRedirectController {
 
       // Redirect to the betting house
       return res.redirect(302, result.redirectUrl!);
-      
     } catch (error: any) {
       console.error('Redirect error:', error);
       return res.status(500).json({
@@ -131,15 +121,12 @@ export class AffiliateRedirectController {
    */
   @Public()
   @Get(':redirectCode/info')
-  async getRedirectInfo(
-    @Param('redirectCode') redirectCode: string,
-    @Req() req: Request,
-  ) {
-    const linkResult = await this.prisma.$runCommandRaw({
+  async getRedirectInfo(@Param('redirectCode') redirectCode: string, @Req() req: Request) {
+    const linkResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_links',
       filter: { redirect_code: redirectCode },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const linkDoc = linkResult.cursor?.firstBatch?.[0];
     if (!linkDoc || linkDoc.status !== 'ACTIVE') {
@@ -150,21 +137,21 @@ export class AffiliateRedirectController {
     }
 
     // Try to find house by ObjectId or string
-    let houseResult = await this.prisma.$runCommandRaw({
+    let houseResult = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: { $oid: linkDoc.house_id } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let house = houseResult.cursor?.firstBatch?.[0];
-    
+
     // If not found, try as string
     if (!house) {
-      houseResult = await this.prisma.$runCommandRaw({
+      houseResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: linkDoc.house_id },
         limit: 1,
-      }) as any;
+      })) as any;
       house = houseResult.cursor?.firstBatch?.[0];
     }
 
@@ -178,11 +165,11 @@ export class AffiliateRedirectController {
     // Get tipster info
     let tipsterName = 'Tipster';
     try {
-      const tipsterResult = await this.prisma.$runCommandRaw({
+      const tipsterResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: { $oid: linkDoc.tipster_id } },
         limit: 1,
-      }) as any;
+      })) as any;
       const tipster = tipsterResult.cursor?.firstBatch?.[0];
       if (tipster) {
         tipsterName = tipster.public_name || 'Tipster';
@@ -192,9 +179,10 @@ export class AffiliateRedirectController {
     }
 
     // Get IP for country check
-    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-      || req.socket.remoteAddress
-      || '';
+    const ip =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      '';
     const countryCode = await getCountryFromIp(ip);
 
     // Check if country is allowed
@@ -214,9 +202,10 @@ export class AffiliateRedirectController {
     }
 
     // Check if this is a demo/test house (by slug containing "test" or master URL containing "test")
-    const isDemo = house.slug?.toLowerCase().includes('test') || 
-                   house.master_affiliate_url?.toLowerCase().includes('test') ||
-                   house.name?.toLowerCase().includes('test');
+    const isDemo =
+      house.slug?.toLowerCase().includes('test') ||
+      house.master_affiliate_url?.toLowerCase().includes('test') ||
+      house.name?.toLowerCase().includes('test');
 
     return {
       valid: true,
@@ -249,11 +238,11 @@ export class AffiliateRedirectController {
     this.logger.log(`Creating demo conversion for code: ${redirectCode}`);
 
     // Find the link
-    const linkResult = await this.prisma.$runCommandRaw({
+    const linkResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_links',
       filter: { redirect_code: redirectCode },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const linkDoc = linkResult.cursor?.firstBatch?.[0];
     if (!linkDoc || linkDoc.status !== 'ACTIVE') {
@@ -269,26 +258,27 @@ export class AffiliateRedirectController {
     // Get house info for commission
     let house: any = null;
     try {
-      const houseResult = await this.prisma.$runCommandRaw({
+      const houseResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: { $oid: houseId } },
         limit: 1,
-      }) as any;
+      })) as any;
       house = houseResult.cursor?.firstBatch?.[0];
     } catch (e) {
       // Try as string
-      const houseResult = await this.prisma.$runCommandRaw({
+      const houseResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: houseId },
         limit: 1,
-      }) as any;
+      })) as any;
       house = houseResult.cursor?.firstBatch?.[0];
     }
 
     // Get IP and country
-    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-      || req.socket.remoteAddress
-      || '';
+    const ip =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      '';
     const countryCode = await getCountryFromIp(ip);
 
     // Create the conversion record
@@ -298,48 +288,52 @@ export class AffiliateRedirectController {
 
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_conversions',
-      documents: [{
-        _id: conversionId,
-        house_id: houseId,
-        tipster_id: tipsterId,
-        tipster_tracking_id: tipsterId,
-        external_ref_id: `DEMO-${Date.now()}`,
-        user_email: body.email || null,
-        user_telegram: body.telegram || null,
-        country_code: countryCode || 'DEMO',
-        event_type: 'REGISTER',
-        status: 'PENDING',
-        amount_cents: 0,
-        currency: 'EUR',
-        commission_cents: commissionCents,
-        clicked_at: { $date: now },
-        occurred_at: { $date: now },
-        imported_at: { $date: now },
-        raw_data: {
-          demo: true,
-          name: body.name,
-          email: body.email,
-          telegram: body.telegram,
-          ip: ip,
-          redirectCode: redirectCode,
+      documents: [
+        {
+          _id: conversionId,
+          house_id: houseId,
+          tipster_id: tipsterId,
+          tipster_tracking_id: tipsterId,
+          external_ref_id: `DEMO-${Date.now()}`,
+          user_email: body.email || null,
+          user_telegram: body.telegram || null,
+          country_code: countryCode || 'DEMO',
+          event_type: 'REGISTER',
+          status: 'PENDING',
+          amount_cents: 0,
+          currency: 'EUR',
+          commission_cents: commissionCents,
+          clicked_at: { $date: now },
+          occurred_at: { $date: now },
+          imported_at: { $date: now },
+          raw_data: {
+            demo: true,
+            name: body.name,
+            email: body.email,
+            telegram: body.telegram,
+            ip: ip,
+            redirectCode: redirectCode,
+          },
+          created_at: { $date: now },
+          updated_at: { $date: now },
         },
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      ],
     });
 
     // Get the link ID properly
     const linkId = linkDoc._id?.$oid || linkDoc._id;
-    
+
     // Update link referral count - try both formats
     try {
       if (linkDoc._id?.$oid) {
         await this.prisma.$runCommandRaw({
           update: 'tipster_affiliate_links',
-          updates: [{
-            q: { _id: { $oid: linkId } },
-            u: { $inc: { total_referrals: 1 } },
-          }],
+          updates: [
+            {
+              q: { _id: { $oid: linkId } },
+              u: { $inc: { total_referrals: 1 } },
+            },
+          ],
         });
       } else {
         // If ID is a string, use findOneAndUpdate
@@ -353,7 +347,9 @@ export class AffiliateRedirectController {
       this.logger.warn(`Could not update link referral count: ${e.message}`);
     }
 
-    this.logger.log(`Demo conversion created: ${conversionId.toHexString()} for tipster ${tipsterId}`);
+    this.logger.log(
+      `Demo conversion created: ${conversionId.toHexString()} for tipster ${tipsterId}`,
+    );
 
     return {
       success: true,
@@ -367,18 +363,15 @@ export class AffiliateRedirectController {
    */
   @Public()
   @Post(':redirectCode/track-click')
-  async trackClick(
-    @Param('redirectCode') redirectCode: string,
-    @Req() req: Request,
-  ) {
+  async trackClick(@Param('redirectCode') redirectCode: string, @Req() req: Request) {
     this.logger.log(`Tracking click for code: ${redirectCode}`);
 
     // Find the link
-    const linkResult = await this.prisma.$runCommandRaw({
+    const linkResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_links',
       filter: { redirect_code: redirectCode },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const linkDoc = linkResult.cursor?.firstBatch?.[0];
     if (!linkDoc || linkDoc.status !== 'ACTIVE') {
@@ -397,25 +390,28 @@ export class AffiliateRedirectController {
     }
 
     // Get IP and record in clicks collection
-    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-      || req.socket.remoteAddress
-      || '';
+    const ip =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      '';
     const countryCode = await getCountryFromIp(ip);
     const now = new Date().toISOString();
 
     try {
       await this.prisma.$runCommandRaw({
         insert: 'affiliate_click_events',
-        documents: [{
-          tipster_id: linkDoc.tipster_id,
-          house_id: linkDoc.house_id,
-          redirect_code: redirectCode,
-          ip_address: ip,
-          country_code: countryCode,
-          user_agent: req.headers['user-agent'] || null,
-          referer: req.headers['referer'] || null,
-          created_at: { $date: now },
-        }],
+        documents: [
+          {
+            tipster_id: linkDoc.tipster_id,
+            house_id: linkDoc.house_id,
+            redirect_code: redirectCode,
+            ip_address: ip,
+            country_code: countryCode,
+            user_agent: req.headers['user-agent'] || null,
+            referer: req.headers['referer'] || null,
+            created_at: { $date: now },
+          },
+        ],
       });
     } catch (e) {
       // Ignore click logging errors
@@ -430,13 +426,11 @@ export class AffiliateRedirectController {
    */
   @Public()
   @Get('postback')
-  async handlePostbackGet(
-    @Req() req: Request,
-  ) {
+  async handlePostbackGet(@Req() req: Request) {
     const { subid, house, event, amount, currency, txid } = req.query as Record<string, string>;
-    
+
     this.logger.log(`📡 Postback received: subid=${subid}, house=${house}, event=${event}`);
-    
+
     if (!subid) {
       return { success: false, error: 'Missing subid parameter' };
     }
@@ -450,7 +444,7 @@ export class AffiliateRedirectController {
         currency: currency || 'EUR',
         transactionId: txid,
       });
-      
+
       return result;
     } catch (error) {
       this.logger.error(`Postback error: ${error.message}`);
@@ -460,19 +454,18 @@ export class AffiliateRedirectController {
 
   @Public()
   @Post('postback')
-  async handlePostbackPost(
-    @Body() body: any,
-    @Req() req: Request,
-  ) {
+  async handlePostbackPost(@Body() body: any, @Req() req: Request) {
     const subid = body.subid || body.sub_id || body.clickid || body.click_id;
     const houseSlug = body.house || body.brand || body.operator;
     const event = body.event || body.type || body.action || 'REGISTRATION';
     const amount = body.amount || body.commission || body.revenue;
     const currency = body.currency || 'EUR';
     const transactionId = body.txid || body.transaction_id || body.conversion_id;
-    
-    this.logger.log(`📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}`);
-    
+
+    this.logger.log(
+      `📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}`,
+    );
+
     if (!subid) {
       return { success: false, error: 'Missing subid parameter' };
     }
@@ -486,7 +479,7 @@ export class AffiliateRedirectController {
         currency,
         transactionId,
       });
-      
+
       return result;
     } catch (error) {
       this.logger.error(`Postback error: ${error.message}`);

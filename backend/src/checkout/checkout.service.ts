@@ -39,7 +39,7 @@ export interface PaymentFeatureFlags {
 export class CheckoutService {
   private stripe: Stripe;
   private readonly logger = new Logger(CheckoutService.name);
-  
+
   // Feature flags (can be loaded from DB or config in production)
   private featureFlags: PaymentFeatureFlags = {
     cryptoEnabled: false, // Future feature
@@ -73,7 +73,7 @@ export class CheckoutService {
     availableMethods: string[];
   }> {
     const geo = await this.geolocationService.detectCountry(clientIp);
-    
+
     let gateway: 'stripe' | 'redsys' = 'stripe';
     let availableMethods: string[] = ['card'];
 
@@ -115,9 +115,7 @@ export class CheckoutService {
     const { gateway, geo } = await this.detectGateway(clientIp);
 
     // Calculate commission based on gateway
-    const commissionRate = gateway === 'redsys' 
-      ? this.redsysService.getCommissionRate() 
-      : 2.9; // Stripe ~2.9%
+    const commissionRate = gateway === 'redsys' ? this.redsysService.getCommissionRate() : 2.9; // Stripe ~2.9%
     const commissionCents = Math.round(product.priceCents * (commissionRate / 100));
 
     // 3. Create order in database with geo info
@@ -145,9 +143,24 @@ export class CheckoutService {
 
     // 5. Create payment session based on gateway
     if (gateway === 'redsys' && this.redsysService.isAvailable()) {
-      return this.createRedsysSession(orderId, product, successUrl, cancelUrl, webhookUrl, geo.country);
+      return this.createRedsysSession(
+        orderId,
+        product,
+        successUrl,
+        cancelUrl,
+        webhookUrl,
+        geo.country,
+      );
     } else {
-      return this.createStripeSession(orderId, product, tipster, successUrl, cancelUrl, dto, geo.country);
+      return this.createStripeSession(
+        orderId,
+        product,
+        tipster,
+        successUrl,
+        cancelUrl,
+        dto,
+        geo.country,
+      );
     }
   }
 
@@ -172,7 +185,8 @@ export class CheckoutService {
               currency: product.currency.toLowerCase(),
               product_data: {
                 name: product.title,
-                description: product.description || `Pronóstico de ${tipster?.publicName || 'Tipster'}`,
+                description:
+                  product.description || `Pronóstico de ${tipster?.publicName || 'Tipster'}`,
               },
               unit_amount: product.priceCents,
             },
@@ -196,7 +210,9 @@ export class CheckoutService {
 
       await this.updateOrderWithSession(orderId, session.id);
 
-      this.logger.log(`Created Stripe session ${session.id} for order ${orderId} (country: ${country})`);
+      this.logger.log(
+        `Created Stripe session ${session.id} for order ${orderId} (country: ${country})`,
+      );
 
       return {
         url: session.url!,
@@ -236,7 +252,9 @@ export class CheckoutService {
 
       await this.updateOrderWithSession(orderId, result.transactionId);
 
-      this.logger.log(`Created Redsys session ${result.transactionId} for order ${orderId} (country: ${country})`);
+      this.logger.log(
+        `Created Redsys session ${result.transactionId} for order ${orderId} (country: ${country})`,
+      );
 
       return {
         url: result.redirectUrl,
@@ -277,28 +295,30 @@ export class CheckoutService {
 
     await this.prisma.$runCommandRaw({
       insert: 'orders',
-      documents: [{
-        _id: { $oid: orderId },
-        product_id: data.productId,
-        tipster_id: data.tipsterId,
-        amount_cents: data.amountCents,
-        currency: data.currency,
-        email_backup: data.email || null,
-        phone_backup: data.phone || null,
-        telegram_user_id: data.telegramUserId || null,
-        telegram_username: data.telegramUsername || null,
-        status: 'PENDING',
-        payment_provider: data.gateway,
-        // Geolocation data
-        detected_country: data.country,
-        detected_country_name: data.countryName,
-        // Commission data
-        commission_cents: data.commissionCents,
-        commission_rate: data.commissionRate,
-        meta: { isGuest: data.isGuest },
-        created_at: { $date: now.toISOString() },
-        updated_at: { $date: now.toISOString() },
-      }],
+      documents: [
+        {
+          _id: { $oid: orderId },
+          product_id: data.productId,
+          tipster_id: data.tipsterId,
+          amount_cents: data.amountCents,
+          currency: data.currency,
+          email_backup: data.email || null,
+          phone_backup: data.phone || null,
+          telegram_user_id: data.telegramUserId || null,
+          telegram_username: data.telegramUsername || null,
+          status: 'PENDING',
+          payment_provider: data.gateway,
+          // Geolocation data
+          detected_country: data.country,
+          detected_country_name: data.countryName,
+          // Commission data
+          commission_cents: data.commissionCents,
+          commission_rate: data.commissionRate,
+          meta: { isGuest: data.isGuest },
+          created_at: { $date: now.toISOString() },
+          updated_at: { $date: now.toISOString() },
+        },
+      ],
     });
 
     return orderId;
@@ -307,7 +327,7 @@ export class CheckoutService {
   async getCheckoutStatus(sessionId: string) {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-      
+
       return {
         status: session.status,
         paymentStatus: session.payment_status,
@@ -323,7 +343,7 @@ export class CheckoutService {
 
   async handleStripeWebhook(payload: Buffer, signature: string) {
     const webhookSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
-    
+
     let event: Stripe.Event;
 
     try {
@@ -371,19 +391,21 @@ export class CheckoutService {
     const status = result.success ? 'PAGADA' : 'FAILED';
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: result.orderId } },
-        u: {
-          $set: {
-            status,
-            payment_provider: 'redsys',
-            provider_order_id: result.transactionId,
-            response_code: result.responseCode,
-            authorization_code: result.authCode,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: result.orderId } },
+          u: {
+            $set: {
+              status,
+              payment_provider: 'redsys',
+              provider_order_id: result.transactionId,
+              response_code: result.responseCode,
+              authorization_code: result.authCode,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     // If successful, send Telegram notification
@@ -431,19 +453,21 @@ export class CheckoutService {
     // Update order status
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            status: 'PAGADA',
-            payment_provider: 'stripe',
-            provider_order_id: session.id,
-            payment_method: 'card',
-            paid_at: { $date: new Date().toISOString() },
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              status: 'PAGADA',
+              payment_provider: 'stripe',
+              provider_order_id: session.id,
+              payment_method: 'card',
+              paid_at: { $date: new Date().toISOString() },
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     // Send Telegram notification if user came from Telegram
@@ -468,42 +492,46 @@ export class CheckoutService {
 
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            status: 'EXPIRED',
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              status: 'EXPIRED',
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
   }
 
   async verifyPaymentAndGetOrder(sessionId: string, orderId: string) {
     // Get session status from Stripe
     const status = await this.getCheckoutStatus(sessionId);
-    
+
     if (status.paymentStatus === 'paid') {
       // Update order if not already updated
       const order = await this.getOrderById(orderId);
-      
+
       if (order && order.status === 'PENDING') {
         await this.prisma.$runCommandRaw({
           update: 'orders',
-          updates: [{
-            q: { _id: { $oid: orderId } },
-            u: {
-              $set: {
-                status: 'PAGADA',
-                payment_provider: 'stripe',
-                provider_order_id: sessionId,
-                payment_method: 'card',
-                paid_at: { $date: new Date().toISOString() },
-                updated_at: { $date: new Date().toISOString() },
+          updates: [
+            {
+              q: { _id: { $oid: orderId } },
+              u: {
+                $set: {
+                  status: 'PAGADA',
+                  payment_provider: 'stripe',
+                  provider_order_id: sessionId,
+                  payment_method: 'card',
+                  paid_at: { $date: new Date().toISOString() },
+                  updated_at: { $date: new Date().toISOString() },
+                },
               },
             },
-          }],
+          ],
         });
 
         // =============================================
@@ -515,16 +543,20 @@ export class CheckoutService {
 
     // Get updated order
     const order = await this.getOrderById(orderId);
-    
+
     // Get product info
-    const product = order ? await this.prisma.product.findUnique({
-      where: { id: order.productId },
-    }) : null;
+    const product = order
+      ? await this.prisma.product.findUnique({
+          where: { id: order.productId },
+        })
+      : null;
 
     // Get tipster info
-    const tipster = product ? await this.prisma.tipsterProfile.findUnique({
-      where: { id: product.tipsterId },
-    }) : null;
+    const tipster = product
+      ? await this.prisma.tipsterProfile.findUnique({
+          where: { id: product.tipsterId },
+        })
+      : null;
 
     return {
       ...status,
@@ -550,22 +582,24 @@ export class CheckoutService {
 
     await this.prisma.$runCommandRaw({
       insert: 'orders',
-      documents: [{
-        _id: { $oid: orderId },
-        product_id: data.productId,
-        tipster_id: data.tipsterId,
-        amount_cents: data.amountCents,
-        currency: data.currency,
-        email_backup: data.email || null,
-        phone_backup: data.phone || null,
-        telegram_user_id: data.telegramUserId || null,
-        telegram_username: data.telegramUsername || null,
-        status: 'PENDING',
-        payment_provider: 'stripe',
-        meta: { isGuest: data.isGuest },
-        created_at: { $date: now.toISOString() },
-        updated_at: { $date: now.toISOString() },
-      }],
+      documents: [
+        {
+          _id: { $oid: orderId },
+          product_id: data.productId,
+          tipster_id: data.tipsterId,
+          amount_cents: data.amountCents,
+          currency: data.currency,
+          email_backup: data.email || null,
+          phone_backup: data.phone || null,
+          telegram_user_id: data.telegramUserId || null,
+          telegram_username: data.telegramUsername || null,
+          status: 'PENDING',
+          payment_provider: 'stripe',
+          meta: { isGuest: data.isGuest },
+          created_at: { $date: now.toISOString() },
+          updated_at: { $date: now.toISOString() },
+        },
+      ],
     });
 
     return orderId;
@@ -574,24 +608,26 @@ export class CheckoutService {
   private async updateOrderWithSession(orderId: string, sessionId: string) {
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            provider_order_id: sessionId,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              provider_order_id: sessionId,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
   }
 
   private async getOrderById(orderId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'orders',
       filter: { _id: { $oid: orderId } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (result.cursor?.firstBatch?.length > 0) {
       const doc = result.cursor.firstBatch[0];
@@ -622,7 +658,9 @@ export class CheckoutService {
 
   private generateOrderId(): string {
     // Generate a MongoDB ObjectId-like string
-    const timestamp = Math.floor(Date.now() / 1000).toString(16).padStart(8, '0');
+    const timestamp = Math.floor(Date.now() / 1000)
+      .toString(16)
+      .padStart(8, '0');
     const random = Math.random().toString(16).substring(2, 18).padStart(16, '0');
     return timestamp + random.substring(0, 16);
   }
@@ -648,11 +686,13 @@ export class CheckoutService {
       currency: product.currency,
       billingType: product.billingType,
       validityDays: product.validityDays,
-      tipster: tipster ? {
-        id: tipster.id,
-        publicName: tipster.publicName,
-        avatarUrl: tipster.avatarUrl,
-      } : null,
+      tipster: tipster
+        ? {
+            id: tipster.id,
+            publicName: tipster.publicName,
+            avatarUrl: tipster.avatarUrl,
+          }
+        : null,
     };
   }
 
@@ -661,7 +701,7 @@ export class CheckoutService {
    */
   async simulateSuccessfulPayment(orderId: string) {
     const order = await this.getOrderById(orderId);
-    
+
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
@@ -681,29 +721,33 @@ export class CheckoutService {
       'stripe_simulated',
     );
 
-    this.logger.log(`Simulated payment commissions: gross=${order.amountCents}, gateway=${commissions.gatewayFeeCents}, platform=${commissions.platformFeeCents}, net=${commissions.netAmountCents}`);
+    this.logger.log(
+      `Simulated payment commissions: gross=${order.amountCents}, gateway=${commissions.gatewayFeeCents}, platform=${commissions.platformFeeCents}, net=${commissions.netAmountCents}`,
+    );
 
     // Update order status to PAGADA with commission data
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            status: 'PAGADA',
-            payment_provider: 'stripe_simulated',
-            payment_method: 'card_simulated',
-            paid_at: { $date: new Date().toISOString() },
-            // Commission fields
-            gateway_fee_cents: commissions.gatewayFeeCents,
-            gateway_fee_percent: commissions.gatewayFeePercent,
-            platform_fee_cents: commissions.platformFeeCents,
-            platform_fee_percent: commissions.platformFeePercent,
-            net_amount_cents: commissions.netAmountCents,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              status: 'PAGADA',
+              payment_provider: 'stripe_simulated',
+              payment_method: 'card_simulated',
+              paid_at: { $date: new Date().toISOString() },
+              // Commission fields
+              gateway_fee_cents: commissions.gatewayFeeCents,
+              gateway_fee_percent: commissions.gatewayFeePercent,
+              platform_fee_cents: commissions.platformFeeCents,
+              platform_fee_percent: commissions.platformFeePercent,
+              net_amount_cents: commissions.netAmountCents,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     // Send Telegram notification if user came from Telegram
@@ -732,7 +776,7 @@ export class CheckoutService {
    */
   async completePaymentAndNotify(orderId: string, sessionId?: string) {
     const order = await this.getOrderById(orderId);
-    
+
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
@@ -742,9 +786,11 @@ export class CheckoutService {
       const product = await this.prisma.product.findUnique({
         where: { id: order.productId },
       });
-      const tipster = product ? await this.prisma.tipsterProfile.findUnique({
-        where: { id: product.tipsterId },
-      }) : null;
+      const tipster = product
+        ? await this.prisma.tipsterProfile.findUnique({
+            where: { id: product.tipsterId },
+          })
+        : null;
 
       return {
         success: true,
@@ -765,36 +811,42 @@ export class CheckoutService {
     // Update order status to PAGADA with commission data
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            status: 'PAGADA',
-            payment_provider: order.paymentProvider || 'stripe',
-            provider_order_id: sessionId || order.providerOrderId,
-            payment_method: 'card',
-            paid_at: { $date: new Date().toISOString() },
-            // Commission fields
-            gateway_fee_cents: commissions.gatewayFeeCents,
-            gateway_fee_percent: commissions.gatewayFeePercent,
-            platform_fee_cents: commissions.platformFeeCents,
-            platform_fee_percent: commissions.platformFeePercent,
-            net_amount_cents: commissions.netAmountCents,
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              status: 'PAGADA',
+              payment_provider: order.paymentProvider || 'stripe',
+              provider_order_id: sessionId || order.providerOrderId,
+              payment_method: 'card',
+              paid_at: { $date: new Date().toISOString() },
+              // Commission fields
+              gateway_fee_cents: commissions.gatewayFeeCents,
+              gateway_fee_percent: commissions.gatewayFeePercent,
+              platform_fee_cents: commissions.platformFeeCents,
+              platform_fee_percent: commissions.platformFeePercent,
+              net_amount_cents: commissions.netAmountCents,
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
-    this.logger.log(`Order ${orderId} completed with commissions: gross=${order.amountCents}, gateway=${commissions.gatewayFeeCents}, platform=${commissions.platformFeeCents}, net=${commissions.netAmountCents}`);
+    this.logger.log(
+      `Order ${orderId} completed with commissions: gross=${order.amountCents}, gateway=${commissions.gatewayFeeCents}, platform=${commissions.platformFeeCents}, net=${commissions.netAmountCents}`,
+    );
 
     // Get product and tipster info first
     const product = await this.prisma.product.findUnique({
       where: { id: order.productId },
     });
-    const tipster = product ? await this.prisma.tipsterProfile.findUnique({
-      where: { id: product.tipsterId },
-    }) : null;
+    const tipster = product
+      ? await this.prisma.tipsterProfile.findUnique({
+          where: { id: product.tipsterId },
+        })
+      : null;
 
     // Send Telegram notification to BUYER if user came from Telegram
     let telegramResult = null;
@@ -822,7 +874,7 @@ export class CheckoutService {
     // =============================================
     // SEND EMAILS
     // =============================================
-    
+
     // 1. Email de confirmación de compra al cliente
     if (order.emailBackup) {
       try {
@@ -847,14 +899,14 @@ export class CheckoutService {
       if (product?.telegramChannelId) {
         try {
           // Buscar el canal para obtener el link
-          const channelResult = await this.prisma.$runCommandRaw({
+          const channelResult = (await this.prisma.$runCommandRaw({
             find: 'telegram_channels',
             filter: { channel_id: product.telegramChannelId, is_active: true },
             projection: { invite_link: 1, channel_title: 1 },
             limit: 1,
-          }) as any;
+          })) as any;
           const channel = channelResult.cursor?.firstBatch?.[0];
-          
+
           if (channel?.invite_link) {
             await this.emailService.sendChannelAccess({
               email: order.emailBackup,
@@ -878,7 +930,7 @@ export class CheckoutService {
         const tipsterUser = await this.prisma.user.findUnique({
           where: { id: tipster.userId },
         });
-        
+
         if (tipsterUser?.email) {
           await this.notificationsService.notifyNewSale({
             tipsterId: tipster.id,
@@ -914,7 +966,7 @@ export class CheckoutService {
    */
   async getOrderDetails(orderId: string) {
     const order = await this.getOrderById(orderId);
-    
+
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
@@ -922,9 +974,11 @@ export class CheckoutService {
     const product = await this.prisma.product.findUnique({
       where: { id: order.productId },
     });
-    const tipster = product ? await this.prisma.tipsterProfile.findUnique({
-      where: { id: product.tipsterId },
-    }) : null;
+    const tipster = product
+      ? await this.prisma.tipsterProfile.findUnique({
+          where: { id: product.tipsterId },
+        })
+      : null;
 
     return {
       order,
@@ -970,18 +1024,20 @@ export class CheckoutService {
     // 3. Simulate payment
     await this.prisma.$runCommandRaw({
       update: 'orders',
-      updates: [{
-        q: { _id: { $oid: orderId } },
-        u: {
-          $set: {
-            status: 'PAGADA',
-            payment_provider: 'test_simulated',
-            payment_method: 'test',
-            paid_at: { $date: new Date().toISOString() },
-            updated_at: { $date: new Date().toISOString() },
+      updates: [
+        {
+          q: { _id: { $oid: orderId } },
+          u: {
+            $set: {
+              status: 'PAGADA',
+              payment_provider: 'test_simulated',
+              payment_method: 'test',
+              paid_at: { $date: new Date().toISOString() },
+              updated_at: { $date: new Date().toISOString() },
+            },
           },
         },
-      }],
+      ],
     });
 
     this.logger.log(`Simulated payment for order ${orderId}`);
@@ -1015,7 +1071,7 @@ export class CheckoutService {
     // =============================================
     // SEND EMAILS (Test Purchase)
     // =============================================
-    
+
     // Email de confirmación de compra al cliente
     if (data.email) {
       try {
@@ -1034,14 +1090,14 @@ export class CheckoutService {
 
         // Email de acceso al canal (si tiene canal)
         if (product.telegramChannelId) {
-          const channelResult = await this.prisma.$runCommandRaw({
+          const channelResult = (await this.prisma.$runCommandRaw({
             find: 'telegram_channels',
             filter: { channel_id: product.telegramChannelId, is_active: true },
             projection: { invite_link: 1, channel_title: 1 },
             limit: 1,
-          }) as any;
+          })) as any;
           const channel = channelResult.cursor?.firstBatch?.[0];
-          
+
           if (channel?.invite_link) {
             await this.emailService.sendChannelAccess({
               email: data.email,
@@ -1064,7 +1120,7 @@ export class CheckoutService {
         const tipsterUser = await this.prisma.user.findUnique({
           where: { id: tipster.userId },
         });
-        
+
         if (tipsterUser?.email) {
           // Calcular comisiones para mostrar neto
           const commissions = await this.calculateOrderCommissions(
@@ -1072,7 +1128,7 @@ export class CheckoutService {
             product.priceCents,
             'test_simulated',
           );
-          
+
           await this.notificationsService.notifyNewSale({
             tipsterId: tipster.id,
             tipsterUserId: tipster.userId,
@@ -1104,10 +1160,12 @@ export class CheckoutService {
         priceCents: product.priceCents,
         currency: product.currency,
       },
-      tipster: tipster ? {
-        id: tipster.id,
-        publicName: tipster.publicName,
-      } : null,
+      tipster: tipster
+        ? {
+            id: tipster.id,
+            publicName: tipster.publicName,
+          }
+        : null,
       telegramNotification: telegramResult,
     };
   }
@@ -1154,14 +1212,18 @@ export class CheckoutService {
       });
 
       // Get tipster
-      const tipster = product ? await this.prisma.tipsterProfile.findUnique({
-        where: { id: product.tipsterId },
-      }) : null;
+      const tipster = product
+        ? await this.prisma.tipsterProfile.findUnique({
+            where: { id: product.tipsterId },
+          })
+        : null;
 
       // Get tipster user for email
-      const tipsterUser = tipster ? await this.prisma.user.findUnique({
-        where: { id: tipster.userId },
-      }) : null;
+      const tipsterUser = tipster
+        ? await this.prisma.user.findUnique({
+            where: { id: tipster.userId },
+          })
+        : null;
 
       // =============================================
       // 1. EMAIL TO CLIENT - Purchase Confirmation
@@ -1191,18 +1253,18 @@ export class CheckoutService {
           const botUsername = this.config.get('TELEGRAM_BOT_USERNAME') || 'Antiabetbot';
           const appUrl = this.config.get('APP_URL');
           const botLink = `https://t.me/${botUsername}?start=order_${orderId}`;
-          
+
           // Try to get channel info if available
           let channelName = 'Canal Premium';
           let directInviteLink: string | null = null;
-          
+
           if (product?.telegramChannelId) {
-            const channelResult = await this.prisma.$runCommandRaw({
+            const channelResult = (await this.prisma.$runCommandRaw({
               find: 'telegram_channels',
               filter: { channel_id: product.telegramChannelId, is_active: true },
               projection: { invite_link: 1, channel_title: 1 },
               limit: 1,
-            }) as any;
+            })) as any;
             const channel = channelResult.cursor?.firstBatch?.[0];
             if (channel) {
               channelName = channel.channel_title || 'Canal Premium';
@@ -1218,8 +1280,9 @@ export class CheckoutService {
             telegramLink: botLink, // Primary: bot link with order
             orderId: orderId,
           });
-          this.logger.log(`📧 Channel access email sent to ${order.emailBackup} (bot link: ${botLink})`);
-          
+          this.logger.log(
+            `📧 Channel access email sent to ${order.emailBackup} (bot link: ${botLink})`,
+          );
         } catch (err) {
           this.logger.error(`Failed to send channel access email: ${err.message}`);
         }

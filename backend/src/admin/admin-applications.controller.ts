@@ -52,7 +52,7 @@ export class AdminApplicationsController {
   async getApplicationStats(@Request() req) {
     await this.verifyAdmin(req.user.id);
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'tipster_profiles',
       pipeline: [
         {
@@ -63,7 +63,7 @@ export class AdminApplicationsController {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const stats = (result.cursor?.firstBatch || []).reduce((acc: any, item: any) => {
       acc[item._id || 'UNKNOWN'] = item.count;
@@ -87,7 +87,7 @@ export class AdminApplicationsController {
 
     const filterStatus = status || 'PENDING';
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'tipster_profiles',
       pipeline: [
         {
@@ -138,7 +138,7 @@ export class AdminApplicationsController {
         { $sort: { created_at: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const applications = (result.cursor?.firstBatch || []).map((doc: any) => ({
       id: doc._id.$oid || doc._id.toString(),
@@ -172,18 +172,18 @@ export class AdminApplicationsController {
     await this.verifyAdmin(req.user.id);
 
     // Try ObjectId format first, then string
-    let result = await this.prisma.$runCommandRaw({
+    let result = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: id } },
       limit: 1,
-    }) as any;
-    
+    })) as any;
+
     if (!result.cursor?.firstBatch?.[0]) {
-      result = await this.prisma.$runCommandRaw({
+      result = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: id },
         limit: 1,
-      }) as any;
+      })) as any;
     }
 
     const profile = result.cursor?.firstBatch?.[0];
@@ -193,11 +193,11 @@ export class AdminApplicationsController {
     }
 
     // Get user info
-    const userResult = await this.prisma.$runCommandRaw({
+    const userResult = (await this.prisma.$runCommandRaw({
       find: 'users',
       filter: { _id: { $oid: profile.user_id } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const user = userResult.cursor?.firstBatch?.[0];
 
@@ -234,19 +234,19 @@ export class AdminApplicationsController {
     const admin = await this.verifyAdmin(req.user.id);
 
     // Get tipster profile - try both ObjectId and string format
-    let profileResult = await this.prisma.$runCommandRaw({
+    let profileResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: { _id: { $oid: id } },
       limit: 1,
-    }) as any;
-    
+    })) as any;
+
     // If not found with ObjectId, try as string
     if (!profileResult.cursor?.firstBatch?.[0]) {
-      profileResult = await this.prisma.$runCommandRaw({
+      profileResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: id },
         limit: 1,
-      }) as any;
+      })) as any;
     }
 
     const profile = profileResult.cursor?.firstBatch?.[0];
@@ -271,50 +271,56 @@ export class AdminApplicationsController {
     // Update tipster profile
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: profileFilter,
-        u: {
-          $set: {
-            application_status: newStatus,
-            rejection_reason: dto.action === 'REJECT' ? dto.rejectionReason : null,
-            reviewed_by: admin.id,
-            reviewed_at: { $date: now },
-            updated_at: { $date: now },
+      updates: [
+        {
+          q: profileFilter,
+          u: {
+            $set: {
+              application_status: newStatus,
+              rejection_reason: dto.action === 'REJECT' ? dto.rejectionReason : null,
+              reviewed_by: admin.id,
+              reviewed_at: { $date: now },
+              updated_at: { $date: now },
+            },
           },
         },
-      }],
+      ],
     });
 
     // Update user status - try both formats since _id could be string or ObjectId
     const userId = profile.user_id;
-    
+
     // First try ObjectId format
-    let updateResult = await this.prisma.$runCommandRaw({
+    const updateResult = (await this.prisma.$runCommandRaw({
       update: 'users',
-      updates: [{
-        q: { _id: { $oid: userId } },
-        u: {
-          $set: {
-            status: userStatus,
-            updated_at: { $date: now },
-          },
-        },
-      }],
-    }) as any;
-    
-    // If no document was modified, try string format
-    if (updateResult.nModified === 0 && updateResult.n === 0) {
-      await this.prisma.$runCommandRaw({
-        update: 'users',
-        updates: [{
-          q: { _id: userId },
+      updates: [
+        {
+          q: { _id: { $oid: userId } },
           u: {
             $set: {
               status: userStatus,
               updated_at: { $date: now },
             },
           },
-        }],
+        },
+      ],
+    })) as any;
+
+    // If no document was modified, try string format
+    if (updateResult.nModified === 0 && updateResult.n === 0) {
+      await this.prisma.$runCommandRaw({
+        update: 'users',
+        updates: [
+          {
+            q: { _id: userId },
+            u: {
+              $set: {
+                status: userStatus,
+                updated_at: { $date: now },
+              },
+            },
+          },
+        ],
       });
     }
 
@@ -323,24 +329,24 @@ export class AdminApplicationsController {
     // Obtener el email del tipster para enviar notificación
     try {
       const userId = profile.user_id;
-      let userResult = await this.prisma.$runCommandRaw({
+      let userResult = (await this.prisma.$runCommandRaw({
         find: 'users',
         filter: { _id: { $oid: userId } },
         limit: 1,
-      }) as any;
-      
+      })) as any;
+
       if (!userResult.cursor?.firstBatch?.[0]) {
-        userResult = await this.prisma.$runCommandRaw({
+        userResult = (await this.prisma.$runCommandRaw({
           find: 'users',
           filter: { _id: userId },
           limit: 1,
-        }) as any;
+        })) as any;
       }
 
       const user = userResult.cursor?.firstBatch?.[0];
       if (user?.email) {
         const tipsterName = profile.public_name || 'Tipster';
-        
+
         if (dto.action === 'APPROVE') {
           await this.emailService.sendTipsterApplicationApproved({
             tipsterEmail: user.email,
@@ -364,9 +370,10 @@ export class AdminApplicationsController {
 
     return {
       success: true,
-      message: dto.action === 'APPROVE' 
-        ? 'Solicitud aprobada. El tipster ya puede acceder a la plataforma.'
-        : 'Solicitud rechazada.',
+      message:
+        dto.action === 'APPROVE'
+          ? 'Solicitud aprobada. El tipster ya puede acceder a la plataforma.'
+          : 'Solicitud rechazada.',
       applicationStatus: newStatus,
       userStatus: userStatus,
     };

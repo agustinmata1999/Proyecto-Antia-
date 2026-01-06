@@ -22,9 +22,9 @@ export class UpdateKycDto {
   @IsString()
   bankAccountType: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: { iban: 'ES1234567890123456789012', bankName: 'Banco Ejemplo' },
-    description: 'Detalles de la cuenta bancaria' 
+    description: 'Detalles de la cuenta bancaria',
   })
   @IsOptional()
   bankAccountDetails?: Record<string, any>;

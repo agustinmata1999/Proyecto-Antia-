@@ -9,7 +9,7 @@ const HIGH_VOLUME_THRESHOLD_CENTS = 10000000; // 100,000 EUR en centavos
 // Comisiones de pasarelas (aproximadas)
 const GATEWAY_FEES = {
   stripe: { percent: 2.9, fixedCents: 30 }, // 2.9% + 0.30€
-  redsys: { percent: 0.5, fixedCents: 0 },  // ~0.5% variable
+  redsys: { percent: 0.5, fixedCents: 0 }, // ~0.5% variable
   stripe_simulated: { percent: 2.9, fixedCents: 30 },
   default: { percent: 2.5, fixedCents: 0 },
 };
@@ -98,7 +98,10 @@ export class CommissionsService {
   /**
    * Calcular comisión de pasarela de pago
    */
-  private calculateGatewayFee(amountCents: number, provider: string): { feeCents: number; percent: number } {
+  private calculateGatewayFee(
+    amountCents: number,
+    provider: string,
+  ): { feeCents: number; percent: number } {
     const providerKey = provider?.toLowerCase() || 'default';
     const rates = GATEWAY_FEES[providerKey] || GATEWAY_FEES.default;
 
@@ -116,11 +119,11 @@ export class CommissionsService {
    */
   async getTipsterCommissionConfig(tipsterId: string) {
     // Buscar configuración existente
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_commission_configs',
       filter: { tipster_id: tipsterId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const existing = existingResult.cursor?.firstBatch?.[0];
 
@@ -140,17 +143,19 @@ export class CommissionsService {
     const now = new Date().toISOString();
     await this.prisma.$runCommandRaw({
       insert: 'tipster_commission_configs',
-      documents: [{
-        tipster_id: tipsterId,
-        platform_fee_percent: PLATFORM_FEE_STANDARD,
-        custom_fee_percent: null,
-        use_custom_fee: false,
-        auto_tier_enabled: true,
-        notes: null,
-        last_modified_by: null,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          tipster_id: tipsterId,
+          platform_fee_percent: PLATFORM_FEE_STANDARD,
+          custom_fee_percent: null,
+          use_custom_fee: false,
+          auto_tier_enabled: true,
+          notes: null,
+          last_modified_by: null,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     return {
@@ -172,7 +177,7 @@ export class CommissionsService {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         {
@@ -193,7 +198,7 @@ export class CommissionsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     return result.cursor?.firstBatch?.[0]?.total || 0;
   }
@@ -209,8 +214,8 @@ export class CommissionsService {
   ) {
     // Obtener configuración actual
     const currentConfig = await this.getTipsterCommissionConfig(tipsterId);
-    const previousPercent = currentConfig.useCustomFee 
-      ? currentConfig.customFeePercent 
+    const previousPercent = currentConfig.useCustomFee
+      ? currentConfig.customFeePercent
       : currentConfig.platformFeePercent;
 
     // Determinar nuevo porcentaje
@@ -228,40 +233,48 @@ export class CommissionsService {
     const now = new Date().toISOString();
     await this.prisma.$runCommandRaw({
       update: 'tipster_commission_configs',
-      updates: [{
-        q: { tipster_id: tipsterId },
-        u: {
-          $set: {
-            ...(dto.customFeePercent !== undefined && { custom_fee_percent: dto.customFeePercent }),
-            ...(dto.useCustomFee !== undefined && { use_custom_fee: dto.useCustomFee }),
-            ...(dto.autoTierEnabled !== undefined && { auto_tier_enabled: dto.autoTierEnabled }),
-            ...(dto.notes !== undefined && { notes: dto.notes }),
-            last_modified_by: adminId,
-            updated_at: { $date: now },
+      updates: [
+        {
+          q: { tipster_id: tipsterId },
+          u: {
+            $set: {
+              ...(dto.customFeePercent !== undefined && {
+                custom_fee_percent: dto.customFeePercent,
+              }),
+              ...(dto.useCustomFee !== undefined && { use_custom_fee: dto.useCustomFee }),
+              ...(dto.autoTierEnabled !== undefined && { auto_tier_enabled: dto.autoTierEnabled }),
+              ...(dto.notes !== undefined && { notes: dto.notes }),
+              last_modified_by: adminId,
+              updated_at: { $date: now },
+            },
           },
+          upsert: true,
         },
-        upsert: true,
-      }],
+      ],
     });
 
     // Registrar en histórico
     const monthlyVolume = await this.getMonthlyVolume(tipsterId);
     await this.prisma.$runCommandRaw({
       insert: 'commission_change_history',
-      documents: [{
-        tipster_id: tipsterId,
-        change_type: changeType,
-        previous_percent: previousPercent || PLATFORM_FEE_STANDARD,
-        new_percent: newPercent,
-        reason: dto.notes || null,
-        changed_by: adminId,
-        changed_by_email: adminEmail,
-        monthly_volume: monthlyVolume,
-        created_at: { $date: now },
-      }],
+      documents: [
+        {
+          tipster_id: tipsterId,
+          change_type: changeType,
+          previous_percent: previousPercent || PLATFORM_FEE_STANDARD,
+          new_percent: newPercent,
+          reason: dto.notes || null,
+          changed_by: adminId,
+          changed_by_email: adminEmail,
+          monthly_volume: monthlyVolume,
+          created_at: { $date: now },
+        },
+      ],
     });
 
-    this.logger.log(`Commission updated for tipster ${tipsterId}: ${previousPercent}% -> ${newPercent}%`);
+    this.logger.log(
+      `Commission updated for tipster ${tipsterId}: ${previousPercent}% -> ${newPercent}%`,
+    );
 
     return this.getTipsterCommissionConfig(tipsterId);
   }
@@ -270,12 +283,12 @@ export class CommissionsService {
    * Obtener histórico de cambios de comisión
    */
   async getCommissionHistory(tipsterId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'commission_change_history',
       filter: { tipster_id: tipsterId },
       sort: { created_at: -1 },
       limit: 50,
-    }) as any;
+    })) as any;
 
     return result.cursor?.firstBatch || [];
   }
@@ -285,10 +298,10 @@ export class CommissionsService {
    */
   async getAllTipsterCommissions() {
     // Obtener todos los tipsters
-    const tipstersResult = await this.prisma.$runCommandRaw({
+    const tipstersResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       projection: { _id: 1, user_id: 1, public_name: 1 },
-    }) as any;
+    })) as any;
 
     const tipsters = tipstersResult.cursor?.firstBatch || [];
     const result = [];
@@ -333,7 +346,7 @@ export class CommissionsService {
     const endOfMonth = new Date(year, month, 0, 23, 59, 59);
 
     // Obtener todas las órdenes del mes
-    const ordersResult = await this.prisma.$runCommandRaw({
+    const ordersResult = (await this.prisma.$runCommandRaw({
       find: 'orders',
       filter: {
         tipster_id: tipsterId,
@@ -343,7 +356,7 @@ export class CommissionsService {
           $lte: { $date: endOfMonth.toISOString() },
         },
       },
-    }) as any;
+    })) as any;
 
     const orders = ordersResult.cursor?.firstBatch || [];
 
@@ -361,33 +374,36 @@ export class CommissionsService {
     }
 
     // Determinar tier aplicado
-    const appliedTier = grossAmountCents >= HIGH_VOLUME_THRESHOLD_CENTS ? 'HIGH_VOLUME' : 'STANDARD';
+    const appliedTier =
+      grossAmountCents >= HIGH_VOLUME_THRESHOLD_CENTS ? 'HIGH_VOLUME' : 'STANDARD';
 
     // Guardar o actualizar resumen
     const now = new Date().toISOString();
     await this.prisma.$runCommandRaw({
       update: 'tipster_monthly_summaries',
-      updates: [{
-        q: { tipster_id: tipsterId, year_month: yearMonth },
-        u: {
-          $set: {
-            gross_amount_cents: grossAmountCents,
-            gateway_fees_cents: gatewayFeesCents,
-            platform_fees_cents: platformFeesCents,
-            net_amount_cents: netAmountCents,
-            order_count: orders.length,
-            applied_tier: appliedTier,
-            calculated_at: { $date: now },
-            updated_at: { $date: now },
+      updates: [
+        {
+          q: { tipster_id: tipsterId, year_month: yearMonth },
+          u: {
+            $set: {
+              gross_amount_cents: grossAmountCents,
+              gateway_fees_cents: gatewayFeesCents,
+              platform_fees_cents: platformFeesCents,
+              net_amount_cents: netAmountCents,
+              order_count: orders.length,
+              applied_tier: appliedTier,
+              calculated_at: { $date: now },
+              updated_at: { $date: now },
+            },
+            $setOnInsert: {
+              tipster_id: tipsterId,
+              year_month: yearMonth,
+              created_at: { $date: now },
+            },
           },
-          $setOnInsert: {
-            tipster_id: tipsterId,
-            year_month: yearMonth,
-            created_at: { $date: now },
-          },
+          upsert: true,
         },
-        upsert: true,
-      }],
+      ],
     });
 
     return {
@@ -433,7 +449,10 @@ export class CommissionsService {
       monthlyVolumeCents: monthlyVolume,
       monthlyVolumeEur: (monthlyVolume / 100).toFixed(2),
       highVolumeThresholdEur: (HIGH_VOLUME_THRESHOLD_CENTS / 100).toFixed(2),
-      progressToHighVolume: Math.min(100, (monthlyVolume / HIGH_VOLUME_THRESHOLD_CENTS) * 100).toFixed(1),
+      progressToHighVolume: Math.min(
+        100,
+        (monthlyVolume / HIGH_VOLUME_THRESHOLD_CENTS) * 100,
+      ).toFixed(1),
       summary,
     };
   }

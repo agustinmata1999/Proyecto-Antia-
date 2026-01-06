@@ -50,7 +50,10 @@ export class CurrencyController {
    */
   @Get('rate/:base/:target')
   async getRate(@Param('base') base: string, @Param('target') target: string) {
-    const rate = await this.currencyService.getExchangeRate(base.toUpperCase(), target.toUpperCase());
+    const rate = await this.currencyService.getExchangeRate(
+      base.toUpperCase(),
+      target.toUpperCase(),
+    );
     return rate;
   }
 

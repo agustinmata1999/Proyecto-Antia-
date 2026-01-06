@@ -157,10 +157,7 @@ export class ReportsController {
    * GET /api/admin/reports/summary - Resumen general
    */
   @Get('summary')
-  async getSummary(
-    @Query('currency') currency: string,
-    @Request() req,
-  ) {
+  async getSummary(@Query('currency') currency: string, @Request() req) {
     await this.verifyAdmin(req.user.id);
 
     // Últimos 30 días

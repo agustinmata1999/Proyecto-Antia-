@@ -40,21 +40,32 @@ export class LandingPublicController {
     let countryCode = country;
     if (!countryCode) {
       // Intentar detectar por headers de geolocalización
-      countryCode = req.headers['cf-ipcountry'] as string || 
-                    req.headers['x-vercel-ip-country'] as string ||
-                    req.headers['x-country-code'] as string ||
-                    '';
-      
+      countryCode =
+        (req.headers['cf-ipcountry'] as string) ||
+        (req.headers['x-vercel-ip-country'] as string) ||
+        (req.headers['x-country-code'] as string) ||
+        '';
+
       // Fallback: usar Accept-Language para inferir país
       if (!countryCode) {
-        const acceptLang = req.headers['accept-language'] as string || '';
+        const acceptLang = (req.headers['accept-language'] as string) || '';
         const langCountryMap: Record<string, string> = {
-          'es-es': 'ES', 'es-mx': 'MX', 'es-ar': 'AR', 'es-co': 'CO',
-          'es-cl': 'CL', 'es-pe': 'PE', 'es': 'ES',
-          'en-us': 'US', 'en-gb': 'UK', 'en': 'US',
-          'pt-br': 'BR', 'pt': 'PT', 'de': 'DE', 'fr': 'FR'
+          'es-es': 'ES',
+          'es-mx': 'MX',
+          'es-ar': 'AR',
+          'es-co': 'CO',
+          'es-cl': 'CL',
+          'es-pe': 'PE',
+          es: 'ES',
+          'en-us': 'US',
+          'en-gb': 'UK',
+          en: 'US',
+          'pt-br': 'BR',
+          pt: 'PT',
+          de: 'DE',
+          fr: 'FR',
         };
-        
+
         const langParts = acceptLang.toLowerCase().split(',');
         for (const part of langParts) {
           const lang = part.split(';')[0].trim();
@@ -64,7 +75,7 @@ export class LandingPublicController {
           }
         }
       }
-      
+
       // Si todavía no hay país, usar ES como default
       if (!countryCode) {
         countryCode = 'ES';
@@ -72,10 +83,10 @@ export class LandingPublicController {
     }
 
     // Registrar impresión
-    const ip = req.headers['x-forwarded-for'] as string || req.ip;
+    const ip = (req.headers['x-forwarded-for'] as string) || req.ip;
     const userAgent = req.headers['user-agent'];
     const referrer = req.headers['referer'];
-    const sessionId = req.cookies?.['antia_session'] || req.headers['x-session-id'] as string;
+    const sessionId = req.cookies?.['antia_session'] || (req.headers['x-session-id'] as string);
 
     await this.landingService.recordImpression(
       slug,
@@ -94,10 +105,7 @@ export class LandingPublicController {
    * Obtener casas de la landing para un país específico
    */
   @Get(':slug/houses')
-  async getLandingHouses(
-    @Param('slug') slug: string,
-    @Query('country') country: string,
-  ) {
+  async getLandingHouses(@Param('slug') slug: string, @Query('country') country: string) {
     return this.landingService.getPublicLanding(slug, country);
   }
 }
@@ -120,10 +128,10 @@ export class LandingRedirectController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const ip = req.headers['x-forwarded-for'] as string || req.ip;
+    const ip = (req.headers['x-forwarded-for'] as string) || req.ip;
     const userAgent = req.headers['user-agent'];
     const referrer = req.headers['referer'];
-    const sessionId = req.cookies?.['antia_session'] || req.headers['x-session-id'] as string;
+    const sessionId = req.cookies?.['antia_session'] || (req.headers['x-session-id'] as string);
 
     const countryCode = country || 'ES';
 
@@ -150,10 +158,10 @@ export class LandingRedirectController {
     @Body() body: { slug: string; houseId: string; country: string },
     @Req() req: Request,
   ) {
-    const ip = req.headers['x-forwarded-for'] as string || req.ip;
+    const ip = (req.headers['x-forwarded-for'] as string) || req.ip;
     const userAgent = req.headers['user-agent'];
     const referrer = req.headers['referer'];
-    const sessionId = req.cookies?.['antia_session'] || req.headers['x-session-id'] as string;
+    const sessionId = req.cookies?.['antia_session'] || (req.headers['x-session-id'] as string);
 
     return this.landingService.recordClickAndRedirect(
       body.slug,
@@ -197,34 +205,36 @@ export class TipsterLandingController {
    */
   @Get('promotions')
   async getAvailablePromotions() {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
       filter: { status: 'ACTIVE' },
       projection: { name: 1, slug: 1, description: 1 },
       sort: { created_at: -1 },
-    }) as any;
-    
+    })) as any;
+
     const promotions = result.cursor?.firstBatch || [];
-    
+
     // Get house counts for each promotion
-    const enriched = await Promise.all(promotions.map(async (p: any) => {
-      const promoId = p._id.$oid || p._id.toString();
-      const linksResult = await this.prisma.$runCommandRaw({
-        find: 'promotion_house_links',
-        filter: { promotion_id: promoId, is_active: true },
-        projection: { betting_house_id: 1, commission_cents: 1 },
-      }) as any;
-      const links = linksResult.cursor?.firstBatch || [];
-      
-      return {
-        id: promoId,
-        name: p.name,
-        slug: p.slug,
-        description: p.description,
-        housesCount: links.length,
-      };
-    }));
-    
+    const enriched = await Promise.all(
+      promotions.map(async (p: any) => {
+        const promoId = p._id.$oid || p._id.toString();
+        const linksResult = (await this.prisma.$runCommandRaw({
+          find: 'promotion_house_links',
+          filter: { promotion_id: promoId, is_active: true },
+          projection: { betting_house_id: 1, commission_cents: 1 },
+        })) as any;
+        const links = linksResult.cursor?.firstBatch || [];
+
+        return {
+          id: promoId,
+          name: p.name,
+          slug: p.slug,
+          description: p.description,
+          housesCount: links.length,
+        };
+      }),
+    );
+
     return enriched;
   }
 
@@ -256,11 +266,11 @@ export class TipsterLandingController {
   async getLanding(@Req() req: any, @Param('id') id: string) {
     const tipsterId = await this.getTipsterProfileId(req.user.id);
     const landing = await this.landingService.getLandingById(id);
-    
+
     if (landing.tipsterId !== tipsterId) {
       throw new Error('No tienes permiso para ver esta landing');
     }
-    
+
     return landing;
   }
 
@@ -269,11 +279,7 @@ export class TipsterLandingController {
    * Actualizar landing
    */
   @Put(':id')
-  async updateLanding(
-    @Req() req: any,
-    @Param('id') id: string,
-    @Body() dto: UpdateLandingDto,
-  ) {
+  async updateLanding(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateLandingDto) {
     const tipsterId = await this.getTipsterProfileId(req.user.id);
     return this.landingService.updateLanding(id, tipsterId, dto);
   }

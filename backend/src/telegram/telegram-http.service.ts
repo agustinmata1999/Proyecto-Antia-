@@ -12,7 +12,7 @@ export class TelegramHttpService {
   private readonly logger = new Logger(TelegramHttpService.name);
   private readonly botToken: string;
   private readonly apiBaseUrl: string = 'https://api.telegram.org';
-  
+
   // Multiple proxies for redundancy - direct connection first, then proxies
   private readonly useDirectConnection: boolean = true;
   private readonly proxyUrls: string[] = [
@@ -20,7 +20,7 @@ export class TelegramHttpService {
     'https://api.allorigins.win/raw?url=',
     'https://corsproxy.io/?',
   ];
-  
+
   private axiosInstance: AxiosInstance;
   private currentProxyIndex: number = 0;
   private consecutiveFailures: number = 0;
@@ -28,13 +28,13 @@ export class TelegramHttpService {
 
   constructor(private config: ConfigService) {
     this.botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN') || '';
-    
+
     // Create axios instance with curl-like headers (required to bypass proxy restrictions)
     this.axiosInstance = axios.create({
       timeout: 30000,
       headers: {
         'User-Agent': 'curl/7.88.1',
-        'Accept': '*/*',
+        Accept: '*/*',
       },
       httpsAgent: new https.Agent({
         rejectUnauthorized: true,
@@ -63,9 +63,13 @@ export class TelegramHttpService {
   /**
    * Make an API call with retry logic across multiple proxies
    */
-  private async callApiWithRetry<T>(method: string, params: Record<string, any> = {}, retries: number = 3): Promise<T> {
+  private async callApiWithRetry<T>(
+    method: string,
+    params: Record<string, any> = {},
+    retries: number = 3,
+  ): Promise<T> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
         const result = await this.callApiGet<T>(method, params);
@@ -76,20 +80,20 @@ export class TelegramHttpService {
         lastError = error;
         this.consecutiveFailures++;
         this.logger.warn(`API call failed (attempt ${attempt + 1}/${retries}): ${error.message}`);
-        
+
         // If too many failures, try rotating proxy
         if (this.consecutiveFailures >= 2 && this.proxyUrls.length > 1) {
           this.rotateProxy();
         }
-        
+
         // Wait before retry (exponential backoff)
         if (attempt < retries - 1) {
           const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
       }
     }
-    
+
     throw lastError || new Error('All retries failed');
   }
 
@@ -104,18 +108,20 @@ export class TelegramHttpService {
         queryParams.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
       }
     }
-    
+
     const queryString = queryParams.toString();
     const telegramUrl = `${this.apiBaseUrl}/bot${this.botToken}/${method}${queryString ? '?' + queryString : ''}`;
-    
+
     // Get current proxy (empty string means direct connection)
     const currentProxy = this.getCurrentProxy();
-    const finalUrl = currentProxy 
+    const finalUrl = currentProxy
       ? `${currentProxy}${encodeURIComponent(telegramUrl)}`
       : telegramUrl;
-    
+
     try {
-      this.logger.debug(`Calling Telegram API: ${method} (${currentProxy ? 'via proxy' : 'direct'})`);
+      this.logger.debug(
+        `Calling Telegram API: ${method} (${currentProxy ? 'via proxy' : 'direct'})`,
+      );
       const response = await this.axiosInstance.get(finalUrl);
 
       if (!response.data.ok) {
@@ -146,10 +152,14 @@ export class TelegramHttpService {
   /**
    * Send a text message
    */
-  async sendMessage(chatId: string | number, text: string, options: {
-    parseMode?: 'Markdown' | 'MarkdownV2' | 'HTML';
-    replyMarkup?: any;
-  } = {}): Promise<any> {
+  async sendMessage(
+    chatId: string | number,
+    text: string,
+    options: {
+      parseMode?: 'Markdown' | 'MarkdownV2' | 'HTML';
+      replyMarkup?: any;
+    } = {},
+  ): Promise<any> {
     const params: Record<string, any> = {
       chat_id: chatId,
       text,
@@ -200,14 +210,17 @@ export class TelegramHttpService {
   /**
    * Create a new chat invite link with more options
    */
-  async createChatInviteLink(chatId: string | number, options: {
-    name?: string;
-    expireDate?: number;
-    memberLimit?: number;
-    createsJoinRequest?: boolean;
-  } = {}): Promise<any> {
+  async createChatInviteLink(
+    chatId: string | number,
+    options: {
+      name?: string;
+      expireDate?: number;
+      memberLimit?: number;
+      createsJoinRequest?: boolean;
+    } = {},
+  ): Promise<any> {
     const params: Record<string, any> = { chat_id: chatId };
-    
+
     if (options.name) params.name = options.name;
     if (options.expireDate) params.expire_date = options.expireDate;
     if (options.memberLimit) params.member_limit = options.memberLimit;
@@ -241,7 +254,11 @@ export class TelegramHttpService {
   /**
    * Ban a chat member
    */
-  async banChatMember(chatId: string | number, userId: number, untilDate?: number): Promise<boolean> {
+  async banChatMember(
+    chatId: string | number,
+    userId: number,
+    untilDate?: number,
+  ): Promise<boolean> {
     const params: Record<string, any> = {
       chat_id: chatId,
       user_id: userId,
@@ -265,13 +282,16 @@ export class TelegramHttpService {
   /**
    * Set webhook URL
    */
-  async setWebhook(url: string, options: {
-    allowedUpdates?: string[];
-    dropPendingUpdates?: boolean;
-    maxConnections?: number;
-  } = {}): Promise<boolean> {
+  async setWebhook(
+    url: string,
+    options: {
+      allowedUpdates?: string[];
+      dropPendingUpdates?: boolean;
+      maxConnections?: number;
+    } = {},
+  ): Promise<boolean> {
     const params: Record<string, any> = { url };
-    
+
     if (options.allowedUpdates) {
       params.allowed_updates = JSON.stringify(options.allowedUpdates);
     }

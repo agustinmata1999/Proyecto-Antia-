@@ -45,11 +45,7 @@ export class ProductsController {
   @Patch(':id')
   @Roles('TIPSTER')
   @ApiOperation({ summary: 'Update product (Tipster only)' })
-  async update(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-    @Body() dto: UpdateProductDto,
-  ) {
+  async update(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: UpdateProductDto) {
     const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
       where: { userId: user.id },
     });
@@ -90,7 +86,7 @@ export class ProductsController {
   @Roles('TIPSTER')
   @ApiOperation({ summary: 'Publish product to Telegram channel' })
   async publishToTelegram(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @CurrentUser() user: any,
     @Body() body?: { channelId?: string },
   ) {

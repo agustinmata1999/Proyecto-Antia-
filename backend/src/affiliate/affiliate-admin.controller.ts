@@ -67,11 +67,7 @@ export class AffiliateAdminController {
   }
 
   @Patch('houses/:id')
-  async updateHouse(
-    @Param('id') id: string,
-    @Body() dto: UpdateBettingHouseDto,
-    @Request() req,
-  ) {
+  async updateHouse(@Param('id') id: string, @Body() dto: UpdateBettingHouseDto, @Request() req) {
     await this.verifyAdmin(req.user.id);
     return this.affiliateService.updateBettingHouse(id, dto);
   }
@@ -97,11 +93,7 @@ export class AffiliateAdminController {
   }
 
   @Patch('campaigns/:id')
-  async updateCampaign(
-    @Param('id') id: string,
-    @Body() dto: UpdateCampaignDto,
-    @Request() req,
-  ) {
+  async updateCampaign(@Param('id') id: string, @Body() dto: UpdateCampaignDto, @Request() req) {
     await this.verifyAdmin(req.user.id);
     return this.affiliateService.updateCampaign(id, dto);
   }
@@ -161,11 +153,12 @@ export class AffiliateAdminController {
       currency: 'currency',
     };
 
-    const standardRows: StandardCsvRow[] = records.map(row => ({
+    const standardRows: StandardCsvRow[] = records.map((row) => ({
       tipster_tracking_id: row[mapping.tipster_tracking_id] || row.tipster_tracking_id || row.subid,
       event_type: (row[mapping.event_type] || row.event_type || 'REGISTER').toUpperCase(),
       status: (row[mapping.status] || row.status || 'PENDING').toUpperCase(),
-      occurred_at: row[mapping.occurred_at] || row.occurred_at || row.date || new Date().toISOString(),
+      occurred_at:
+        row[mapping.occurred_at] || row.occurred_at || row.date || new Date().toISOString(),
       external_ref_id: row[mapping.external_ref_id] || row.external_ref_id,
       amount: row[mapping.amount] ? parseFloat(row[mapping.amount]) : undefined,
       currency: row[mapping.currency] || row.currency || 'EUR',
@@ -204,20 +197,16 @@ export class AffiliateAdminController {
   @Post('payouts/generate')
   async generatePayouts(@Body('periodMonth') periodMonth: string, @Request() req) {
     await this.verifyAdmin(req.user.id);
-    
+
     if (!periodMonth) {
       throw new BadRequestException('periodMonth es requerido (formato: YYYY-MM)');
     }
-    
+
     return this.affiliateService.generateMonthlyPayouts(periodMonth);
   }
 
   @Patch('payouts/:id/pay')
-  async markPayoutPaid(
-    @Param('id') id: string,
-    @Body() dto: MarkPayoutPaidDto,
-    @Request() req,
-  ) {
+  async markPayoutPaid(@Param('id') id: string, @Body() dto: MarkPayoutPaidDto, @Request() req) {
     const admin = await this.verifyAdmin(req.user.id);
     return this.affiliateService.markPayoutPaid(id, dto, admin.id);
   }
@@ -241,7 +230,9 @@ export class AffiliateAdminController {
     if (periodMonth) {
       where.occurredAt = {
         gte: new Date(`${periodMonth}-01`),
-        lt: new Date(new Date(`${periodMonth}-01`).setMonth(new Date(`${periodMonth}-01`).getMonth() + 1)),
+        lt: new Date(
+          new Date(`${periodMonth}-01`).setMonth(new Date(`${periodMonth}-01`).getMonth() + 1),
+        ),
       };
     }
 
@@ -252,16 +243,20 @@ export class AffiliateAdminController {
     });
 
     // Enrich with house and tipster names
-    const houseIds = [...new Set(conversions.map(c => c.houseId))];
-    const tipsterIds = [...new Set(conversions.filter(c => c.tipsterId).map(c => c.tipsterId!))];
+    const houseIds = [...new Set(conversions.map((c) => c.houseId))];
+    const tipsterIds = [
+      ...new Set(conversions.filter((c) => c.tipsterId).map((c) => c.tipsterId!)),
+    ];
 
     const houses = await this.prisma.bettingHouse.findMany({ where: { id: { in: houseIds } } });
-    const tipsters = await this.prisma.tipsterProfile.findMany({ where: { id: { in: tipsterIds } } });
+    const tipsters = await this.prisma.tipsterProfile.findMany({
+      where: { id: { in: tipsterIds } },
+    });
 
-    const housesMap = new Map(houses.map(h => [h.id, h.name]));
-    const tipstersMap = new Map(tipsters.map(t => [t.id, t.publicName]));
+    const housesMap = new Map(houses.map((h) => [h.id, h.name]));
+    const tipstersMap = new Map(tipsters.map((t) => [t.id, t.publicName]));
 
-    return conversions.map(c => ({
+    return conversions.map((c) => ({
       ...c,
       houseName: housesMap.get(c.houseId) || 'Unknown',
       tipsterName: c.tipsterId ? tipstersMap.get(c.tipsterId) || 'Unknown' : 'Sin asignar',
@@ -279,14 +274,14 @@ export class AffiliateAdminController {
     await this.verifyAdmin(req.user.id);
 
     // Try to find conversion - first as string, then as ObjectId
-    let conversionResult = await this.prisma.$runCommandRaw({
+    let conversionResult = (await this.prisma.$runCommandRaw({
       find: 'affiliate_conversions',
       filter: { _id: id },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let conversion = conversionResult?.cursor?.firstBatch?.[0];
-    
+
     // If not found as string, try as ObjectId
     if (!conversion) {
       try {
@@ -310,19 +305,19 @@ export class AffiliateAdminController {
     // Get house for commission
     let house: any = null;
     try {
-      let houseResult = await this.prisma.$runCommandRaw({
+      let houseResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: houseId },
         limit: 1,
-      }) as any;
+      })) as any;
       house = houseResult?.cursor?.firstBatch?.[0];
-      
+
       if (!house) {
-        houseResult = await this.prisma.$runCommandRaw({
+        houseResult = (await this.prisma.$runCommandRaw({
           find: 'betting_houses',
           filter: { _id: { $oid: houseId } },
           limit: 1,
-        }) as any;
+        })) as any;
         house = houseResult?.cursor?.firstBatch?.[0];
       }
     } catch (e) {
@@ -330,11 +325,11 @@ export class AffiliateAdminController {
     }
 
     const now = new Date().toISOString();
-    const updateData: any = { 
+    const updateData: any = {
       status,
       updated_at: { $date: now },
     };
-    
+
     if (status === 'APPROVED') {
       updateData.approved_at = { $date: now };
       updateData.commission_cents = house?.commission_per_referral_cents || 2500;
@@ -377,7 +372,7 @@ export class AffiliateAdminController {
     if (tipsterId) filter.tipster_id = tipsterId;
     if (houseId) filter.house_id = houseId;
     if (status) filter.status = status;
-    
+
     if (startDate || endDate) {
       filter.occurred_at = {};
       if (startDate) filter.occurred_at.$gte = { $date: new Date(startDate).toISOString() };
@@ -388,12 +383,12 @@ export class AffiliateAdminController {
       }
     }
 
-    const conversionsResult = await this.prisma.$runCommandRaw({
+    const conversionsResult = (await this.prisma.$runCommandRaw({
       find: 'affiliate_conversions',
       filter,
       sort: { occurred_at: -1 },
       limit: 500,
-    }) as any;
+    })) as any;
 
     const conversions = conversionsResult.cursor?.firstBatch || [];
 
@@ -402,14 +397,14 @@ export class AffiliateAdminController {
     const tipsterIds = [...new Set(conversions.map((c: any) => c.tipster_id).filter(Boolean))];
 
     // Fetch houses - handle both string and ObjectId formats
-    let housesMap: Record<string, string> = {};
+    const housesMap: Record<string, string> = {};
     if (houseIds.length > 0) {
       // Try with ObjectId format first
-      const housesResult = await this.prisma.$runCommandRaw({
+      const housesResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: {},
         projection: { name: 1 },
-      }) as any;
+      })) as any;
       (housesResult.cursor?.firstBatch || []).forEach((h: any) => {
         const id = h._id.$oid || h._id || '';
         housesMap[id] = h.name;
@@ -423,13 +418,13 @@ export class AffiliateAdminController {
     }
 
     // Fetch tipsters
-    let tipstersMap: Record<string, string> = {};
+    const tipstersMap: Record<string, string> = {};
     if (tipsterIds.length > 0) {
-      const tipstersResult = await this.prisma.$runCommandRaw({
+      const tipstersResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
         filter: { _id: { $in: tipsterIds.map((id: string) => ({ $oid: id })) } },
         projection: { public_name: 1 },
-      }) as any;
+      })) as any;
       (tipstersResult.cursor?.firstBatch || []).forEach((t: any) => {
         tipstersMap[t._id.$oid || t._id] = t.public_name;
       });
@@ -482,11 +477,11 @@ export class AffiliateAdminController {
   async getTipsters(@Request() req) {
     await this.verifyAdmin(req.user.id);
 
-    const tipstersResult = await this.prisma.$runCommandRaw({
+    const tipstersResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: {},
       projection: { public_name: 1 },
-    }) as any;
+    })) as any;
 
     const tipsters = (tipstersResult.cursor?.firstBatch || []).map((t: any) => ({
       id: t._id.$oid || t._id,

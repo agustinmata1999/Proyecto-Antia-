@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../emails/emails.service';
 import { ConfigService } from '@nestjs/config';
 
-export type NotificationType = 
+export type NotificationType =
   | 'SALE'
   | 'SUBSCRIPTION_NEW'
   | 'SUBSCRIPTION_CANCELLED'
@@ -74,13 +74,13 @@ export class NotificationsService {
     const filter: any = { user_id: userId };
     if (unreadOnly) filter.is_read = false;
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'notifications',
       filter,
       sort: { created_at: -1 },
       limit,
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
 
     return result.cursor?.firstBatch || [];
   }
@@ -89,10 +89,10 @@ export class NotificationsService {
    * Get unread count
    */
   async getUnreadCount(userId: string): Promise<number> {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       count: 'notifications',
       query: { user_id: userId, is_read: false },
-    }) as any;
+    })) as any;
 
     return result.n || 0;
   }
@@ -101,13 +101,15 @@ export class NotificationsService {
    * Mark notification as read
    */
   async markAsRead(notificationId: string, userId: string): Promise<boolean> {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       update: 'notifications',
-      updates: [{
-        q: { id: notificationId, user_id: userId },
-        u: { $set: { is_read: true, read_at: new Date().toISOString() } },
-      }],
-    }) as any;
+      updates: [
+        {
+          q: { id: notificationId, user_id: userId },
+          u: { $set: { is_read: true, read_at: new Date().toISOString() } },
+        },
+      ],
+    })) as any;
 
     return result.nModified > 0;
   }
@@ -116,14 +118,16 @@ export class NotificationsService {
    * Mark all notifications as read
    */
   async markAllAsRead(userId: string): Promise<number> {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       update: 'notifications',
-      updates: [{
-        q: { user_id: userId, is_read: false },
-        u: { $set: { is_read: true, read_at: new Date().toISOString() } },
-        multi: true,
-      }],
-    }) as any;
+      updates: [
+        {
+          q: { user_id: userId, is_read: false },
+          u: { $set: { is_read: true, read_at: new Date().toISOString() } },
+          multi: true,
+        },
+      ],
+    })) as any;
 
     return result.nModified || 0;
   }

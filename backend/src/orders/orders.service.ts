@@ -62,15 +62,15 @@ export class OrdersService {
       }
 
       // Get all orders for this tipster
-      const result = await this.prisma.$runCommandRaw({
+      const result = (await this.prisma.$runCommandRaw({
         find: 'orders',
-        filter: { 
+        filter: {
           tipster_id: tipster.id,
           status: 'PAGADA',
         },
         sort: { created_at: -1 },
         limit: 100,
-      }) as any;
+      })) as any;
 
       const orders = result.cursor?.firstBatch || [];
 
@@ -116,7 +116,7 @@ export class OrdersService {
       }
 
       // Aggregate sales with commission breakdown
-      const result = await this.prisma.$runCommandRaw({
+      const result = (await this.prisma.$runCommandRaw({
         aggregate: 'orders',
         pipeline: [
           { $match: { tipster_id: tipster.id, status: { $in: ['PAGADA', 'ACCESS_GRANTED'] } } },
@@ -133,7 +133,7 @@ export class OrdersService {
           },
         ],
         cursor: {},
-      }) as any;
+      })) as any;
 
       const stats = result.cursor?.firstBatch?.[0] || {
         totalSales: 0,

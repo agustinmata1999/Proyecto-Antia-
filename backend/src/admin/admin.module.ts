@@ -8,6 +8,11 @@ import { EmailsModule } from '../emails/emails.module';
 
 @Module({
   imports: [PrismaModule, EmailsModule],
-  controllers: [AdminTipstersController, AdminApplicationsController, AdminSalesController, AdminSupportController],
+  controllers: [
+    AdminTipstersController,
+    AdminApplicationsController,
+    AdminSalesController,
+    AdminSupportController,
+  ],
 })
 export class AdminModule {}

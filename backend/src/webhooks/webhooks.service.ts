@@ -14,10 +14,7 @@ export class WebhooksService {
 
   verifySignature(payload: string, signature: string): boolean {
     const secret = this.config.get('CHECKOUT_WEBHOOK_SECRET');
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex');
+    const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
     return signature === expectedSignature;
   }
 
@@ -35,7 +32,7 @@ export class WebhooksService {
 
     if (order) {
       await this.ordersService.updateStatus(order.id, 'PAGADA');
-      
+
       // Grant access if channel ID exists
       const product = await this.prisma.product.findUnique({
         where: { id: data.product_id },

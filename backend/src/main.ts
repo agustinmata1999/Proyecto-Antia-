@@ -14,18 +14,20 @@ async function bootstrap() {
   // This is required for Emergent deployment health checks
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.get('/health', (req, res) => {
-    res.json({ 
-      status: 'ok', 
+    res.json({
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime()
+      uptime: process.uptime(),
     });
   });
 
   // Security - Configure helmet to allow CORS
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    crossOriginOpenerPolicy: { policy: 'unsafe-none' },
-  }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'unsafe-none' },
+    }),
+  );
   app.use(cookieParser());
 
   // CORS - Allow all origins (including preview URLs)
@@ -33,7 +35,14 @@ async function bootstrap() {
     origin: true, // Allow all origins
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Accept', 'Origin', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-CSRF-Token',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
     exposedHeaders: ['Content-Length', 'Content-Type'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
@@ -79,7 +88,7 @@ async function bootstrap() {
   // Start server
   const port = process.env.PORT || process.env.BACKEND_PORT || 8001;
   await app.listen(port, '0.0.0.0');
-  
+
   console.log(`\n🚀 Antia Backend API running on: http://0.0.0.0:${port}/api`);
   console.log(`📚 Swagger docs available at: http://0.0.0.0:${port}/api/docs`);
   console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);

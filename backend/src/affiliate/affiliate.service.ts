@@ -18,11 +18,11 @@ export class AffiliateService {
 
   async createBettingHouse(dto: CreateBettingHouseDto, adminId: string) {
     // Check slug is unique using raw query
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { slug: dto.slug.toLowerCase() },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new BadRequestException(`Ya existe una casa con el slug "${dto.slug}"`);
@@ -33,24 +33,26 @@ export class AffiliateService {
 
     await this.prisma.$runCommandRaw({
       insert: 'betting_houses',
-      documents: [{
-        _id: newId,
-        name: dto.name,
-        slug: dto.slug.toLowerCase(),
-        logo_url: dto.logoUrl || null,
-        status: 'ACTIVE',
-        master_affiliate_url: dto.masterAffiliateUrl,
-        tracking_param_name: dto.trackingParamName || 'subid',
-        commission_per_referral_cents: dto.commissionPerReferralCents,
-        allowed_countries: dto.allowedCountries || [],
-        blocked_countries: dto.blockedCountries || [],
-        csv_column_mapping: dto.csvColumnMapping || null,
-        description: dto.description || null,
-        website_url: dto.websiteUrl || null,
-        created_by: adminId,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: newId,
+          name: dto.name,
+          slug: dto.slug.toLowerCase(),
+          logo_url: dto.logoUrl || null,
+          status: 'ACTIVE',
+          master_affiliate_url: dto.masterAffiliateUrl,
+          tracking_param_name: dto.trackingParamName || 'subid',
+          commission_per_referral_cents: dto.commissionPerReferralCents,
+          allowed_countries: dto.allowedCountries || [],
+          blocked_countries: dto.blockedCountries || [],
+          csv_column_mapping: dto.csvColumnMapping || null,
+          description: dto.description || null,
+          website_url: dto.websiteUrl || null,
+          created_by: adminId,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     return {
@@ -70,19 +72,19 @@ export class AffiliateService {
 
   async updateBettingHouse(id: string, dto: UpdateBettingHouseDto) {
     // Check house exists - try string ID first, then ObjectId
-    let houseResult = await this.prisma.$runCommandRaw({
+    let houseResult = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: id },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (!houseResult.cursor?.firstBatch?.length) {
       // Try as ObjectId
-      houseResult = await this.prisma.$runCommandRaw({
+      houseResult = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: { $oid: id } },
         limit: 1,
-      }) as any;
+      })) as any;
     }
 
     if (!houseResult.cursor?.firstBatch?.length) {
@@ -97,8 +99,10 @@ export class AffiliateService {
     if (dto.logoUrl !== undefined) updateFields.logo_url = dto.logoUrl;
     if (dto.status) updateFields.status = dto.status;
     if (dto.masterAffiliateUrl) updateFields.master_affiliate_url = dto.masterAffiliateUrl;
-    if (dto.trackingParamName !== undefined) updateFields.tracking_param_name = dto.trackingParamName;
-    if (dto.commissionPerReferralCents !== undefined) updateFields.commission_per_referral_cents = dto.commissionPerReferralCents;
+    if (dto.trackingParamName !== undefined)
+      updateFields.tracking_param_name = dto.trackingParamName;
+    if (dto.commissionPerReferralCents !== undefined)
+      updateFields.commission_per_referral_cents = dto.commissionPerReferralCents;
     // Arrays can be empty, so check for undefined instead of truthy
     if (dto.allowedCountries !== undefined) updateFields.allowed_countries = dto.allowedCountries;
     if (dto.blockedCountries !== undefined) updateFields.blocked_countries = dto.blockedCountries;
@@ -118,11 +122,11 @@ export class AffiliateService {
 
   async getAllBettingHouses(includeInactive = false) {
     const filter = includeInactive ? {} : { status: 'ACTIVE' };
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter,
       sort: { name: 1 },
-    }) as any;
+    })) as any;
 
     const houses = result.cursor?.firstBatch || [];
     return houses.map((h: any) => {
@@ -148,21 +152,21 @@ export class AffiliateService {
 
   async getBettingHouse(id: string) {
     // Try to find by _id as ObjectId or as string
-    let result = await this.prisma.$runCommandRaw({
+    let result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: { $oid: id } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let house = result.cursor?.firstBatch?.[0];
-    
+
     // If not found with $oid, try as string
     if (!house) {
-      result = await this.prisma.$runCommandRaw({
+      result = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: id },
         limit: 1,
-      }) as any;
+      })) as any;
       house = result.cursor?.firstBatch?.[0];
     }
 
@@ -190,17 +194,17 @@ export class AffiliateService {
   }
 
   async getBettingHouseBySlug(slug: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { slug: slug.toLowerCase() },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const house = result.cursor?.firstBatch?.[0];
     if (!house) {
       throw new NotFoundException('Casa de apuestas no encontrada');
     }
-    
+
     return {
       id: house._id.$oid || house._id.toString(),
       name: house.name,
@@ -219,7 +223,7 @@ export class AffiliateService {
   async getHousesForCountry(countryCode: string) {
     const allHouses = await this.getAllBettingHouses(false);
 
-    return allHouses.filter(house => {
+    return allHouses.filter((house) => {
       if (house.allowedCountries.length > 0) {
         return house.allowedCountries.includes(countryCode);
       }
@@ -233,11 +237,11 @@ export class AffiliateService {
   // ==================== CAMPAIGNS ====================
 
   async createCampaign(dto: CreateCampaignDto, adminId: string) {
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'affiliate_campaigns',
       filter: { slug: dto.slug.toLowerCase() },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new BadRequestException(`Ya existe una campaña con el slug "${dto.slug}"`);
@@ -248,20 +252,22 @@ export class AffiliateService {
 
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_campaigns',
-      documents: [{
-        _id: newId,
-        name: dto.name,
-        slug: dto.slug.toLowerCase(),
-        description: dto.description || null,
-        status: 'ACTIVE',
-        house_ids: dto.houseIds,
-        target_countries: dto.targetCountries || [],
-        start_date: dto.startDate ? { $date: dto.startDate.toISOString() } : null,
-        end_date: dto.endDate ? { $date: dto.endDate.toISOString() } : null,
-        created_by: adminId,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: newId,
+          name: dto.name,
+          slug: dto.slug.toLowerCase(),
+          description: dto.description || null,
+          status: 'ACTIVE',
+          house_ids: dto.houseIds,
+          target_countries: dto.targetCountries || [],
+          start_date: dto.startDate ? { $date: dto.startDate.toISOString() } : null,
+          end_date: dto.endDate ? { $date: dto.endDate.toISOString() } : null,
+          created_by: adminId,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     return {
@@ -274,11 +280,11 @@ export class AffiliateService {
   }
 
   async updateCampaign(id: string, dto: UpdateCampaignDto) {
-    const campaignResult = await this.prisma.$runCommandRaw({
+    const campaignResult = (await this.prisma.$runCommandRaw({
       find: 'affiliate_campaigns',
       filter: { _id: { $oid: id } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (!campaignResult.cursor?.firstBatch?.length) {
       throw new NotFoundException('Campaña no encontrada');
@@ -295,10 +301,12 @@ export class AffiliateService {
 
     await this.prisma.$runCommandRaw({
       update: 'affiliate_campaigns',
-      updates: [{
-        q: { _id: { $oid: id } },
-        u: { $set: updateFields },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: id } },
+          u: { $set: updateFields },
+        },
+      ],
     });
 
     return this.getCampaign(id);
@@ -306,15 +314,15 @@ export class AffiliateService {
 
   async getAllCampaigns(includeInactive = false) {
     const filter = includeInactive ? {} : { status: 'ACTIVE' };
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_campaigns',
       filter,
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const campaigns = result.cursor?.firstBatch || [];
     const allHouses = await this.getAllBettingHouses(true);
-    const housesMap = new Map(allHouses.map(h => [h.id, h]));
+    const housesMap = new Map(allHouses.map((h) => [h.id, h]));
 
     return campaigns.map((c: any) => ({
       id: c._id.$oid || c._id.toString(),
@@ -330,11 +338,11 @@ export class AffiliateService {
   }
 
   async getCampaign(id: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_campaigns',
       filter: { _id: { $oid: id } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const campaign = result.cursor?.firstBatch?.[0];
     if (!campaign) {
@@ -352,7 +360,7 @@ export class AffiliateService {
       status: campaign.status,
       houseIds,
       targetCountries: campaign.target_countries || [],
-      houses: houses.filter(h => houseIds.includes(h.id)),
+      houses: houses.filter((h) => houseIds.includes(h.id)),
     };
   }
 
@@ -360,35 +368,37 @@ export class AffiliateService {
 
   async getOrCreateTipsterLink(tipsterId: string, houseId: string) {
     // Check if link exists
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_links',
       filter: { tipster_id: tipsterId, house_id: houseId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let linkDoc = existingResult.cursor?.firstBatch?.[0];
 
     if (!linkDoc) {
       // Get house for slug
       const house = await this.getBettingHouse(houseId);
-      
+
       const now = new Date().toISOString();
       const newId = new ObjectId();
       const redirectCode = `${tipsterId.slice(-6)}-${house.slug}`;
 
       await this.prisma.$runCommandRaw({
         insert: 'tipster_affiliate_links',
-        documents: [{
-          _id: newId,
-          tipster_id: tipsterId,
-          house_id: houseId,
-          redirect_code: redirectCode,
-          total_clicks: 0,
-          total_referrals: 0,
-          status: 'ACTIVE',
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
+        documents: [
+          {
+            _id: newId,
+            tipster_id: tipsterId,
+            house_id: houseId,
+            redirect_code: redirectCode,
+            total_clicks: 0,
+            total_referrals: 0,
+            status: 'ACTIVE',
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
       });
 
       linkDoc = {
@@ -414,17 +424,17 @@ export class AffiliateService {
   }
 
   async getTipsterLinks(tipsterId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_links',
       filter: { tipster_id: tipsterId },
-    }) as any;
+    })) as any;
 
     const links = result.cursor?.firstBatch || [];
 
     // Enrich with house details
     const houseIds = links.map((l: any) => l.house_id);
     const allHouses = await this.getAllBettingHouses(true);
-    const housesMap = new Map(allHouses.map(h => [h.id, h]));
+    const housesMap = new Map(allHouses.map((h) => [h.id, h]));
 
     return links.map((link: any) => {
       const house = housesMap.get(link.house_id) as any;
@@ -435,13 +445,15 @@ export class AffiliateService {
         redirectCode: link.redirect_code,
         totalClicks: link.total_clicks || 0,
         totalReferrals: link.total_referrals || 0,
-        house: house ? {
-          id: house.id,
-          name: house.name,
-          slug: house.slug,
-          logoUrl: house.logoUrl,
-          commissionPerReferralEur: house.commissionPerReferralEur,
-        } : null,
+        house: house
+          ? {
+              id: house.id,
+              name: house.name,
+              slug: house.slug,
+              logoUrl: house.logoUrl,
+              commissionPerReferralEur: house.commissionPerReferralEur,
+            }
+          : null,
       };
     });
   }
@@ -451,7 +463,7 @@ export class AffiliateService {
     let houses = await this.getAllBettingHouses(false);
 
     if (countryCode) {
-      houses = houses.filter(house => {
+      houses = houses.filter((house) => {
         if (house.allowedCountries.length > 0) {
           return house.allowedCountries.includes(countryCode);
         }
@@ -466,7 +478,7 @@ export class AffiliateService {
     const result = [];
     for (const house of houses) {
       const link = await this.getOrCreateTipsterLink(tipsterId, house.id);
-      
+
       result.push({
         house: {
           id: house.id,
@@ -540,31 +552,35 @@ export class AffiliateService {
 
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_click_events',
-      documents: [{
-        _id: clickId,
-        tipster_id: tipsterId,
-        house_id: houseId,
-        link_id: link.id,
-        ip_address: ipAddress || null,
-        country_code: countryCode || null,
-        user_agent: userAgent || null,
-        referer: referer || null,
-        was_blocked: wasBlocked,
-        block_reason: blockReason,
-        redirected_to: redirectedTo,
-        clicked_at: { $date: now },
-        created_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: clickId,
+          tipster_id: tipsterId,
+          house_id: houseId,
+          link_id: link.id,
+          ip_address: ipAddress || null,
+          country_code: countryCode || null,
+          user_agent: userAgent || null,
+          referer: referer || null,
+          was_blocked: wasBlocked,
+          block_reason: blockReason,
+          redirected_to: redirectedTo,
+          clicked_at: { $date: now },
+          created_at: { $date: now },
+        },
+      ],
     });
 
     // Update click count on link
     if (!wasBlocked) {
       await this.prisma.$runCommandRaw({
         update: 'tipster_affiliate_links',
-        updates: [{
-          q: { _id: { $oid: link.id } },
-          u: { $inc: { total_clicks: 1 } },
-        }],
+        updates: [
+          {
+            q: { _id: { $oid: link.id } },
+            u: { $inc: { total_clicks: 1 } },
+          },
+        ],
       });
     }
 
@@ -692,13 +708,13 @@ export class AffiliateService {
     });
 
     // Enrich with house names
-    const houseIds = [...new Set(batches.map(b => b.houseId))];
+    const houseIds = [...new Set(batches.map((b) => b.houseId))];
     const houses = await this.prisma.bettingHouse.findMany({
       where: { id: { in: houseIds } },
     });
-    const housesMap = new Map(houses.map(h => [h.id, h.name]));
+    const housesMap = new Map(houses.map((h) => [h.id, h.name]));
 
-    return batches.map(b => ({
+    return batches.map((b) => ({
       ...b,
       houseName: housesMap.get(b.houseId) || 'Unknown',
     }));
@@ -719,7 +735,7 @@ export class AffiliateService {
 
     // Group by house
     const houses = await this.prisma.bettingHouse.findMany();
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h) => [h.id, h]));
 
     const byHouse: Record<string, any> = {};
     for (const conv of conversions) {
@@ -742,11 +758,11 @@ export class AffiliateService {
       if (conv.status === 'REJECTED') byHouse[conv.houseId].rejected++;
     }
 
-    const totalPending = conversions.filter(c => c.status === 'PENDING').length;
-    const totalApproved = conversions.filter(c => c.status === 'APPROVED').length;
-    const totalRejected = conversions.filter(c => c.status === 'REJECTED').length;
+    const totalPending = conversions.filter((c) => c.status === 'PENDING').length;
+    const totalApproved = conversions.filter((c) => c.status === 'APPROVED').length;
+    const totalRejected = conversions.filter((c) => c.status === 'REJECTED').length;
     const totalEarningsCents = conversions
-      .filter(c => c.status === 'APPROVED')
+      .filter((c) => c.status === 'APPROVED')
       .reduce((sum, c) => sum + (c.commissionCents || 0), 0);
 
     return {
@@ -767,10 +783,13 @@ export class AffiliateService {
 
   // ==================== TIPSTER REFERRALS ====================
 
-  async getTipsterReferrals(tipsterId: string, filters?: { houseId?: string; status?: string; startDate?: string; endDate?: string }) {
+  async getTipsterReferrals(
+    tipsterId: string,
+    filters?: { houseId?: string; status?: string; startDate?: string; endDate?: string },
+  ) {
     // Build where clause
     const where: any = { tipsterId };
-    
+
     if (filters?.houseId) {
       where.houseId = filters.houseId;
     }
@@ -796,10 +815,10 @@ export class AffiliateService {
 
     // Get houses for names
     const houses = await this.prisma.bettingHouse.findMany();
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h) => [h.id, h]));
 
     // Map to response format
-    const referrals = conversions.map(conv => {
+    const referrals = conversions.map((conv) => {
       const house = housesMap.get(conv.houseId);
       return {
         id: conv.id,
@@ -822,10 +841,12 @@ export class AffiliateService {
     // Calculate stats
     const stats = {
       total: referrals.length,
-      pending: referrals.filter(r => r.status === 'PENDING').length,
-      approved: referrals.filter(r => r.status === 'APPROVED').length,
-      rejected: referrals.filter(r => r.status === 'REJECTED').length,
-      totalEarningsEur: referrals.filter(r => r.status === 'APPROVED').reduce((sum, r) => sum + r.commissionEur, 0),
+      pending: referrals.filter((r) => r.status === 'PENDING').length,
+      approved: referrals.filter((r) => r.status === 'APPROVED').length,
+      rejected: referrals.filter((r) => r.status === 'REJECTED').length,
+      totalEarningsEur: referrals
+        .filter((r) => r.status === 'APPROVED')
+        .reduce((sum, r) => sum + r.commissionEur, 0),
     };
 
     return {
@@ -844,7 +865,9 @@ export class AffiliateService {
         status: 'APPROVED',
         occurredAt: {
           gte: new Date(`${periodMonth}-01`),
-          lt: new Date(new Date(`${periodMonth}-01`).setMonth(new Date(`${periodMonth}-01`).getMonth() + 1)),
+          lt: new Date(
+            new Date(`${periodMonth}-01`).setMonth(new Date(`${periodMonth}-01`).getMonth() + 1),
+          ),
         },
       },
     });
@@ -858,17 +881,17 @@ export class AffiliateService {
     }
 
     const allHouses = await this.getAllBettingHouses(true);
-    const housesMap = new Map(allHouses.map(h => [h.id, h]));
+    const housesMap = new Map(allHouses.map((h) => [h.id, h]));
 
     const payouts = [];
     for (const [tipsterId, tipsterConvs] of Object.entries(byTipster)) {
       // Check if payout already exists using raw query
-      const existingResult = await this.prisma.$runCommandRaw({
+      const existingResult = (await this.prisma.$runCommandRaw({
         find: 'affiliate_payouts',
         filter: { tipster_id: tipsterId, period_month: periodMonth },
         limit: 1,
-      }) as any;
-      
+      })) as any;
+
       if (existingResult.cursor?.firstBatch?.length > 0) continue;
 
       // Build house breakdown
@@ -896,18 +919,20 @@ export class AffiliateService {
 
       await this.prisma.$runCommandRaw({
         insert: 'affiliate_payouts',
-        documents: [{
-          _id: payoutId,
-          tipster_id: tipsterId,
-          period_month: periodMonth,
-          house_breakdown: Object.values(breakdown),
-          total_referrals: totalReferrals,
-          total_amount_cents: totalAmountCents,
-          currency: 'EUR',
-          status: 'PENDING',
-          created_at: { $date: now },
-          updated_at: { $date: now },
-        }],
+        documents: [
+          {
+            _id: payoutId,
+            tipster_id: tipsterId,
+            period_month: periodMonth,
+            house_breakdown: Object.values(breakdown),
+            total_referrals: totalReferrals,
+            total_amount_cents: totalAmountCents,
+            currency: 'EUR',
+            status: 'PENDING',
+            created_at: { $date: now },
+            updated_at: { $date: now },
+          },
+        ],
       });
 
       payouts.push({
@@ -935,13 +960,13 @@ export class AffiliateService {
     });
 
     // Enrich with tipster names
-    const tipsterIds = [...new Set(payouts.map(p => p.tipsterId))];
+    const tipsterIds = [...new Set(payouts.map((p) => p.tipsterId))];
     const tipsters = await this.prisma.tipsterProfile.findMany({
       where: { id: { in: tipsterIds } },
     });
-    const tipstersMap = new Map(tipsters.map(t => [t.id, t.publicName]));
+    const tipstersMap = new Map(tipsters.map((t) => [t.id, t.publicName]));
 
-    return payouts.map(p => ({
+    return payouts.map((p) => ({
       ...p,
       tipsterName: tipstersMap.get(p.tipsterId) || 'Unknown',
       totalAmountEur: p.totalAmountCents / 100,
@@ -984,7 +1009,9 @@ export class AffiliateService {
     houseId?: string;
   }) {
     // Build date range
-    const startDate = filters.startDate ? new Date(filters.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const startDate = filters.startDate
+      ? new Date(filters.startDate)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const endDate = filters.endDate ? new Date(filters.endDate + 'T23:59:59') : new Date();
 
     // Build where clause for clicks
@@ -1021,29 +1048,31 @@ export class AffiliateService {
 
     // Get houses and tipsters for mapping
     const houses = await this.prisma.bettingHouse.findMany();
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h) => [h.id, h]));
 
-    const tipstersResult = await this.prisma.$runCommandRaw({
+    const tipstersResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       filter: {},
       projection: { _id: 1, public_name: 1, slug: 1 },
-    }) as any;
+    })) as any;
     const tipsters = tipstersResult.cursor?.firstBatch || [];
     const tipstersMap = new Map(tipsters.map((t: any) => [t._id.$oid || t._id, t]));
 
     // Get tipster landings (campaigns created by tipsters)
-    const landingsResult = await this.prisma.$runCommandRaw({
+    const landingsResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: {},
       projection: { _id: 1, title: 1, slug: 1, tipster_id: 1 },
-    }) as any;
+    })) as any;
     const landings = landingsResult.cursor?.firstBatch || [];
-    const landingsMap = new Map(landings.map((l: any) => [l._id.$oid || l._id || l._id.toString(), l]));
+    const landingsMap = new Map(
+      landings.map((l: any) => [l._id.$oid || l._id || l._id.toString(), l]),
+    );
 
     // General stats
     const totalClicks = clicks.length;
-    const uniqueUsers = new Set(clicks.map(c => (c as any).visitorId || c.ipAddress)).size;
-    const totalConversions = conversions.filter(c => c.status === 'APPROVED').length;
+    const uniqueUsers = new Set(clicks.map((c) => (c as any).visitorId || c.ipAddress)).size;
+    const totalConversions = conversions.filter((c) => c.status === 'APPROVED').length;
     const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     // By Country
@@ -1063,15 +1092,20 @@ export class AffiliateService {
       .sort((a, b) => b.clicks - a.clicks);
 
     // By House
-    const byHouseMap: Record<string, { clicks: number; conversions: number; commissionEarned: number }> = {};
+    const byHouseMap: Record<
+      string,
+      { clicks: number; conversions: number; commissionEarned: number }
+    > = {};
     for (const click of clicks) {
       if (!click.houseId) continue;
-      if (!byHouseMap[click.houseId]) byHouseMap[click.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byHouseMap[click.houseId])
+        byHouseMap[click.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       byHouseMap[click.houseId].clicks++;
     }
     for (const conv of conversions) {
       if (!conv.houseId) continue;
-      if (!byHouseMap[conv.houseId]) byHouseMap[conv.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byHouseMap[conv.houseId])
+        byHouseMap[conv.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       if (conv.status === 'APPROVED') {
         byHouseMap[conv.houseId].conversions++;
         byHouseMap[conv.houseId].commissionEarned += conv.commissionCents || 0;
@@ -1097,7 +1131,8 @@ export class AffiliateService {
       byDateMap[date].clicks++;
     }
     for (const conv of conversions) {
-      const date = conv.occurredAt?.toISOString().split('T')[0] || conv.createdAt.toISOString().split('T')[0];
+      const date =
+        conv.occurredAt?.toISOString().split('T')[0] || conv.createdAt.toISOString().split('T')[0];
       if (!byDateMap[date]) byDateMap[date] = { clicks: 0, conversions: 0 };
       if (conv.status === 'APPROVED') byDateMap[date].conversions++;
     }
@@ -1109,7 +1144,11 @@ export class AffiliateService {
     const byCampaignMap: Record<string, { clicks: number; conversions: number }> = {};
     for (const click of clicks) {
       // Use landingId if available, otherwise campaignId/promotionId
-      const campaignId = (click as any).landingId || (click as any).campaignId || (click as any).promotionId || 'NO_CAMPAIGN';
+      const campaignId =
+        (click as any).landingId ||
+        (click as any).campaignId ||
+        (click as any).promotionId ||
+        'NO_CAMPAIGN';
       if (!byCampaignMap[campaignId]) byCampaignMap[campaignId] = { clicks: 0, conversions: 0 };
       byCampaignMap[campaignId].clicks++;
     }
@@ -1118,22 +1157,29 @@ export class AffiliateService {
         const landing = landingsMap.get(campaignId) as any;
         return {
           campaignId,
-          campaignName: landing?.title || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : `Landing ${campaignId.slice(-6)}`),
+          campaignName:
+            landing?.title ||
+            (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : `Landing ${campaignId.slice(-6)}`),
           ...data,
         };
       })
       .sort((a, b) => b.clicks - a.clicks);
 
     // By Tipster
-    const byTipsterMap: Record<string, { clicks: number; conversions: number; commissionEarned: number }> = {};
+    const byTipsterMap: Record<
+      string,
+      { clicks: number; conversions: number; commissionEarned: number }
+    > = {};
     for (const click of clicks) {
       if (!click.tipsterId) continue;
-      if (!byTipsterMap[click.tipsterId]) byTipsterMap[click.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byTipsterMap[click.tipsterId])
+        byTipsterMap[click.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       byTipsterMap[click.tipsterId].clicks++;
     }
     for (const conv of conversions) {
       if (!conv.tipsterId) continue;
-      if (!byTipsterMap[conv.tipsterId]) byTipsterMap[conv.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byTipsterMap[conv.tipsterId])
+        byTipsterMap[conv.tipsterId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       if (conv.status === 'APPROVED') {
         byTipsterMap[conv.tipsterId].conversions++;
         byTipsterMap[conv.tipsterId].commissionEarned += conv.commissionCents || 0;
@@ -1157,7 +1203,7 @@ export class AffiliateService {
     const filterOptions = {
       tipsters: tipsters.map((t: any) => ({ id: t._id.$oid || t._id, name: t.public_name })),
       campaigns: promotions.map((p: any) => ({ id: p._id.$oid || p._id, name: p.name })),
-      houses: houses.map(h => ({ id: h.id, name: h.name })),
+      houses: houses.map((h) => ({ id: h.id, name: h.name })),
     };
 
     return {
@@ -1179,7 +1225,9 @@ export class AffiliateService {
   // ==================== TIPSTER STATISTICS ====================
 
   async getTipsterAffiliateStats(tipsterId: string, startDateStr?: string, endDateStr?: string) {
-    const startDate = startDateStr ? new Date(startDateStr) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const startDate = startDateStr
+      ? new Date(startDateStr)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const endDate = endDateStr ? new Date(endDateStr + 'T23:59:59') : new Date();
 
     // Get clicks for this tipster
@@ -1207,20 +1255,20 @@ export class AffiliateService {
 
     // Get houses for mapping
     const houses = await this.prisma.bettingHouse.findMany();
-    const housesMap = new Map(houses.map(h => [h.id, h]));
+    const housesMap = new Map(houses.map((h) => [h.id, h]));
 
     // Get promotions for mapping
-    const promotionsResult = await this.prisma.$runCommandRaw({
+    const promotionsResult = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
       filter: {},
       projection: { _id: 1, name: 1 },
-    }) as any;
+    })) as any;
     const promotions = promotionsResult.cursor?.firstBatch || [];
     const promotionsMap = new Map(promotions.map((p: any) => [p._id.$oid || p._id, p]));
 
     // General stats
     const totalClicks = clicks.length;
-    const approvedConversions = conversions.filter(c => c.status === 'APPROVED');
+    const approvedConversions = conversions.filter((c) => c.status === 'APPROVED');
     const totalConversions = approvedConversions.length;
     const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
     const totalEarnings = approvedConversions.reduce((sum, c) => sum + (c.commissionCents || 0), 0);
@@ -1242,15 +1290,20 @@ export class AffiliateService {
       .sort((a, b) => b.clicks - a.clicks);
 
     // By House
-    const byHouseMap: Record<string, { clicks: number; conversions: number; commissionEarned: number }> = {};
+    const byHouseMap: Record<
+      string,
+      { clicks: number; conversions: number; commissionEarned: number }
+    > = {};
     for (const click of clicks) {
       if (!click.houseId) continue;
-      if (!byHouseMap[click.houseId]) byHouseMap[click.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byHouseMap[click.houseId])
+        byHouseMap[click.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       byHouseMap[click.houseId].clicks++;
     }
     for (const conv of approvedConversions) {
       if (!conv.houseId) continue;
-      if (!byHouseMap[conv.houseId]) byHouseMap[conv.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
+      if (!byHouseMap[conv.houseId])
+        byHouseMap[conv.houseId] = { clicks: 0, conversions: 0, commissionEarned: 0 };
       byHouseMap[conv.houseId].conversions++;
       byHouseMap[conv.houseId].commissionEarned += conv.commissionCents || 0;
     }
@@ -1274,7 +1327,8 @@ export class AffiliateService {
       byDateMap[date].clicks++;
     }
     for (const conv of approvedConversions) {
-      const date = conv.occurredAt?.toISOString().split('T')[0] || conv.createdAt.toISOString().split('T')[0];
+      const date =
+        conv.occurredAt?.toISOString().split('T')[0] || conv.createdAt.toISOString().split('T')[0];
       if (!byDateMap[date]) byDateMap[date] = { clicks: 0, conversions: 0 };
       byDateMap[date].conversions++;
     }
@@ -1294,7 +1348,9 @@ export class AffiliateService {
         const campaign = promotionsMap.get(campaignId) as any;
         return {
           campaignId,
-          campaignName: campaign?.name || (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
+          campaignName:
+            campaign?.name ||
+            (campaignId === 'NO_CAMPAIGN' ? 'Sin Campaña' : 'Campaña Desconocida'),
           ...data,
         };
       })
@@ -1353,12 +1409,12 @@ export class AffiliateService {
     let commissionCents = 0;
     if (click?.promotionHouseLinkId) {
       // Get commission from promotion house link
-      const linkResult = await this.prisma.$runCommandRaw({
+      const linkResult = (await this.prisma.$runCommandRaw({
         find: 'promotion_house_links',
         filter: { _id: { $oid: click.promotionHouseLinkId } },
         projection: { commission_cents: 1 },
         limit: 1,
-      }) as any;
+      })) as any;
       const link = linkResult.cursor?.firstBatch?.[0];
       commissionCents = link?.commission_cents || house?.commissionPerReferralCents || 5000;
     } else if (house) {
@@ -1368,31 +1424,33 @@ export class AffiliateService {
     // Create conversion using raw MongoDB command
     const now = new Date().toISOString();
     const conversionId = new ObjectId();
-    
+
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_conversions',
-      documents: [{
-        _id: conversionId,
-        tipster_id: tipsterId,
-        house_id: house?.id || click?.houseId,
-        click_id: clickId || null,
-        event_type: event || 'REGISTRATION',
-        status: 'PENDING',
-        commission_cents: commissionCents,
-        country_code: click?.countryCode || null,
-        clicked_at: click?.clickedAt ? { $date: click.clickedAt } : null,
-        occurred_at: { $date: now },
-        external_transaction_id: transactionId || null,
-        metadata: {
-          subid,
-          houseSlug,
-          event,
-          amount,
-          currency,
+      documents: [
+        {
+          _id: conversionId,
+          tipster_id: tipsterId,
+          house_id: house?.id || click?.houseId,
+          click_id: clickId || null,
+          event_type: event || 'REGISTRATION',
+          status: 'PENDING',
+          commission_cents: commissionCents,
+          country_code: click?.countryCode || null,
+          clicked_at: click?.clickedAt ? { $date: click.clickedAt } : null,
+          occurred_at: { $date: now },
+          external_transaction_id: transactionId || null,
+          metadata: {
+            subid,
+            houseSlug,
+            event,
+            amount,
+            currency,
+          },
+          created_at: { $date: now },
+          updated_at: { $date: now },
         },
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      ],
     });
 
     return {

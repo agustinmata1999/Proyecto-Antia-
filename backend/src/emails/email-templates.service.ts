@@ -74,7 +74,9 @@ export class EmailTemplatesService {
   }
 
   private infoBox(items: { label: string; value: string }[]): string {
-    const rows = items.map(item => `
+    const rows = items
+      .map(
+        (item) => `
       <tr>
         <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">
           <span style="font-size: 14px; color: #6b7280;">${item.label}</span>
@@ -83,7 +85,9 @@ export class EmailTemplatesService {
           <span style="font-size: 14px; font-weight: 600; color: #111827;">${item.value}</span>
         </td>
       </tr>
-    `).join('');
+    `,
+      )
+      .join('');
 
     return `
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border-radius: 8px; margin: 24px 0;">
@@ -120,10 +124,14 @@ export class EmailTemplatesService {
 
   private getBillingPeriodText(period?: string): string {
     switch (period) {
-      case 'MONTHLY': return 'Mensual';
-      case 'QUARTERLY': return 'Trimestral';
-      case 'YEARLY': return 'Anual';
-      default: return 'Mensual';
+      case 'MONTHLY':
+        return 'Mensual';
+      case 'QUARTERLY':
+        return 'Trimestral';
+      case 'YEARLY':
+        return 'Anual';
+      default:
+        return 'Mensual';
     }
   }
 
@@ -148,12 +156,14 @@ export class EmailTemplatesService {
     purchaseDate: Date;
     hasChannel?: boolean;
   }): string {
-    const billingTypeText = data.billingType === 'SUBSCRIPTION' 
-      ? `Suscripción (${this.getBillingPeriodText(data.billingPeriod)})`
-      : 'Pago único';
+    const billingTypeText =
+      data.billingType === 'SUBSCRIPTION'
+        ? `Suscripción (${this.getBillingPeriodText(data.billingPeriod)})`
+        : 'Pago único';
 
-    const channelNote = data.hasChannel === false 
-      ? `
+    const channelNote =
+      data.hasChannel === false
+        ? `
         <div style="margin-top: 24px; padding: 16px; background-color: #dbeafe; border-radius: 8px;">
           <p style="margin: 0; font-size: 14px; color: #1e40af;">
             <strong>📧 Información importante</strong><br>
@@ -162,7 +172,7 @@ export class EmailTemplatesService {
           </p>
         </div>
       `
-      : `
+        : `
         <div style="margin-top: 24px; padding: 16px; background-color: #d1fae5; border-radius: 8px;">
           <p style="margin: 0; font-size: 14px; color: #065f46;">
             <strong>📱 Acceso a Telegram</strong><br>
@@ -246,10 +256,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu acceso al canal premium está listo');
   }
 
-  channelAccessApproved(data: {
-    productName: string;
-    channelName: string;
-  }): string {
+  channelAccessApproved(data: { productName: string; channelName: string }): string {
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
         <div style="width: 64px; height: 64px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
@@ -270,11 +277,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu solicitud de acceso fue aprobada');
   }
 
-  channelAccessDenied(data: {
-    productName: string;
-    channelName: string;
-    reason: string;
-  }): string {
+  channelAccessDenied(data: { productName: string; channelName: string; reason: string }): string {
     const content = `
       <div style="text-align: center; margin-bottom: 32px;">
         <div style="width: 64px; height: 64px; background-color: #fee2e2; border-radius: 50%; margin: 0 auto 16px; line-height: 64px;">
@@ -301,11 +304,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'No pudimos validar tu acceso');
   }
 
-  channelLinkUpdated(data: {
-    productName: string;
-    channelName: string;
-    newLink: string;
-  }): string {
+  channelLinkUpdated(data: { productName: string; channelName: string; newLink: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Canal actualizado</h2>
       
@@ -326,10 +325,7 @@ export class EmailTemplatesService {
   // CLIENTE - CUENTA
   // =============================================
 
-  welcomeClient(data: {
-    name?: string;
-    email: string;
-  }): string {
+  welcomeClient(data: { name?: string; email: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">¡Bienvenido a ${this.brandName}!</h2>
       
@@ -350,10 +346,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu cuenta ha sido creada');
   }
 
-  passwordReset(data: {
-    resetLink: string;
-    expiresIn: string;
-  }): string {
+  passwordReset(data: { resetLink: string; expiresIn: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Recuperar contraseña</h2>
       
@@ -376,17 +369,16 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Solicitud para restablecer contraseña');
   }
 
-  emailVerification(data: {
-    verificationLink: string;
-    newEmail?: string;
-  }): string {
+  emailVerification(data: { verificationLink: string; newEmail?: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Verificar email</h2>
       
       <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
-        ${data.newEmail 
-          ? `Hacé clic en el botón para confirmar tu nuevo email: <strong>${data.newEmail}</strong>` 
-          : 'Hacé clic en el botón para verificar tu dirección de email.'}
+        ${
+          data.newEmail
+            ? `Hacé clic en el botón para confirmar tu nuevo email: <strong>${data.newEmail}</strong>`
+            : 'Hacé clic en el botón para verificar tu dirección de email.'
+        }
       </p>
 
       <div style="text-align: center;">
@@ -401,10 +393,7 @@ export class EmailTemplatesService {
   // CLIENTE - SOPORTE
   // =============================================
 
-  ticketCreated(data: {
-    ticketId: string;
-    subject: string;
-  }): string {
+  ticketCreated(data: { ticketId: string; subject: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Ticket creado</h2>
       
@@ -425,11 +414,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu ticket de soporte fue creado');
   }
 
-  ticketReplied(data: {
-    ticketId: string;
-    subject: string;
-    replyPreview: string;
-  }): string {
+  ticketReplied(data: { ticketId: string; subject: string; replyPreview: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Nueva respuesta</h2>
       
@@ -451,10 +436,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Hay una nueva respuesta en tu ticket');
   }
 
-  ticketClosed(data: {
-    ticketId: string;
-    subject: string;
-  }): string {
+  ticketClosed(data: { ticketId: string; subject: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Ticket cerrado</h2>
       
@@ -512,10 +494,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu suscripción está activa');
   }
 
-  subscriptionCancelled(data: {
-    productName: string;
-    accessUntil: Date;
-  }): string {
+  subscriptionCancelled(data: { productName: string; accessUntil: Date }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Suscripción cancelada</h2>
       
@@ -537,10 +516,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu suscripción ha sido cancelada');
   }
 
-  subscriptionExpired(data: {
-    productName: string;
-    channelName?: string;
-  }): string {
+  subscriptionExpired(data: { productName: string; channelName?: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Suscripción expirada</h2>
       
@@ -548,13 +524,17 @@ export class EmailTemplatesService {
         Tu suscripción a <strong>${data.productName}</strong> ha expirado.
       </p>
 
-      ${data.channelName ? `
+      ${
+        data.channelName
+          ? `
         <div style="padding: 16px; background-color: #fee2e2; border-radius: 8px; margin-bottom: 24px;">
           <p style="margin: 0; font-size: 14px; color: #991b1b;">
             Tu acceso al canal <strong>${data.channelName}</strong> ha sido removido.
           </p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <p style="margin: 0; font-size: 14px; color: #6b7280;">
         Si deseas renovar tu suscripción, visita el canal del tipster para comprar nuevamente.
@@ -692,14 +672,18 @@ export class EmailTemplatesService {
         Lamentamos informarte que tu solicitud para ser tipster en ${this.brandName} no ha sido aprobada en esta ocasión.
       </p>
 
-      ${data.rejectionReason ? `
+      ${
+        data.rejectionReason
+          ? `
         <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
           <p style="margin: 0; font-size: 14px; color: #991b1b;">
             <strong>Motivo:</strong><br/>
             ${data.rejectionReason}
           </p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <p style="margin: 0 0 24px; font-size: 16px; color: #4b5563; line-height: 1.6;">
         Si crees que esto es un error o deseas más información, puedes contactarnos respondiendo a este email.
@@ -826,10 +810,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tienes una nueva suscripción');
   }
 
-  tipsterSubscriptionCancelled(data: {
-    productName: string;
-    clientEmail: string;
-  }): string {
+  tipsterSubscriptionCancelled(data: { productName: string; clientEmail: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Suscripción cancelada</h2>
       
@@ -846,10 +827,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Una suscripción fue cancelada');
   }
 
-  tipsterSubscriptionExpired(data: {
-    productName: string;
-    clientEmail: string;
-  }): string {
+  tipsterSubscriptionExpired(data: { productName: string; clientEmail: string }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Suscripción expirada</h2>
       
@@ -886,7 +864,10 @@ export class EmailTemplatesService {
       </div>
 
       ${this.infoBox([
-        { label: 'Período', value: `${this.formatDateOnly(data.periodStart)} - ${this.formatDateOnly(data.periodEnd)}` },
+        {
+          label: 'Período',
+          value: `${this.formatDateOnly(data.periodStart)} - ${this.formatDateOnly(data.periodEnd)}`,
+        },
         { label: 'Ventas', value: data.salesCount.toString() },
         { label: 'Total a cobrar', value: this.formatMoney(data.totalAmount, data.currency) },
       ])}
@@ -927,10 +908,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Tu pago ha sido procesado');
   }
 
-  kycReminder(data: {
-    tipsterName: string;
-    daysRemaining?: number;
-  }): string {
+  kycReminder(data: { tipsterName: string; daysRemaining?: number }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Completa tus datos de cobro</h2>
       
@@ -938,13 +916,17 @@ export class EmailTemplatesService {
         Hola ${data.tipsterName}, necesitamos que completes tus datos de KYC y método de cobro para poder procesarte los pagos.
       </p>
 
-      ${data.daysRemaining ? `
+      ${
+        data.daysRemaining
+          ? `
         <div style="padding: 16px; background-color: #fef3c7; border-radius: 8px; margin-bottom: 24px;">
           <p style="margin: 0; font-size: 14px; color: #92400e;">
             ⏰ Tienes <strong>${data.daysRemaining} días</strong> para completar esta información.
           </p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <div style="text-align: center;">
         ${this.button('Completar datos', `${this.appUrl}/dashboard/tipster`)}
@@ -954,10 +936,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Completa tus datos para recibir pagos');
   }
 
-  configurationChanged(data: {
-    changeDescription: string;
-    effectiveDate: Date;
-  }): string {
+  configurationChanged(data: { changeDescription: string; effectiveDate: Date }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Cambio de configuración</h2>
       
@@ -996,7 +975,10 @@ export class EmailTemplatesService {
         { label: 'Ganancias totales', value: this.formatMoney(data.totalEarnings, data.currency) },
         { label: 'Conversiones', value: data.conversions.toString() },
         { label: 'Clicks', value: data.clicks.toString() },
-        { label: 'Tasa de conversión', value: data.clicks > 0 ? `${((data.conversions / data.clicks) * 100).toFixed(1)}%` : '0%' },
+        {
+          label: 'Tasa de conversión',
+          value: data.clicks > 0 ? `${((data.conversions / data.clicks) * 100).toFixed(1)}%` : '0%',
+        },
       ])}
 
       <div style="text-align: center;">
@@ -1007,11 +989,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, `Resumen de afiliación: ${data.month}`);
   }
 
-  affiliateCsvUploaded(data: {
-    fileName: string;
-    recordsCount: number;
-    uploadDate: Date;
-  }): string {
+  affiliateCsvUploaded(data: { fileName: string; recordsCount: number; uploadDate: Date }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">CSV de afiliación cargado</h2>
       
@@ -1063,9 +1041,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Nuevo inicio de sesión detectado');
   }
 
-  passwordChanged(data: {
-    changeDate: Date;
-  }): string {
+  passwordChanged(data: { changeDate: Date }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">Contraseña actualizada</h2>
       
@@ -1073,9 +1049,7 @@ export class EmailTemplatesService {
         Tu contraseña ha sido cambiada exitosamente.
       </p>
 
-      ${this.infoBox([
-        { label: 'Fecha del cambio', value: this.formatDate(data.changeDate) },
-      ])}
+      ${this.infoBox([{ label: 'Fecha del cambio', value: this.formatDate(data.changeDate) }])}
 
       <div style="padding: 16px; background-color: #fee2e2; border-radius: 8px;">
         <p style="margin: 0; font-size: 14px; color: #991b1b;">
@@ -1117,11 +1091,7 @@ export class EmailTemplatesService {
     return this.baseTemplate(content, 'Nueva solicitud de tipster');
   }
 
-  tipsterKycCompleted(data: {
-    tipsterName: string;
-    email: string;
-    completedDate: Date;
-  }): string {
+  tipsterKycCompleted(data: { tipsterName: string; email: string; completedDate: Date }): string {
     const content = `
       <h2 style="margin: 0 0 16px; font-size: 24px; font-weight: 700; color: #111827;">KYC completado</h2>
       

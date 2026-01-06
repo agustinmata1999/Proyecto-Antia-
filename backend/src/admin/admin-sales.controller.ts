@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Logger } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -46,7 +40,10 @@ export class AdminSalesController {
       };
 
       if (startDate) {
-        filter.created_at = { ...filter.created_at, $gte: { $date: new Date(startDate).toISOString() } };
+        filter.created_at = {
+          ...filter.created_at,
+          $gte: { $date: new Date(startDate).toISOString() },
+        };
       }
       if (endDate) {
         const endDateObj = new Date(endDate);
@@ -70,12 +67,12 @@ export class AdminSalesController {
       }
 
       // Get orders
-      const ordersResult = await this.prisma.$runCommandRaw({
+      const ordersResult = (await this.prisma.$runCommandRaw({
         find: 'orders',
         filter,
         sort: { created_at: -1 },
         limit: 500,
-      }) as any;
+      })) as any;
 
       const orders = ordersResult.cursor?.firstBatch || [];
 
@@ -84,13 +81,13 @@ export class AdminSalesController {
       const productIds = [...new Set(orders.map((o: any) => o.product_id).filter(Boolean))];
 
       // Fetch tipsters
-      let tipstersMap: Record<string, string> = {};
+      const tipstersMap: Record<string, string> = {};
       if (tipsterIds.length > 0) {
-        const tipstersResult = await this.prisma.$runCommandRaw({
+        const tipstersResult = (await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
           filter: { _id: { $in: tipsterIds.map((id: string) => ({ $oid: id })) } },
           projection: { public_name: 1 },
-        }) as any;
+        })) as any;
         const tipsters = tipstersResult.cursor?.firstBatch || [];
         tipsters.forEach((t: any) => {
           const id = t._id.$oid || t._id;
@@ -99,13 +96,13 @@ export class AdminSalesController {
       }
 
       // Fetch products
-      let productsMap: Record<string, string> = {};
+      const productsMap: Record<string, string> = {};
       if (productIds.length > 0) {
-        const productsResult = await this.prisma.$runCommandRaw({
+        const productsResult = (await this.prisma.$runCommandRaw({
           find: 'products',
           filter: { _id: { $in: productIds.map((id: string) => ({ $oid: id })) } },
           projection: { title: 1 },
-        }) as any;
+        })) as any;
         const products = productsResult.cursor?.firstBatch || [];
         products.forEach((p: any) => {
           const id = p._id.$oid || p._id;
@@ -163,7 +160,10 @@ export class AdminSalesController {
       };
     } catch (error) {
       this.logger.error('Error fetching sales:', error);
-      return { sales: [], stats: { totalSales: 0, totalGrossCents: 0, totalPlatformFeeCents: 0, totalNetCents: 0 } };
+      return {
+        sales: [],
+        stats: { totalSales: 0, totalGrossCents: 0, totalPlatformFeeCents: 0, totalNetCents: 0 },
+      };
     }
   }
 }

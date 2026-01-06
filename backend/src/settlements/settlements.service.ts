@@ -18,13 +18,13 @@ export class SettlementsService {
    */
   async getPendingSummary(tipsterId: string) {
     const now = new Date();
-    
+
     // Calcular período actual de pronósticos (últimos 7 días)
     const forecastPeriodStart = new Date(now);
     forecastPeriodStart.setDate(forecastPeriodStart.getDate() - SETTLEMENT_FREQUENCY.FORECASTS);
 
     // Obtener órdenes del período actual
-    const ordersResult = await this.prisma.$runCommandRaw({
+    const ordersResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         {
@@ -46,7 +46,7 @@ export class SettlementsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const forecastStats = ordersResult.cursor?.firstBatch?.[0] || {
       grossAmountCents: 0,
@@ -61,7 +61,7 @@ export class SettlementsService {
 
     // Obtener ingresos de afiliación del mes actual
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const affiliateResult = await this.prisma.$runCommandRaw({
+    const affiliateResult = (await this.prisma.$runCommandRaw({
       aggregate: 'affiliate_earnings',
       pipeline: [
         {
@@ -80,7 +80,7 @@ export class SettlementsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const affiliateStats = affiliateResult.cursor?.firstBatch?.[0] || {
       totalEarningsCents: 0,
@@ -115,12 +115,12 @@ export class SettlementsService {
    * Obtener historial de liquidaciones de un tipster
    */
   async getSettlementHistory(tipsterId: string, limit = 20) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'settlements',
       filter: { tipster_id: tipsterId },
       sort: { created_at: -1 },
       limit,
-    }) as any;
+    })) as any;
 
     return (result.cursor?.firstBatch || []).map((doc: any) => ({
       id: doc._id.$oid || doc._id,
@@ -144,7 +144,7 @@ export class SettlementsService {
    * Obtener total liquidado histórico
    */
   async getTotalPaidOut(tipsterId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'settlements',
       pipeline: [
         {
@@ -162,7 +162,7 @@ export class SettlementsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const stats = result.cursor?.firstBatch?.[0] || { totalNetCents: 0, count: 0 };
     return {
@@ -190,24 +190,28 @@ export class SettlementsService {
 
     await this.prisma.$runCommandRaw({
       insert: 'settlements',
-      documents: [{
-        tipster_id: data.tipsterId,
-        type: data.type,
-        period_start: { $date: data.periodStart.toISOString() },
-        period_end: { $date: data.periodEnd.toISOString() },
-        gross_amount_cents: data.grossAmountCents,
-        gateway_fees_cents: data.gatewayFeesCents,
-        platform_fees_cents: data.platformFeesCents,
-        net_amount_cents: data.netAmountCents,
-        order_count: data.orderCount,
-        status: 'PENDING',
-        notes: data.notes || null,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          tipster_id: data.tipsterId,
+          type: data.type,
+          period_start: { $date: data.periodStart.toISOString() },
+          period_end: { $date: data.periodEnd.toISOString() },
+          gross_amount_cents: data.grossAmountCents,
+          gateway_fees_cents: data.gatewayFeesCents,
+          platform_fees_cents: data.platformFeesCents,
+          net_amount_cents: data.netAmountCents,
+          order_count: data.orderCount,
+          status: 'PENDING',
+          notes: data.notes || null,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
-    this.logger.log(`Created settlement for tipster ${data.tipsterId}: ${data.type} - €${(data.netAmountCents / 100).toFixed(2)}`);
+    this.logger.log(
+      `Created settlement for tipster ${data.tipsterId}: ${data.type} - €${(data.netAmountCents / 100).toFixed(2)}`,
+    );
   }
 
   /**
@@ -218,18 +222,20 @@ export class SettlementsService {
 
     await this.prisma.$runCommandRaw({
       update: 'settlements',
-      updates: [{
-        q: { _id: { $oid: settlementId } },
-        u: {
-          $set: {
-            status: 'PAID',
-            paid_at: { $date: now },
-            payment_method: paymentMethod,
-            payment_reference: paymentReference,
-            updated_at: { $date: now },
+      updates: [
+        {
+          q: { _id: { $oid: settlementId } },
+          u: {
+            $set: {
+              status: 'PAID',
+              paid_at: { $date: now },
+              payment_method: paymentMethod,
+              payment_reference: paymentReference,
+              updated_at: { $date: now },
+            },
           },
         },
-      }],
+      ],
     });
 
     this.logger.log(`Settlement ${settlementId} marked as PAID`);

@@ -35,25 +35,25 @@ export class AdminSupportController {
         filter.status = status;
       }
 
-      const ticketsResult = await this.prisma.$runCommandRaw({
+      const ticketsResult = (await this.prisma.$runCommandRaw({
         find: 'support_tickets',
         filter,
         sort: { created_at: -1 },
         limit: 200,
-      }) as any;
+      })) as any;
 
       const tickets = ticketsResult.cursor?.firstBatch || [];
 
       // Get user info for each ticket
       const userIds = [...new Set(tickets.map((t: any) => t.user_id).filter(Boolean))];
-      
-      let usersMap: Record<string, any> = {};
+
+      const usersMap: Record<string, any> = {};
       if (userIds.length > 0) {
-        const usersResult = await this.prisma.$runCommandRaw({
+        const usersResult = (await this.prisma.$runCommandRaw({
           find: 'users',
           filter: { _id: { $in: userIds.map((id: string) => ({ $oid: id })) } },
           projection: { email: 1, name: 1, role: 1 },
-        }) as any;
+        })) as any;
         const users = usersResult.cursor?.firstBatch || [];
         users.forEach((u: any) => {
           const id = u._id.$oid || u._id;
@@ -65,14 +65,14 @@ export class AdminSupportController {
       const tipsterUserIds = Object.entries(usersMap)
         .filter(([_, u]: [string, any]) => u.role === 'TIPSTER')
         .map(([id]) => id);
-      
-      let tipsterNames: Record<string, string> = {};
+
+      const tipsterNames: Record<string, string> = {};
       if (tipsterUserIds.length > 0) {
-        const tipstersResult = await this.prisma.$runCommandRaw({
+        const tipstersResult = (await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
           filter: { od_user_id: { $in: tipsterUserIds } },
           projection: { od_user_id: 1, public_name: 1 },
-        }) as any;
+        })) as any;
         const tipsters = tipstersResult.cursor?.firstBatch || [];
         tipsters.forEach((t: any) => {
           tipsterNames[t.od_user_id] = t.public_name;
@@ -88,7 +88,8 @@ export class AdminSupportController {
           status: ticket.status || 'OPEN',
           userId: ticket.user_id,
           userEmail: user.email || 'N/A',
-          userName: tipsterNames[ticket.user_id] || user.name || user.email?.split('@')[0] || 'Usuario',
+          userName:
+            tipsterNames[ticket.user_id] || user.name || user.email?.split('@')[0] || 'Usuario',
           userRole: user.role || 'CLIENT',
           responses: ticket.responses || [],
           createdAt: ticket.created_at?.$date || ticket.created_at,
@@ -107,10 +108,10 @@ export class AdminSupportController {
   @ApiOperation({ summary: 'Get ticket statistics' })
   async getTicketStats() {
     try {
-      const allTicketsResult = await this.prisma.$runCommandRaw({
+      const allTicketsResult = (await this.prisma.$runCommandRaw({
         find: 'support_tickets',
         projection: { status: 1 },
-      }) as any;
+      })) as any;
 
       const tickets = allTicketsResult.cursor?.firstBatch || [];
 
@@ -131,11 +132,11 @@ export class AdminSupportController {
   @ApiOperation({ summary: 'Get ticket details' })
   async getTicket(@Param('id') id: string) {
     try {
-      const ticketResult = await this.prisma.$runCommandRaw({
+      const ticketResult = (await this.prisma.$runCommandRaw({
         find: 'support_tickets',
         filter: { _id: { $oid: id } },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const ticket = ticketResult.cursor?.firstBatch?.[0];
 
@@ -146,24 +147,24 @@ export class AdminSupportController {
       // Get user info
       let user: any = {};
       if (ticket.user_id) {
-        const userResult = await this.prisma.$runCommandRaw({
+        const userResult = (await this.prisma.$runCommandRaw({
           find: 'users',
           filter: { _id: { $oid: ticket.user_id } },
           projection: { email: 1, name: 1, role: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
         user = userResult.cursor?.firstBatch?.[0] || {};
       }
 
       // Get tipster name if tipster
       let tipsterName = '';
       if (user.role === 'TIPSTER') {
-        const tipsterResult = await this.prisma.$runCommandRaw({
+        const tipsterResult = (await this.prisma.$runCommandRaw({
           find: 'tipster_profiles',
           filter: { od_user_id: ticket.user_id },
           projection: { public_name: 1 },
           limit: 1,
-        }) as any;
+        })) as any;
         tipsterName = tipsterResult.cursor?.firstBatch?.[0]?.public_name || '';
       }
 
@@ -190,10 +191,7 @@ export class AdminSupportController {
 
   @Post('tickets/:id/reply')
   @ApiOperation({ summary: 'Reply to a ticket (admin)' })
-  async replyToTicket(
-    @Param('id') id: string,
-    @Body() body: { message: string },
-  ) {
+  async replyToTicket(@Param('id') id: string, @Body() body: { message: string }) {
     try {
       const response = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
@@ -223,10 +221,7 @@ export class AdminSupportController {
 
   @Patch('tickets/:id/status')
   @ApiOperation({ summary: 'Update ticket status' })
-  async updateTicketStatus(
-    @Param('id') id: string,
-    @Body() body: { status: string },
-  ) {
+  async updateTicketStatus(@Param('id') id: string, @Body() body: { status: string }) {
     try {
       const validStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED'];
       if (!validStatuses.includes(body.status)) {
@@ -235,16 +230,18 @@ export class AdminSupportController {
 
       await this.prisma.$runCommandRaw({
         update: 'support_tickets',
-        updates: [{
-          q: { _id: { $oid: id } },
-          u: {
-            $set: { 
-              status: body.status,
-              updated_at: new Date().toISOString(),
-              ...(body.status === 'RESOLVED' ? { resolved_at: new Date().toISOString() } : {}),
+        updates: [
+          {
+            q: { _id: { $oid: id } },
+            u: {
+              $set: {
+                status: body.status,
+                updated_at: new Date().toISOString(),
+                ...(body.status === 'RESOLVED' ? { resolved_at: new Date().toISOString() } : {}),
+              },
             },
           },
-        }],
+        ],
       });
 
       this.logger.log(`Ticket ${id} status updated to ${body.status}`);

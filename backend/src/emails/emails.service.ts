@@ -30,7 +30,7 @@ export class EmailService {
     const apiKey = this.config.get<string>('RESEND_API_KEY');
     this.senderEmail = this.config.get<string>('SENDER_EMAIL') || 'onboarding@resend.dev';
     this.appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
-    
+
     if (apiKey && apiKey !== 'your_resend_api_key_here') {
       this.resend = new Resend(apiKey);
       this.isConfigured = true;
@@ -43,9 +43,11 @@ export class EmailService {
   /**
    * Send an email and log it to database
    */
-  async sendEmail(dto: SendEmailDto): Promise<{ success: boolean; emailId?: string; error?: string }> {
+  async sendEmail(
+    dto: SendEmailDto,
+  ): Promise<{ success: boolean; emailId?: string; error?: string }> {
     const { to, subject, html, type, metadata } = dto;
-    
+
     const emailLog = {
       id: this.generateId(),
       to,
@@ -61,10 +63,10 @@ export class EmailService {
         this.logger.log(`📧 [DEV MODE] Email to ${to}:`);
         this.logger.log(`   Subject: ${subject}`);
         this.logger.log(`   Type: ${type}`);
-        
+
         emailLog.status = 'LOGGED_DEV';
         await this.saveEmailLog(emailLog);
-        
+
         return { success: true, emailId: emailLog.id };
       }
 
@@ -81,10 +83,9 @@ export class EmailService {
 
       this.logger.log(`✅ Email sent to ${to} (${type})`);
       return { success: true, emailId: result.data?.id };
-
     } catch (error) {
       this.logger.error(`❌ Failed to send email to ${to}:`, error.message);
-      
+
       emailLog.status = 'FAILED';
       emailLog['error'] = error.message;
       await this.saveEmailLog(emailLog);
@@ -187,10 +188,7 @@ export class EmailService {
   // CLIENTE - CUENTA
   // =============================================
 
-  async sendWelcomeClient(data: {
-    email: string;
-    name?: string;
-  }) {
+  async sendWelcomeClient(data: { email: string; name?: string }) {
     const html = this.templates.welcomeClient(data);
     return this.sendEmail({
       to: data.email,
@@ -201,11 +199,7 @@ export class EmailService {
     });
   }
 
-  async sendPasswordReset(data: {
-    email: string;
-    resetLink: string;
-    expiresIn: string;
-  }) {
+  async sendPasswordReset(data: { email: string; resetLink: string; expiresIn: string }) {
     const html = this.templates.passwordReset(data);
     return this.sendEmail({
       to: data.email,
@@ -235,11 +229,7 @@ export class EmailService {
   // CLIENTE - SOPORTE
   // =============================================
 
-  async sendTicketCreated(data: {
-    email: string;
-    ticketId: string;
-    subject: string;
-  }) {
+  async sendTicketCreated(data: { email: string; ticketId: string; subject: string }) {
     const html = this.templates.ticketCreated(data);
     return this.sendEmail({
       to: data.email,
@@ -266,11 +256,7 @@ export class EmailService {
     });
   }
 
-  async sendTicketClosed(data: {
-    email: string;
-    ticketId: string;
-    subject: string;
-  }) {
+  async sendTicketClosed(data: { email: string; ticketId: string; subject: string }) {
     const html = this.templates.ticketClosed(data);
     return this.sendEmail({
       to: data.email,
@@ -304,11 +290,7 @@ export class EmailService {
     });
   }
 
-  async sendSubscriptionCancelled(data: {
-    email: string;
-    productName: string;
-    accessUntil: Date;
-  }) {
+  async sendSubscriptionCancelled(data: { email: string; productName: string; accessUntil: Date }) {
     const html = this.templates.subscriptionCancelled(data);
     return this.sendEmail({
       to: data.email,
@@ -569,10 +551,7 @@ export class EmailService {
     });
   }
 
-  async sendPasswordChanged(data: {
-    email: string;
-    changeDate: Date;
-  }) {
+  async sendPasswordChanged(data: { email: string; changeDate: Date }) {
     const html = this.templates.passwordChanged(data);
     return this.sendEmail({
       to: data.email,
@@ -751,18 +730,18 @@ export class EmailService {
 
   async getEmailLogs(filters: { type?: string; status?: string; limit?: number } = {}) {
     const { type, status, limit = 50 } = filters;
-    
+
     const filter: any = {};
     if (type) filter.type = type;
     if (status) filter.status = status;
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'email_logs',
       filter,
       sort: { created_at: -1 },
       limit,
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
 
     return result.cursor?.firstBatch || [];
   }

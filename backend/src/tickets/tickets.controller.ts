@@ -29,10 +29,7 @@ export class TicketsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a support ticket' })
-  async createTicket(
-    @CurrentUser() user: any,
-    @Body() body: { subject: string; message: string },
-  ) {
+  async createTicket(@CurrentUser() user: any, @Body() body: { subject: string; message: string }) {
     return this.ticketsService.createTicket({
       userId: user.id,
       userEmail: user.email,
@@ -129,10 +126,7 @@ export class TicketsController {
   @Roles('SUPERADMIN', 'ADMIN', 'SUPPORT')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update ticket status (admin)' })
-  async updateStatus(
-    @Param('id') id: string,
-    @Body() body: { status: TicketStatus },
-  ) {
+  async updateStatus(@Param('id') id: string, @Body() body: { status: TicketStatus }) {
     return this.ticketsService.updateStatus(id, body.status);
   }
 }

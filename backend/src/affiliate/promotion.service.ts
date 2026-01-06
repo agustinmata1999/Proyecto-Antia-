@@ -48,23 +48,25 @@ export class PromotionService {
     // Crear la promoción
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_promotions',
-      documents: [{
-        _id: promotionId,
-        name: dto.name,
-        description: dto.description || null,
-        slug: uniqueSlug,
-        status: 'ACTIVE',
-        start_date: dto.startDate ? { $date: dto.startDate } : null,
-        end_date: dto.endDate ? { $date: dto.endDate } : null,
-        created_by: adminId,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: promotionId,
+          name: dto.name,
+          description: dto.description || null,
+          slug: uniqueSlug,
+          status: 'ACTIVE',
+          start_date: dto.startDate ? { $date: dto.startDate } : null,
+          end_date: dto.endDate ? { $date: dto.endDate } : null,
+          created_by: adminId,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     // Crear los links de las casas
     if (dto.houseLinks && dto.houseLinks.length > 0) {
-      const linkDocuments = dto.houseLinks.map(link => ({
+      const linkDocuments = dto.houseLinks.map((link) => ({
         _id: new ObjectId(),
         promotion_id: promotionId.toHexString(),
         betting_house_id: link.bettingHouseId,
@@ -93,36 +95,38 @@ export class PromotionService {
    * Obtener todas las promociones
    */
   async getAllPromotions() {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const promotions = result.cursor?.firstBatch || [];
 
     // Para cada promoción, contar los links
-    const enriched = await Promise.all(promotions.map(async (p: any) => {
-      const promotionId = p._id.$oid || p._id.toString();
-      
-      const linksResult = await this.prisma.$runCommandRaw({
-        find: 'promotion_house_links',
-        filter: { promotion_id: promotionId },
-      }) as any;
+    const enriched = await Promise.all(
+      promotions.map(async (p: any) => {
+        const promotionId = p._id.$oid || p._id.toString();
 
-      const links = linksResult.cursor?.firstBatch || [];
+        const linksResult = (await this.prisma.$runCommandRaw({
+          find: 'promotion_house_links',
+          filter: { promotion_id: promotionId },
+        })) as any;
 
-      return {
-        id: promotionId,
-        name: p.name,
-        description: p.description,
-        slug: p.slug,
-        status: p.status,
-        startDate: p.start_date?.$date || p.start_date,
-        endDate: p.end_date?.$date || p.end_date,
-        housesCount: links.length,
-        createdAt: p.created_at?.$date || p.created_at,
-      };
-    }));
+        const links = linksResult.cursor?.firstBatch || [];
+
+        return {
+          id: promotionId,
+          name: p.name,
+          description: p.description,
+          slug: p.slug,
+          status: p.status,
+          startDate: p.start_date?.$date || p.start_date,
+          endDate: p.end_date?.$date || p.end_date,
+          housesCount: links.length,
+          createdAt: p.created_at?.$date || p.created_at,
+        };
+      }),
+    );
 
     return enriched;
   }
@@ -131,11 +135,11 @@ export class PromotionService {
    * Obtener promociones activas (para tipsters)
    */
   async getActivePromotions() {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
       filter: { status: 'ACTIVE' },
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const promotions = result.cursor?.firstBatch || [];
 
@@ -152,37 +156,37 @@ export class PromotionService {
    */
   async getPromotionById(promotionId: string) {
     // Try both ObjectId format and string format for _id
-    let result = await this.prisma.$runCommandRaw({
+    let result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
       filter: { _id: promotionId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let promotion = result.cursor?.firstBatch?.[0];
-    
+
     // If not found, try with ObjectId format
     if (!promotion) {
       try {
-        result = await this.prisma.$runCommandRaw({
+        result = (await this.prisma.$runCommandRaw({
           find: 'affiliate_promotions',
           filter: { _id: { $oid: promotionId } },
           limit: 1,
-        }) as any;
+        })) as any;
         promotion = result.cursor?.firstBatch?.[0];
       } catch (e) {
         // Ignore error if ObjectId format fails
       }
     }
-    
+
     if (!promotion) {
       throw new NotFoundException('Promoción no encontrada');
     }
 
     // Obtener los links de las casas
-    const linksResult = await this.prisma.$runCommandRaw({
+    const linksResult = (await this.prisma.$runCommandRaw({
       find: 'promotion_house_links',
       filter: { promotion_id: promotionId },
-    }) as any;
+    })) as any;
 
     const links = linksResult.cursor?.firstBatch || [];
 
@@ -200,12 +204,14 @@ export class PromotionService {
         trackingParamName: link.tracking_param_name,
         commissionCents: link.commission_cents || 0,
         isActive: link.is_active,
-        house: house ? {
-          id: house.id,
-          name: house.name,
-          slug: house.slug,
-          logoUrl: house.logoUrl,
-        } : null,
+        house: house
+          ? {
+              id: house.id,
+              name: house.name,
+              slug: house.slug,
+              logoUrl: house.logoUrl,
+            }
+          : null,
       };
     });
 
@@ -232,26 +238,32 @@ export class PromotionService {
     if (dto.name !== undefined) updateFields.name = dto.name;
     if (dto.description !== undefined) updateFields.description = dto.description;
     if (dto.status !== undefined) updateFields.status = dto.status;
-    if (dto.startDate !== undefined) updateFields.start_date = dto.startDate ? { $date: dto.startDate } : null;
-    if (dto.endDate !== undefined) updateFields.end_date = dto.endDate ? { $date: dto.endDate } : null;
+    if (dto.startDate !== undefined)
+      updateFields.start_date = dto.startDate ? { $date: dto.startDate } : null;
+    if (dto.endDate !== undefined)
+      updateFields.end_date = dto.endDate ? { $date: dto.endDate } : null;
 
     // Try with string _id first
-    let result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       update: 'affiliate_promotions',
-      updates: [{
-        q: { _id: promotionId },
-        u: { $set: updateFields },
-      }],
-    }) as any;
+      updates: [
+        {
+          q: { _id: promotionId },
+          u: { $set: updateFields },
+        },
+      ],
+    })) as any;
 
     // If no matches, try with ObjectId
     if (result.n === 0) {
       await this.prisma.$runCommandRaw({
         update: 'affiliate_promotions',
-        updates: [{
-          q: { _id: { $oid: promotionId } },
-          u: { $set: updateFields },
-        }],
+        updates: [
+          {
+            q: { _id: { $oid: promotionId } },
+            u: { $set: updateFields },
+          },
+        ],
       });
     }
 
@@ -263,41 +275,49 @@ export class PromotionService {
    */
   async deletePromotion(promotionId: string) {
     // Verificar si hay landings usando esta promoción
-    const landingsResult = await this.prisma.$runCommandRaw({
+    const landingsResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { promotion_id: promotionId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (landingsResult.cursor?.firstBatch?.length > 0) {
-      throw new BadRequestException('No se puede eliminar la promoción porque hay landings que la usan');
+      throw new BadRequestException(
+        'No se puede eliminar la promoción porque hay landings que la usan',
+      );
     }
 
     // Eliminar links
     await this.prisma.$runCommandRaw({
       delete: 'promotion_house_links',
-      deletes: [{
-        q: { promotion_id: promotionId },
-        limit: 0,
-      }],
+      deletes: [
+        {
+          q: { promotion_id: promotionId },
+          limit: 0,
+        },
+      ],
     });
 
     // Eliminar promoción - try both _id formats
     await this.prisma.$runCommandRaw({
       delete: 'affiliate_promotions',
-      deletes: [{
-        q: { _id: promotionId },
-        limit: 1,
-      }],
+      deletes: [
+        {
+          q: { _id: promotionId },
+          limit: 1,
+        },
+      ],
     });
-    
+
     // Try with ObjectId as well
     await this.prisma.$runCommandRaw({
       delete: 'affiliate_promotions',
-      deletes: [{
-        q: { _id: { $oid: promotionId } },
-        limit: 1,
-      }],
+      deletes: [
+        {
+          q: { _id: { $oid: promotionId } },
+          limit: 1,
+        },
+      ],
     });
 
     return { success: true };
@@ -308,13 +328,19 @@ export class PromotionService {
   /**
    * Añadir link de casa a una promoción
    */
-  async addHouseLink(promotionId: string, bettingHouseId: string, affiliateUrl: string, trackingParamName?: string, commissionCents?: number) {
+  async addHouseLink(
+    promotionId: string,
+    bettingHouseId: string,
+    affiliateUrl: string,
+    trackingParamName?: string,
+    commissionCents?: number,
+  ) {
     // Verificar que no exista ya
-    const existingResult = await this.prisma.$runCommandRaw({
+    const existingResult = (await this.prisma.$runCommandRaw({
       find: 'promotion_house_links',
       filter: { promotion_id: promotionId, betting_house_id: bettingHouseId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (existingResult.cursor?.firstBatch?.length > 0) {
       throw new BadRequestException('Esta casa ya está configurada en la promoción');
@@ -325,17 +351,19 @@ export class PromotionService {
 
     await this.prisma.$runCommandRaw({
       insert: 'promotion_house_links',
-      documents: [{
-        _id: linkId,
-        promotion_id: promotionId,
-        betting_house_id: bettingHouseId,
-        affiliate_url: affiliateUrl,
-        tracking_param_name: trackingParamName || null,
-        commission_cents: commissionCents || 5000, // Default €50
-        is_active: true,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: linkId,
+          promotion_id: promotionId,
+          betting_house_id: bettingHouseId,
+          affiliate_url: affiliateUrl,
+          tracking_param_name: trackingParamName || null,
+          commission_cents: commissionCents || 5000, // Default €50
+          is_active: true,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     return { id: linkId.toHexString(), success: true };
@@ -349,15 +377,18 @@ export class PromotionService {
     const updateFields: any = { updated_at: { $date: now } };
 
     if (dto.affiliateUrl !== undefined) updateFields.affiliate_url = dto.affiliateUrl;
-    if (dto.trackingParamName !== undefined) updateFields.tracking_param_name = dto.trackingParamName;
+    if (dto.trackingParamName !== undefined)
+      updateFields.tracking_param_name = dto.trackingParamName;
     if (dto.isActive !== undefined) updateFields.is_active = dto.isActive;
 
     await this.prisma.$runCommandRaw({
       update: 'promotion_house_links',
-      updates: [{
-        q: { _id: { $oid: linkId } },
-        u: { $set: updateFields },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: linkId } },
+          u: { $set: updateFields },
+        },
+      ],
     });
 
     return { success: true };
@@ -369,10 +400,12 @@ export class PromotionService {
   async removeHouseLink(linkId: string) {
     await this.prisma.$runCommandRaw({
       delete: 'promotion_house_links',
-      deletes: [{
-        q: { _id: { $oid: linkId } },
-        limit: 1,
-      }],
+      deletes: [
+        {
+          q: { _id: { $oid: linkId } },
+          limit: 1,
+        },
+      ],
     });
 
     return { success: true };
@@ -382,10 +415,10 @@ export class PromotionService {
    * Obtener casas disponibles de una promoción (para que el tipster seleccione)
    */
   async getPromotionHouses(promotionId: string) {
-    const linksResult = await this.prisma.$runCommandRaw({
+    const linksResult = (await this.prisma.$runCommandRaw({
       find: 'promotion_house_links',
       filter: { promotion_id: promotionId, is_active: true },
-    }) as any;
+    })) as any;
 
     const links = linksResult.cursor?.firstBatch || [];
 
@@ -394,35 +427,39 @@ export class PromotionService {
     const houses = await this.getBettingHousesByIds(houseIds);
     const housesMap = new Map(houses.map((h: any) => [h.id, h]));
 
-    return links.map((link: any) => {
-      const house: any = housesMap.get(link.betting_house_id);
-      return {
-        bettingHouseId: link.betting_house_id,
-        affiliateUrl: link.affiliate_url,
-        house: house ? {
-          id: house.id,
-          name: house.name,
-          slug: house.slug,
-          logoUrl: house.logoUrl,
-          allowedCountries: house.allowedCountries,
-        } : null,
-      };
-    }).filter((l: any) => l.house !== null);
+    return links
+      .map((link: any) => {
+        const house: any = housesMap.get(link.betting_house_id);
+        return {
+          bettingHouseId: link.betting_house_id,
+          affiliateUrl: link.affiliate_url,
+          house: house
+            ? {
+                id: house.id,
+                name: house.name,
+                slug: house.slug,
+                logoUrl: house.logoUrl,
+                allowedCountries: house.allowedCountries,
+              }
+            : null,
+        };
+      })
+      .filter((l: any) => l.house !== null);
   }
 
   /**
    * Obtener el link específico de una casa en una promoción
    */
   async getPromotionHouseLink(promotionId: string, bettingHouseId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'promotion_house_links',
-      filter: { 
-        promotion_id: promotionId, 
+      filter: {
+        promotion_id: promotionId,
         betting_house_id: bettingHouseId,
         is_active: true,
       },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const link = result.cursor?.firstBatch?.[0];
     if (!link) {
@@ -451,11 +488,11 @@ export class PromotionService {
     let counter = 1;
 
     while (true) {
-      const existing = await this.prisma.$runCommandRaw({
+      const existing = (await this.prisma.$runCommandRaw({
         find: 'affiliate_promotions',
         filter: { slug },
         limit: 1,
-      }) as any;
+      })) as any;
 
       if (!existing.cursor?.firstBatch?.length) {
         return slug;
@@ -469,13 +506,13 @@ export class PromotionService {
   private async getBettingHousesByIds(houseIds: string[]) {
     if (!houseIds.length) return [];
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { status: 'ACTIVE' },
-    }) as any;
+    })) as any;
 
     const allHouses = result.cursor?.firstBatch || [];
-    
+
     return allHouses
       .filter((h: any) => {
         const id = h._id.$oid || h._id.toString();

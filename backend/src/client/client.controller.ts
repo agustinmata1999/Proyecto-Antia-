@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Post,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Put, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -26,7 +18,7 @@ export class ClientController {
   @ApiOperation({ summary: 'Get client profile' })
   async getProfile(@CurrentUser() user: any) {
     const profile = await this.clientService.getProfile(user.id);
-    
+
     return {
       profile,
       user: {
@@ -41,7 +33,8 @@ export class ClientController {
   @ApiOperation({ summary: 'Update client profile' })
   async updateProfile(
     @CurrentUser() user: any,
-    @Body() body: {
+    @Body()
+    body: {
       countryIso?: string;
       telegramUserId?: string;
       locale?: string;
@@ -59,16 +52,13 @@ export class ClientController {
 
   @Get('purchases/:id')
   @ApiOperation({ summary: 'Get purchase details' })
-  async getPurchaseDetails(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async getPurchaseDetails(@CurrentUser() user: any, @Param('id') id: string) {
     const details = await this.clientService.getPurchaseDetails(user.id, id);
-    
+
     if (!details) {
       return { error: 'Compra no encontrada' };
     }
-    
+
     return details;
   }
 
@@ -80,10 +70,7 @@ export class ClientController {
 
   @Post('subscriptions/:id/cancel')
   @ApiOperation({ summary: 'Cancel a subscription' })
-  async cancelSubscription(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async cancelSubscription(@CurrentUser() user: any, @Param('id') id: string) {
     return this.clientService.cancelSubscription(user.id, id);
   }
 

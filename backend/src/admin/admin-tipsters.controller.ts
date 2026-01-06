@@ -44,7 +44,7 @@ export class AdminTipstersController {
     await this.verifyAdmin(req.user.id);
 
     // Get all tipster profiles with user info
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'tipster_profiles',
       pipeline: [
         {
@@ -90,7 +90,7 @@ export class AdminTipstersController {
         { $sort: { created_at: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const tipsters = (result.cursor?.firstBatch || []).map((doc: any) => ({
       id: doc._id.$oid || doc._id.toString(),
@@ -143,11 +143,11 @@ export class AdminTipstersController {
     }
 
     // Get user info
-    const userResult = await this.prisma.$runCommandRaw({
+    const userResult = (await this.prisma.$runCommandRaw({
       find: 'users',
       filter: { _id: { $oid: tipster.userId } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const user = userResult.cursor?.firstBatch?.[0];
 
@@ -172,11 +172,7 @@ export class AdminTipstersController {
    * PATCH /api/admin/tipsters/:id/modules - Actualizar módulos de un tipster
    */
   @Patch(':id/modules')
-  async updateModules(
-    @Param('id') id: string,
-    @Body() dto: UpdateModulesDto,
-    @Request() req,
-  ) {
+  async updateModules(@Param('id') id: string, @Body() dto: UpdateModulesDto, @Request() req) {
     const admin = await this.verifyAdmin(req.user.id);
 
     const tipster = await this.prisma.tipsterProfile.findUnique({
@@ -204,10 +200,12 @@ export class AdminTipstersController {
 
     await this.prisma.$runCommandRaw({
       update: 'tipster_profiles',
-      updates: [{
-        q: { _id: { $oid: id } },
-        u: { $set: updateData },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: id } },
+          u: { $set: updateData },
+        },
+      ],
     });
 
     // Get updated tipster

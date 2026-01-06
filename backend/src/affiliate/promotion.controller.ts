@@ -1,18 +1,13 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { PromotionService, CreatePromotionDto, UpdatePromotionDto, UpdateHouseLinkDto } from './promotion.service';
+import {
+  PromotionService,
+  CreatePromotionDto,
+  UpdatePromotionDto,
+  UpdateHouseLinkDto,
+} from './promotion.service';
 
 @Controller('admin/promotions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -72,9 +67,21 @@ export class PromotionAdminController {
   @Post(':id/houses')
   async addHouseLink(
     @Param('id') id: string,
-    @Body() body: { bettingHouseId: string; affiliateUrl: string; trackingParamName?: string; commissionCents?: number },
+    @Body()
+    body: {
+      bettingHouseId: string;
+      affiliateUrl: string;
+      trackingParamName?: string;
+      commissionCents?: number;
+    },
   ) {
-    return this.promotionService.addHouseLink(id, body.bettingHouseId, body.affiliateUrl, body.trackingParamName, body.commissionCents);
+    return this.promotionService.addHouseLink(
+      id,
+      body.bettingHouseId,
+      body.affiliateUrl,
+      body.trackingParamName,
+      body.commissionCents,
+    );
   }
 
   /**

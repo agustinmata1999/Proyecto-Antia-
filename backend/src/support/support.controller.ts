@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Param,
-  Body,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -26,10 +17,7 @@ export class SupportController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a support ticket' })
-  async createTicket(
-    @CurrentUser() user: any,
-    @Body() body: CreateTicketDto,
-  ) {
+  async createTicket(@CurrentUser() user: any, @Body() body: CreateTicketDto) {
     return this.supportService.createTicket(user.id, user.email, body);
   }
 
@@ -45,16 +33,13 @@ export class SupportController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get my ticket details' })
-  async getMyTicketDetails(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async getMyTicketDetails(@CurrentUser() user: any, @Param('id') id: string) {
     const ticket = await this.supportService.getTicketDetails(user.id, id);
-    
+
     if (!ticket) {
       return { error: 'Ticket no encontrado' };
     }
-    
+
     return ticket;
   }
 
@@ -88,7 +73,8 @@ export class SupportController {
   @ApiOperation({ summary: 'Update ticket (admin)' })
   async updateTicket(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       status?: string;
       priority?: string;
       adminNotes?: string;

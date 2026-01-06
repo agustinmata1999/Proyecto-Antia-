@@ -32,7 +32,7 @@ export class ReferralsController {
     const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
       where: { userId: user.id },
     });
-    
+
     if (!tipsterProfile) {
       return {
         clicks: 0,
@@ -43,7 +43,7 @@ export class ReferralsController {
         conversionRate: 0,
       };
     }
-    
+
     return this.referralsService.getMetrics(tipsterProfile.id);
   }
 

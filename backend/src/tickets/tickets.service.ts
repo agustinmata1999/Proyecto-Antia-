@@ -33,7 +33,7 @@ export class TicketsService {
    */
   async createTicket(dto: CreateTicketDto) {
     const ticketId = this.generateId();
-    
+
     const ticket = {
       id: ticketId,
       user_id: dto.userId,
@@ -71,12 +71,12 @@ export class TicketsService {
    * Get tickets for a user
    */
   async getTicketsByUser(userId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter: { user_id: userId },
       sort: { created_at: -1 },
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
 
     const tickets = result.cursor?.firstBatch || [];
     return tickets.map(this.formatTicket);
@@ -90,12 +90,12 @@ export class TicketsService {
     if (filters.status) filter.status = filters.status;
     if (filters.userType) filter.user_type = filters.userType;
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter,
       sort: { created_at: -1 },
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
 
     const tickets = result.cursor?.firstBatch || [];
     return tickets.map(this.formatTicket);
@@ -108,12 +108,12 @@ export class TicketsService {
     const filter: any = { id: ticketId };
     if (userId) filter.user_id = userId;
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter,
       limit: 1,
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
 
     const ticket = result.cursor?.firstBatch?.[0];
     if (!ticket) {
@@ -136,12 +136,12 @@ export class TicketsService {
     };
 
     // Get ticket to send email
-    const ticketResult = await this.prisma.$runCommandRaw({
+    const ticketResult = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter: { id: dto.ticketId },
       limit: 1,
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
     const ticket = ticketResult.cursor?.firstBatch?.[0];
 
     if (!ticket) {
@@ -151,16 +151,18 @@ export class TicketsService {
     // Update ticket with new response
     await this.prisma.$runCommandRaw({
       update: 'support_tickets',
-      updates: [{
-        q: { id: dto.ticketId },
-        u: {
-          $push: { responses: response },
-          $set: {
-            status: dto.isAdmin ? 'IN_PROGRESS' : ticket.status,
-            updated_at: new Date().toISOString(),
+      updates: [
+        {
+          q: { id: dto.ticketId },
+          u: {
+            $push: { responses: response },
+            $set: {
+              status: dto.isAdmin ? 'IN_PROGRESS' : ticket.status,
+              updated_at: new Date().toISOString(),
+            },
           },
         },
-      }],
+      ],
     });
 
     // Send email notification
@@ -185,12 +187,12 @@ export class TicketsService {
    * Update ticket status
    */
   async updateStatus(ticketId: string, status: TicketStatus) {
-    const ticketResult = await this.prisma.$runCommandRaw({
+    const ticketResult = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter: { id: ticketId },
       limit: 1,
       projection: { _id: 0 },
-    }) as any;
+    })) as any;
     const ticket = ticketResult.cursor?.firstBatch?.[0];
 
     if (!ticket) {
@@ -199,15 +201,17 @@ export class TicketsService {
 
     await this.prisma.$runCommandRaw({
       update: 'support_tickets',
-      updates: [{
-        q: { id: ticketId },
-        u: {
-          $set: {
-            status,
-            updated_at: new Date().toISOString(),
+      updates: [
+        {
+          q: { id: ticketId },
+          u: {
+            $set: {
+              status,
+              updated_at: new Date().toISOString(),
+            },
           },
         },
-      }],
+      ],
     });
 
     // Send closed email if applicable
@@ -234,17 +238,17 @@ export class TicketsService {
     const stats: Record<string, number> = {};
 
     for (const status of statuses) {
-      const result = await this.prisma.$runCommandRaw({
+      const result = (await this.prisma.$runCommandRaw({
         count: 'support_tickets',
         query: { status },
-      }) as any;
+      })) as any;
       stats[status.toLowerCase()] = result.n || 0;
     }
 
-    const totalResult = await this.prisma.$runCommandRaw({
+    const totalResult = (await this.prisma.$runCommandRaw({
       count: 'support_tickets',
       query: {},
-    }) as any;
+    })) as any;
     stats.total = totalResult.n || 0;
 
     return stats;

@@ -23,7 +23,7 @@ export class GeolocationService {
     try {
       // Clean the IP (remove IPv6 prefix if present)
       const cleanIp = ip.replace('::ffff:', '');
-      
+
       // Skip localhost/private IPs
       if (this.isPrivateIP(cleanIp)) {
         this.logger.warn(`Private IP detected: ${cleanIp}, defaulting to Spain`);
@@ -31,7 +31,9 @@ export class GeolocationService {
       }
 
       // Call ip-api.com (free, no API key needed)
-      const response = await fetch(`http://ip-api.com/json/${cleanIp}?fields=status,country,countryCode,regionName,city`);
+      const response = await fetch(
+        `http://ip-api.com/json/${cleanIp}?fields=status,country,countryCode,regionName,city`,
+      );
       const data = await response.json();
 
       if (data.status === 'success') {
@@ -50,7 +52,6 @@ export class GeolocationService {
 
       this.logger.warn(`Geolocation failed for ${cleanIp}: ${data.message}`);
       return this.getDefaultResult(cleanIp, 'ES');
-
     } catch (error) {
       this.logger.error(`Geolocation error for ${ip}:`, error);
       // Default to Spain if geolocation fails
@@ -63,16 +64,16 @@ export class GeolocationService {
    */
   private isPrivateIP(ip: string): boolean {
     const privateRanges = [
-      /^127\./,           // Localhost
-      /^10\./,            // Private Class A
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,  // Private Class B
-      /^192\.168\./,      // Private Class C
-      /^::1$/,            // IPv6 localhost
+      /^127\./, // Localhost
+      /^10\./, // Private Class A
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./, // Private Class B
+      /^192\.168\./, // Private Class C
+      /^::1$/, // IPv6 localhost
       /^localhost$/i,
-      /^$/,               // Empty
+      /^$/, // Empty
     ];
 
-    return privateRanges.some(range => range.test(ip));
+    return privateRanges.some((range) => range.test(ip));
   }
 
   /**

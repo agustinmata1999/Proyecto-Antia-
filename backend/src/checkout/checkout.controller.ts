@@ -36,11 +36,12 @@ export class CheckoutController {
   @Get('detect-gateway')
   @ApiOperation({ summary: 'Detect payment gateway based on client IP' })
   async detectGateway(@Req() req: any) {
-    const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || 
-                     req.headers['x-real-ip'] || 
-                     req.connection?.remoteAddress || 
-                     req.ip || 
-                     '127.0.0.1';
+    const clientIp =
+      req.headers['x-forwarded-for']?.split(',')[0] ||
+      req.headers['x-real-ip'] ||
+      req.connection?.remoteAddress ||
+      req.ip ||
+      '127.0.0.1';
     return this.checkoutService.detectGateway(clientIp);
   }
 
@@ -57,7 +58,8 @@ export class CheckoutController {
   @Post('session')
   @ApiOperation({ summary: 'Create payment checkout session' })
   async createCheckoutSession(
-    @Body() body: {
+    @Body()
+    body: {
       productId: string;
       originUrl: string;
       isGuest: boolean;
@@ -69,12 +71,13 @@ export class CheckoutController {
     @Req() req: any,
   ) {
     // Get client IP for geolocation
-    const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || 
-                     req.headers['x-real-ip'] || 
-                     req.connection?.remoteAddress || 
-                     req.ip || 
-                     '127.0.0.1';
-    
+    const clientIp =
+      req.headers['x-forwarded-for']?.split(',')[0] ||
+      req.headers['x-real-ip'] ||
+      req.connection?.remoteAddress ||
+      req.ip ||
+      '127.0.0.1';
+
     this.logger.log(`Creating checkout session for product ${body.productId} (IP: ${clientIp})`);
     return this.checkoutService.createCheckoutSession({ ...body, clientIp });
   }
@@ -91,10 +94,7 @@ export class CheckoutController {
   @Public()
   @Get('verify')
   @ApiOperation({ summary: 'Verify payment and get order details' })
-  async verifyPayment(
-    @Query('session_id') sessionId: string,
-    @Query('order_id') orderId: string,
-  ) {
+  async verifyPayment(@Query('session_id') sessionId: string, @Query('order_id') orderId: string) {
     return this.checkoutService.verifyPaymentAndGetOrder(sessionId, orderId);
   }
 
@@ -112,7 +112,7 @@ export class CheckoutController {
       this.logger.error('No raw body in webhook request');
       return { received: false };
     }
-    
+
     this.logger.log('Received Stripe webhook');
     return this.checkoutService.handleStripeWebhook(rawBody, signature);
   }
@@ -140,12 +140,7 @@ export class CheckoutController {
   @Public()
   @Post('complete-payment')
   @ApiOperation({ summary: 'Complete payment and send Telegram notification' })
-  async completePayment(
-    @Body() body: {
-      orderId: string;
-      sessionId?: string;
-    },
-  ) {
+  async completePayment(@Body() body: { orderId: string; sessionId?: string }) {
     this.logger.log(`Completing payment for order ${body.orderId}`);
     return this.checkoutService.completePaymentAndNotify(body.orderId, body.sessionId);
   }
@@ -163,7 +158,8 @@ export class CheckoutController {
   @Post('test-purchase')
   @ApiOperation({ summary: 'Create order and simulate payment (testing only)' })
   async testPurchase(
-    @Body() body: {
+    @Body()
+    body: {
       productId: string;
       email?: string;
       phone?: string;

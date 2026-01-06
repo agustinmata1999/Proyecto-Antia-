@@ -1,18 +1,22 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  UseGuards, 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
   Request,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { TelegramChannelsService, CreateChannelDto, UpdateChannelDto } from './telegram-channels.service';
+import {
+  TelegramChannelsService,
+  CreateChannelDto,
+  UpdateChannelDto,
+} from './telegram-channels.service';
 import { TelegramService } from './telegram.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -32,11 +36,11 @@ export class TelegramChannelsController {
     const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
       where: { userId },
     });
-    
+
     if (!tipsterProfile) {
       throw new Error('Perfil de tipster no encontrado');
     }
-    
+
     return tipsterProfile.id;
   }
 
@@ -67,8 +71,8 @@ export class TelegramChannelsController {
   async create(@Body() dto: CreateChannelDto, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
     const channel = await this.channelsService.create(tipsterId, dto);
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Canal conectado correctamente',
       channel,
     };
@@ -88,15 +92,11 @@ export class TelegramChannelsController {
    * PATCH /api/telegram/channels/:id - Actualizar un canal
    */
   @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateChannelDto,
-    @Request() req,
-  ) {
+  async update(@Param('id') id: string, @Body() dto: UpdateChannelDto, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
     const channel = await this.channelsService.update(id, tipsterId, dto);
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Canal actualizado correctamente',
       channel,
     };
@@ -110,8 +110,8 @@ export class TelegramChannelsController {
   async remove(@Param('id') id: string, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
     await this.channelsService.remove(id, tipsterId);
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Canal desconectado correctamente',
     };
   }
@@ -124,8 +124,8 @@ export class TelegramChannelsController {
   async refresh(@Param('id') id: string, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
     const channel = await this.channelsService.updateMemberCount(id, tipsterId);
-    return { 
-      success: true, 
+    return {
+      success: true,
       channel,
     };
   }
@@ -138,20 +138,20 @@ export class TelegramChannelsController {
   async generateInviteLink(@Param('id') id: string, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
     const channel = await this.channelsService.findOne(id, tipsterId);
-    
+
     const inviteLink = await this.channelsService.getInviteLink(channel.channelId);
-    
+
     if (inviteLink) {
       // Actualizar el enlace en la base de datos
       await this.channelsService.update(id, tipsterId, { inviteLink });
-      return { 
-        success: true, 
+      return {
+        success: true,
         inviteLink,
       };
     }
-    
-    return { 
-      success: false, 
+
+    return {
+      success: false,
       error: 'No se pudo generar el enlace de invitación',
     };
   }
@@ -171,7 +171,7 @@ export class TelegramChannelsController {
     }
 
     const tipsterId = await this.getTipsterId(req.user.id);
-    
+
     // Extraer el hash del invite link
     // Formatos posibles:
     // - https://t.me/+abc123xyz
@@ -179,23 +179,25 @@ export class TelegramChannelsController {
     // - https://t.me/joinchat/abc123xyz (formato antiguo)
     // - https://t.me/channelname (canales públicos)
     const inviteLink = body.inviteLink.trim();
-    
+
     // Buscar el canal en la base de datos por invite link
     const searchResult = await this.telegramService.findChannelByInviteLink(inviteLink);
-    
+
     if (!searchResult.found || !searchResult.channel) {
       return {
         success: false,
-        message: searchResult.error || 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+        message:
+          searchResult.error ||
+          'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
       };
     }
 
     // Verificar si el canal ya está conectado para este tipster
     const existingChannel = await this.channelsService.findByChannelId(
-      tipsterId, 
-      searchResult.channel.channelId
+      tipsterId,
+      searchResult.channel.channelId,
     );
-    
+
     if (existingChannel) {
       return {
         success: false,
@@ -207,11 +209,13 @@ export class TelegramChannelsController {
     // Crear el canal usando el servicio existente
     try {
       const isPrivate = !searchResult.channel.channelUsername;
-      
+
       const channel = await this.channelsService.create(tipsterId, {
         channelId: searchResult.channel.channelId,
         channelTitle: searchResult.channel.channelTitle,
-        channelName: searchResult.channel.channelUsername ? `@${searchResult.channel.channelUsername}` : undefined,
+        channelName: searchResult.channel.channelUsername
+          ? `@${searchResult.channel.channelUsername}`
+          : undefined,
         channelType: isPrivate ? 'private' : 'public',
         inviteLink: inviteLink,
       });
@@ -244,23 +248,25 @@ export class TelegramChannelsController {
     }
 
     const tipsterId = await this.getTipsterId(req.user.id);
-    
+
     // Buscar el canal por nombre en la tabla de canales detectados
     const searchResult = await this.telegramService.findChannelByName(body.channelName);
-    
+
     if (!searchResult.found || !searchResult.channel) {
       return {
         success: false,
-        message: searchResult.error || 'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
+        message:
+          searchResult.error ||
+          'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
       };
     }
 
     // Verificar si el canal ya está conectado para este tipster
     const existingChannel = await this.channelsService.findByChannelId(
-      tipsterId, 
-      searchResult.channel.channelId
+      tipsterId,
+      searchResult.channel.channelId,
     );
-    
+
     if (existingChannel) {
       return {
         success: false,
@@ -275,11 +281,13 @@ export class TelegramChannelsController {
       // - Si tiene @username → público
       // - Si NO tiene @username → privado (la mayoría de canales premium)
       const isPrivate = !searchResult.channel.channelUsername;
-      
+
       const channel = await this.channelsService.create(tipsterId, {
         channelId: searchResult.channel.channelId,
         channelTitle: searchResult.channel.channelTitle,
-        channelName: searchResult.channel.channelUsername ? `@${searchResult.channel.channelUsername}` : undefined,
+        channelName: searchResult.channel.channelUsername
+          ? `@${searchResult.channel.channelUsername}`
+          : undefined,
         channelType: isPrivate ? 'private' : 'public',
       });
 
@@ -331,10 +339,10 @@ export class TelegramChannelsController {
 
     // Verificar si ya está conectado
     const existingChannel = await this.channelsService.findByChannelId(
-      tipsterId, 
-      body.channelId.trim()
+      tipsterId,
+      body.channelId.trim(),
     );
-    
+
     if (existingChannel) {
       return {
         success: false,

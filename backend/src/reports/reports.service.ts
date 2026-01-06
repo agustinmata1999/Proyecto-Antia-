@@ -51,7 +51,7 @@ export class ReportsService {
    */
   async getSalesReport(filters: ReportFilters): Promise<SalesReport> {
     const { startDate, endDate, tipsterId } = filters;
-    
+
     // Construir filtro de fechas
     const dateFilter: any = {};
     if (startDate) dateFilter.$gte = { $date: new Date(startDate).toISOString() };
@@ -64,7 +64,7 @@ export class ReportsService {
     if (tipsterId) matchStage.tipster_id = tipsterId;
 
     // Totales generales
-    const totalsResult = await this.prisma.$runCommandRaw({
+    const totalsResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -80,7 +80,7 @@ export class ReportsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const totals = totalsResult.cursor?.firstBatch?.[0] || {
       totalSales: 0,
@@ -91,7 +91,7 @@ export class ReportsService {
     };
 
     // Por período (día)
-    const byPeriodResult = await this.prisma.$runCommandRaw({
+    const byPeriodResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -106,7 +106,7 @@ export class ReportsService {
         { $sort: { _id: 1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const byPeriod = (byPeriodResult.cursor?.firstBatch || []).map((item: any) => ({
       period: item._id,
@@ -116,7 +116,7 @@ export class ReportsService {
     }));
 
     // Por tipster
-    const byTipsterResult = await this.prisma.$runCommandRaw({
+    const byTipsterResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -131,10 +131,12 @@ export class ReportsService {
         { $sort: { grossCents: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     // Obtener nombres de tipsters
-    const tipsterIds = (byTipsterResult.cursor?.firstBatch || []).map((t: any) => t._id).filter(Boolean);
+    const tipsterIds = (byTipsterResult.cursor?.firstBatch || [])
+      .map((t: any) => t._id)
+      .filter(Boolean);
     const tipstersMap = await this.getTipstersMap(tipsterIds);
 
     const byTipster = (byTipsterResult.cursor?.firstBatch || []).map((item: any) => ({
@@ -146,7 +148,7 @@ export class ReportsService {
     }));
 
     // Por producto
-    const byProductResult = await this.prisma.$runCommandRaw({
+    const byProductResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -161,9 +163,11 @@ export class ReportsService {
         { $limit: 20 },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
-    const productIds = (byProductResult.cursor?.firstBatch || []).map((p: any) => p._id).filter(Boolean);
+    const productIds = (byProductResult.cursor?.firstBatch || [])
+      .map((p: any) => p._id)
+      .filter(Boolean);
     const productsMap = await this.getProductsMap(productIds);
 
     const byProduct = (byProductResult.cursor?.firstBatch || []).map((item: any) => ({
@@ -190,7 +194,7 @@ export class ReportsService {
    */
   async getPlatformIncomeReport(filters: ReportFilters) {
     const { startDate, endDate } = filters;
-    
+
     const dateFilter: any = {};
     if (startDate) dateFilter.$gte = { $date: new Date(startDate).toISOString() };
     if (endDate) dateFilter.$lte = { $date: new Date(endDate).toISOString() };
@@ -201,7 +205,7 @@ export class ReportsService {
     if (Object.keys(dateFilter).length > 0) matchStage.created_at = dateFilter;
 
     // Totales de comisiones
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -216,7 +220,7 @@ export class ReportsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const totals = result.cursor?.firstBatch?.[0] || {
       totalOrders: 0,
@@ -226,7 +230,7 @@ export class ReportsService {
     };
 
     // Por mes
-    const byMonthResult = await this.prisma.$runCommandRaw({
+    const byMonthResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         { $match: matchStage },
@@ -242,7 +246,7 @@ export class ReportsService {
         { $sort: { _id: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const byMonth = (byMonthResult.cursor?.firstBatch || []).map((item: any) => ({
       month: item._id,
@@ -258,9 +262,10 @@ export class ReportsService {
       totalGrossCents: totals.totalGrossCents,
       totalPlatformFeesCents: totals.totalPlatformFeesCents,
       totalGatewayFeesCents: totals.totalGatewayFeesCents,
-      avgPlatformFeePercent: totals.totalGrossCents > 0 
-        ? ((totals.totalPlatformFeesCents / totals.totalGrossCents) * 100).toFixed(2)
-        : 0,
+      avgPlatformFeePercent:
+        totals.totalGrossCents > 0
+          ? ((totals.totalPlatformFeesCents / totals.totalGrossCents) * 100).toFixed(2)
+          : 0,
       byMonth,
     };
   }
@@ -270,11 +275,11 @@ export class ReportsService {
    */
   async getSettlementsReport(filters: ReportFilters) {
     const { startDate, endDate, tipsterId, status } = filters;
-    
+
     const matchStage: any = {};
     if (tipsterId) matchStage.tipster_id = tipsterId;
     if (status) matchStage.status = status;
-    
+
     if (startDate || endDate) {
       matchStage.created_at = {};
       if (startDate) matchStage.created_at.$gte = { $date: new Date(startDate).toISOString() };
@@ -282,7 +287,7 @@ export class ReportsService {
     }
 
     // Por estado
-    const byStatusResult = await this.prisma.$runCommandRaw({
+    const byStatusResult = (await this.prisma.$runCommandRaw({
       aggregate: 'settlements',
       pipeline: [
         { $match: matchStage },
@@ -296,7 +301,7 @@ export class ReportsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const byStatus = (byStatusResult.cursor?.firstBatch || []).map((item: any) => ({
       status: item._id,
@@ -306,7 +311,7 @@ export class ReportsService {
     }));
 
     // Por tipo
-    const byTypeResult = await this.prisma.$runCommandRaw({
+    const byTypeResult = (await this.prisma.$runCommandRaw({
       aggregate: 'settlements',
       pipeline: [
         { $match: matchStage },
@@ -320,7 +325,7 @@ export class ReportsService {
         },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     const byType = (byTypeResult.cursor?.firstBatch || []).map((item: any) => ({
       type: item._id,
@@ -330,7 +335,10 @@ export class ReportsService {
     }));
 
     // Totales
-    const pending = byStatus.find((s: any) => s.status === 'PENDING') || { count: 0, totalNetCents: 0 };
+    const pending = byStatus.find((s: any) => s.status === 'PENDING') || {
+      count: 0,
+      totalNetCents: 0,
+    };
     const paid = byStatus.find((s: any) => s.status === 'PAID') || { count: 0, totalNetCents: 0 };
 
     return {
@@ -348,16 +356,16 @@ export class ReportsService {
    */
   async getTipstersReport(filters: ReportFilters) {
     const { startDate, endDate } = filters;
-    
+
     const dateFilter: any = {};
     if (startDate) dateFilter.$gte = { $date: new Date(startDate).toISOString() };
     if (endDate) dateFilter.$lte = { $date: new Date(endDate).toISOString() };
 
     // Obtener todos los tipsters
-    const tipstersResult = await this.prisma.$runCommandRaw({
+    const tipstersResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
       projection: { _id: 1, user_id: 1, public_name: 1, module_forecasts: 1, module_affiliate: 1 },
-    }) as any;
+    })) as any;
 
     const tipsters = tipstersResult.cursor?.firstBatch || [];
     const rankings = [];
@@ -372,7 +380,7 @@ export class ReportsService {
       };
       if (Object.keys(dateFilter).length > 0) matchStage.created_at = dateFilter;
 
-      const salesResult = await this.prisma.$runCommandRaw({
+      const salesResult = (await this.prisma.$runCommandRaw({
         aggregate: 'orders',
         pipeline: [
           { $match: matchStage },
@@ -387,7 +395,7 @@ export class ReportsService {
           },
         ],
         cursor: {},
-      }) as any;
+      })) as any;
 
       const sales = salesResult.cursor?.firstBatch?.[0] || {
         sales: 0,
@@ -397,10 +405,10 @@ export class ReportsService {
       };
 
       // Contar productos activos
-      const productsResult = await this.prisma.$runCommandRaw({
+      const productsResult = (await this.prisma.$runCommandRaw({
         count: 'products',
         query: { tipster_id: tipsterId, active: true },
-      }) as any;
+      })) as any;
 
       rankings.push({
         tipsterId,
@@ -426,7 +434,7 @@ export class ReportsService {
 
     return {
       totalTipsters: rankings.length,
-      activeTipsters: rankings.filter(t => t.totalSales > 0).length,
+      activeTipsters: rankings.filter((t) => t.totalSales > 0).length,
       totalSales,
       totalGrossCents: totalGross,
       rankings,
@@ -455,7 +463,13 @@ export class ReportsService {
 
       case 'platform':
         data = await this.getPlatformIncomeReport(filters);
-        headers = ['Mes', 'Pedidos', 'Bruto (EUR)', 'Comisión Plataforma (EUR)', 'Comisión Pasarela (EUR)'];
+        headers = [
+          'Mes',
+          'Pedidos',
+          'Bruto (EUR)',
+          'Comisión Plataforma (EUR)',
+          'Comisión Pasarela (EUR)',
+        ];
         rows = data.byMonth.map((m: any) => [
           m.month,
           m.orders.toString(),
@@ -478,7 +492,14 @@ export class ReportsService {
 
       case 'tipsters':
         data = await this.getTipstersReport(filters);
-        headers = ['Tipster', 'Ventas', 'Bruto (EUR)', 'Neto (EUR)', 'Comisión Antia (EUR)', 'Productos Activos'];
+        headers = [
+          'Tipster',
+          'Ventas',
+          'Bruto (EUR)',
+          'Neto (EUR)',
+          'Comisión Antia (EUR)',
+          'Productos Activos',
+        ];
         rows = data.rankings.map((t: any) => [
           t.tipsterName,
           t.totalSales.toString(),
@@ -496,7 +517,7 @@ export class ReportsService {
     // Generar CSV
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
     ].join('\n');
 
     return csvContent;
@@ -508,11 +529,11 @@ export class ReportsService {
   private async getTipstersMap(tipsterIds: string[]): Promise<Record<string, string>> {
     if (tipsterIds.length === 0) return {};
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
-      filter: { _id: { $in: tipsterIds.map(id => ({ $oid: id })) } },
+      filter: { _id: { $in: tipsterIds.map((id) => ({ $oid: id })) } },
       projection: { _id: 1, public_name: 1 },
-    }) as any;
+    })) as any;
 
     const map: Record<string, string> = {};
     for (const t of result.cursor?.firstBatch || []) {
@@ -528,11 +549,11 @@ export class ReportsService {
   private async getProductsMap(productIds: string[]): Promise<Record<string, string>> {
     if (productIds.length === 0) return {};
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'products',
-      filter: { _id: { $in: productIds.map(id => ({ $oid: id })) } },
+      filter: { _id: { $in: productIds.map((id) => ({ $oid: id })) } },
       projection: { _id: 1, title: 1 },
-    }) as any;
+    })) as any;
 
     const map: Record<string, string> = {};
     for (const p of result.cursor?.firstBatch || []) {
@@ -549,7 +570,7 @@ export class ReportsService {
     if (targetCurrency === 'EUR') return report;
 
     const rate = await this.currencyService.getExchangeRate('EUR', targetCurrency);
-    
+
     // Función recursiva para convertir todos los campos *Cents
     const convertObject = (obj: any): any => {
       if (Array.isArray(obj)) {

@@ -23,21 +23,23 @@ export class SupportService {
 
     await this.prisma.$runCommandRaw({
       insert: 'support_tickets',
-      documents: [{
-        _id: ticketId,
-        user_id: userId,
-        user_email: userEmail,
-        order_id: data.orderId || null,
-        category: data.category,
-        subject: data.subject,
-        description: data.description,
-        status: 'OPEN',
-        priority: 'NORMAL',
-        admin_notes: null,
-        resolved_at: null,
-        created_at: { $date: new Date().toISOString() },
-        updated_at: { $date: new Date().toISOString() },
-      }],
+      documents: [
+        {
+          _id: ticketId,
+          user_id: userId,
+          user_email: userEmail,
+          order_id: data.orderId || null,
+          category: data.category,
+          subject: data.subject,
+          description: data.description,
+          status: 'OPEN',
+          priority: 'NORMAL',
+          admin_notes: null,
+          resolved_at: null,
+          created_at: { $date: new Date().toISOString() },
+          updated_at: { $date: new Date().toISOString() },
+        },
+      ],
     });
 
     this.logger.log(`Created support ticket ${ticketId} for user ${userId}`);
@@ -53,11 +55,11 @@ export class SupportService {
    * Obtener tickets del usuario
    */
   async getMyTickets(userId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter: { user_id: userId },
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const tickets = result.cursor?.firstBatch || [];
 
@@ -85,14 +87,14 @@ export class SupportService {
    * Obtener detalle de un ticket
    */
   async getTicketDetails(userId: string, ticketId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
-      filter: { 
+      filter: {
         _id: ticketId,
         user_id: userId,
       },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const ticket = result.cursor?.firstBatch?.[0];
 
@@ -130,11 +132,11 @@ export class SupportService {
       filter.status = status;
     }
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter,
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const tickets = result.cursor?.firstBatch || [];
 
@@ -157,11 +159,14 @@ export class SupportService {
   /**
    * Actualizar ticket (para admin)
    */
-  async updateTicket(ticketId: string, data: {
-    status?: string;
-    priority?: string;
-    adminNotes?: string;
-  }) {
+  async updateTicket(
+    ticketId: string,
+    data: {
+      status?: string;
+      priority?: string;
+      adminNotes?: string;
+    },
+  ) {
     const updateFields: any = {
       updated_at: { $date: new Date().toISOString() },
     };
@@ -177,10 +182,12 @@ export class SupportService {
 
     await this.prisma.$runCommandRaw({
       update: 'support_tickets',
-      updates: [{
-        q: { _id: ticketId },
-        u: { $set: updateFields },
-      }],
+      updates: [
+        {
+          q: { _id: ticketId },
+          u: { $set: updateFields },
+        },
+      ],
     });
 
     return { success: true, message: 'Ticket actualizado' };
@@ -191,11 +198,11 @@ export class SupportService {
    */
   async addClientResponse(userId: string, ticketId: string, message: string) {
     // Verify ticket belongs to user
-    const ticketResult = await this.prisma.$runCommandRaw({
+    const ticketResult = (await this.prisma.$runCommandRaw({
       find: 'support_tickets',
       filter: { _id: ticketId, user_id: userId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const ticket = ticketResult.cursor?.firstBatch?.[0];
     if (!ticket) {
@@ -218,7 +225,7 @@ export class SupportService {
       query: { _id: ticketId },
       update: {
         $push: { responses: response },
-        $set: { 
+        $set: {
           updated_at: new Date().toISOString(),
           status: 'OPEN', // Reopen if it was in progress
         },

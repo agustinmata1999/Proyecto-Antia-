@@ -14,7 +14,7 @@ export class ReferralsService {
   async getMetrics(tipsterId: string, dateRange?: { start: Date; end: Date }) {
     try {
       const where: any = { tipsterId };
-      
+
       if (dateRange) {
         where.eventAt = {
           gte: dateRange.start,
@@ -26,13 +26,13 @@ export class ReferralsService {
         where,
       });
 
-      const clicks = events.filter(e => e.type === 'CLICK').length;
-      const registers = events.filter(e => e.type === 'REGISTER').length;
-      const ftds = events.filter(e => e.type === 'FTD').length;
-      const deposits = events.filter(e => e.type === 'DEPOSIT').length;
+      const clicks = events.filter((e) => e.type === 'CLICK').length;
+      const registers = events.filter((e) => e.type === 'REGISTER').length;
+      const ftds = events.filter((e) => e.type === 'FTD').length;
+      const deposits = events.filter((e) => e.type === 'DEPOSIT').length;
 
       const totalDeposits = events
-        .filter(e => e.type === 'DEPOSIT' && e.amountCents)
+        .filter((e) => e.type === 'DEPOSIT' && e.amountCents)
         .reduce((sum, e) => sum + (e.amountCents || 0), 0);
 
       return {
@@ -41,7 +41,7 @@ export class ReferralsService {
         ftds,
         deposits,
         totalDeposits,
-        conversionRate: clicks > 0 ? parseFloat((registers / clicks * 100).toFixed(2)) : 0,
+        conversionRate: clicks > 0 ? parseFloat(((registers / clicks) * 100).toFixed(2)) : 0,
       };
     } catch (error) {
       console.error('Error getting metrics:', error);

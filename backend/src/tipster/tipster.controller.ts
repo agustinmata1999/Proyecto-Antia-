@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -32,10 +26,7 @@ export class TipsterController {
 
   @Put('kyc')
   @ApiOperation({ summary: 'Complete KYC / payment data' })
-  async updateKyc(
-    @CurrentUser() user: any,
-    @Body() dto: UpdateKycDto,
-  ) {
+  async updateKyc(@CurrentUser() user: any, @Body() dto: UpdateKycDto) {
     return this.tipsterService.updateKyc(user.id, dto);
   }
 }

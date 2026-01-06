@@ -15,17 +15,13 @@ export class LandingService {
    */
   async createLanding(tipsterId: string, dto: CreateLandingDto) {
     // Obtener info del tipster para generar slug
-    const tipsterResult = await this.prisma.$runCommandRaw({
+    const tipsterResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
-      filter: { 
-        $or: [
-          { _id: tipsterId },
-          { _id: { $oid: tipsterId } },
-          { id: tipsterId }
-        ]
+      filter: {
+        $or: [{ _id: tipsterId }, { _id: { $oid: tipsterId } }, { id: tipsterId }],
       },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const tipster = tipsterResult.cursor?.firstBatch?.[0];
     if (!tipster) {
@@ -53,20 +49,22 @@ export class LandingService {
     // Crear la landing
     await this.prisma.$runCommandRaw({
       insert: 'tipster_affiliate_landings',
-      documents: [{
-        _id: landingId,
-        tipster_id: tipsterId,
-        promotion_id: dto.promotionId || null,  // Reto/promoción seleccionado
-        slug,
-        title: dto.title || null,
-        description: dto.description || null,
-        countries_enabled: dto.countriesEnabled,
-        is_active: true,
-        total_clicks: 0,
-        total_impressions: 0,
-        created_at: { $date: now },
-        updated_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: landingId,
+          tipster_id: tipsterId,
+          promotion_id: dto.promotionId || null, // Reto/promoción seleccionado
+          slug,
+          title: dto.title || null,
+          description: dto.description || null,
+          countries_enabled: dto.countriesEnabled,
+          is_active: true,
+          total_clicks: 0,
+          total_impressions: 0,
+          created_at: { $date: now },
+          updated_at: { $date: now },
+        },
+      ],
     });
 
     // Crear los items por país
@@ -120,11 +118,11 @@ export class LandingService {
    * Obtener landings de un tipster
    */
   async getTipsterLandings(tipsterId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { tipster_id: tipsterId },
       sort: { created_at: -1 },
-    }) as any;
+    })) as any;
 
     const landings = result.cursor?.firstBatch || [];
 
@@ -157,9 +155,9 @@ export class LandingService {
   private async getPromotionsMap(promotionIds: string[]) {
     if (!promotionIds.length) return new Map();
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'affiliate_promotions',
-    }) as any;
+    })) as any;
 
     const promotions = result.cursor?.firstBatch || [];
     const map = new Map();
@@ -179,31 +177,31 @@ export class LandingService {
    */
   async getLandingById(landingId: string) {
     // Intentar buscar por ObjectId
-    let result = await this.prisma.$runCommandRaw({
+    let result = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { _id: { $oid: landingId } },
       limit: 1,
-    }) as any;
+    })) as any;
 
     let landing = result.cursor?.firstBatch?.[0];
-    
+
     // Si no se encuentra, intentar por string
     if (!landing) {
-      result = await this.prisma.$runCommandRaw({
+      result = (await this.prisma.$runCommandRaw({
         find: 'tipster_affiliate_landings',
         filter: { _id: landingId },
         limit: 1,
-      }) as any;
+      })) as any;
       landing = result.cursor?.firstBatch?.[0];
     }
-    
+
     // Si aún no se encuentra, intentar por id field
     if (!landing) {
-      result = await this.prisma.$runCommandRaw({
+      result = (await this.prisma.$runCommandRaw({
         find: 'tipster_affiliate_landings',
         filter: { id: landingId },
         limit: 1,
-      }) as any;
+      })) as any;
       landing = result.cursor?.firstBatch?.[0];
     }
 
@@ -212,11 +210,11 @@ export class LandingService {
     }
 
     // Obtener items
-    const itemsResult = await this.prisma.$runCommandRaw({
+    const itemsResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_landing_items',
       filter: { landing_id: landingId },
       sort: { country: 1, order_index: 1 },
-    }) as any;
+    })) as any;
 
     const items = itemsResult.cursor?.firstBatch || [];
 
@@ -272,10 +270,12 @@ export class LandingService {
 
     await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
-      updates: [{
-        q: { _id: { $oid: landingId } },
-        u: { $set: updateFields },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: landingId } },
+          u: { $set: updateFields },
+        },
+      ],
     });
 
     // Si hay countryConfigs, actualizar items
@@ -283,10 +283,12 @@ export class LandingService {
       // Eliminar items existentes
       await this.prisma.$runCommandRaw({
         delete: 'tipster_landing_items',
-        deletes: [{
-          q: { landing_id: landingId },
-          limit: 0, // 0 = delete all matching
-        }],
+        deletes: [
+          {
+            q: { landing_id: landingId },
+            limit: 0, // 0 = delete all matching
+          },
+        ],
       });
 
       // Crear nuevos items
@@ -308,19 +310,23 @@ export class LandingService {
     // Eliminar items
     await this.prisma.$runCommandRaw({
       delete: 'tipster_landing_items',
-      deletes: [{
-        q: { landing_id: landingId },
-        limit: 0,
-      }],
+      deletes: [
+        {
+          q: { landing_id: landingId },
+          limit: 0,
+        },
+      ],
     });
 
     // Eliminar landing
     await this.prisma.$runCommandRaw({
       delete: 'tipster_affiliate_landings',
-      deletes: [{
-        q: { _id: { $oid: landingId } },
-        limit: 1,
-      }],
+      deletes: [
+        {
+          q: { _id: { $oid: landingId } },
+          limit: 1,
+        },
+      ],
     });
 
     return { success: true };
@@ -332,11 +338,11 @@ export class LandingService {
    * Obtener landing pública por slug (para /go/:slug)
    */
   async getPublicLanding(slug: string, countryCode?: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { slug, is_active: true },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const landing = result.cursor?.firstBatch?.[0];
     if (!landing) {
@@ -353,29 +359,29 @@ export class LandingService {
     }
 
     // Obtener tipster info
-    const tipsterResult = await this.prisma.$runCommandRaw({
+    const tipsterResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_profiles',
-      filter: { 
+      filter: {
         $or: [
           { _id: landing.tipster_id },
           { _id: { $oid: landing.tipster_id } },
-          { id: landing.tipster_id }
-        ]
+          { id: landing.tipster_id },
+        ],
       },
       limit: 1,
-    }) as any;
+    })) as any;
     const tipster = tipsterResult.cursor?.firstBatch?.[0];
 
     // Obtener items para el país seleccionado
-    const itemsResult = await this.prisma.$runCommandRaw({
+    const itemsResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_landing_items',
-      filter: { 
-        landing_id: landingId, 
+      filter: {
+        landing_id: landingId,
         country: selectedCountry,
         is_enabled: true,
       },
       sort: { order_index: 1 },
-    }) as any;
+    })) as any;
 
     const items = itemsResult.cursor?.firstBatch || [];
 
@@ -384,35 +390,41 @@ export class LandingService {
     const houses = await this.getBettingHousesByIds(houseIds);
     const housesMap = new Map(houses.map((h: any) => [h.id, h]));
 
-    const enrichedItems = items.map((item: any) => {
-      const house: any = housesMap.get(item.betting_house_id);
-      return {
-        id: item._id.$oid || item._id.toString(),
-        bettingHouseId: item.betting_house_id,
-        orderIndex: item.order_index,
-        customTermsText: item.custom_terms_text,
-        house: house ? {
-          id: house.id,
-          name: house.name,
-          slug: house.slug,
-          logoUrl: house.logoUrl,
-          logoBgColor: house.logoBgColor || null,
-          termsText: item.custom_terms_text || house.description || 'Deposita al menos 10€',
-          websiteUrl: house.websiteUrl,
-        } : null,
-      };
-    }).filter((item: any) => item.house !== null);
+    const enrichedItems = items
+      .map((item: any) => {
+        const house: any = housesMap.get(item.betting_house_id);
+        return {
+          id: item._id.$oid || item._id.toString(),
+          bettingHouseId: item.betting_house_id,
+          orderIndex: item.order_index,
+          customTermsText: item.custom_terms_text,
+          house: house
+            ? {
+                id: house.id,
+                name: house.name,
+                slug: house.slug,
+                logoUrl: house.logoUrl,
+                logoBgColor: house.logoBgColor || null,
+                termsText: item.custom_terms_text || house.description || 'Deposita al menos 10€',
+                websiteUrl: house.websiteUrl,
+              }
+            : null,
+        };
+      })
+      .filter((item: any) => item.house !== null);
 
     return {
       id: landingId,
       slug: landing.slug,
       title: landing.title,
       description: landing.description,
-      tipster: tipster ? {
-        id: tipster._id?.$oid || tipster._id?.toString() || tipster.id,
-        publicName: tipster.public_name,
-        avatarUrl: tipster.avatar_url,
-      } : null,
+      tipster: tipster
+        ? {
+            id: tipster._id?.$oid || tipster._id?.toString() || tipster.id,
+            publicName: tipster.public_name,
+            avatarUrl: tipster.avatar_url,
+          }
+        : null,
       countriesEnabled,
       selectedCountry,
       items: enrichedItems,
@@ -434,11 +446,11 @@ export class LandingService {
     anonymousSessionId?: string,
   ) {
     // Obtener landing
-    const landingResult = await this.prisma.$runCommandRaw({
+    const landingResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { slug, is_active: true },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const landing = landingResult.cursor?.firstBatch?.[0];
     if (!landing) {
@@ -460,55 +472,68 @@ export class LandingService {
 
     // Construir URL de redirección con tracking
     // Si hay promotionId, usar el link específico de la promoción
-    const redirectUrl = await this.buildRedirectUrl(house, tipsterId, clickId, countryCode, promotionId, bettingHouseId);
+    const redirectUrl = await this.buildRedirectUrl(
+      house,
+      tipsterId,
+      clickId,
+      countryCode,
+      promotionId,
+      bettingHouseId,
+    );
 
     // Registrar evento de click
     const now = new Date().toISOString();
     await this.prisma.$runCommandRaw({
       insert: 'landing_click_events',
-      documents: [{
-        _id: new ObjectId(),
-        click_id: clickId,
-        tipster_id: tipsterId,
-        landing_id: landingId,
-        betting_house_id: bettingHouseId,
-        country_context: countryCode,
-        anonymous_session_id: anonymousSessionId || null,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null,
-        referrer: referrer || null,
-        redirect_url: redirectUrl,
-        created_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: new ObjectId(),
+          click_id: clickId,
+          tipster_id: tipsterId,
+          landing_id: landingId,
+          betting_house_id: bettingHouseId,
+          country_context: countryCode,
+          anonymous_session_id: anonymousSessionId || null,
+          ip_address: ipAddress || null,
+          user_agent: userAgent || null,
+          referrer: referrer || null,
+          redirect_url: redirectUrl,
+          created_at: { $date: now },
+        },
+      ],
     });
 
     // Actualizar contador de clicks en la landing
     await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
-      updates: [{
-        q: { _id: { $oid: landingId } },
-        u: { $inc: { total_clicks: 1 } },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: landingId } },
+          u: { $inc: { total_clicks: 1 } },
+        },
+      ],
     });
 
     // También registrar en affiliate_click_events para compatibilidad
     await this.prisma.$runCommandRaw({
       insert: 'affiliate_click_events',
-      documents: [{
-        _id: new ObjectId(),
-        tipster_id: tipsterId,
-        house_id: bettingHouseId,
-        link_id: null,
-        ip_address: ipAddress || null,
-        country_code: countryCode,
-        user_agent: userAgent || null,
-        referer: referrer || null,
-        was_blocked: false,
-        block_reason: null,
-        redirected_to: redirectUrl,
-        clicked_at: { $date: now },
-        created_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: new ObjectId(),
+          tipster_id: tipsterId,
+          house_id: bettingHouseId,
+          link_id: null,
+          ip_address: ipAddress || null,
+          country_code: countryCode,
+          user_agent: userAgent || null,
+          referer: referrer || null,
+          was_blocked: false,
+          block_reason: null,
+          redirected_to: redirectUrl,
+          clicked_at: { $date: now },
+          created_at: { $date: now },
+        },
+      ],
     });
 
     return {
@@ -528,11 +553,11 @@ export class LandingService {
     referrer?: string,
     anonymousSessionId?: string,
   ) {
-    const landingResult = await this.prisma.$runCommandRaw({
+    const landingResult = (await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { slug, is_active: true },
       limit: 1,
-    }) as any;
+    })) as any;
 
     const landing = landingResult.cursor?.firstBatch?.[0];
     if (!landing) return;
@@ -543,26 +568,30 @@ export class LandingService {
     // Registrar impresión
     await this.prisma.$runCommandRaw({
       insert: 'landing_impression_events',
-      documents: [{
-        _id: new ObjectId(),
-        tipster_id: landing.tipster_id,
-        landing_id: landingId,
-        country_context: countryCode,
-        anonymous_session_id: anonymousSessionId || null,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null,
-        referrer: referrer || null,
-        created_at: { $date: now },
-      }],
+      documents: [
+        {
+          _id: new ObjectId(),
+          tipster_id: landing.tipster_id,
+          landing_id: landingId,
+          country_context: countryCode,
+          anonymous_session_id: anonymousSessionId || null,
+          ip_address: ipAddress || null,
+          user_agent: userAgent || null,
+          referrer: referrer || null,
+          created_at: { $date: now },
+        },
+      ],
     });
 
     // Actualizar contador
     await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
-      updates: [{
-        q: { _id: { $oid: landingId } },
-        u: { $inc: { total_impressions: 1 } },
-      }],
+      updates: [
+        {
+          q: { _id: { $oid: landingId } },
+          u: { $inc: { total_impressions: 1 } },
+        },
+      ],
     });
   }
 
@@ -593,7 +622,7 @@ export class LandingService {
     };
 
     // Clicks por país
-    const clicksByCountry = await this.prisma.$runCommandRaw({
+    const clicksByCountry = (await this.prisma.$runCommandRaw({
       aggregate: 'landing_click_events',
       pipeline: [
         { $match: buildDateMatch() },
@@ -601,10 +630,10 @@ export class LandingService {
         { $sort: { count: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     // Clicks por casa
-    const clicksByHouse = await this.prisma.$runCommandRaw({
+    const clicksByHouse = (await this.prisma.$runCommandRaw({
       aggregate: 'landing_click_events',
       pipeline: [
         { $match: buildDateMatch() },
@@ -612,24 +641,24 @@ export class LandingService {
         { $sort: { count: -1 } },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     // Clicks por día (últimos 30 días)
-    const clicksByDate = await this.prisma.$runCommandRaw({
+    const clicksByDate = (await this.prisma.$runCommandRaw({
       aggregate: 'landing_click_events',
       pipeline: [
         { $match: buildDateMatch() },
-        { 
-          $group: { 
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } }, 
-            count: { $sum: 1 } 
-          } 
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } },
+            count: { $sum: 1 },
+          },
         },
         { $sort: { _id: 1 } },
         { $limit: 30 },
       ],
       cursor: {},
-    }) as any;
+    })) as any;
 
     // Conversiones/Referidos de este landing (por tipsterId)
     const conversions = await this.prisma.affiliateConversion.findMany({
@@ -646,11 +675,11 @@ export class LandingService {
     // Stats de conversiones
     const conversionStats = {
       total: conversions.length,
-      approved: conversions.filter(c => c.status === 'APPROVED').length,
-      pending: conversions.filter(c => c.status === 'PENDING').length,
-      rejected: conversions.filter(c => c.status === 'REJECTED').length,
+      approved: conversions.filter((c) => c.status === 'APPROVED').length,
+      pending: conversions.filter((c) => c.status === 'PENDING').length,
+      rejected: conversions.filter((c) => c.status === 'REJECTED').length,
       totalEarningsCents: conversions
-        .filter(c => c.status === 'APPROVED')
+        .filter((c) => c.status === 'APPROVED')
         .reduce((sum, c) => sum + (c.commissionCents || 0), 0),
     };
 
@@ -666,9 +695,10 @@ export class LandingService {
         clicks: landing.totalClicks,
         impressions: landing.totalImpressions,
         conversions: conversionStats.approved,
-        conversionRate: landing.totalClicks > 0 
-          ? ((conversionStats.approved / landing.totalClicks) * 100).toFixed(1)
-          : '0',
+        conversionRate:
+          landing.totalClicks > 0
+            ? ((conversionStats.approved / landing.totalClicks) * 100).toFixed(1)
+            : '0',
         earnings: conversionStats.totalEarningsCents,
       },
       clicksByCountry: (clicksByCountry.cursor?.firstBatch || []).map((c: any) => ({
@@ -688,7 +718,7 @@ export class LandingService {
         clicks: c.count,
       })),
       conversions: conversionStats,
-      recentReferrals: conversions.slice(0, 10).map(c => ({
+      recentReferrals: conversions.slice(0, 10).map((c) => ({
         id: c.id,
         status: c.status,
         eventType: c.eventType,
@@ -709,13 +739,13 @@ export class LandingService {
 
     const skip = (page - 1) * limit;
 
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'landing_click_events',
       filter: { landing_id: landingId },
       sort: { created_at: -1 },
       skip,
       limit,
-    }) as any;
+    })) as any;
 
     const clicks = result.cursor?.firstBatch || [];
 
@@ -730,11 +760,13 @@ export class LandingService {
         id: click._id.$oid || click._id.toString(),
         clickId: click.click_id,
         country: click.country_context,
-        house: house ? {
-          id: house.id,
-          name: house.name,
-          slug: house.slug,
-        } : null,
+        house: house
+          ? {
+              id: house.id,
+              name: house.name,
+              slug: house.slug,
+            }
+          : null,
         createdAt: click.created_at?.$date || click.created_at,
       };
     });
@@ -756,11 +788,11 @@ export class LandingService {
     let counter = 1;
 
     while (true) {
-      const existing = await this.prisma.$runCommandRaw({
+      const existing = (await this.prisma.$runCommandRaw({
         find: 'tipster_affiliate_landings',
         filter: { slug },
         limit: 1,
-      }) as any;
+      })) as any;
 
       if (!existing.cursor?.firstBatch?.length) {
         return slug;
@@ -773,19 +805,19 @@ export class LandingService {
 
   private async getBettingHouseById(houseId: string) {
     // Intentar con string ID primero
-    let result = await this.prisma.$runCommandRaw({
+    let result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { _id: houseId },
       limit: 1,
-    }) as any;
+    })) as any;
 
     if (!result.cursor?.firstBatch?.length) {
       // Intentar con ObjectId
-      result = await this.prisma.$runCommandRaw({
+      result = (await this.prisma.$runCommandRaw({
         find: 'betting_houses',
         filter: { _id: { $oid: houseId } },
         limit: 1,
-      }) as any;
+      })) as any;
     }
 
     const house = result.cursor?.firstBatch?.[0];
@@ -809,13 +841,13 @@ export class LandingService {
     if (!houseIds.length) return [];
 
     // Obtener todas las casas y filtrar
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { status: 'ACTIVE' },
-    }) as any;
+    })) as any;
 
     const allHouses = result.cursor?.firstBatch || [];
-    
+
     return allHouses
       .filter((h: any) => {
         const id = h._id.$oid || h._id.toString();
@@ -837,9 +869,9 @@ export class LandingService {
   }
 
   private async buildRedirectUrl(
-    house: any, 
-    tipsterId: string, 
-    clickId: string, 
+    house: any,
+    tipsterId: string,
+    clickId: string,
     countryCode: string,
     promotionId?: string,
     bettingHouseId?: string,
@@ -855,15 +887,15 @@ export class LandingService {
 
     // Si hay promotionId, buscar el link específico de la promoción
     if (promotionId && bettingHouseId) {
-      const promotionLinkResult = await this.prisma.$runCommandRaw({
+      const promotionLinkResult = (await this.prisma.$runCommandRaw({
         find: 'promotion_house_links',
-        filter: { 
-          promotion_id: promotionId, 
+        filter: {
+          promotion_id: promotionId,
           betting_house_id: bettingHouseId,
           is_active: true,
         },
         limit: 1,
-      }) as any;
+      })) as any;
 
       const promotionLink = promotionLinkResult.cursor?.firstBatch?.[0];
       if (promotionLink && promotionLink.affiliate_url) {
@@ -876,7 +908,7 @@ export class LandingService {
     }
 
     const url = new URL(baseUrl);
-    
+
     // Añadir parámetros de tracking
     url.searchParams.set(trackingParamName, tipsterId);
     url.searchParams.set('clickid', clickId);
@@ -888,10 +920,10 @@ export class LandingService {
    * Obtener casas de apuestas disponibles para un país
    */
   async getAvailableHousesForCountry(country: string) {
-    const result = await this.prisma.$runCommandRaw({
+    const result = (await this.prisma.$runCommandRaw({
       find: 'betting_houses',
       filter: { status: 'ACTIVE' },
-    }) as any;
+    })) as any;
 
     const houses = result.cursor?.firstBatch || [];
 

@@ -128,12 +128,7 @@ export class RedsysService {
         return { success: false };
       }
 
-      const {
-        Ds_Order,
-        Ds_Response,
-        Ds_AuthorisationCode,
-        Ds_MerchantData,
-      } = result;
+      const { Ds_Order, Ds_Response, Ds_AuthorisationCode, Ds_MerchantData } = result;
 
       // Parse merchant data to get our orderId
       let orderId: string | undefined;
@@ -148,7 +143,9 @@ export class RedsysService {
       const responseCode = parseInt(Ds_Response, 10);
       const isSuccessful = responseCode >= 0 && responseCode < 100;
 
-      this.logger.log(`Redsys webhook: order=${Ds_Order}, response=${Ds_Response}, success=${isSuccessful}`);
+      this.logger.log(
+        `Redsys webhook: order=${Ds_Order}, response=${Ds_Response}, success=${isSuccessful}`,
+      );
 
       return {
         success: isSuccessful,

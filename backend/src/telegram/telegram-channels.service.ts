@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Telegraf } from 'telegraf';
@@ -74,9 +80,9 @@ export class TelegramChannelsService {
   async create(tipsterId: string, dto: CreateChannelDto) {
     // Verificar si el canal ya existe para este tipster
     const existing = await this.prisma.telegramChannel.findFirst({
-      where: { 
-        tipsterId, 
-        channelId: dto.channelId 
+      where: {
+        tipsterId,
+        channelId: dto.channelId,
       },
     });
 
@@ -86,20 +92,22 @@ export class TelegramChannelsService {
         const now = new Date().toISOString();
         await this.prisma.$runCommandRaw({
           update: 'telegram_channels',
-          updates: [{
-            q: { _id: { $oid: existing.id } },
-            u: { 
-              $set: {
-                is_active: true,
-                channel_title: dto.channelTitle,
-                channel_name: dto.channelName || null,
-                invite_link: dto.inviteLink || null,
-                updated_at: { $date: now },
-              }
+          updates: [
+            {
+              q: { _id: { $oid: existing.id } },
+              u: {
+                $set: {
+                  is_active: true,
+                  channel_title: dto.channelTitle,
+                  channel_name: dto.channelName || null,
+                  invite_link: dto.inviteLink || null,
+                  updated_at: { $date: now },
+                },
+              },
             },
-          }],
+          ],
         });
-        
+
         // Obtener el canal actualizado
         const updated = await this.prisma.telegramChannel.findUnique({
           where: { id: existing.id },
@@ -111,11 +119,11 @@ export class TelegramChannelsService {
 
     // Crear nuevo canal usando $runCommandRaw para evitar transacciones
     const now = new Date().toISOString();
-    
+
     // NO intentamos generar invite link automáticamente para evitar timeouts
     // El usuario puede generarlo después desde el panel si lo necesita
-    let inviteLink = dto.inviteLink || null;
-    
+    const inviteLink = dto.inviteLink || null;
+
     const channelData = {
       tipster_id: tipsterId,
       channel_id: dto.channelId,
@@ -208,21 +216,25 @@ export class TelegramChannelsService {
     }
 
     try {
-      const chat = await this.bot.telegram.getChat(channelId) as any;
-      
+      const chat = (await this.bot.telegram.getChat(channelId)) as any;
+
       return {
         valid: true,
         title: chat.title || 'Canal',
         username: chat.username || undefined,
-        type: chat.type === 'channel' ? 'channel' : 
-              chat.type === 'supergroup' ? 'supergroup' : chat.type,
+        type:
+          chat.type === 'channel'
+            ? 'channel'
+            : chat.type === 'supergroup'
+              ? 'supergroup'
+              : chat.type,
         memberCount: chat.members_count || undefined,
       };
     } catch (error) {
       this.logger.warn(`Error verifying channel ${channelId}:`, error);
-      return { 
-        valid: false, 
-        error: 'No se pudo verificar el canal. Asegúrate de que el bot sea administrador.' 
+      return {
+        valid: false,
+        error: 'No se pudo verificar el canal. Asegúrate de que el bot sea administrador.',
       };
     }
   }
@@ -249,20 +261,20 @@ export class TelegramChannelsService {
    */
   async updateMemberCount(id: string, tipsterId: string) {
     const channel = await this.findOne(id, tipsterId);
-    
+
     const verification = await this.verifyChannel(channel.channelId);
-    
+
     if (verification.valid && verification.memberCount !== undefined) {
       await this.prisma.$runCommandRaw({
         update: 'telegram_channels',
         updates: [
           {
             q: { _id: { $oid: channel.id } },
-            u: { 
-              $set: { 
-                member_count: verification.memberCount, 
-                updated_at: { $date: new Date().toISOString() } 
-              } 
+            u: {
+              $set: {
+                member_count: verification.memberCount,
+                updated_at: { $date: new Date().toISOString() },
+              },
             },
           },
         ],
@@ -278,8 +290,8 @@ export class TelegramChannelsService {
    */
   async findByChannelId(tipsterId: string, channelId: string) {
     return this.prisma.telegramChannel.findFirst({
-      where: { 
-        tipsterId, 
+      where: {
+        tipsterId,
         channelId,
         isActive: true,
       },

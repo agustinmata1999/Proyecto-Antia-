@@ -5,10 +5,10 @@ import { PromotionService } from './promotion.service';
 import { AffiliateAdminController } from './affiliate-admin.controller';
 import { AffiliateTipsterController } from './affiliate-tipster.controller';
 import { AffiliateRedirectController } from './affiliate-redirect.controller';
-import { 
-  LandingPublicController, 
-  LandingRedirectController, 
-  TipsterLandingController 
+import {
+  LandingPublicController,
+  LandingRedirectController,
+  TipsterLandingController,
 } from './landing.controller';
 import { PromotionAdminController, PromotionPublicController } from './promotion.controller';
 import { PrismaModule } from '../prisma/prisma.module';

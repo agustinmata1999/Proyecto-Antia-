@@ -73,7 +73,7 @@ export class CommissionsController {
     @Request() req,
   ) {
     const admin = await this.verifyAdmin(req.user.id);
-    
+
     const updatedConfig = await this.commissionsService.updateTipsterCommission(
       tipsterId,
       dto,
