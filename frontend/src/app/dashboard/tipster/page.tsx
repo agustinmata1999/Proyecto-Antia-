@@ -2650,10 +2650,10 @@ export default function TipsterDashboard() {
                 </p>
               </div>
 
-              {/* Link de invitación (opcional) */}
+              {/* Link de invitación (obligatorio) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Link de invitación <span className="text-gray-400">(opcional)</span>
+                  Link de invitación <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -2663,7 +2663,7 @@ export default function TipsterDashboard() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Solo necesario si tienes varios canales con el mismo nombre
+                  Pega el link de invitación de tu canal (sirve para diferenciar canales con el mismo nombre)
                 </p>
               </div>
 
@@ -2676,7 +2676,7 @@ export default function TipsterDashboard() {
                 </button>
                 <button 
                   onClick={handleConnectChannelByNameAndLink}
-                  disabled={connectingChannel || !channelInput.trim()}
+                  disabled={connectingChannel || !channelInput.trim() || !channelLinkInput.trim()}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
                   {connectingChannel ? (
