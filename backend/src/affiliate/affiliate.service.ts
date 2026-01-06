@@ -1256,7 +1256,6 @@ export class AffiliateService {
   // ==================== TIPSTER STATISTICS ====================
 
   async getTipsterAffiliateStats(tipsterId: string, startDateStr?: string, endDateStr?: string) {
-    console.log('[DEBUG] getTipsterAffiliateStats called with tipsterId:', tipsterId);
     const startDate = startDateStr
       ? new Date(startDateStr)
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -1268,13 +1267,11 @@ export class AffiliateService {
     const landingClicksFilter: any = {
       tipster_id: tipsterId,
     };
-    console.log('[DEBUG] Filter:', JSON.stringify(landingClicksFilter));
 
     const landingClicksResult = (await this.prisma.$runCommandRaw({
       find: 'landing_click_events',
       filter: landingClicksFilter,
     })) as any;
-    console.log('[DEBUG] Clicks found:', landingClicksResult.cursor?.firstBatch?.length || 0);
     
     // Filter by date in memory
     const landingClicks = (landingClicksResult.cursor?.firstBatch || []).filter((c: any) => {
