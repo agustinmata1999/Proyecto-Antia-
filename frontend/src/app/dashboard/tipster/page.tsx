@@ -77,7 +77,7 @@ export default function TipsterDashboard() {
   const [showAddChannelForm, setShowAddChannelForm] = useState(false);
   // Estado del formulario de conexión
   const [channelInput, setChannelInput] = useState(''); // Puede ser nombre o ID
-  const [inputMode, setInputMode] = useState<'name' | 'id'>('name'); // Modo de entrada
+  const [inputMode, setInputMode] = useState<'title' | 'name' | 'id'>('title'); // Modo de entrada: title=nombre, name=link, id=channel_id
   const [connectingChannel, setConnectingChannel] = useState(false);
   const [addChannelError, setAddChannelError] = useState('');
   
