@@ -1199,10 +1199,15 @@ export class AffiliateService {
       })
       .sort((a, b) => b.totalClicks - a.totalClicks);
 
-    // Filter options
+    // Filter options - use landings (tipster campaigns) instead of promotions
     const filterOptions = {
       tipsters: tipsters.map((t: any) => ({ id: t._id.$oid || t._id, name: t.public_name })),
-      campaigns: promotions.map((p: any) => ({ id: p._id.$oid || p._id, name: p.name })),
+      campaigns: landings
+        .filter((l: any) => l.title) // Only landings with titles
+        .map((l: any) => ({ 
+          id: l._id.$oid || l._id || l._id.toString(), 
+          name: l.title 
+        })),
       houses: houses.map((h) => ({ id: h.id, name: h.name })),
     };
 
