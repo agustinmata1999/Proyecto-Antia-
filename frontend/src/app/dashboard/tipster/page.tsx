@@ -2548,8 +2548,8 @@ export default function TipsterDashboard() {
 
       {/* Wizard: Guía de Telegram (primera vez) */}
       {showTelegramWizard && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={handleCloseWizard}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={handleCloseWizard}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white rounded-t-2xl">
               <div className="flex items-center justify-between">
