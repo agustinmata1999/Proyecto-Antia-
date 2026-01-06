@@ -2655,44 +2655,38 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         
         try {
           // Temporalmente desactivar webhook para hacer getUpdates
-          const webhookInfo = await this.httpService.callApi('getWebhookInfo', {});
-          const currentWebhook = webhookInfo?.url;
+          await this.httpService.deleteWebhook(false);
           
-          if (currentWebhook) {
-            // Temporalmente borrar webhook para obtener updates
-            await this.httpService.deleteWebhook(false);
-            
-            // Obtener todos los updates pendientes
-            const updates = await this.httpService.callApi('getUpdates', {
-              timeout: 5,
-              allowed_updates: JSON.stringify(['my_chat_member', 'channel_post']),
-            });
-            
-            this.logger.log(`📥 Got ${updates?.length || 0} updates from Telegram`);
-            
-            // Procesar cada update
-            if (updates && Array.isArray(updates)) {
-              for (const update of updates) {
-                if (update.my_chat_member) {
-                  await this.handleMyChatMemberUpdate(update.my_chat_member);
-                }
-                if (update.channel_post) {
-                  const chat = update.channel_post.chat;
-                  if (chat && chat.type === 'channel') {
-                    this.logger.log(`📬 Found channel from update: ${chat.title} (${chat.id})`);
-                    await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
-                  }
+          // Obtener todos los updates pendientes
+          const updates = await this.httpService.getUpdates({
+            timeout: 5,
+            allowedUpdates: ['my_chat_member', 'channel_post'],
+          });
+          
+          this.logger.log(`📥 Got ${updates?.length || 0} updates from Telegram`);
+          
+          // Procesar cada update
+          if (updates && Array.isArray(updates)) {
+            for (const update of updates) {
+              if (update.my_chat_member) {
+                await this.handleMyChatMemberUpdate(update.my_chat_member);
+              }
+              if (update.channel_post) {
+                const chat = update.channel_post.chat;
+                if (chat && chat.type === 'channel') {
+                  this.logger.log(`📬 Found channel from update: ${chat.title} (${chat.id})`);
+                  await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
                 }
               }
             }
-            
-            // Restaurar webhook
-            const appUrl = this.config.get<string>('APP_URL');
-            if (appUrl) {
-              await this.httpService.setWebhook(`${appUrl}/api/telegram/webhook`, {
-                allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
-              });
-            }
+          }
+          
+          // Restaurar webhook
+          const appUrl = this.config.get<string>('APP_URL');
+          if (appUrl) {
+            await this.httpService.setWebhook(`${appUrl}/api/telegram/webhook`, {
+              allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
+            });
           }
           
           // Buscar de nuevo en la base de datos
