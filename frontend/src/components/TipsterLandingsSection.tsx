@@ -699,25 +699,6 @@ export default function TipsterLandingsSection() {
                       </div>
                     )}
                   </div>
-
-                  {/* Conversions Detail */}
-                  {metrics.conversions && (
-                    <div>
-                      <h4 className="font-medium mb-3 text-gray-900">Estado de Conversiones</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="p-3 bg-green-50 rounded-lg text-center">
-                          <div className="text-xl font-bold text-green-600">{metrics.conversions.approved}</div>
-                          <div className="text-xs text-green-600">Aprobadas</div>
-                        </div>
-                        <div className="p-3 bg-yellow-50 rounded-lg text-center">
-                          <div className="text-xl font-bold text-yellow-600">{metrics.conversions.pending}</div>
-                          <div className="text-xs text-yellow-600">Pendientes</div>
-                        </div>
-                        <div className="p-3 bg-red-50 rounded-lg text-center">
-                          <div className="text-xl font-bold text-red-600">{metrics.conversions.rejected}</div>
-                          <div className="text-xs text-red-600">Rechazadas</div>
-                        </div>
-                      </div>
                     </div>
                   )}
 
