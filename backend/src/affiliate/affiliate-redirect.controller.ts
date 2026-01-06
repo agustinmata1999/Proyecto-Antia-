@@ -465,9 +465,11 @@ export class AffiliateRedirectController {
     const userEmail = body.user_email || body.email || body.player_email;
     const userTelegram = body.user_telegram || body.telegram || body.player_telegram;
     const externalRefId = body.external_ref_id || body.player_id || body.user_id || transactionId;
+    // Auto-approve flag (for simulator/testing)
+    const autoApprove = body.auto_approve === true || body.auto_approve === 'true';
 
     this.logger.log(
-      `📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}, user=${userEmail || 'N/A'}`,
+      `📡 Postback POST received: subid=${subid}, house=${houseSlug}, event=${event}, user=${userEmail || 'N/A'}, autoApprove=${autoApprove}`,
     );
 
     if (!subid) {
@@ -485,6 +487,7 @@ export class AffiliateRedirectController {
         userEmail,
         userTelegram,
         externalRefId,
+        autoApprove,
       });
 
       return result;
