@@ -2634,7 +2634,8 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       // Buscar por título exacto o username (sin @)
       const searchName = normalizedName.replace(/^@/, '');
 
-      const result = (await this.prisma.$runCommandRaw({
+      // PASO 1: Buscar en la base de datos
+      let result = (await this.prisma.$runCommandRaw({
         find: 'detected_telegram_channels',
         filter: {
           is_active: true,
@@ -2646,19 +2647,91 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         limit: 1,
       })) as any;
 
-      const channel = result.cursor?.firstBatch?.[0];
+      let channel = result.cursor?.firstBatch?.[0];
 
+      // PASO 2: Si no se encontró, forzar refresh de updates de Telegram
       if (!channel) {
-        return {
-          found: false,
-          error:
-            'Canal no encontrado. Asegúrate de que el bot (@Antiabetbot) sea administrador del canal.',
-        };
+        this.logger.log(`🔄 Canal "${normalizedName}" no encontrado en DB, forzando refresh de updates...`);
+        
+        try {
+          // Temporalmente desactivar webhook para hacer getUpdates
+          const webhookInfo = await this.httpService.callApi('getWebhookInfo', {});
+          const currentWebhook = webhookInfo?.url;
+          
+          if (currentWebhook) {
+            // Temporalmente borrar webhook para obtener updates
+            await this.httpService.deleteWebhook(false);
+            
+            // Obtener todos los updates pendientes
+            const updates = await this.httpService.callApi('getUpdates', {
+              timeout: 5,
+              allowed_updates: JSON.stringify(['my_chat_member', 'channel_post']),
+            });
+            
+            this.logger.log(`📥 Got ${updates?.length || 0} updates from Telegram`);
+            
+            // Procesar cada update
+            if (updates && Array.isArray(updates)) {
+              for (const update of updates) {
+                if (update.my_chat_member) {
+                  await this.handleMyChatMemberUpdate(update.my_chat_member);
+                }
+                if (update.channel_post) {
+                  const chat = update.channel_post.chat;
+                  if (chat && chat.type === 'channel') {
+                    this.logger.log(`📬 Found channel from update: ${chat.title} (${chat.id})`);
+                    await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+                  }
+                }
+              }
+            }
+            
+            // Restaurar webhook
+            const appUrl = this.config.get<string>('APP_URL');
+            if (appUrl) {
+              await this.httpService.setWebhook(`${appUrl}/api/telegram/webhook`, {
+                allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
+              });
+            }
+          }
+          
+          // Buscar de nuevo en la base de datos
+          result = (await this.prisma.$runCommandRaw({
+            find: 'detected_telegram_channels',
+            filter: {
+              is_active: true,
+              $or: [
+                { channel_title: { $regex: `^${this.escapeRegex(normalizedName)}$`, $options: 'i' } },
+                { channel_username: { $regex: `^${this.escapeRegex(searchName)}$`, $options: 'i' } },
+              ],
+            },
+            limit: 1,
+          })) as any;
+          
+          channel = result.cursor?.firstBatch?.[0];
+          
+          if (channel) {
+            this.logger.log(`✅ Canal encontrado después del refresh: ${channel.channel_title}`);
+          }
+        } catch (refreshError) {
+          this.logger.warn('Error during refresh:', refreshError.message);
+        }
       }
 
-      // NO hacemos verificación con Telegram para evitar timeouts
-      // Confiamos en que si el canal está como is_active=true, el bot sigue siendo admin
-      // La verificación se hará cuando se intente enviar mensajes
+      if (!channel) {
+        // Listar canales disponibles para el mensaje de error
+        const availableResult = (await this.prisma.$runCommandRaw({
+          find: 'detected_telegram_channels',
+          filter: { is_active: true },
+        })) as any;
+        const availableChannels = availableResult.cursor?.firstBatch || [];
+        const channelNames = availableChannels.map((c: any) => c.channel_title).join(', ');
+        
+        return {
+          found: false,
+          error: `Canal "${normalizedName}" no encontrado.\n\nCanales detectados: ${channelNames || 'Ninguno'}\n\n💡 Para detectar tu canal:\n1. Verifica que @Antiabetbot sea admin\n2. Envía un mensaje en el canal\n3. Vuelve a intentar`,
+        };
+      }
 
       return {
         found: true,
