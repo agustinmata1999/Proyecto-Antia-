@@ -39,12 +39,11 @@ export class TelegramController {
 
   // Webhook endpoint (sin guards - debe ser público para Telegram)
   @Post('webhook')
-  @Post('webhook')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Telegram webhook endpoint' })
   async handleWebhook(@Req() req: any, @Body() update: any) {
     try {
-      this.logger.log('📥 Received webhook update');
+      this.logger.log(`📥 Received webhook update: ${JSON.stringify(update).substring(0, 200)}...`);
       // Procesar el update con el bot
       await this.telegramService.handleUpdate(update);
       return { ok: true };
