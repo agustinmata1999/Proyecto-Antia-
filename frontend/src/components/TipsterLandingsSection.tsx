@@ -615,11 +615,11 @@ export default function TipsterLandingsSection() {
       {/* Metrics Dialog */}
       {showMetricsDialog && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">
-                  Métricas: {selectedLanding?.title || 'Landing'}
+                  Métricas: {selectedLanding?.title || 'Campaña'}
                 </h2>
                 <button onClick={() => setShowMetricsDialog(false)} className="p-1 hover:bg-gray-100 rounded">
                   <X className="w-5 h-5" />
@@ -627,45 +627,106 @@ export default function TipsterLandingsSection() {
               </div>
               
               {metrics ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 rounded text-center">
-                      <div className="text-2xl font-bold">{metrics.landing?.totalImpressions || 0}</div>
-                      <div className="text-sm text-gray-500">Vistas</div>
+                <div className="space-y-6">
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-600">{metrics.landing?.totalImpressions || 0}</div>
+                      <div className="text-sm text-blue-600/70">Vistas</div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded text-center">
-                      <div className="text-2xl font-bold">{metrics.landing?.totalClicks || 0}</div>
-                      <div className="text-sm text-gray-500">Clicks</div>
+                    <div className="p-4 bg-purple-50 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-purple-600">{metrics.landing?.totalClicks || 0}</div>
+                      <div className="text-sm text-purple-600/70">Clicks</div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-600">{metrics.conversions?.approved || 0}</div>
+                      <div className="text-sm text-green-600/70">Conversiones</div>
+                    </div>
+                    <div className="p-4 bg-yellow-50 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        €{((metrics.conversions?.totalEarningsCents || 0) / 100).toFixed(2)}
+                      </div>
+                      <div className="text-sm text-yellow-600/70">Ganancias</div>
                     </div>
                   </div>
 
-                  {metrics.clicksByCountry?.length > 0 && (
+                  {/* Conversion Rate */}
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Tasa de conversión</span>
+                      <span className="text-lg font-bold">{metrics.general?.conversionRate || 0}%</span>
+                    </div>
+                    <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full"
+                        style={{ width: `${Math.min(parseFloat(metrics.general?.conversionRate || 0), 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Two columns: Country and House */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* By Country */}
+                    {metrics.clicksByCountry?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-3 text-gray-900">Clicks por País</h4>
+                        <div className="space-y-2">
+                          {metrics.clicksByCountry.map((c: any) => (
+                            <div key={c.country} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                              <span className="flex items-center gap-2">
+                                <span>{COUNTRY_INFO[c.country]?.flag || '🌍'}</span>
+                                <span>{COUNTRY_INFO[c.country]?.name || c.country}</span>
+                              </span>
+                              <span className="font-medium">{c.clicks}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* By House */}
+                    {metrics.clicksByHouse?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-3 text-gray-900">Clicks por Casa</h4>
+                        <div className="space-y-2">
+                          {metrics.clicksByHouse.map((h: any) => (
+                            <div key={h.houseId} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                              <span>{h.houseName}</span>
+                              <span className="font-medium">{h.clicks}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conversions Detail */}
+                  {metrics.conversions && (
                     <div>
-                      <h4 className="font-medium mb-2">Clicks por País</h4>
-                      <div className="space-y-1">
-                        {metrics.clicksByCountry.map((c: any) => (
-                          <div key={c.country} className="flex justify-between text-sm">
-                            <span>
-                              {COUNTRY_INFO[c.country]?.flag} {COUNTRY_INFO[c.country]?.name || c.country}
-                            </span>
-                            <span className="font-medium">{c.clicks}</span>
-                          </div>
-                        ))}
+                      <h4 className="font-medium mb-3 text-gray-900">Estado de Conversiones</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="p-3 bg-green-50 rounded-lg text-center">
+                          <div className="text-xl font-bold text-green-600">{metrics.conversions.approved}</div>
+                          <div className="text-xs text-green-600">Aprobadas</div>
+                        </div>
+                        <div className="p-3 bg-yellow-50 rounded-lg text-center">
+                          <div className="text-xl font-bold text-yellow-600">{metrics.conversions.pending}</div>
+                          <div className="text-xs text-yellow-600">Pendientes</div>
+                        </div>
+                        <div className="p-3 bg-red-50 rounded-lg text-center">
+                          <div className="text-xl font-bold text-red-600">{metrics.conversions.rejected}</div>
+                          <div className="text-xs text-red-600">Rechazadas</div>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {metrics.clicksByHouse?.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-2">Clicks por Casa</h4>
-                      <div className="space-y-1">
-                        {metrics.clicksByHouse.map((h: any) => (
-                          <div key={h.houseId} className="flex justify-between text-sm">
-                            <span>{h.houseName}</span>
-                            <span className="font-medium">{h.clicks}</span>
-                          </div>
-                        ))}
-                      </div>
+                  {/* No data message */}
+                  {(!metrics.clicksByCountry?.length && !metrics.clicksByHouse?.length) && (
+                    <div className="text-center py-8 text-gray-500">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No hay datos de clicks para esta campaña aún</p>
+                      <p className="text-sm mt-1">Comparte tu enlace para empezar a ver métricas</p>
                     </div>
                   )}
                 </div>
