@@ -179,11 +179,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       try {
         const chat = ctx.chat;
         if (chat.type === 'channel') {
+          this.logger.log(`📬 Channel post received in: ${chat.title} (${chat.id})`);
           // Auto-registrar el canal si el bot puede ver mensajes (es admin)
           await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
         }
       } catch (error) {
         // Silently ignore errors
+        this.logger.warn(`Error handling channel_post: ${error.message}`);
       }
     });
 
