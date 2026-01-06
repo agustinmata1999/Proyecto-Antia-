@@ -143,21 +143,26 @@ export default function TipsterDashboard() {
   // Wizard de bienvenida para Telegram
   const [showTelegramWizard, setShowTelegramWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
+  const [dontShowWizardAgain, setDontShowWizardAgain] = useState(false);
 
-  // Mostrar wizard la primera vez que entra a Telegram
+  // Mostrar wizard cada vez que entra a Telegram (a menos que haya marcado "no mostrar")
   useEffect(() => {
     if (activeView === 'telegram') {
-      const hasSeenWizard = localStorage.getItem('telegram_wizard_seen');
-      if (!hasSeenWizard) {
+      const neverShowWizard = localStorage.getItem('telegram_wizard_never_show');
+      if (!neverShowWizard) {
         setShowTelegramWizard(true);
         setWizardStep(1);
+        setDontShowWizardAgain(false);
       }
     }
   }, [activeView]);
 
   const handleCloseWizard = () => {
     setShowTelegramWizard(false);
-    localStorage.setItem('telegram_wizard_seen', 'true');
+    // Solo guardar si el usuario marcó la casilla
+    if (dontShowWizardAgain) {
+      localStorage.setItem('telegram_wizard_never_show', 'true');
+    }
   };
 
   useEffect(() => {
