@@ -178,13 +178,35 @@ export class LandingService {
    * Obtener una landing por ID
    */
   async getLandingById(landingId: string) {
-    const result = await this.prisma.$runCommandRaw({
+    // Intentar buscar por ObjectId
+    let result = await this.prisma.$runCommandRaw({
       find: 'tipster_affiliate_landings',
       filter: { _id: { $oid: landingId } },
       limit: 1,
     }) as any;
 
-    const landing = result.cursor?.firstBatch?.[0];
+    let landing = result.cursor?.firstBatch?.[0];
+    
+    // Si no se encuentra, intentar por string
+    if (!landing) {
+      result = await this.prisma.$runCommandRaw({
+        find: 'tipster_affiliate_landings',
+        filter: { _id: landingId },
+        limit: 1,
+      }) as any;
+      landing = result.cursor?.firstBatch?.[0];
+    }
+    
+    // Si aún no se encuentra, intentar por id field
+    if (!landing) {
+      result = await this.prisma.$runCommandRaw({
+        find: 'tipster_affiliate_landings',
+        filter: { id: landingId },
+        limit: 1,
+      }) as any;
+      landing = result.cursor?.firstBatch?.[0];
+    }
+
     if (!landing) {
       throw new NotFoundException('Landing no encontrada');
     }
