@@ -503,16 +503,29 @@ export class LandingService {
       ],
     });
 
-    // Actualizar contador de clicks en la landing
-    await this.prisma.$runCommandRaw({
-      update: 'tipster_affiliate_landings',
-      updates: [
-        {
-          q: { _id: { $oid: landingId } },
-          u: { $inc: { total_clicks: 1 } },
-        },
-      ],
-    });
+    // Actualizar contador de clicks en la landing usando ObjectId nativo
+    try {
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_landings',
+        updates: [
+          {
+            q: { _id: new ObjectId(landingId) },
+            u: { $inc: { total_clicks: 1 } },
+          },
+        ],
+      });
+    } catch (e) {
+      // Fallback: try with $oid syntax
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_landings',
+        updates: [
+          {
+            q: { _id: { $oid: landingId } },
+            u: { $inc: { total_clicks: 1 } },
+          },
+        ],
+      });
+    }
 
     // También registrar en affiliate_click_events para compatibilidad
     await this.prisma.$runCommandRaw({
@@ -583,16 +596,29 @@ export class LandingService {
       ],
     });
 
-    // Actualizar contador
-    await this.prisma.$runCommandRaw({
-      update: 'tipster_affiliate_landings',
-      updates: [
-        {
-          q: { _id: { $oid: landingId } },
-          u: { $inc: { total_impressions: 1 } },
-        },
-      ],
-    });
+    // Actualizar contador usando ObjectId nativo
+    try {
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_landings',
+        updates: [
+          {
+            q: { _id: new ObjectId(landingId) },
+            u: { $inc: { total_impressions: 1 } },
+          },
+        ],
+      });
+    } catch (e) {
+      // Fallback: try with $oid syntax
+      await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_landings',
+        updates: [
+          {
+            q: { _id: { $oid: landingId } },
+            u: { $inc: { total_impressions: 1 } },
+          },
+        ],
+      });
+    }
   }
 
   // ==================== MÉTRICAS ====================
