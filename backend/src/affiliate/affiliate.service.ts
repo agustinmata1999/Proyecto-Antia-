@@ -1023,7 +1023,7 @@ export class AffiliateService {
       },
     };
     if (filters.tipsterId) clickWhere.tipsterId = filters.tipsterId;
-    if (filters.campaignId) clickWhere.campaignId = filters.campaignId;
+    if (filters.campaignId) clickWhere.landingId = filters.campaignId; // campaignId = landingId
     if (filters.houseId) clickWhere.houseId = filters.houseId;
 
     // Build where clause for conversions
