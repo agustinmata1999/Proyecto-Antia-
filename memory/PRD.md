@@ -90,8 +90,8 @@ Red de afiliación premium:
 ## Backlog
 
 ### P0 - Alta Prioridad
-- [ ] Rediseño Dashboard Tipster
-- [ ] Rediseño Panel Admin
+- [ ] Rediseño Dashboard Tipster (aplicar tema oscuro)
+- [ ] Rediseño Panel Admin (aplicar tema oscuro)
 - [ ] Rediseño páginas de Login/Register
 
 ### P1 - Media Prioridad
@@ -99,6 +99,7 @@ Red de afiliación premium:
 - [ ] Login con Telegram Widget
 - [ ] Subida de fotos de perfil
 - [ ] Suscripción trimestral
+- [ ] Mejorar datos de referidos anónimos (simulador) para mostrar más info
 
 ### P2 - Baja Prioridad
 - [ ] Emails transaccionales (cancelación/expiración)
