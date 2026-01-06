@@ -139,6 +139,26 @@ export default function TipsterDashboard() {
   // Modal de confirmación para compartir en Telegram
   const [showShareConfirmModal, setShowShareConfirmModal] = useState(false);
   const [productToShare, setProductToShare] = useState<{ id: string; title: string } | null>(null);
+  
+  // Wizard de bienvenida para Telegram
+  const [showTelegramWizard, setShowTelegramWizard] = useState(false);
+  const [wizardStep, setWizardStep] = useState(1);
+
+  // Mostrar wizard la primera vez que entra a Telegram
+  useEffect(() => {
+    if (activeView === 'telegram') {
+      const hasSeenWizard = localStorage.getItem('telegram_wizard_seen');
+      if (!hasSeenWizard) {
+        setShowTelegramWizard(true);
+        setWizardStep(1);
+      }
+    }
+  }, [activeView]);
+
+  const handleCloseWizard = () => {
+    setShowTelegramWizard(false);
+    localStorage.setItem('telegram_wizard_seen', 'true');
+  };
 
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
