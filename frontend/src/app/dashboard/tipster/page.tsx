@@ -2555,7 +2555,7 @@ export default function TipsterDashboard() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Conectar Canal de Telegram</h2>
-                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setChannelLinkInput(''); }} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -2568,36 +2568,8 @@ export default function TipsterDashboard() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-medium text-blue-800 mb-2">📋 Requisito previo:</h4>
                 <p className="text-sm text-blue-700">
-                  Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal
+                  Añade el bot <strong>@Antiabetbot</strong> como <strong>administrador</strong> de tu canal y envía un mensaje en el canal.
                 </p>
-              </div>
-
-              {/* Toggle entre Nombre, Link e ID */}
-              <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
-                <button
-                  onClick={() => { setInputMode('title'); setChannelInput(''); setAddChannelError(''); }}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    inputMode === 'title' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  📝 Por Nombre
-                </button>
-                <button
-                  onClick={() => { setInputMode('name'); setChannelInput(''); setAddChannelError(''); }}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    inputMode === 'name' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  📎 Por Link
-                </button>
-                <button
-                  onClick={() => { setInputMode('id'); setChannelInput(''); setAddChannelError(''); }}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    inputMode === 'id' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  🔢 Por ID
-                </button>
               </div>
 
               {addChannelError && (
@@ -2606,73 +2578,66 @@ export default function TipsterDashboard() {
                 </div>
               )}
 
-              {inputMode === 'title' ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre del canal <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={channelInput}
-                    onChange={(e) => setChannelInput(e.target.value)}
-                    placeholder="Pronosticos Futbol"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Escribe el nombre exacto de tu canal (como aparece en Telegram)
-                  </p>
-                </div>
-              ) : inputMode === 'name' ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Link de invitación del canal <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={channelInput}
-                    onChange={(e) => setChannelInput(e.target.value)}
-                    placeholder="https://t.me/+abc123xyz"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Pega el link de invitación de tu canal (Telegram → Info del canal → Invitar)
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Channel ID <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={channelInput}
-                    onChange={(e) => setChannelInput(e.target.value)}
-                    placeholder="-1001234567890"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-mono"
-                  />
-                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-xs text-amber-800">
-                      <strong>💡 ¿Cómo obtener el Channel ID?</strong><br/>
-                      1. Reenvía un mensaje de tu canal a @userinfobot<br/>
-                      2. El bot te dará el ID (empieza con -100...)
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Nombre del canal (obligatorio) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre del canal <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  value={channelInput}
+                  onChange={(e) => setChannelInput(e.target.value)}
+                  placeholder="Ej: Pronosticos Futbol"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Escribe el nombre exacto de tu canal (como aparece en Telegram)
+                </p>
+              </div>
+
+              {/* Link de invitación (opcional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Link de invitación <span className="text-gray-400">(opcional)</span>
+                </label>
+                <input 
+                  type="text" 
+                  value={channelLinkInput}
+                  onChange={(e) => setChannelLinkInput(e.target.value)}
+                  placeholder="https://t.me/+abc123xyz"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Solo necesario si tienes varios canales con el mismo nombre
+                </p>
+              </div>
 
               <div className="flex gap-3 justify-end pt-4">
                 <button 
-                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setInputMode('name'); }}
+                  onClick={() => { setShowAddChannelForm(false); setAddChannelError(''); setChannelInput(''); setChannelLinkInput(''); }}
                   className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button 
-                  onClick={inputMode === 'title' ? handleConnectChannelByName : (inputMode === 'name' ? handleConnectChannel : handleConnectChannelById)}
+                  onClick={handleConnectChannelByNameAndLink}
                   disabled={connectingChannel || !channelInput.trim()}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
                   {connectingChannel ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Conectando...
+                    </>
+                  ) : (
+                    'Conectar Canal'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Conectando...
