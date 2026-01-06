@@ -2667,6 +2667,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
       channelType: string;
     };
     error?: string;
+    availableChannels?: Array<{ id: string; title: string }>;
   }> {
     try {
       const link = inviteLink.trim();
