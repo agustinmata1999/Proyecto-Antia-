@@ -11,7 +11,7 @@ import subprocess
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://aff-metrics-fix.preview.emergentagent.com"
+BASE_URL = "https://telegram-bot-fix-44.preview.emergentagent.com"
 WEBHOOK_URL = f"{BASE_URL}/api/telegram/webhook"
 BOT_TOKEN = "8422601694:AAHiM9rnHgufLkeLKrNe28aibFZippxGr-k"
 BOT_USERNAME = "Antiabetbot"
