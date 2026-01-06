@@ -1037,12 +1037,8 @@ export class AffiliateService {
     if (filters.houseId) conversionWhere.houseId = filters.houseId;
 
     // Get all clicks from landing_click_events (campaigns)
-    const landingClicksFilter: any = {
-      created_at: {
-        $gte: { $date: startDate.toISOString() },
-        $lte: { $date: endDate.toISOString() },
-      },
-    };
+    // Build filter without date (we'll filter in memory)
+    const landingClicksFilter: any = {};
     if (filters.tipsterId) landingClicksFilter.tipster_id = filters.tipsterId;
     if (filters.campaignId) landingClicksFilter.landing_id = filters.campaignId;
     if (filters.houseId) landingClicksFilter.betting_house_id = filters.houseId;
@@ -1051,7 +1047,13 @@ export class AffiliateService {
       find: 'landing_click_events',
       filter: landingClicksFilter,
     })) as any;
-    const landingClicks = landingClicksResult.cursor?.firstBatch || [];
+    
+    // Filter by date in memory
+    const landingClicks = (landingClicksResult.cursor?.firstBatch || []).filter((c: any) => {
+      const clickDate = c.created_at?.$date ? new Date(c.created_at.$date) : (c.created_at ? new Date(c.created_at) : null);
+      if (!clickDate) return false;
+      return clickDate >= startDate && clickDate <= endDate;
+    });
 
     // Map landing clicks to a standard format
     const clicks = landingClicks.map((c: any) => ({
