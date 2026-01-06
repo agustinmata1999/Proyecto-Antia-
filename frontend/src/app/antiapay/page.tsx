@@ -6,17 +6,22 @@ export default function AntiaPay() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-800/50">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-semibold tracking-tight">
-            Antia<span className="text-blue-400 font-light">Pay</span>
+          <Link href="/" className="text-xl font-medium tracking-tight">
+            Antia<span className="font-light">Pay</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <a href="#contact" className="text-gray-400 hover:text-white text-sm transition">Contacto</a>
+            <Link href="/register?role=tipster" className="text-gray-400 hover:text-white text-sm transition">Empezar a vender</Link>
             <Link
               href="/login"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg transition font-medium text-sm flex items-center gap-2"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition font-medium text-sm flex items-center gap-2"
               data-testid="header-login-btn"
             >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
               Iniciar sesión
             </Link>
           </div>
@@ -24,155 +29,343 @@ export default function AntiaPay() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/5" />
+      <section className="pt-28 pb-16 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-6">
-              <span className="text-blue-400 text-sm font-medium">Solución de pagos para creadores</span>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left content */}
+            <div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Una plataforma para
+                <br />
+                gestionar y vender
+                <br />
+                <span className="font-normal">contenido digital</span>
+              </h1>
+              <p className="text-gray-400 text-lg mb-4 leading-relaxed max-w-lg">
+                AntiaPay es una plataforma que permite a creadores y proyectos 
+                digitales gestionar la venta de contenido premium mediante pagos 
+                y suscripciones automatizadas.
+              </p>
+              <p className="text-gray-400 text-lg mb-8 leading-relaxed max-w-lg">
+                Desde un único panel, puedes controlar accesos, renovaciones y 
+                transacciones de forma sencilla y organizada.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/register?role=tipster"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg transition font-medium text-center"
+                  data-testid="hero-cta-btn"
+                >
+                  Comenzar ahora
+                </Link>
+                <a
+                  href="#contact"
+                  className="border border-gray-600 text-white px-8 py-4 rounded-lg hover:bg-white/5 transition font-medium text-center"
+                  data-testid="hero-contact-btn"
+                >
+                  Contactanos
+                </a>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-              Cobra por tu contenido
-              <br />
-              <span className="text-blue-400">en un solo clic</span>
-            </h1>
-            <p className="text-gray-400 text-xl mb-10 max-w-2xl mx-auto">
-              AntiaPay es la solución todo-en-uno para gestionar pagos, suscripciones y 
-              accesos automáticos a tu contenido premium.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/register"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg transition font-medium text-lg"
-                data-testid="hero-cta-btn"
-              >
-                Comenzar gratis
-              </Link>
-              <a
-                href="#demo"
-                className="border border-gray-600 text-white px-8 py-4 rounded-lg hover:bg-white/5 transition font-medium text-lg"
-              >
-                Ver demo
-              </a>
+
+            {/* Right content - AntiaPay 3D mockup */}
+            <div className="relative flex justify-center lg:justify-end">
+              {/* 3D Card mockup */}
+              <div className="relative">
+                {/* Background glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-cyan-400/20 blur-3xl rounded-full scale-150" />
+                
+                {/* Main card */}
+                <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 border border-gray-700 shadow-2xl transform perspective-1000 rotate-y-6 hover:rotate-y-0 transition-transform duration-500">
+                  {/* Inner card design */}
+                  <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-full px-8 py-4 border border-gray-600 flex items-center gap-3 shadow-xl">
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/50" />
+                    <span className="text-2xl font-semibold tracking-tight">
+                      Antia<span className="font-light italic text-blue-400">Pay</span>
+                    </span>
+                  </div>
+                  
+                  {/* Decorative lines */}
+                  <div className="absolute -bottom-4 -right-4 w-32 h-32 border-r-2 border-b-2 border-blue-500/30 rounded-br-3xl" />
+                  <div className="absolute -top-4 -left-4 w-16 h-16 border-l-2 border-t-2 border-cyan-500/30 rounded-tl-2xl" />
+                </div>
+                
+                {/* Floating elements */}
+                <div className="absolute -top-8 right-0 w-4 h-4 bg-blue-400 rounded-full animate-pulse" />
+                <div className="absolute bottom-0 -left-8 w-3 h-3 bg-cyan-400 rounded-full animate-pulse delay-300" />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 border-y border-gray-800">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-2">500+</div>
-              <div className="text-gray-500">Creadores activos</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-2">€2M+</div>
-              <div className="text-gray-500">Procesado</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-2">98%</div>
-              <div className="text-gray-500">Uptime</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-2">24h</div>
-              <div className="text-gray-500">Soporte</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24">
+      {/* User Type Selection Section */}
+      <section className="py-24 bg-[#0a0a0a]">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Todo lo que necesitas para
-              <span className="text-blue-400"> monetizar</span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 italic">
+              Antes de avanzar
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Una suite completa de herramientas diseñadas específicamente para creadores de contenido
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">
+              ¿que situación te define mejor?
+            </h3>
+            <p className="text-gray-500">
+              Todo lo que estas buscando, lo encontraras en un mismo lugar
             </p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-3">Pagos en 1 clic</h3>
-              <p className="text-gray-400">
-                Checkout optimizado para máxima conversión. Stripe y Redsys integrados.
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Particular (Cliente) */}
+            <div className="bg-[#141414] rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition">
+              <h4 className="text-2xl font-bold mb-4">Particular</h4>
+              <p className="text-gray-400 mb-6">
+                Quiero disfrutar del contenido de mis creadores favoritos y apoyarles
               </p>
+              <Link
+                href="/register?role=client"
+                className="flex items-center justify-center gap-2 border border-gray-600 text-white px-6 py-3 rounded-lg hover:bg-white/5 transition font-medium w-full"
+                data-testid="user-type-client-btn"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Cuenta Personal
+              </Link>
             </div>
 
-            {/* Feature 2 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-3">Suscripciones automáticas</h3>
-              <p className="text-gray-400">
-                Cobros recurrentes sin intervención. Renovaciones y cancelaciones automatizadas.
+            {/* Empresa (Tipster) */}
+            <div className="bg-[#141414] rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition">
+              <h4 className="text-2xl font-bold mb-4">Empresa</h4>
+              <p className="text-gray-400 mb-6">
+                Quiero vender acceso a mi canal, curso, contenido o sala y cobrar fácilmente
               </p>
+              <Link
+                href="/register?role=tipster"
+                className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition font-medium w-full"
+                data-testid="user-type-tipster-btn"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Cuenta Business
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section with 3D Icons */}
+      <section className="py-24 bg-[#0d0d0d]">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Una solución diseñada para la
+            </h2>
+            <h3 className="text-3xl md:text-4xl font-bold">
+              gestión de <span className="font-light">contenido digital</span>
+            </h3>
+            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+              AntiaPay ofrece un conjunto de funcionalidades orientadas a la 
+              gestión de pagos, suscripciones y accesos a contenido digital 
+              desde una única plataforma
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Feature 1 - Gestión de suscripciones */}
+            <div className="text-center">
+              <h4 className="text-xl font-bold mb-4">Gestión de suscripciones</h4>
+              <p className="text-gray-500 text-sm mb-8">
+                Olvidate de la gestión manual, automatiza las suscripciones, los 
+                cobros y los accesos para que todo funcione de forma continua y 
+                sin interrupciones
+              </p>
+              {/* 3D Icon */}
+              <div className="relative w-48 h-48 mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-full blur-2xl" />
+                <div className="relative bg-gradient-to-br from-blue-400/20 to-cyan-400/10 rounded-3xl p-6 border border-blue-500/20">
+                  <div className="flex items-center justify-center h-full">
+                    <div className="relative">
+                      {/* Monitor icon */}
+                      <div className="w-24 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-xl shadow-blue-500/30">
+                        <div className="w-16 h-12 bg-blue-300/30 rounded flex items-center justify-center">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                      </div>
+                      {/* Settings gear */}
+                      <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-3">Gestión de accesos</h3>
-              <p className="text-gray-400">
-                Control total sobre quién accede a tu contenido. Grupos de Telegram automatizados.
+            {/* Feature 2 - Pagos en un click */}
+            <div className="text-center">
+              <h4 className="text-xl font-bold mb-4">Pagos en un click</h4>
+              <p className="text-gray-500 text-sm mb-8">
+                Permite ejecutar pagos de forma rápida y directa en un solo clic, 
+                optimizando la experiencia del usuario en cada transacción
               </p>
+              {/* 3D Icon */}
+              <div className="relative w-48 h-48 mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-full blur-2xl" />
+                <div className="relative bg-gradient-to-br from-blue-400/20 to-cyan-400/10 rounded-3xl p-6 border border-blue-500/20">
+                  <div className="flex items-center justify-center h-full">
+                    <div className="relative">
+                      {/* Cart icon */}
+                      <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/30 transform rotate-6">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      {/* Check badge */}
+                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Feature 4 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-3">Analytics en tiempo real</h3>
-              <p className="text-gray-400">
-                Dashboard completo con métricas de ingresos, conversiones y crecimiento.
+            {/* Feature 3 - Integrado con Telegram */}
+            <div className="text-center">
+              <h4 className="text-xl font-bold mb-4">Integrado con Telegram</h4>
+              <p className="text-gray-500 text-sm mb-8">
+                La plataforma puede integrarse con herramientas de mensajería 
+                para automatizar la gestión de accesos a comunidades y 
+                contenidos privados.
               </p>
+              {/* 3D Icon */}
+              <div className="relative w-48 h-48 mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-full blur-2xl" />
+                <div className="relative bg-gradient-to-br from-blue-400/20 to-cyan-400/10 rounded-3xl p-6 border border-blue-500/20">
+                  <div className="flex items-center justify-center h-full">
+                    <div className="relative">
+                      {/* Chart icon */}
+                      <div className="w-24 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-end justify-center gap-1 p-3 shadow-xl shadow-blue-500/30">
+                        <div className="w-4 h-6 bg-blue-300/50 rounded-sm" />
+                        <div className="w-4 h-10 bg-blue-300/50 rounded-sm" />
+                        <div className="w-4 h-8 bg-blue-300/50 rounded-sm" />
+                        <div className="w-4 h-12 bg-white/70 rounded-sm" />
+                      </div>
+                      {/* Check badge */}
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center mt-12">
+            <Link
+              href="/register?role=tipster"
+              className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-10 py-4 rounded-lg transition font-medium"
+            >
+              Comenzar ahora
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Dashboard Showcase Section */}
+      <section className="py-24 bg-[#0a0a0a]">
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left content */}
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                Optimiza la gestión de
+                <br />
+                tus <span className="font-light">procesos digitales</span>
+              </h2>
+              <Link
+                href="/register?role=tipster"
+                className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg transition font-medium"
+              >
+                Comenzar ahora
+              </Link>
             </div>
 
-            {/* Feature 5 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
+            {/* Right content - Dashboard mockup */}
+            <div className="relative">
+              <div className="bg-[#141414] rounded-2xl p-4 border border-gray-700 shadow-2xl">
+                {/* Dashboard header */}
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-700">
+                  <div className="w-3 h-3 bg-red-500 rounded-full" />
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                  <div className="w-3 h-3 bg-green-500 rounded-full" />
+                </div>
+                
+                {/* Dashboard content */}
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Sidebar */}
+                  <div className="col-span-1 bg-[#1a1a1a] rounded-lg p-3 space-y-2">
+                    <div className="h-3 bg-gray-700 rounded w-3/4" />
+                    <div className="h-2 bg-gray-800 rounded w-1/2" />
+                    <div className="h-2 bg-gray-800 rounded w-2/3" />
+                    <div className="h-2 bg-blue-500/30 rounded w-1/2" />
+                    <div className="h-2 bg-gray-800 rounded w-3/4" />
+                  </div>
+                  
+                  {/* Main content */}
+                  <div className="col-span-2 space-y-3">
+                    {/* Stats cards */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="bg-[#1a1a1a] rounded-lg p-2">
+                        <div className="text-xs text-gray-500">Ingresos</div>
+                        <div className="text-sm font-bold text-green-400">€1,234</div>
+                      </div>
+                      <div className="bg-[#1a1a1a] rounded-lg p-2">
+                        <div className="text-xs text-gray-500">Suscriptores</div>
+                        <div className="text-sm font-bold">847</div>
+                      </div>
+                      <div className="bg-[#1a1a1a] rounded-lg p-2">
+                        <div className="text-xs text-gray-500">Conversión</div>
+                        <div className="text-sm font-bold text-blue-400">12.5%</div>
+                      </div>
+                    </div>
+                    
+                    {/* Chart placeholder */}
+                    <div className="bg-[#1a1a1a] rounded-lg p-3 h-24">
+                      <div className="flex items-end justify-around h-full gap-1">
+                        {[40, 60, 30, 80, 50, 70, 45, 90, 55, 75, 85, 65].map((h, i) => (
+                          <div key={i} className="bg-blue-500/50 rounded-sm w-full" style={{ height: `${h}%` }} />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Table placeholder */}
+                    <div className="bg-[#1a1a1a] rounded-lg p-2 space-y-1">
+                      {[1, 2, 3].map((_, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 border-b border-gray-800 last:border-0">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-gray-700 rounded-full" />
+                            <div className="h-2 bg-gray-700 rounded w-20" />
+                          </div>
+                          <div className="h-2 bg-green-500/30 rounded w-12" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-3">Links de pago personalizados</h3>
-              <p className="text-gray-400">
-                Crea enlaces únicos para cada producto. Compártelos en redes sociales.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-gray-800 hover:border-blue-500/30 transition group">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition">
-                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-3">Sistema de referidos</h3>
-              <p className="text-gray-400">
-                Programa de afiliados integrado. Genera comisiones por cada cliente referido.
-              </p>
             </div>
           </div>
         </div>
@@ -216,7 +409,7 @@ export default function AntiaPay() {
                   Soporte por email
                 </li>
               </ul>
-              <Link href="/register" className="block w-full text-center py-3 border border-gray-600 rounded-lg hover:bg-white/5 transition">
+              <Link href="/register?role=tipster" className="block w-full text-center py-3 border border-gray-600 rounded-lg hover:bg-white/5 transition">
                 Empezar gratis
               </Link>
             </div>
@@ -255,7 +448,7 @@ export default function AntiaPay() {
                   Analytics avanzado
                 </li>
               </ul>
-              <Link href="/register" className="block w-full text-center py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium">
+              <Link href="/register?role=tipster" className="block w-full text-center py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium">
                 Comenzar ahora
               </Link>
             </div>
@@ -299,22 +492,20 @@ export default function AntiaPay() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24">
+      {/* Contact Section */}
+      <section id="contact" className="py-24 bg-[#0a0a0a]">
         <div className="container mx-auto px-6">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-3xl p-12 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              ¿Listo para monetizar tu contenido?
-            </h2>
-            <p className="text-blue-100 text-xl mb-8 max-w-2xl mx-auto">
-              Únete a más de 500 creadores que ya confían en AntiaPay para gestionar sus pagos.
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-4xl font-bold mb-4">¿Tienes preguntas?</h2>
+            <p className="text-gray-400 mb-8">
+              Contáctanos y te responderemos lo antes posible.
             </p>
-            <Link
-              href="/register"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition font-medium text-lg"
+            <a
+              href="mailto:soporte@antia.com"
+              className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg transition font-medium"
             >
-              Crear cuenta gratis
-            </Link>
+              Contactar soporte
+            </a>
           </div>
         </div>
       </section>
@@ -323,8 +514,8 @@ export default function AntiaPay() {
       <footer className="bg-[#080808] border-t border-gray-800 py-12">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <Link href="/" className="text-xl font-semibold">
-              Antia<span className="text-blue-400 font-light">Pay</span>
+            <Link href="/" className="text-xl font-medium">
+              Antia<span className="font-light">Pay</span>
             </Link>
             <div className="flex items-center gap-6 text-gray-500 text-sm">
               <Link href="/" className="hover:text-white transition">Inicio</Link>
