@@ -419,12 +419,47 @@ export default function TipsterDashboard() {
         // Reset form
         setShowAddChannelForm(false);
         setChannelInput('');
+        setInputMode('name');
         alert('✅ Canal conectado correctamente');
       } else {
         setAddChannelError(response.data.message || 'No se pudo conectar el canal.');
       }
     } catch (error: any) {
       setAddChannelError(error.response?.data?.message || 'Error al conectar el canal');
+    } finally {
+      setConnectingChannel(false);
+    }
+  };
+
+  // Conectar canal por ID directamente
+  const handleConnectChannelById = async () => {
+    if (!channelInput.trim()) {
+      setAddChannelError('Por favor, ingresa el ID del canal');
+      return;
+    }
+
+    setConnectingChannel(true);
+    setAddChannelError('');
+
+    try {
+      // Conectar por ID
+      const response = await telegramApi.channels.connectById(channelInput.trim());
+      
+      if (response.data.success) {
+        // Reload channels
+        const channelsRes = await telegramApi.channels.getAll();
+        setTelegramChannels(channelsRes.data.channels || []);
+        
+        // Reset form
+        setShowAddChannelForm(false);
+        setChannelInput('');
+        setInputMode('name');
+        alert('✅ Canal conectado correctamente');
+      } else {
+        setAddChannelError(response.data.message || 'No se pudo conectar el canal. Verifica que el bot sea administrador.');
+      }
+    } catch (error: any) {
+      setAddChannelError(error.response?.data?.message || 'Error al conectar el canal. Verifica el ID.');
     } finally {
       setConnectingChannel(false);
     }
