@@ -2707,6 +2707,28 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         };
       }
 
+      // PASO 0: Forzar refresh de updates de Telegram para detectar canales nuevos
+      this.logger.log(`🔄 Forcing Telegram updates refresh before searching for channel...`);
+      try {
+        if (this.httpService) {
+          const updates = await this.httpService.getUpdates({
+            timeout: 5,
+            allowedUpdates: ['my_chat_member'],
+          });
+          
+          if (updates && Array.isArray(updates) && updates.length > 0) {
+            this.logger.log(`📥 Got ${updates.length} updates from Telegram`);
+            for (const update of updates) {
+              if (update.my_chat_member) {
+                await this.handleMyChatMemberUpdate(update.my_chat_member);
+              }
+            }
+          }
+        }
+      } catch (refreshError) {
+        this.logger.warn('Could not refresh updates:', refreshError.message);
+      }
+
       // PASO 1: Buscar por invite link en la base de datos
       let filter: any;
 
