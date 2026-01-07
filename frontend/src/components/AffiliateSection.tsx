@@ -239,7 +239,7 @@ export default function AffiliateSection() {
   const loadEditHousesForCountry = async (country: string) => {
     try {
       const token = localStorage.getItem('access_token');
-      const res = await fetch(`${getBaseUrl()}/api/affiliate/houses/country/${country}`, {
+      const res = await fetch(`${getBaseUrl()}/api/tipster/landings/houses/${country}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
