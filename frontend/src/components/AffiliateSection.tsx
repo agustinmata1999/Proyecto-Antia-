@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { affiliateApi } from '@/lib/api';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { Search, Plus, Check, X, ChevronDown } from 'lucide-react';
+import { Search, Plus, Check, X, ChevronDown, Trash2 } from 'lucide-react';
 
 interface HouseWithLink {
   house: {
@@ -23,6 +23,26 @@ interface HouseWithLink {
   };
 }
 
+interface BettingHouse {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  description: string | null;
+  commissionPerReferralEur: number;
+  allowedCountries: string[];
+}
+
+interface LandingItem {
+  bettingHouseId: string;
+  orderIndex: number;
+}
+
+interface CountryConfig {
+  country: string;
+  items: LandingItem[];
+}
+
 interface Campaign {
   id: string;
   title: string;
@@ -34,6 +54,7 @@ interface Campaign {
   totalClicks: number;
   totalImpressions: number;
   countriesEnabled: string[];
+  countryConfigs?: CountryConfig[];
   createdAt: string;
   // Betting houses in this campaign
   bettingHouses?: Array<{
