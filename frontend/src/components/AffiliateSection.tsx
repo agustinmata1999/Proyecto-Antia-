@@ -35,6 +35,12 @@ interface Campaign {
   totalImpressions: number;
   countriesEnabled: string[];
   createdAt: string;
+  // Betting houses in this campaign
+  bettingHouses?: Array<{
+    id: string;
+    name: string;
+    logoUrl?: string;
+  }>;
 }
 
 const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
