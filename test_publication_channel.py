@@ -9,7 +9,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://telegram-bot-fix-44.preview.emergentagent.com"
+BASE_URL = "https://tele-channels-1.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
