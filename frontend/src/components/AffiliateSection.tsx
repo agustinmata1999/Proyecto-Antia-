@@ -235,21 +235,121 @@ export default function AffiliateSection() {
     }
   };
 
-  const handleOpenEdit = (campaign: Campaign) => {
+  // Load houses for a specific country (for edit modal)
+  const loadEditHousesForCountry = async (country: string) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/affiliate/houses/country/${country}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEditAvailableHouses(prev => ({ ...prev, [country]: data }));
+      }
+    } catch (err) {
+      console.error('Error loading houses for country:', err);
+    }
+  };
+
+  const handleOpenEdit = async (campaign: Campaign) => {
     setEditingCampaign(campaign);
     setEditForm({
       title: campaign.title,
       description: campaign.description || '',
-      countriesEnabled: campaign.countriesEnabled,
+      countriesEnabled: campaign.countriesEnabled || [],
+      countryConfigs: campaign.countryConfigs || [],
     });
+    setEditAvailableHouses({});
+    setEditError('');
     setShowEditModal(true);
+    
+    // Load houses for each enabled country
+    for (const country of campaign.countriesEnabled || []) {
+      await loadEditHousesForCountry(country);
+    }
+  };
+
+  const handleEditCountryToggle = async (country: string) => {
+    const current = editForm.countriesEnabled;
+    
+    if (current.includes(country)) {
+      // Remove country
+      setEditForm(prev => ({
+        ...prev,
+        countriesEnabled: prev.countriesEnabled.filter(c => c !== country),
+        countryConfigs: prev.countryConfigs.filter(c => c.country !== country),
+      }));
+    } else {
+      // Add country
+      await loadEditHousesForCountry(country);
+      setEditForm(prev => ({
+        ...prev,
+        countriesEnabled: [...prev.countriesEnabled, country],
+        countryConfigs: [...prev.countryConfigs, { country, items: [] }],
+      }));
+    }
+  };
+
+  const handleEditAddHouseToCountry = (country: string, houseId: string) => {
+    setEditForm(prev => {
+      const configs = [...prev.countryConfigs];
+      const configIndex = configs.findIndex(c => c.country === country);
+      
+      if (configIndex === -1) {
+        configs.push({
+          country,
+          items: [{ bettingHouseId: houseId, orderIndex: 0 }],
+        });
+      } else {
+        const items = configs[configIndex].items;
+        if (!items.find(i => i.bettingHouseId === houseId)) {
+          items.push({
+            bettingHouseId: houseId,
+            orderIndex: items.length,
+          });
+        }
+      }
+      
+      return { ...prev, countryConfigs: configs };
+    });
+  };
+
+  const handleEditRemoveHouseFromCountry = (country: string, houseId: string) => {
+    setEditForm(prev => {
+      const configs = [...prev.countryConfigs];
+      const configIndex = configs.findIndex(c => c.country === country);
+      
+      if (configIndex !== -1) {
+        configs[configIndex].items = configs[configIndex].items
+          .filter(i => i.bettingHouseId !== houseId)
+          .map((item, index) => ({ ...item, orderIndex: index }));
+      }
+      
+      return { ...prev, countryConfigs: configs };
+    });
   };
 
   const handleSaveEdit = async () => {
     if (!editingCampaign) return;
+    setEditError('');
+    
     if (!editForm.title.trim()) {
-      alert('El nombre de la campaña es obligatorio');
+      setEditError('El nombre de la campaña es obligatorio');
       return;
+    }
+
+    if (editForm.countriesEnabled.length === 0) {
+      setEditError('Selecciona al menos un país');
+      return;
+    }
+
+    // Validate that each country has at least one house
+    for (const country of editForm.countriesEnabled) {
+      const config = editForm.countryConfigs.find(c => c.country === country);
+      if (!config || config.items.length === 0) {
+        setEditError(`Añade al menos una casa de apuestas para ${COUNTRY_INFO[country]?.name || country}`);
+        return;
+      }
     }
 
     setSaving(true);
@@ -265,6 +365,7 @@ export default function AffiliateSection() {
           title: editForm.title,
           description: editForm.description || undefined,
           countriesEnabled: editForm.countriesEnabled,
+          countryConfigs: editForm.countryConfigs,
         }),
       });
 
@@ -277,7 +378,7 @@ export default function AffiliateSection() {
       setShowEditModal(false);
       setEditingCampaign(null);
     } catch (err: any) {
-      alert(err.message);
+      setEditError(err.message);
     } finally {
       setSaving(false);
     }
