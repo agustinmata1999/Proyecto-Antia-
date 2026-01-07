@@ -210,6 +210,54 @@ export default function AffiliateSection() {
     }
   };
 
+  const handleOpenEdit = (campaign: Campaign) => {
+    setEditingCampaign(campaign);
+    setEditForm({
+      title: campaign.title,
+      description: campaign.description || '',
+      countriesEnabled: campaign.countriesEnabled,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCampaign) return;
+    if (!editForm.title.trim()) {
+      alert('El nombre de la campaña es obligatorio');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/tipster/landings/${editingCampaign.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: editForm.title,
+          description: editForm.description || undefined,
+          countriesEnabled: editForm.countriesEnabled,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Error al guardar');
+      }
+
+      await loadData();
+      setShowEditModal(false);
+      setEditingCampaign(null);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleRequestHouse = (houseId: string) => {
     setSelectedHouses(prev => 
       prev.includes(houseId) 
