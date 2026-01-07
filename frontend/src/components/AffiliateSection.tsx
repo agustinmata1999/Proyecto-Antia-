@@ -586,6 +586,12 @@ export default function AffiliateSection() {
                         onClick={() => window.open(`/go/${campaign.slug}`, '_blank')}
                         className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium transition-colors"
                       >
+                        Ver
+                      </button>
+                      <button
+                        onClick={() => handleOpenEdit(campaign)}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium transition-colors"
+                      >
                         Editar
                       </button>
                       <button
