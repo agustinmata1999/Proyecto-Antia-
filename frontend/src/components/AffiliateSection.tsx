@@ -95,6 +95,15 @@ export default function AffiliateSection() {
   });
   const [saving, setSaving] = useState(false);
 
+  // Edit campaign modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    countriesEnabled: [] as string[],
+  });
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
