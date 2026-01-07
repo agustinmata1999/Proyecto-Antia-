@@ -123,7 +123,10 @@ export default function AffiliateSection() {
     title: '',
     description: '',
     countriesEnabled: [] as string[],
+    countryConfigs: [] as CountryConfig[],
   });
+  const [editAvailableHouses, setEditAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
+  const [editError, setEditError] = useState('');
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
