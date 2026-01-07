@@ -188,6 +188,7 @@ export default function AffiliateSection() {
             totalClicks: l.totalClicks,
             totalImpressions: l.totalImpressions,
             countriesEnabled: l.countriesEnabled || [],
+            countryConfigs: l.countryConfigs || [],
             createdAt: l.createdAt,
             bettingHouses: campaignHouses,
           };
