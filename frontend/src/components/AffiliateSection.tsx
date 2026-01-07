@@ -109,26 +109,58 @@ export default function AffiliateSection() {
       const housesRes = await affiliateApi.getHousesWithLinks();
       setHouses(housesRes.data || []);
       
-      // Load campaigns (landings)
+      // Load campaigns (landings) with their betting houses
       const token = localStorage.getItem('access_token');
       const landingsRes = await fetch(`${getBaseUrl()}/api/tipster/landings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (landingsRes.ok) {
         const landingsData = await landingsRes.json();
-        setCampaigns(landingsData.map((l: any) => ({
-          id: l.id,
-          title: l.title || 'Campaña sin título',
-          description: l.description,
-          imageUrl: l.imageUrl,
-          channel: 'Telegram',
-          isActive: l.isActive,
-          slug: l.slug,
-          totalClicks: l.totalClicks,
-          totalImpressions: l.totalImpressions,
-          countriesEnabled: l.countriesEnabled || [],
-          createdAt: l.createdAt,
-        })));
+        
+        // Map landings to campaigns with betting house info
+        const campaignsWithHouses = landingsData.map((l: any) => {
+          // Extract betting houses from countryConfigs if available
+          const bettingHouseIds = new Set<string>();
+          if (l.countryConfigs) {
+            l.countryConfigs.forEach((config: any) => {
+              config.items?.forEach((item: any) => {
+                if (item.bettingHouseId) {
+                  bettingHouseIds.add(item.bettingHouseId);
+                }
+              });
+            });
+          }
+          
+          // Find the actual house info from our loaded houses
+          const campaignHouses = Array.from(bettingHouseIds).map(houseId => {
+            const found = housesRes.data?.find((h: any) => h.house.id === houseId);
+            if (found) {
+              return {
+                id: found.house.id,
+                name: found.house.name,
+                logoUrl: found.house.logoUrl,
+              };
+            }
+            return null;
+          }).filter(Boolean);
+
+          return {
+            id: l.id,
+            title: l.title || 'Campaña sin título',
+            description: l.description,
+            imageUrl: l.imageUrl,
+            channel: 'Telegram',
+            isActive: l.isActive,
+            slug: l.slug,
+            totalClicks: l.totalClicks,
+            totalImpressions: l.totalImpressions,
+            countriesEnabled: l.countriesEnabled || [],
+            createdAt: l.createdAt,
+            bettingHouses: campaignHouses,
+          };
+        });
+        
+        setCampaigns(campaignsWithHouses);
       }
     } catch (err: any) {
       console.error('Error loading data:', err);
