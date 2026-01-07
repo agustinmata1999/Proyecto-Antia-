@@ -905,6 +905,128 @@ export default function AffiliateSection() {
           </div>
         </div>
       )}
+
+      {/* Edit Campaign Modal */}
+      {showEditModal && editingCampaign && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Editar Campaña</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingCampaign(null);
+                  }}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Campaign Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre de la campaña
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nombre de la campaña"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción (opcional)
+                  </label>
+                  <textarea
+                    placeholder="Descripción de la campaña"
+                    value={editForm.description}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                  />
+                </div>
+
+                {/* Countries */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Países objetivo
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(COUNTRY_INFO).slice(0, 6).map(([code, info]) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => {
+                          setEditForm(prev => ({
+                            ...prev,
+                            countriesEnabled: prev.countriesEnabled.includes(code)
+                              ? prev.countriesEnabled.filter(c => c !== code)
+                              : [...prev.countriesEnabled, code]
+                          }));
+                        }}
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                          editForm.countriesEnabled.includes(code)
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {info.flag} {info.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Link Preview */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Link de la campaña
+                  </label>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <code className="flex-1 text-sm text-gray-600 truncate">
+                      {baseUrl}/go/{editingCampaign.slug}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${baseUrl}/go/${editingCampaign.slug}`);
+                      }}
+                      className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingCampaign(null);
+                  }}
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={saving || !editForm.title.trim()}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {saving ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
