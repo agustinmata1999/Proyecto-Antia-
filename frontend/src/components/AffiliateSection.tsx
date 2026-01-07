@@ -601,11 +601,9 @@ export default function AffiliateSection() {
                           </span>
                         ))}
                       </div>
-                      {(house.allowedCountries || []).length > 3 && (
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                          +{(house.allowedCountries || []).length - 3} países
-                        </span>
-                      )}
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                        +20 países
+                      </span>
                     </div>
 
                     <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
