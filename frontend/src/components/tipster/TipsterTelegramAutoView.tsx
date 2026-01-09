@@ -3,19 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   MessageCircle,
-  Plus,
   Trash2,
   RefreshCw,
   Check,
   AlertCircle,
-  Link2,
   Copy,
   Unlink,
   Zap,
   Shield,
-  ExternalLink,
-  User,
-  Radio,
 } from 'lucide-react';
 import TelegramLoginButton from './TelegramLoginButton';
 
