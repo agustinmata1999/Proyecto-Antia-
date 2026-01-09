@@ -395,7 +395,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
           { 
             parse_mode: 'Markdown',
-            disable_web_page_preview: true,
+            link_preview_options: { is_disabled: true },
           },
         );
 
