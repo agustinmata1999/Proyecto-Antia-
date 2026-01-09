@@ -527,4 +527,85 @@ export class TelegramAuthController {
       botUsername,
     };
   }
+
+  /**
+   * POST /api/telegram/auth/connect-with-code - Vincular con código del bot
+   */
+  @Post('connect-with-code')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async connectWithCode(@Body() body: { linkCode: string }, @Request() req) {
+    this.logger.log(`Telegram code connect request from user ${req.user.id}`);
+
+    if (!body.linkCode || body.linkCode.length < 6) {
+      throw new BadRequestException('Código de vinculación inválido');
+    }
+
+    const tipsterId = await this.getTipsterId(req.user.id);
+
+    // Buscar el código en la base de datos
+    const codeResult = (await this.prisma.$runCommandRaw({
+      find: 'telegram_link_codes',
+      filter: {
+        link_code: body.linkCode.toUpperCase(),
+        used: false,
+        expires_at: { $gt: { $date: new Date().toISOString() } },
+      },
+      limit: 1,
+    })) as any;
+
+    const linkData = codeResult.cursor?.firstBatch?.[0];
+
+    if (!linkData) {
+      this.logger.warn(`Invalid or expired link code: ${body.linkCode}`);
+      throw new BadRequestException('Código inválido o expirado. Por favor, genera un nuevo código con /vincular en el bot.');
+    }
+
+    const telegramUserId = linkData.telegram_user_id;
+    const telegramUsername = linkData.telegram_username;
+
+    // Marcar el código como usado
+    await this.prisma.$runCommandRaw({
+      update: 'telegram_link_codes',
+      updates: [
+        {
+          q: { link_code: body.linkCode.toUpperCase() },
+          u: { $set: { used: true, used_at: { $date: new Date().toISOString() }, used_by_tipster: tipsterId } },
+        },
+      ],
+    });
+
+    // Actualizar el perfil del tipster con el telegram_user_id
+    const now = new Date().toISOString();
+    await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [
+        {
+          q: { _id: { $oid: tipsterId } },
+          u: {
+            $set: {
+              telegram_user_id: telegramUserId,
+              telegram_username: telegramUsername ? `@${telegramUsername}` : null,
+              telegram_connected_at: { $date: now },
+              updated_at: { $date: now },
+            },
+          },
+        },
+      ],
+    });
+
+    this.logger.log(`✅ Telegram connected via code for tipster ${tipsterId}: ${telegramUserId}`);
+
+    // Buscar canales que este usuario añadió el bot y conectarlos automáticamente
+    const autoConnectedChannels = await this.autoConnectChannels(tipsterId, telegramUserId);
+
+    return {
+      success: true,
+      message: 'Telegram vinculado correctamente',
+      telegramId: telegramUserId,
+      telegramUsername: telegramUsername,
+      autoConnectedChannels: autoConnectedChannels.length,
+      channels: autoConnectedChannels,
+    };
+  }
 }
