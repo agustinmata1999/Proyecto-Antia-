@@ -152,6 +152,35 @@ export default function TipsterTelegramAutoView({
   const [manualConnectCode, setManualConnectCode] = useState('');
   const [verifyingManualCode, setVerifyingManualCode] = useState(false);
 
+  // Manejar vinculación con código
+  const handleConnectWithCode = async () => {
+    if (!manualConnectCode.trim() || !onConnectWithCode) return;
+    
+    setVerifyingManualCode(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      const result = await onConnectWithCode(manualConnectCode.trim().toUpperCase());
+      if (result.success) {
+        setSuccess(
+          result.autoConnectedChannels && result.autoConnectedChannels > 0
+            ? `¡Telegram vinculado! Se han conectado ${result.autoConnectedChannels} canal(es) automáticamente.`
+            : '¡Telegram vinculado correctamente!'
+        );
+        setManualConnectCode('');
+        setShowManualConnect(false);
+        onRefreshStatus();
+      } else {
+        setError('Código inválido o expirado');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Error al vincular');
+    } finally {
+      setVerifyingManualCode(false);
+    }
+  };
+
   // Limpiar mensajes después de un tiempo
   useEffect(() => {
     if (success || error) {
