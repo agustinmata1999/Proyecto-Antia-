@@ -293,26 +293,27 @@ export default function TipsterTelegramAutoView({
                         <div className="p-4 bg-white rounded-xl border border-gray-200">
                           <h4 className="font-medium text-gray-900 mb-2">Opción 1: Código de vinculación</h4>
                           <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1 mb-3">
-                            <li>
-                              <a 
-                                href={`https://t.me/${botUsername}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                Abre @{botUsername} en Telegram
-                              </a>
-                            </li>
-                            <li>Envía el comando <code className="bg-gray-100 px-1 rounded">/vincular</code></li>
-                            <li>El bot te dará un código de 8 caracteres</li>
-                            <li>Ingrésalo aquí:</li>
+                            <li>Haz clic en el botón de abajo para abrir el bot</li>
+                            <li>El bot te enviará un código de 8 caracteres</li>
+                            <li>Cópialo e ingrésalo aquí:</li>
                           </ol>
+                          <div className="mb-3">
+                            <a 
+                              href={`https://t.me/${botUsername}?start=vincular`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
+                            >
+                              <MessageCircle size={18} />
+                              Obtener código de vinculación
+                            </a>
+                          </div>
                           <div className="flex gap-2">
                             <input
                               type="text"
                               value={manualConnectCode}
                               onChange={(e) => setManualConnectCode(e.target.value.toUpperCase())}
-                              placeholder="Ej: ABC12345"
+                              placeholder="Ingresa el código aquí"
                               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase"
                               maxLength={8}
                             />
@@ -333,21 +334,12 @@ export default function TipsterTelegramAutoView({
                           </div>
                         </div>
                         
-                        {/* Opción 2: Link directo (si el widget no funciona) */}
+                        {/* Opción 2: Link directo desde el bot */}
                         <div className="p-4 bg-gray-50 rounded-xl">
-                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo desde el bot</h4>
-                          <p className="text-sm text-gray-600 mb-2">
-                            Abre el bot en Telegram y envía <code className="bg-gray-100 px-1 rounded">/vincular</code>. El bot te enviará un link directo.
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo</h4>
+                          <p className="text-sm text-gray-600">
+                            El bot también te enviará un link directo que puedes hacer clic para vincular automáticamente tu cuenta.
                           </p>
-                          <a 
-                            href={`https://t.me/${botUsername}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
-                          >
-                            <MessageCircle size={18} />
-                            Abrir bot en Telegram
-                          </a>
                         </div>
                       </div>
                     )}
