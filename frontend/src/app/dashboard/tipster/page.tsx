@@ -686,6 +686,80 @@ export default function TipsterDashboard() {
     }
   };
 
+  // ==================== TELEGRAM AUTH (AUTO-CONNECT) FUNCTIONS ====================
+  
+  const handleTelegramAuth = async (authData: any) => {
+    try {
+      const response = await telegramApi.auth.connect(authData);
+      if (response.data.success) {
+        // Recargar estado de autenticación
+        const authStatusRes = await telegramApi.auth.getStatus();
+        setTelegramAuthStatus(authStatusRes.data);
+        
+        // Recargar canales
+        const channelsRes = await telegramApi.channels.getAll();
+        setTelegramChannels(channelsRes.data.channels || []);
+        
+        return { 
+          success: true, 
+          autoConnectedChannels: response.data.autoConnectedChannels 
+        };
+      }
+      return { success: false };
+    } catch (error: any) {
+      console.error('Error connecting Telegram:', error);
+      return { success: false };
+    }
+  };
+
+  const handleTelegramDisconnect = async () => {
+    if (!confirm('¿Deseas desvincular tu cuenta de Telegram?')) return;
+    
+    try {
+      await telegramApi.auth.disconnect();
+      setTelegramAuthStatus({
+        isConnected: false,
+        availableChannels: [],
+      });
+    } catch (error) {
+      console.error('Error disconnecting Telegram:', error);
+      alert('Error al desvincular Telegram');
+    }
+  };
+
+  const handleAutoConnectChannel = async (channelId: string) => {
+    try {
+      const response = await telegramApi.auth.autoConnectChannel(channelId);
+      if (response.data.success) {
+        // Recargar canales
+        const channelsRes = await telegramApi.channels.getAll();
+        setTelegramChannels(channelsRes.data.channels || []);
+        
+        // Recargar estado de autenticación
+        const authStatusRes = await telegramApi.auth.getStatus();
+        setTelegramAuthStatus(authStatusRes.data);
+        
+        return { success: true, channel: response.data.channel };
+      }
+      return { success: false, error: response.data.message };
+    } catch (error: any) {
+      console.error('Error auto-connecting channel:', error);
+      return { success: false, error: error.response?.data?.message || 'Error al conectar el canal' };
+    }
+  };
+
+  const refreshTelegramAuthStatus = async () => {
+    try {
+      const authStatusRes = await telegramApi.auth.getStatus();
+      setTelegramAuthStatus(authStatusRes.data);
+      
+      const channelsRes = await telegramApi.channels.getAll();
+      setTelegramChannels(channelsRes.data.channels || []);
+    } catch (error) {
+      console.error('Error refreshing Telegram status:', error);
+    }
+  };
+
   // ==================== LEGACY TELEGRAM FUNCTIONS ====================
   
   const handleConnectTelegram = async () => {
