@@ -2166,7 +2166,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log(`📥 /start command from user ${userId}, full text: "${text}", payload: "${payload || 'NONE'}"`);
 
-      // Handle order_ payload (post-payment access) - PRIORITY
+      // Handle order_ payload (post-payment access) - HIGHEST PRIORITY
       if (payload.startsWith('order_')) {
         const orderId = payload.replace('order_', '');
         this.logger.log(`🎯 Post-payment flow for order: ${orderId}`);
@@ -2197,26 +2197,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      // Handle vincular/link payload - generate link code
-      if (payload === 'vincular' || payload === 'link') {
-        this.logger.log(`🔗 Vincular flow triggered via /start payload for user ${userId}`);
-        await this.handleVincularCommand(message);
-        return;
-      }
-
-      // Default welcome message (NO payload or unknown payload)
-      this.logger.log(`📨 Sending default welcome message to user ${userId}`);
-      await this.httpService.sendMessage(
-        userId,
-        '👋 ¡Bienvenido a Antia!\n\n' +
-          '🛒 *¿Cómo comprar?*\n' +
-          'Si compraste un producto, deberías haber sido redirigido aquí automáticamente.\n\n' +
-          '🔗 *¿Eres tipster?*\n' +
-          'Escribe /vincular para conectar tu cuenta de Telegram.\n\n' +
-          '❓ *¿Necesitas ayuda?*\n' +
-          'Contacta con @AntiaSupport',
-        { parseMode: 'Markdown' },
-      );
+      // Para /start vincular O /start sin payload -> generar código de vinculación
+      // Esto soluciona el problema de Telegram Web que pierde el payload
+      this.logger.log(`🔗 Generating link code for user ${userId}`);
+      await this.handleVincularCommand(message);
       return;
     }
 
