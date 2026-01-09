@@ -289,25 +289,24 @@ export default function TipsterTelegramAutoView({
                     
                     {showManualConnect && (
                       <div className="mt-4 space-y-4">
-                        {/* Opción 1: Código de vinculación */}
+                        {/* Opción 1: Código de vinculación (manual) */}
                         <div className="p-4 bg-white rounded-xl border border-gray-200">
-                          <h4 className="font-medium text-gray-900 mb-2">Opción 1: Código de vinculación</h4>
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 1: Código de vinculación (manual)</h4>
                           <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1 mb-3">
-                            <li>Haz clic en el botón de abajo para abrir el bot</li>
-                            <li>El bot te enviará un código de 8 caracteres</li>
+                            <li>
+                              <a 
+                                href={`https://t.me/${botUsername}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                Abre @{botUsername} en Telegram
+                              </a>
+                            </li>
+                            <li>Escribe el comando <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono">/vincular</code></li>
+                            <li>El bot te dará un código de 8 caracteres</li>
                             <li>Cópialo e ingrésalo aquí:</li>
                           </ol>
-                          <div className="mb-3">
-                            <a 
-                              href={`https://t.me/${botUsername}?start=vincular`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
-                            >
-                              <MessageCircle size={18} />
-                              Obtener código de vinculación
-                            </a>
-                          </div>
                           <div className="flex gap-2">
                             <input
                               type="text"
@@ -334,11 +333,23 @@ export default function TipsterTelegramAutoView({
                           </div>
                         </div>
                         
-                        {/* Opción 2: Link directo desde el bot */}
+                        {/* Opción 2: Link directo (automático) */}
                         <div className="p-4 bg-gray-50 rounded-xl">
-                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo</h4>
-                          <p className="text-sm text-gray-600">
-                            El bot también te enviará un link directo que puedes hacer clic para vincular automáticamente tu cuenta.
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo (automático)</h4>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Haz clic en el botón para abrir el bot. Debería enviarte el código automáticamente.
+                          </p>
+                          <a 
+                            href={`https://t.me/${botUsername}?start=vincular`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
+                          >
+                            <MessageCircle size={18} />
+                            Vincular automáticamente
+                          </a>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Nota: Si Telegram muestra "Start Bot", haz clic en él. Si no funciona, usa la Opción 1.
                           </p>
                         </div>
                       </div>
