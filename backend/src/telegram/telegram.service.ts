@@ -2522,6 +2522,8 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     channelTitle: string,
     channelUsername?: string,
     channelType?: string,
+    addedByTelegramId?: string | null,
+    addedByUsername?: string | null,
   ) {
     try {
       const now = new Date().toISOString();
@@ -2561,6 +2563,12 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           updateData.invite_link = inviteLink;
         }
 
+        // Si tenemos el ID del usuario que añadió el bot, actualizarlo
+        if (addedByTelegramId) {
+          updateData.added_by_telegram_id = addedByTelegramId;
+          updateData.added_by_username = addedByUsername || null;
+        }
+
         await this.prisma.$runCommandRaw({
           update: 'detected_telegram_channels',
           updates: [
@@ -2570,7 +2578,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
             },
           ],
         });
-        this.logger.log(`📝 Updated detected channel: ${channelTitle} (${channelId})`);
+        this.logger.log(`📝 Updated detected channel: ${channelTitle} (${channelId}) - addedBy: ${addedByTelegramId || 'unknown'}`);
       } else {
         // Crear nuevo registro
         const newDoc: any = {
@@ -2587,12 +2595,18 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
           newDoc.invite_link = inviteLink;
         }
 
+        // Guardar quién añadió el bot
+        if (addedByTelegramId) {
+          newDoc.added_by_telegram_id = addedByTelegramId;
+          newDoc.added_by_username = addedByUsername || null;
+        }
+
         await this.prisma.$runCommandRaw({
           insert: 'detected_telegram_channels',
           documents: [newDoc],
         });
         this.logger.log(
-          `✅ Saved new detected channel: ${channelTitle} (${channelId})${inviteLink ? ' with invite link' : ''}`,
+          `✅ Saved new detected channel: ${channelTitle} (${channelId})${inviteLink ? ' with invite link' : ''} - addedBy: ${addedByTelegramId || 'unknown'}`,
         );
       }
     } catch (error) {
