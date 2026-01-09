@@ -279,22 +279,78 @@ export default function TipsterTelegramAutoView({
                   </div>
                   
                   {/* Alternativa: Conectar a través del bot directamente */}
-                  <div className="text-sm text-gray-500">
-                    <p>Si el botón no funciona, también puedes:</p>
-                    <ol className="list-decimal list-inside mt-2 space-y-1">
-                      <li>
-                        <a 
-                          href={`https://t.me/${botUsername}?start=link`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Abre el bot @{botUsername} en Telegram
-                        </a>
-                      </li>
-                      <li>Envía el comando <code className="bg-gray-100 px-1 rounded">/vincular</code></li>
-                      <li>Sigue las instrucciones del bot</li>
-                    </ol>
+                  <div className="mt-4 pt-4 border-t border-blue-200">
+                    <button 
+                      onClick={() => setShowManualConnect(!showManualConnect)}
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      {showManualConnect ? '▼ Ocultar opciones alternativas' : '▶ Ver opciones alternativas de conexión'}
+                    </button>
+                    
+                    {showManualConnect && (
+                      <div className="mt-4 space-y-4">
+                        {/* Opción 1: Código de vinculación */}
+                        <div className="p-4 bg-white rounded-xl border border-gray-200">
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 1: Código de vinculación</h4>
+                          <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1 mb-3">
+                            <li>
+                              <a 
+                                href={`https://t.me/${botUsername}?start=link`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                Abre @{botUsername} en Telegram
+                              </a>
+                            </li>
+                            <li>Envía el comando <code className="bg-gray-100 px-1 rounded">/vincular</code></li>
+                            <li>El bot te dará un código de 8 caracteres</li>
+                            <li>Ingrésalo aquí:</li>
+                          </ol>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={manualConnectCode}
+                              onChange={(e) => setManualConnectCode(e.target.value.toUpperCase())}
+                              placeholder="Ej: ABC12345"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase"
+                              maxLength={8}
+                            />
+                            <button
+                              onClick={handleConnectWithCode}
+                              disabled={!manualConnectCode.trim() || verifyingManualCode}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              {verifyingManualCode ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  Verificando...
+                                </>
+                              ) : (
+                                'Vincular'
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Opción 2: Link directo (si el widget no funciona) */}
+                        <div className="p-4 bg-gray-50 rounded-xl">
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo desde el bot</h4>
+                          <p className="text-sm text-gray-600 mb-2">
+                            El bot también te enviará un link que puedes hacer clic para vincular directamente.
+                          </p>
+                          <a 
+                            href={`https://t.me/${botUsername}?start=link`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
+                          >
+                            <MessageCircle size={18} />
+                            Abrir bot en Telegram
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
