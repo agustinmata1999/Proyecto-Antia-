@@ -234,6 +234,14 @@ export default function TipsterDashboard() {
         console.error('Error loading Telegram channels:', error);
       }
 
+      // Load Telegram auth status (new auto-connect system)
+      try {
+        const authStatusRes = await telegramApi.auth.getStatus();
+        setTelegramAuthStatus(authStatusRes.data);
+      } catch (error) {
+        console.error('Error loading Telegram auth status:', error);
+      }
+
       // Load legacy Telegram channel info (backward compatibility)
       try {
         const telegramRes = await telegramApi.getChannelInfo();
