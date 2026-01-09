@@ -414,57 +414,6 @@ export default function TipsterTelegramAutoView({
         </div>
       </div>
 
-      {/* Canales disponibles para conectar (detectados pero no vinculados) */}
-      {authStatus?.isConnected && hasAvailableChannels && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Radio className="w-5 h-5 text-blue-500" />
-            Canales detectados ({availableChannels.length})
-          </h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Estos canales tienen el bot como administrador. Haz clic para conectarlos.
-          </p>
-          
-          <div className="space-y-3">
-            {availableChannels.map((channel) => (
-              <div
-                key={channel.channelId}
-                className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <MessageCircle className="text-blue-600" size={20} />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{channel.channelTitle}</p>
-                    <p className="text-xs text-gray-500">
-                      {channel.channelUsername ? `@${channel.channelUsername}` : 'Canal privado'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleConnectAvailableChannel(channel.channelId)}
-                  disabled={connectingChannelId === channel.channelId}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {connectingChannelId === channel.channelId ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Conectando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={16} />
-                      Conectar
-                    </>
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Canales conectados */}
       {channels.length > 0 && (
         <div className="space-y-4">
