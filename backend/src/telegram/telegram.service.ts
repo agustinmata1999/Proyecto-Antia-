@@ -2566,6 +2566,20 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   }
 
   /**
+   * Generar código de vinculación único
+   */
+  private generateLinkCode(telegramUserId: string): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin caracteres confusos (0,O,I,1,L)
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    // Añadir hash parcial del telegram ID para mayor seguridad
+    const hash = telegramUserId.slice(-2);
+    return `${code}${hash}`;
+  }
+
+  /**
    * Force reconfigure webhook (useful for debugging)
    */
   async forceReconfigureWebhook() {
