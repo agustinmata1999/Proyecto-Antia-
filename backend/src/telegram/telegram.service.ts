@@ -143,7 +143,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         botUsername: botInfo?.username || null,
         webhookUrl: webhookInfo?.url || null,
         webhookConfigured: !!webhookInfo?.url,
-        pollingMode: true, // Always polling mode now
+        pollingMode: false,
         lastError: null,
       };
     } catch (error) {
@@ -152,9 +152,38 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         botUsername: null,
         webhookUrl: null,
         webhookConfigured: false,
-        pollingMode: true,
+        pollingMode: false,
         lastError: error.message,
       };
+    }
+  }
+
+  /**
+   * Force setup webhook (for debugging/fixing issues)
+   */
+  async forceSetupWebhook(): Promise<{ success: boolean; webhookUrl: string; message: string }> {
+    try {
+      const appUrl = this.config.get<string>('APP_URL');
+      if (!appUrl) {
+        return { success: false, webhookUrl: '', message: 'APP_URL not configured' };
+      }
+
+      const webhookUrl = `${appUrl}/api/telegram/webhook`;
+      
+      // First delete any existing webhook
+      await this.httpService.deleteWebhook(false);
+      
+      // Set new webhook
+      await this.httpService.setWebhook(webhookUrl, {
+        allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
+        dropPendingUpdates: false,
+      });
+
+      this.logger.log(`✅ Webhook forced: ${webhookUrl}`);
+      return { success: true, webhookUrl, message: 'Webhook configured successfully' };
+    } catch (error) {
+      this.logger.error('Error forcing webhook:', error);
+      return { success: false, webhookUrl: '', message: error.message };
     }
   }
 
