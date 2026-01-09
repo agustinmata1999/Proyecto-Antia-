@@ -57,6 +57,7 @@ interface TipsterTelegramAutoViewProps {
   onRefreshLink: (channelId: string) => Promise<string>;
   onTelegramAuth: (authData: any) => Promise<{ success: boolean; autoConnectedChannels?: number }>;
   onTelegramDisconnect: () => Promise<void>;
+  onConnectWithCode?: (code: string) => Promise<{ success: boolean; autoConnectedChannels?: number }>;
   authStatus: TelegramAuthStatus | null;
   loading: boolean;
   onRefreshStatus: () => void;
@@ -70,6 +71,7 @@ export default function TipsterTelegramAutoView({
   onRefreshLink,
   onTelegramAuth,
   onTelegramDisconnect,
+  onConnectWithCode,
   authStatus,
   loading,
   onRefreshStatus,
