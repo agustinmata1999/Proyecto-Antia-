@@ -2197,6 +2197,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
+      // Handle vincular payload - automatically trigger account linking
+      if (payload === 'vincular' || payload === 'link') {
+        this.logger.log(`🔗 Vincular flow triggered via /start for user ${userId}`);
+        await this.handleVincularCommand(message);
+        return;
+      }
+
       // Default welcome message
       await this.httpService.sendMessage(
         userId,
