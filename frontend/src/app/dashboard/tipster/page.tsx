@@ -1684,252 +1684,27 @@ export default function TipsterDashboard() {
         )}
 
         {activeView === 'telegram' && (
-          <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">📱 Telegram</h1>
-              <p className="text-gray-600 mt-1">Conecta tu canal privado donde los clientes recibirán acceso después de pagar</p>
-            </div>
-
-            {/* GUÍA DETALLADA - Estilo Pretopay */}
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-8">
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Cómo conectar tu canal de Telegram
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">Sigue estos 4 pasos simples</p>
-              </div>
-
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* PASO 1 */}
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
-                      Paso 01
-                    </span>
-                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Crea tu canal privado</h4>
-                    <p className="text-sm text-gray-600 mb-4">Abre Telegram y crea un nuevo canal privado.</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
-                        <span>Abre Telegram</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Toca "Nuevo Canal"</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Selecciona "Privado"</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* PASO 2 */}
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
-                      Paso 02
-                    </span>
-                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                      </svg>
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Añade el bot</h4>
-                    <p className="text-sm text-gray-600 mb-4">Agrega @Antiabetbot como administrador.</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
-                        <span>Ve a "Administradores"</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Busca @Antiabetbot</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Dale los permisos</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* PASO 3 */}
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
-                      Paso 03
-                    </span>
-                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                      <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Copia los datos del canal</h4>
-                    <p className="text-sm text-gray-600 mb-4">Obtén el nombre y link de invitación.</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
-                        <span>Ve a "Info del canal"</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Copia el <strong>nombre</strong> del canal</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Copia el <strong>link de invitación</strong></span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* PASO 4 */}
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full mb-4">
-                      Paso 04
-                    </span>
-                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                      <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Conecta tu canal aquí</h4>
-                    <p className="text-sm text-gray-600 mb-4">Ingresa los datos en el formulario.</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
-                        <span>Clic en "Añadir Canal"</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
-                        <span>Ingresa <strong>nombre</strong> y <strong>link</strong></span>
-                      </li>
-                      <li className="flex items-start gap-2 text-xs text-gray-500">
-                        <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
-                        <span>Pulsa "Conectar"</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Bot Username */}
-                <div className="mt-6 p-4 bg-blue-50 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-800">Bot de Telegram</p>
-                      <p className="font-mono font-bold text-blue-900">@Antiabetbot</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText('@Antiabetbot');
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Copiar nombre del bot
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Canales Premium - Para dar acceso a clientes */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    🔒 Canales Premium
-                    <span className="text-xs font-normal px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Para clientes</span>
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Estos son los canales privados donde tus clientes reciben acceso después de comprar.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowAddChannelForm(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
-                >
-                  + Añadir Canal
-                </button>
-              </div>
-
-              {telegramChannels.length === 0 ? (
-                <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
-                  <div className="text-4xl mb-4">📱</div>
-                  <p className="text-gray-500 mb-4">No tienes canales conectados</p>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Sigue la guía de arriba y luego haz clic en "Añadir Canal"
-                  </p>
-                  <button
-                    onClick={() => setShowAddChannelForm(true)}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Añadir mi primer canal
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {telegramChannels.map((channel) => (
-                    <div key={channel.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${channel.channelType === 'public' ? 'bg-green-100' : 'bg-blue-100'}`}>
-                            <span className="text-2xl">{channel.channelType === 'public' ? '🌐' : '🔒'}</span>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{channel.channelTitle}</h3>
-                            <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                              {channel.channelName && <span>@{channel.channelName}</span>}
-                              <span className={`px-2 py-0.5 rounded text-xs ${channel.channelType === 'public' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
-                                {channel.channelType === 'public' ? 'Público' : 'Privado'}
-                              </span>
-                              {channel.memberCount && (
-                                <span>{channel.memberCount} miembros</span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-400 mt-1">
-                              ID: {channel.channelId} • Conectado: {new Date(channel.connectedAt).toLocaleDateString('es-ES')}
-                            </p>
-                            {channel.inviteLink && (
-                              <div className="mt-2">
-                                <span className="text-xs text-gray-500">Enlace: </span>
-                                <a href={channel.inviteLink} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                                  {channel.inviteLink}
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {channel.channelType === 'private' && (
-                            <button
-                              onClick={() => handleGenerateInviteLink(channel.id)}
-                              className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50"
-                              title="Generar enlace de invitación"
-                            >
-                              🔗 Generar Link
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeleteChannel(channel.id)}
-                            className="px-3 py-1.5 text-xs text-red-600 border border-red-300 rounded hover:bg-red-50"
-                          >
-                            Desconectar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
+          <TipsterTelegramAutoView
+            channels={telegramChannels.map(ch => ({
+              ...ch,
+              connectionType: (ch as any).connectionType,
+            }))}
+            botUsername="Antiabetbot"
+            onConnectChannel={handleAutoConnectChannel}
+            onDisconnectChannel={handleDeleteChannel}
+            onRefreshLink={async (channelId) => {
+              const channel = telegramChannels.find(c => c.channelId === channelId);
+              if (channel) {
+                await handleGenerateInviteLink(channel.id);
+              }
+              return '';
+            }}
+            onTelegramAuth={handleTelegramAuth}
+            onTelegramDisconnect={handleTelegramDisconnect}
+            authStatus={telegramAuthStatus}
+            loading={channelsLoading}
+            onRefreshStatus={refreshTelegramAuthStatus}
+          />
         )}
 
         {activeView === 'referrals' && (
