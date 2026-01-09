@@ -2197,31 +2197,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      // Handle vincular payload - automatically trigger account linking
-      if (payload === 'vincular' || payload === 'link') {
-        this.logger.log(`🔗 Vincular flow triggered via /start payload for user ${userId}`);
-        await this.handleVincularCommand(message);
-        return;
-      }
-
-      // Default welcome message
-      this.logger.log(`📨 Sending default welcome message to user ${userId}`);
-      await this.httpService.sendMessage(
-        userId,
-        '👋 ¡Bienvenido a Antia!\n\n' +
-          '🛒 *¿Cómo comprar?*\n\n' +
-          '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
-          '2️⃣ Haz clic en el enlace de compra\n' +
-          '3️⃣ Completa el pago en nuestra web\n' +
-          '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
-          '✅ *¿Ya pagaste?*\n' +
-          'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
-          '🔗 *¿Eres tipster?*\n' +
-          'Escribe /vincular para conectar tu cuenta.\n\n' +
-          '❓ *¿Necesitas ayuda?*\n' +
-          'Contacta con @AntiaSupport',
-        { parseMode: 'Markdown' },
-      );
+      // Para CUALQUIER /start (con o sin payload vincular), generar código de vinculación
+      // Esto soluciona el problema de Telegram Web que pierde el payload
+      this.logger.log(`🔗 Generating link code for user ${userId} (payload: ${payload || 'none'})`);
+      await this.handleVincularCommand(message);
       return;
     }
 
