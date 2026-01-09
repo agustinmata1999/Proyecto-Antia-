@@ -2164,7 +2164,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const parts = text.split(' ');
       const payload = parts[1] || '';
 
-      this.logger.log(`📥 /start command from user ${userId}, payload: ${payload || 'NONE'}`);
+      this.logger.log(`📥 /start command from user ${userId}, full text: "${text}", payload: "${payload || 'NONE'}"`);
 
       // Handle order_ payload (post-payment access)
       if (payload.startsWith('order_')) {
@@ -2199,12 +2199,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Handle vincular payload - automatically trigger account linking
       if (payload === 'vincular' || payload === 'link') {
-        this.logger.log(`🔗 Vincular flow triggered via /start for user ${userId}`);
+        this.logger.log(`🔗 Vincular flow triggered via /start payload for user ${userId}`);
         await this.handleVincularCommand(message);
         return;
       }
 
       // Default welcome message
+      this.logger.log(`📨 Sending default welcome message to user ${userId}`);
       await this.httpService.sendMessage(
         userId,
         '👋 ¡Bienvenido a Antia!\n\n' +
@@ -2215,6 +2216,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
           '✅ *¿Ya pagaste?*\n' +
           'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
+          '🔗 *¿Eres tipster?*\n' +
+          'Escribe /vincular para conectar tu cuenta.\n\n' +
           '❓ *¿Necesitas ayuda?*\n' +
           'Contacta con @AntiaSupport',
         { parseMode: 'Markdown' },
