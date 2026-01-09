@@ -37,6 +37,15 @@ export class TelegramController {
     return status;
   }
 
+  // Force webhook setup (public for debugging)
+  @Post('setup-webhook')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Force webhook setup' })
+  async setupWebhook() {
+    const result = await this.telegramService.forceSetupWebhook();
+    return result;
+  }
+
   // Webhook endpoint (sin guards - debe ser público para Telegram)
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
