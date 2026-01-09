@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi } from '@/lib/api';
 import AffiliateSection from '@/components/AffiliateSection';
@@ -28,6 +28,7 @@ interface TelegramChannel {
 }
 
 export default function TipsterDashboard() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { formatPrice, symbol } = useCurrency();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
