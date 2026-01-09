@@ -222,25 +222,7 @@ function TipsterDashboardContent() {
     }
   }, [searchParams, autoLinkStatus]);
 
-  // Mostrar wizard cada vez que entra a Telegram (a menos que haya marcado "no mostrar")
-  useEffect(() => {
-    if (activeView === 'telegram') {
-      const neverShowWizard = localStorage.getItem('telegram_wizard_never_show');
-      if (!neverShowWizard) {
-        setShowTelegramWizard(true);
-        setWizardStep(1);
-        setDontShowWizardAgain(false);
-      }
-    }
-  }, [activeView]);
-
-  const handleCloseWizard = () => {
-    setShowTelegramWizard(false);
-    // Solo guardar si el usuario marcó la casilla
-    if (dontShowWizardAgain) {
-      localStorage.setItem('telegram_wizard_never_show', 'true');
-    }
-  };
+  // Wizard de Telegram eliminado - ya no se muestra automáticamente
 
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
