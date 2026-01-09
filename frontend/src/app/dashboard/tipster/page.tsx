@@ -82,6 +82,23 @@ export default function TipsterDashboard() {
   const [connectingChannel, setConnectingChannel] = useState(false);
   const [addChannelError, setAddChannelError] = useState('');
   
+  // Estado de autenticación de Telegram (nuevo sistema automático)
+  const [telegramAuthStatus, setTelegramAuthStatus] = useState<{
+    isConnected: boolean;
+    telegramId?: string;
+    telegramUsername?: string;
+    connectedAt?: string;
+    availableChannels: Array<{
+      channelId: string;
+      channelTitle: string;
+      channelUsername?: string;
+      channelType: string;
+      inviteLink?: string;
+      detectedAt: string;
+      isConnected: boolean;
+    }>;
+  } | null>(null);
+  
   // Legacy - mantener para compatibilidad pero no usar
   const [channelNameInput, setChannelNameInput] = useState('');
   const [newChannelData, setNewChannelData] = useState({
