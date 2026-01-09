@@ -340,6 +340,75 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       );
     });
 
+    // Comando /vincular - Vincular cuenta de Telegram al perfil de tipster
+    this.bot.command('vincular', async (ctx) => {
+      try {
+        const telegramUserId = ctx.from.id.toString();
+        const telegramUsername = ctx.from.username || null;
+        const firstName = ctx.from.first_name || '';
+        const lastName = ctx.from.last_name || '';
+
+        this.logger.log(`📱 /vincular command from user: ${telegramUserId} (@${telegramUsername})`);
+
+        // Generar código de vinculación único
+        const linkCode = this.generateLinkCode(telegramUserId);
+        
+        // Guardar el código en la base de datos
+        const now = new Date().toISOString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutos
+
+        await this.prisma.$runCommandRaw({
+          update: 'telegram_link_codes',
+          updates: [
+            {
+              q: { telegram_user_id: telegramUserId },
+              u: {
+                $set: {
+                  telegram_user_id: telegramUserId,
+                  telegram_username: telegramUsername,
+                  first_name: firstName,
+                  last_name: lastName,
+                  link_code: linkCode,
+                  created_at: { $date: now },
+                  expires_at: { $date: expiresAt },
+                  used: false,
+                },
+              },
+              upsert: true,
+            },
+          ],
+        });
+
+        // Obtener URL de la plataforma
+        const appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
+        const linkUrl = `${appUrl}/dashboard/tipster?telegram_link=${linkCode}`;
+
+        await ctx.reply(
+          '🔗 *Vincular tu cuenta de Telegram*\n\n' +
+            'Tienes dos opciones para vincular tu cuenta:\n\n' +
+            '*Opción 1 - Código de vinculación:*\n' +
+            `Tu código es: \`${linkCode}\`\n` +
+            'Cópialo e ingrésalo en la plataforma.\n\n' +
+            '*Opción 2 - Link directo:*\n' +
+            `[Haz clic aquí para vincular](${linkUrl})\n\n` +
+            '⏰ El código expira en 10 minutos.\n\n' +
+            'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
+          { 
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true,
+          },
+        );
+
+        this.logger.log(`✅ Link code generated for ${telegramUserId}: ${linkCode}`);
+      } catch (error) {
+        this.logger.error('Error handling /vincular command:', error);
+        await ctx.reply(
+          '❌ Error al generar el código de vinculación.\n' +
+            'Por favor, intenta de nuevo más tarde.',
+        );
+      }
+    });
+
     // Handler para mensajes de texto - ya no procesa compras, solo ayuda
     this.bot.on('text', async (ctx) => {
       try {
