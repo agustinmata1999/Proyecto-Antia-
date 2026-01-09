@@ -107,6 +107,24 @@ export const telegramApi = {
     api.post(`/products/${productId}/publish-telegram`, channelId ? { channelId } : {}),
   setPremiumChannel: (premiumChannelLink: string | null) => api.post('/telegram/premium-channel', { premiumChannelLink }),
   
+  // Autenticación de Telegram (Login Widget)
+  auth: {
+    connect: (authData: {
+      id: number;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+      photo_url?: string;
+      auth_date: number;
+      hash: string;
+    }) => api.post('/telegram/auth/connect', authData),
+    disconnect: () => api.post('/telegram/auth/disconnect'),
+    getStatus: () => api.get('/telegram/auth/status'),
+    getAvailableChannels: () => api.get('/telegram/auth/available-channels'),
+    autoConnectChannel: (channelId: string) => api.post('/telegram/auth/auto-connect-channel', { channelId }),
+    getBotInfo: () => api.get('/telegram/auth/bot-info'),
+  },
+  
   // Canal de publicación (para compartir productos)
   publicationChannel: {
     get: () => api.get('/telegram/publication-channel'),
