@@ -761,6 +761,30 @@ export default function TipsterDashboard() {
     }
   };
 
+  const handleConnectWithCode = async (code: string) => {
+    try {
+      const response = await telegramApi.auth.connectWithCode(code);
+      if (response.data.success) {
+        // Recargar estado de autenticación
+        const authStatusRes = await telegramApi.auth.getStatus();
+        setTelegramAuthStatus(authStatusRes.data);
+        
+        // Recargar canales
+        const channelsRes = await telegramApi.channels.getAll();
+        setTelegramChannels(channelsRes.data.channels || []);
+        
+        return { 
+          success: true, 
+          autoConnectedChannels: response.data.autoConnectedChannels 
+        };
+      }
+      return { success: false };
+    } catch (error: any) {
+      console.error('Error connecting with code:', error);
+      throw error;
+    }
+  };
+
   // ==================== LEGACY TELEGRAM FUNCTIONS ====================
   
   const handleConnectTelegram = async () => {
