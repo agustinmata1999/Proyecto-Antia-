@@ -148,13 +148,14 @@ Red de afiliación premium:
 ## Backlog
 
 ### P0 - Alta Prioridad
+- [x] ~~Sistema automatizado de conexión de canales de Telegram~~ ✅ (Implementado 09-01-2026)
 - [ ] Rediseño Dashboard Tipster (aplicar tema oscuro)
 - [ ] Rediseño Panel Admin (aplicar tema oscuro)
 - [ ] Rediseño páginas de Login/Register
 
 ### P1 - Media Prioridad
 - [ ] Login con Google OAuth
-- [ ] Login con Telegram Widget
+- [x] ~~Login con Telegram Widget~~ ✅ (Parcialmente - requiere configuración BotFather para producción)
 - [ ] Subida de fotos de perfil
 - [ ] Suscripción trimestral
 - [ ] Mejorar datos de referidos anónimos (simulador) para mostrar más info
@@ -164,6 +165,7 @@ Red de afiliación premium:
 - [ ] Consolidar módulos duplicados de tickets (/tickets y /support)
 - [ ] Términos y Condiciones / Privacidad
 - [ ] Disclaimer +18
+- [ ] Validación backend para inviteLink en conexión Telegram
 
 ---
 
@@ -171,6 +173,18 @@ Red de afiliación premium:
 
 ### Telegram Bot
 El bot usa **POLLING** (no webhooks). Esto es intencional para evitar problemas con el routing del entorno preview.
+
+### Sistema de Auto-Conexión de Canales Telegram (NUEVO - 09-01-2026)
+1. **Vinculación de cuenta:** Los tipsters pueden vincular su Telegram mediante:
+   - Telegram Login Widget (requiere configuración en BotFather para producción)
+   - Código de vinculación generado con el comando `/vincular` en el bot
+2. **Auto-conexión:** Cuando el tipster añade el bot como admin en un canal:
+   - Se detecta automáticamente quién lo añadió (`from.id`)
+   - Si el usuario tiene Telegram vinculado, el canal se conecta automáticamente
+   - Se envía mensaje de confirmación al canal
+3. **Auto-desconexión:** Cuando el bot es removido de un canal:
+   - El canal se marca como inactivo
+   - Los canales conectados se marcan como desconectados
 
 ### Simulador de Afiliados
 Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliación.
