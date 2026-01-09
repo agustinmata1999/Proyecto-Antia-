@@ -363,7 +363,7 @@ export default function TipsterTelegramAutoView({
       <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-amber-500" />
-          Cómo funciona la conexión automática
+          Cómo conectar tu canal
         </h3>
         
         <div className="grid md:grid-cols-3 gap-4">
@@ -372,8 +372,8 @@ export default function TipsterTelegramAutoView({
               1
             </div>
             <div>
-              <p className="font-medium text-gray-900">Conecta tu Telegram</p>
-              <p className="text-sm text-gray-500">Haz clic en el botón de arriba para vincular tu cuenta</p>
+              <p className="font-medium text-gray-900">Crea tu canal privado</p>
+              <p className="text-sm text-gray-500">Abre Telegram y crea un canal privado para tus clientes</p>
             </div>
           </div>
           
@@ -382,20 +382,20 @@ export default function TipsterTelegramAutoView({
               2
             </div>
             <div>
-              <p className="font-medium text-gray-900">Añade el bot al canal</p>
+              <p className="font-medium text-gray-900">Añade el bot como admin</p>
               <p className="text-sm text-gray-500">
-                Añade <button onClick={handleCopyBotUsername} className="text-blue-600 hover:underline font-mono">@{botUsername}</button> como admin
+                Añade <button onClick={handleCopyBotUsername} className="text-blue-600 hover:underline font-mono">@{botUsername}</button> con permisos de publicar
               </p>
             </div>
           </div>
           
           <div className="flex gap-3">
             <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">
-              ✓
+              3
             </div>
             <div>
-              <p className="font-medium text-gray-900">¡Listo!</p>
-              <p className="text-sm text-gray-500">El canal se conecta automáticamente</p>
+              <p className="font-medium text-gray-900">Vincula tu cuenta</p>
+              <p className="text-sm text-gray-500">Usa las opciones de arriba para vincular y el canal se conectará</p>
             </div>
           </div>
         </div>
