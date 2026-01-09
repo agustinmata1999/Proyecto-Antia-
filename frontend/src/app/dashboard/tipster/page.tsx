@@ -1766,28 +1766,68 @@ export default function TipsterDashboard() {
         )}
 
         {activeView === 'telegram' && (
-          <TipsterTelegramAutoView
-            channels={telegramChannels.map(ch => ({
-              ...ch,
-              connectionType: (ch as any).connectionType,
-            }))}
-            botUsername="Antiabetbot"
-            onConnectChannel={handleAutoConnectChannel}
-            onDisconnectChannel={handleDeleteChannel}
-            onRefreshLink={async (channelId) => {
-              const channel = telegramChannels.find(c => c.channelId === channelId);
-              if (channel) {
-                await handleGenerateInviteLink(channel.id);
-              }
-              return '';
-            }}
-            onTelegramAuth={handleTelegramAuth}
-            onTelegramDisconnect={handleTelegramDisconnect}
-            onConnectWithCode={handleConnectWithCode}
-            authStatus={telegramAuthStatus}
-            loading={channelsLoading}
-            onRefreshStatus={refreshTelegramAuthStatus}
-          />
+          <>
+            {/* Banner de vinculación automática */}
+            {autoLinkStatus !== 'idle' && (
+              <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
+                autoLinkStatus === 'linking' ? 'bg-blue-50 border border-blue-200' :
+                autoLinkStatus === 'success' ? 'bg-green-50 border border-green-200' :
+                'bg-red-50 border border-red-200'
+              }`}>
+                {autoLinkStatus === 'linking' && (
+                  <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                )}
+                {autoLinkStatus === 'success' && (
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+                {autoLinkStatus === 'error' && (
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+                <span className={`font-medium ${
+                  autoLinkStatus === 'linking' ? 'text-blue-700' :
+                  autoLinkStatus === 'success' ? 'text-green-700' :
+                  'text-red-700'
+                }`}>
+                  {autoLinkMessage}
+                </span>
+                {autoLinkStatus !== 'linking' && (
+                  <button 
+                    onClick={() => setAutoLinkStatus('idle')}
+                    className="ml-auto text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            )}
+            
+            <TipsterTelegramAutoView
+              channels={telegramChannels.map(ch => ({
+                ...ch,
+                connectionType: (ch as any).connectionType,
+              }))}
+              botUsername="Antiabetbot"
+              onConnectChannel={handleAutoConnectChannel}
+              onDisconnectChannel={handleDeleteChannel}
+              onRefreshLink={async (channelId) => {
+                const channel = telegramChannels.find(c => c.channelId === channelId);
+                if (channel) {
+                  await handleGenerateInviteLink(channel.id);
+                }
+                return '';
+              }}
+              onTelegramAuth={handleTelegramAuth}
+              onTelegramDisconnect={handleTelegramDisconnect}
+              onConnectWithCode={handleConnectWithCode}
+              authStatus={telegramAuthStatus}
+              loading={channelsLoading}
+              onRefreshStatus={refreshTelegramAuthStatus}
+            />
+          </>
         )}
 
         {activeView === 'referrals' && (
