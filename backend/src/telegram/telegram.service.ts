@@ -2642,6 +2642,174 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
   }
 
   /**
+   * Marcar canales conectados como desconectados cuando el bot es removido
+   */
+  private async markConnectedChannelAsDisconnected(channelId: string) {
+    try {
+      const now = new Date().toISOString();
+
+      // Marcar todos los telegram_channels con este channel_id como inactivos
+      const result = await this.prisma.$runCommandRaw({
+        update: 'telegram_channels',
+        updates: [
+          {
+            q: { channel_id: channelId, is_active: true },
+            u: {
+              $set: {
+                is_active: false,
+                disconnected_at: { $date: now },
+                disconnected_reason: 'bot_removed',
+                updated_at: { $date: now },
+              },
+            },
+            multi: true,
+          },
+        ],
+      }) as any;
+
+      const modifiedCount = result.nModified || 0;
+      if (modifiedCount > 0) {
+        this.logger.log(`🔌 Disconnected ${modifiedCount} connected channel(s) for channel_id ${channelId}`);
+      }
+    } catch (error) {
+      this.logger.error('Error marking connected channels as disconnected:', error);
+    }
+  }
+
+  /**
+   * Intentar auto-conectar un canal si el usuario ya está vinculado a un tipster
+   */
+  private async tryAutoConnectChannel(
+    channelId: string,
+    channelTitle: string,
+    channelUsername?: string,
+    addedByTelegramId?: string | null,
+  ) {
+    if (!addedByTelegramId) {
+      this.logger.log(`Cannot auto-connect: no addedByTelegramId for channel ${channelTitle}`);
+      return;
+    }
+
+    try {
+      // Buscar si hay un tipster con este telegram_user_id
+      const tipsterResult = (await this.prisma.$runCommandRaw({
+        find: 'tipster_profiles',
+        filter: { telegram_user_id: addedByTelegramId },
+        limit: 1,
+      })) as any;
+
+      const tipster = tipsterResult.cursor?.firstBatch?.[0];
+
+      if (!tipster) {
+        this.logger.log(`No tipster found with telegram_user_id ${addedByTelegramId} - channel will be available when they connect`);
+        return;
+      }
+
+      const tipsterId = tipster._id?.$oid || tipster._id;
+
+      // Verificar si el canal ya está conectado para este tipster
+      const existingChannel = await this.prisma.telegramChannel.findFirst({
+        where: {
+          tipsterId,
+          channelId,
+        },
+      });
+
+      if (existingChannel) {
+        // Si existe pero está inactivo, reactivarlo
+        if (!existingChannel.isActive) {
+          const now = new Date().toISOString();
+          await this.prisma.$runCommandRaw({
+            update: 'telegram_channels',
+            updates: [
+              {
+                q: { _id: { $oid: existingChannel.id } },
+                u: {
+                  $set: {
+                    is_active: true,
+                    channel_title: channelTitle,
+                    updated_at: { $date: now },
+                  },
+                },
+              },
+            ],
+          });
+          this.logger.log(`✅ Reactivated channel ${channelTitle} for tipster ${tipsterId}`);
+        } else {
+          this.logger.log(`Channel ${channelTitle} already connected to tipster ${tipsterId}`);
+        }
+        return;
+      }
+
+      // Obtener invite link
+      let inviteLink: string | null = null;
+      try {
+        if (this.httpService) {
+          inviteLink = await this.httpService.exportChatInviteLink(channelId);
+        }
+      } catch (e) {
+        this.logger.warn(`Could not get invite link for auto-connect: ${e.message}`);
+      }
+
+      // Crear el canal automáticamente
+      const now = new Date().toISOString();
+      const isPrivate = !channelUsername;
+
+      await this.prisma.$runCommandRaw({
+        insert: 'telegram_channels',
+        documents: [
+          {
+            tipster_id: tipsterId,
+            channel_id: channelId,
+            channel_name: channelUsername ? `@${channelUsername}` : null,
+            channel_title: channelTitle,
+            channel_type: isPrivate ? 'private' : 'public',
+            invite_link: inviteLink || null,
+            member_count: null,
+            is_active: true,
+            connected_at: { $date: now },
+            created_at: { $date: now },
+            updated_at: { $date: now },
+            connection_type: 'auto',
+          },
+        ],
+      });
+
+      // Marcar el canal detectado como auto-conectado
+      await this.prisma.$runCommandRaw({
+        update: 'detected_telegram_channels',
+        updates: [
+          {
+            q: { channel_id: channelId },
+            u: { $set: { auto_connected_to: tipsterId } },
+          },
+        ],
+      });
+
+      this.logger.log(`🎉 AUTO-CONNECTED channel ${channelTitle} to tipster ${tipster.public_name || tipsterId}`);
+
+      // Enviar mensaje de confirmación al canal
+      try {
+        await this.httpService.sendMessage(
+          channelId,
+          `✅ *¡Canal conectado automáticamente!*\n\n` +
+            `Este canal ha sido vinculado a *${tipster.public_name || 'tu cuenta'}* en la plataforma.\n\n` +
+            `Ahora puedes:\n` +
+            `• Asociar productos a este canal\n` +
+            `• Dar acceso automático a clientes que compren\n` +
+            `• Publicar tus pronósticos`,
+          { parseMode: 'Markdown' },
+        );
+      } catch (msgError) {
+        this.logger.warn(`Could not send welcome message to channel: ${msgError.message}`);
+      }
+
+    } catch (error) {
+      this.logger.error('Error in tryAutoConnectChannel:', error);
+    }
+  }
+
+  /**
    * NUEVO: Buscar canal por nombre (para conectar sin pedir ID)
    * Busca en la tabla de canales detectados
    * OPTIMIZADO: No hace verificación con Telegram para evitar timeouts
