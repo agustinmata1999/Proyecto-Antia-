@@ -295,7 +295,7 @@ export default function TipsterTelegramAutoView({
                           <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1 mb-3">
                             <li>
                               <a 
-                                href={`https://t.me/${botUsername}?start=link`} 
+                                href={`https://t.me/${botUsername}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:underline"
@@ -337,10 +337,10 @@ export default function TipsterTelegramAutoView({
                         <div className="p-4 bg-gray-50 rounded-xl">
                           <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo desde el bot</h4>
                           <p className="text-sm text-gray-600 mb-2">
-                            El bot también te enviará un link que puedes hacer clic para vincular directamente.
+                            Abre el bot en Telegram y envía <code className="bg-gray-100 px-1 rounded">/vincular</code>. El bot te enviará un link directo.
                           </p>
                           <a 
-                            href={`https://t.me/${botUsername}?start=link`} 
+                            href={`https://t.me/${botUsername}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
