@@ -164,10 +164,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Handler cuando el bot es añadido a un canal
     this.bot.on('my_chat_member', async (ctx) => {
       try {
-        const { chat, new_chat_member, old_chat_member } = ctx.myChatMember;
+        const { chat, new_chat_member, old_chat_member, from } = ctx.myChatMember;
         const chatTitle = 'title' in chat ? chat.title : 'N/A';
+        const addedByUserId = from?.id?.toString() || null;
+        const addedByUsername = from?.username || null;
+        
         this.logger.log(
-          `📥 my_chat_member event: ${chatTitle} (${chat.id}) - status: ${new_chat_member.status}`,
+          `📥 my_chat_member event: ${chatTitle} (${chat.id}) - status: ${new_chat_member.status} - from: ${addedByUserId}`,
         );
 
         // Verificar si el bot fue añadido como administrador
@@ -175,10 +178,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           new_chat_member.status === 'administrator' &&
           (chat.type === 'channel' || chat.type === 'supergroup')
         ) {
-          this.logger.log(`🎉 Bot added to channel: ${chat.title} (${chat.id})`);
+          this.logger.log(`🎉 Bot added to channel: ${chat.title} (${chat.id}) by user: ${addedByUserId}`);
 
-          // NUEVO: Guardar en la tabla de canales detectados
-          await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+          // Guardar en la tabla de canales detectados CON el ID del usuario que añadió el bot
+          await this.saveDetectedChannel(
+            chat.id.toString(), 
+            chat.title, 
+            chat.username, 
+            chat.type,
+            addedByUserId,
+            addedByUsername
+          );
+
+          // Intentar auto-conectar el canal si el usuario ya está vinculado
+          await this.tryAutoConnectChannel(chat.id.toString(), chat.title, chat.username, addedByUserId);
 
           // Legacy: manejar conexión automática para tipsters pendientes
           await this.handleChannelConnection(chat.id.toString(), chat.title, chat.username);
@@ -192,6 +205,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         ) {
           this.logger.log(`👋 Bot removed from channel: ${chat.title} (${chat.id})`);
           await this.markChannelAsInactive(chat.id.toString());
+          // También marcar los canales conectados como desconectados
+          await this.markConnectedChannelAsDisconnected(chat.id.toString());
         }
       } catch (error) {
         this.logger.error('Error handling my_chat_member:', error);
