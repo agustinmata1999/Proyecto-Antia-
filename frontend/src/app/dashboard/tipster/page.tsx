@@ -10,6 +10,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import KycBanner from '@/components/KycBanner';
 import KycForm from '@/components/KycForm';
 import { NotificationsBell } from '@/components/NotificationsBell';
+import TipsterTelegramAutoView from '@/components/tipster/TipsterTelegramAutoView';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram' | 'kyc' | 'support';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
