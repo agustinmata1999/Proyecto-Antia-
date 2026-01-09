@@ -41,8 +41,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // Always use POLLING mode for preview environments
-    // Use WEBHOOK mode for reliable event delivery
+    // Use WEBHOOK mode only - no polling
     try {
       const botInfo = await this.httpService.getMe();
       this.logger.log(`📱 Bot info: @${botInfo.username}`);
@@ -54,6 +53,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         this.logger.log(`🔗 Setting up webhook: ${webhookUrl}`);
         
         try {
+          // First ensure any polling is stopped
+          if (this.bot) {
+            try {
+              this.bot.stop('Switching to webhook mode');
+            } catch (e) {
+              // Ignore if not running
+            }
+          }
+          
           await this.httpService.setWebhook(webhookUrl, {
             allowedUpdates: [
               'message',
@@ -65,14 +73,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             dropPendingUpdates: false,
           });
           this.logger.log('✅ Webhook configured successfully');
+          
+          // Start a timer to check webhook status every 30 seconds
+          this.startWebhookMonitor(webhookUrl);
+          
         } catch (webhookError) {
-          this.logger.warn(`Webhook setup failed: ${webhookError.message}, falling back to polling`);
-          // Fallback to polling
-          await this.startPollingMode();
+          this.logger.error(`Webhook setup failed: ${webhookError.message}`);
         }
       } else {
-        this.logger.warn('APP_URL not configured, falling back to polling');
-        await this.startPollingMode();
+        this.logger.warn('APP_URL not configured');
       }
 
       this.isInitialized = true;
@@ -81,6 +90,32 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       this.logger.error('Failed to initialize Telegram:', error.message);
       this.logger.warn('⚠️  Telegram features may not work correctly');
     }
+  }
+  
+  private webhookMonitorInterval: NodeJS.Timeout | null = null;
+  
+  private startWebhookMonitor(expectedUrl: string) {
+    // Clear any existing monitor
+    if (this.webhookMonitorInterval) {
+      clearInterval(this.webhookMonitorInterval);
+    }
+    
+    // Check webhook every 30 seconds
+    this.webhookMonitorInterval = setInterval(async () => {
+      try {
+        const info = await this.httpService.getWebhookInfo();
+        if (!info?.url || info.url !== expectedUrl) {
+          this.logger.warn(`⚠️ Webhook missing or wrong, reconfiguring...`);
+          await this.httpService.setWebhook(expectedUrl, {
+            allowedUpdates: ['message', 'callback_query', 'my_chat_member', 'chat_join_request', 'channel_post'],
+            dropPendingUpdates: false,
+          });
+          this.logger.log('✅ Webhook restored');
+        }
+      } catch (error) {
+        this.logger.error('Webhook monitor error:', error.message);
+      }
+    }, 30000); // Every 30 seconds
   }
 
   private async startPollingMode() {
