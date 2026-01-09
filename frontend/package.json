@@ -25,6 +25,7 @@
     "next": "14.2.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-telegram-login": "^1.1.2",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
