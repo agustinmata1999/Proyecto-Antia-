@@ -145,6 +145,11 @@ export default function TipsterTelegramAutoView({
     }
   };
 
+  // Estado para método alternativo de conexión
+  const [showManualConnect, setShowManualConnect] = useState(false);
+  const [manualConnectCode, setManualConnectCode] = useState('');
+  const [verifyingManualCode, setVerifyingManualCode] = useState(false);
+
   // Limpiar mensajes después de un tiempo
   useEffect(() => {
     if (success || error) {
