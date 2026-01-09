@@ -118,6 +118,7 @@ export const telegramApi = {
       auth_date: number;
       hash: string;
     }) => api.post('/telegram/auth/connect', authData),
+    connectWithCode: (linkCode: string) => api.post('/telegram/auth/connect-with-code', { linkCode }),
     disconnect: () => api.post('/telegram/auth/disconnect'),
     getStatus: () => api.get('/telegram/auth/status'),
     getAvailableChannels: () => api.get('/telegram/auth/available-channels'),
