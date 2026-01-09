@@ -228,20 +228,43 @@ export default function TipsterTelegramAutoView({
                 <p className="text-gray-600">
                   Vincula tu cuenta de Telegram para detectar automáticamente los canales donde añadas el bot.
                 </p>
-                <div className="flex items-center gap-4">
-                  {connecting ? (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg">
-                      <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                      <span>Conectando...</span>
-                    </div>
-                  ) : (
-                    <TelegramLoginButton
-                      botName={botUsername}
-                      onAuth={handleTelegramAuth}
-                      buttonSize="large"
-                      cornerRadius={10}
-                    />
-                  )}
+                
+                {/* Telegram Login Widget */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    {connecting ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg">
+                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        <span>Conectando...</span>
+                      </div>
+                    ) : (
+                      <TelegramLoginButton
+                        botName={botUsername}
+                        onAuth={handleTelegramAuth}
+                        buttonSize="large"
+                        cornerRadius={10}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Alternativa: Conectar a través del bot directamente */}
+                  <div className="text-sm text-gray-500">
+                    <p>Si el botón no funciona, también puedes:</p>
+                    <ol className="list-decimal list-inside mt-2 space-y-1">
+                      <li>
+                        <a 
+                          href={`https://t.me/${botUsername}?start=link`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Abre el bot @{botUsername} en Telegram
+                        </a>
+                      </li>
+                      <li>Envía el comando <code className="bg-gray-100 px-1 rounded">/vincular</code></li>
+                      <li>Sigue las instrucciones del bot</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             )}
