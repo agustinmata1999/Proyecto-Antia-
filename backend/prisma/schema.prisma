@@ -671,14 +671,18 @@ model TelegramChannel {
 // Canales detectados automáticamente cuando el bot es añadido como admin
 // Esta tabla es INTERNA y no se expone a los usuarios
 model DetectedTelegramChannel {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  channelId       String   @unique @map("channel_id")       // ID numérico del canal en Telegram
-  channelTitle    String   @map("channel_title")            // Título/nombre del canal
-  channelUsername String?  @map("channel_username")         // @username del canal (si es público)
-  channelType     String   @map("channel_type")             // "channel" o "supergroup"
-  detectedAt      DateTime @default(now()) @map("detected_at")
-  lastSeenAt      DateTime @default(now()) @map("last_seen_at") // Última vez que el bot verificó que es admin
-  isActive        Boolean  @default(true) @map("is_active") // Si el bot sigue siendo admin
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  channelId           String   @unique @map("channel_id")       // ID numérico del canal en Telegram
+  channelTitle        String   @map("channel_title")            // Título/nombre del canal
+  channelUsername     String?  @map("channel_username")         // @username del canal (si es público)
+  channelType         String   @map("channel_type")             // "channel" o "supergroup"
+  addedByTelegramId   String?  @map("added_by_telegram_id")     // ID de Telegram del usuario que añadió el bot
+  addedByUsername     String?  @map("added_by_username")        // Username de quien añadió el bot
+  inviteLink          String?  @map("invite_link")              // Link de invitación del canal
+  detectedAt          DateTime @default(now()) @map("detected_at")
+  lastSeenAt          DateTime @default(now()) @map("last_seen_at") // Última vez que el bot verificó que es admin
+  isActive            Boolean  @default(true) @map("is_active") // Si el bot sigue siendo admin
+  autoConnectedTo     String?  @map("auto_connected_to")        // ID del tipster al que se conectó automáticamente
   
   @@map("detected_telegram_channels")
 }
