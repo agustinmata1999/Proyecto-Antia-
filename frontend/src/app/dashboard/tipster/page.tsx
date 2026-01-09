@@ -1725,6 +1725,7 @@ export default function TipsterDashboard() {
             }}
             onTelegramAuth={handleTelegramAuth}
             onTelegramDisconnect={handleTelegramDisconnect}
+            onConnectWithCode={handleConnectWithCode}
             authStatus={telegramAuthStatus}
             loading={channelsLoading}
             onRefreshStatus={refreshTelegramAuthStatus}
