@@ -335,18 +335,18 @@ export default function TipsterTelegramAutoView({
                         
                         {/* Opción 2: Link directo (automático) */}
                         <div className="p-4 bg-gray-50 rounded-xl">
-                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo</h4>
+                          <h4 className="font-medium text-gray-900 mb-2">Opción 2: Link directo (automático)</h4>
                           <p className="text-sm text-gray-600 mb-3">
-                            Abre el bot y escribe <code className="bg-gray-200 px-1.5 py-0.5 rounded font-mono">/vincular</code> para obtener el código.
+                            Haz clic en el botón y el bot te enviará el código automáticamente.
                           </p>
                           <a 
-                            href={`https://t.me/${botUsername}`} 
+                            href={`https://t.me/${botUsername}?start=vincular`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors"
                           >
                             <MessageCircle size={18} />
-                            Abrir bot en Telegram
+                            Obtener código automáticamente
                           </a>
                         </div>
                       </div>
