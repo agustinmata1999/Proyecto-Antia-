@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi } from '@/lib/api';
@@ -27,7 +27,8 @@ interface TelegramChannel {
   connectedAt: string;
 }
 
-export default function TipsterDashboard() {
+// Wrapper component to handle Suspense for useSearchParams
+function TipsterDashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { formatPrice, symbol } = useCurrency();
