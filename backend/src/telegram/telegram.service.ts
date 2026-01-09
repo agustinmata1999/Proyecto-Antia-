@@ -2261,12 +2261,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
    */
   private async handleMyChatMemberUpdate(myChatMember: any) {
     try {
-      const { chat, new_chat_member, old_chat_member } = myChatMember;
+      const { chat, new_chat_member, old_chat_member, from } = myChatMember;
       const chatTitle = chat.title || 'N/A';
       const chatId = chat.id.toString();
+      const addedByUserId = from?.id?.toString() || null;
+      const addedByUsername = from?.username || null;
 
       this.logger.log(
-        `📥 my_chat_member event: ${chatTitle} (${chatId}) - new status: ${new_chat_member?.status}`,
+        `📥 my_chat_member event: ${chatTitle} (${chatId}) - new status: ${new_chat_member?.status} - from: ${addedByUserId}`,
       );
 
       // Verificar si el bot fue añadido como administrador
@@ -2274,10 +2276,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         new_chat_member?.status === 'administrator' &&
         (chat.type === 'channel' || chat.type === 'supergroup')
       ) {
-        this.logger.log(`🎉 Bot added to channel: ${chatTitle} (${chatId})`);
+        this.logger.log(`🎉 Bot added to channel: ${chatTitle} (${chatId}) by user: ${addedByUserId}`);
 
-        // Guardar en la tabla de canales detectados
-        await this.saveDetectedChannel(chatId, chatTitle, chat.username, chat.type);
+        // Guardar en la tabla de canales detectados CON el ID del usuario
+        await this.saveDetectedChannel(
+          chatId, 
+          chatTitle, 
+          chat.username, 
+          chat.type,
+          addedByUserId,
+          addedByUsername
+        );
+
+        // Intentar auto-conectar el canal si el usuario ya está vinculado
+        await this.tryAutoConnectChannel(chatId, chatTitle, chat.username, addedByUserId);
 
         // Legacy: manejar conexión automática para tipsters pendientes
         await this.handleChannelConnection(chatId, chatTitle, chat.username);
@@ -2291,6 +2303,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       ) {
         this.logger.log(`👋 Bot removed from channel: ${chatTitle} (${chatId})`);
         await this.markChannelAsInactive(chatId);
+        await this.markConnectedChannelAsDisconnected(chatId);
       }
     } catch (error) {
       this.logger.error('Error handling my_chat_member:', error);
