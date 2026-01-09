@@ -164,6 +164,63 @@ export default function TipsterDashboard() {
   const [wizardStep, setWizardStep] = useState(1);
   const [dontShowWizardAgain, setDontShowWizardAgain] = useState(false);
 
+  // Auto-vinculación de Telegram via link
+  const [autoLinkStatus, setAutoLinkStatus] = useState<'idle' | 'linking' | 'success' | 'error'>('idle');
+  const [autoLinkMessage, setAutoLinkMessage] = useState('');
+
+  // Detectar parámetro telegram_link en la URL y vincular automáticamente
+  useEffect(() => {
+    const telegramLinkCode = searchParams.get('telegram_link');
+    if (telegramLinkCode && autoLinkStatus === 'idle') {
+      // Cambiar a la vista de Telegram
+      setActiveView('telegram');
+      
+      // Intentar vincular automáticamente
+      const autoLink = async () => {
+        setAutoLinkStatus('linking');
+        setAutoLinkMessage('Vinculando tu cuenta de Telegram...');
+        
+        try {
+          const response = await telegramApi.auth.connectWithCode(telegramLinkCode);
+          if (response.data.success) {
+            setAutoLinkStatus('success');
+            const autoConnected = response.data.autoConnectedChannels || 0;
+            setAutoLinkMessage(
+              autoConnected > 0
+                ? `¡Telegram vinculado! Se conectaron ${autoConnected} canal(es) automáticamente.`
+                : '¡Telegram vinculado correctamente!'
+            );
+            
+            // Recargar estado de autenticación y canales
+            try {
+              const authStatusRes = await telegramApi.auth.getStatus();
+              setTelegramAuthStatus(authStatusRes.data);
+              const channelsRes = await telegramApi.channels.getAll();
+              setTelegramChannels(channelsRes.data.channels || []);
+            } catch (e) {
+              console.error('Error refreshing after auto-link:', e);
+            }
+            
+            // Limpiar el parámetro de la URL
+            window.history.replaceState({}, '', '/dashboard/tipster?view=telegram');
+          } else {
+            setAutoLinkStatus('error');
+            setAutoLinkMessage('Error al vincular. El código puede haber expirado.');
+          }
+        } catch (err: any) {
+          setAutoLinkStatus('error');
+          setAutoLinkMessage(err.response?.data?.message || 'Error al vincular. El código puede haber expirado.');
+        }
+      };
+      
+      // Esperar a que el usuario esté autenticado
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        autoLink();
+      }
+    }
+  }, [searchParams, autoLinkStatus]);
+
   // Mostrar wizard cada vez que entra a Telegram (a menos que haya marcado "no mostrar")
   useEffect(() => {
     if (activeView === 'telegram') {
