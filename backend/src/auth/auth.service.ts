@@ -75,6 +75,25 @@ export class AuthService {
       throw new UnauthorizedException('Tu cuenta no está activa');
     }
 
+    // Para tipsters, verificar si tienen Telegram conectado
+    if (user.role === 'TIPSTER') {
+      const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
+        where: { userId: user.id },
+        select: { telegramUserId: true },
+      });
+
+      if (!tipsterProfile?.telegramUserId) {
+        throw new UnauthorizedException({
+          message: '¡Tu solicitud ha sido aprobada! Para acceder a la plataforma, debes conectar tu cuenta de Telegram.',
+          code: 'TELEGRAM_REQUIRED',
+          status: 'ACTIVE',
+          requiresTelegram: true,
+          userId: user.id,
+          email: user.email,
+        });
+      }
+    }
+
     const { passwordHash, ...result } = user;
     return result;
   }
