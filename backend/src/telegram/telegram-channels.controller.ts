@@ -169,14 +169,7 @@ export class TelegramChannelsController {
    */
   @Post('connect-by-invite-link')
   @HttpCode(HttpStatus.OK)
-  async connectByInviteLink(@Body() body: { inviteLink: string }, @Request() req) {
-    if (!body.inviteLink || body.inviteLink.trim().length === 0) {
-      return {
-        success: false,
-        message: 'El link de invitación es obligatorio',
-      };
-    }
-
+  async connectByInviteLink(@Body() body: ConnectByInviteLinkDto, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
 
     // Extraer el hash del invite link
@@ -246,8 +239,7 @@ export class TelegramChannelsController {
    */
   @Post('connect-by-name')
   @HttpCode(HttpStatus.OK)
-  async connectByName(@Body() body: { channelName: string; inviteLink?: string }, @Request() req) {
-    if (!body.channelName || body.channelName.trim().length === 0) {
+  async connectByName(@Body() body: ConnectByNameDto, @Request() req) {
       return {
         success: false,
         message: 'El nombre del canal es obligatorio',
