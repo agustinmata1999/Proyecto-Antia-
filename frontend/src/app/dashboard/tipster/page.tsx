@@ -2654,18 +2654,16 @@ function TipsterDashboardContent() {
                         ⚠️ No tienes canales conectados
                       </p>
                       <p className="text-xs text-yellow-700 mb-3">
-                        Debes conectar al menos un canal de Telegram para asignarlo a tus productos.
+                        Para conectar un canal, añade el bot <strong>@Antiabetbot</strong> como administrador en tu canal de Telegram. Se detectará automáticamente.
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          closeModals();
-                          setActiveView('telegram');
-                        }}
+                      <a
+                        href="https://t.me/Antiabetbot"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline font-medium"
                       >
-                        Ir a conectar un canal →
-                      </button>
+                        Abrir @Antiabetbot en Telegram →
+                      </a>
                     </div>
                   ) : (
                     <select 
