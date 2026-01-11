@@ -196,22 +196,28 @@ Red de afiliación premium:
 ## Notas Técnicas
 
 ### Sistema de Conexión Telegram (Flujo Actualizado - 11-01-2026)
-**Registro de Tipster:**
-1. El tipster ve opción "Conecta tu Telegram" (opcional)
-2. Si decide conectar:
-   - Abre el bot @Antiabetbot con `?start=vincular`
-   - Presiona START, recibe código de 8 caracteres
-   - Ingresa el código en el formulario de registro
-   - El código se verifica y el `telegramUserId` se guarda
 
-**Post-Aprobación (sin Telegram):**
-1. Admin aprueba la solicitud
-2. El tipster intenta hacer login
-3. Backend detecta que no tiene `telegramUserId` en perfil
-4. Devuelve error `TELEGRAM_REQUIRED`
-5. Frontend redirige a `/connect-telegram`
-6. El tipster conecta Telegram usando email/password + código
-7. Una vez conectado, puede acceder normalmente
+**Dos flujos diferentes con links distintos:**
+
+**FLUJO 1: Durante el Registro (deep link: `vincular_registro`)**
+1. El tipster ve opción "Conecta tu Telegram" (opcional) en el formulario de registro
+2. Hace clic en "Conectar Telegram" que abre `t.me/BOT?start=vincular_registro`
+3. El bot envía un código y un botón "📝 Completar Registro"
+4. El botón redirige a `/register?telegram_code=CODE&telegram_username=USERNAME`
+5. La página de registro recibe el código, lo verifica automáticamente y pre-llena el username
+6. El tipster completa el resto del formulario y envía la solicitud
+7. El `telegramUserId` se guarda junto con la solicitud
+
+**FLUJO 2: Post-Aprobación (deep link: `vincular`)**
+1. Tipster fue aprobado pero no conectó Telegram durante el registro
+2. Intenta hacer login → Backend devuelve error `TELEGRAM_REQUIRED`
+3. Frontend redirige a `/connect-telegram?email=EMAIL`
+4. El tipster hace clic en "Abre el bot en Telegram" que usa `t.me/BOT?start=vincular`
+5. El bot envía un código y un botón "🚀 Vincular y Acceder"
+6. El botón redirige a `/connect-telegram?code=CODE`
+7. La página muestra el código pre-cargado con mensaje "Código de Telegram recibido"
+8. El tipster ingresa su contraseña y hace clic en "Conectar y Acceder"
+9. El backend vincula el Telegram y el tipster puede acceder
 
 **Auto-Conexión de Canales:**
 - Los canales se conectan automáticamente cuando el bot es agregado como admin
