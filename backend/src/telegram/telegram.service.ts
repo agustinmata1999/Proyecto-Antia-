@@ -2261,10 +2261,38 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      // Para /start vincular O /start sin payload -> generar código de vinculación
-      // Esto soluciona el problema de Telegram Web que pierde el payload
-      this.logger.log(`🔗 Generating link code for user ${userId}`);
-      await this.handleVincularCommand(message);
+      // Handle vincular_registro payload - Para usuarios registrándose como tipster
+      if (payload === 'vincular_registro') {
+        this.logger.log(`📝 Registration flow vincular for user ${userId}`);
+        await this.handleVincularCommand(message, 'registro');
+        return;
+      }
+
+      // Handle vincular payload - Para tipsters ya aprobados que necesitan conectar
+      if (payload === 'vincular') {
+        this.logger.log(`🔗 Post-approval vincular for user ${userId}`);
+        await this.handleVincularCommand(message, 'aprobado');
+        return;
+      }
+
+      // Para /start sin payload -> mensaje de bienvenida general
+      this.logger.log(`👋 Welcome message for user ${userId}`);
+      await this.httpService.sendMessage(
+        userId,
+        '👋 ¡Bienvenido a Antia!\n\n' +
+          '🛒 *¿Cómo comprar?*\n\n' +
+          '1️⃣ Busca el producto que te interesa en el canal del tipster\n' +
+          '2️⃣ Haz clic en el enlace de compra\n' +
+          '3️⃣ Completa el pago en nuestra web\n' +
+          '4️⃣ Vuelve aquí automáticamente para recibir tu acceso\n\n' +
+          '✅ *¿Ya pagaste?*\n' +
+          'Si ya realizaste una compra, deberías haber sido redirigido aquí automáticamente con tu acceso.\n\n' +
+          '🔗 *¿Eres tipster?*\n' +
+          'Usa el comando /vincular para conectar tu cuenta.\n\n' +
+          '❓ *¿Necesitas ayuda?*\n' +
+          'Contacta con @AntiaSupport',
+        { parseMode: 'Markdown' },
+      );
       return;
     }
 
