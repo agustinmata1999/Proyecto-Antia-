@@ -245,3 +245,62 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 ### Routing
 - Todas las rutas de API deben usar prefijo `/api`
 - El entorno preview tiene limitaciones con webhooks externos
+
+
+
+---
+
+## Historial de Cambios
+
+### 2026-01-11 - Correcciones de Issues P2
+
+**Issue 1: "Invalid Date" en Dashboard - CORREGIDO**
+- El backend devolvía fechas en formato BSON extendido `{"$date": "..."}` cuando usaba `$runCommandRaw`
+- El frontend no podía parsear este formato, mostrando "Invalid Date"
+- **Solución:** Se agregó función `toISOString()` en `/app/backend/src/orders/orders.service.ts` para convertir fechas BSON a strings ISO estándar
+- Las ventas recientes ahora muestran fechas correctamente en formato español (ej: "9/1/2026")
+
+**Issue 2: Validación de DTOs en Telegram Channels - CORREGIDO**
+- Los endpoints de conexión de canales no tenían validación formal de DTOs
+- **Solución:** Se crearon DTOs con class-validator en `/app/backend/src/telegram/dto/connect-channel.dto.ts`:
+  - `ConnectByInviteLinkDto` - Valida `inviteLink` requerido
+  - `ConnectByNameDto` - Valida `channelName` requerido, `inviteLink` opcional
+  - `ConnectByIdDto` - Valida `channelId` requerido
+  - `VerifyChannelDto` - Valida `channelId` requerido
+  - `SearchByNameDto` - Valida `channelName` requerido
+- Los endpoints ahora devuelven errores 400 con mensajes claros en español
+
+**Issue 3: Módulos de Tickets Duplicados - NO APLICA**
+- Se verificó que las rutas `/tickets` y `/support` como carpetas separadas NO existen
+- El soporte está integrado dentro del dashboard de tipster como una vista
+- Este issue fue reportado incorrectamente en el handoff anterior
+
+---
+
+## Issues Pendientes
+
+### P1 (Alta Prioridad)
+- Continuar rediseño del frontend (secciones Clientes, Mi Cuenta)
+
+### P2 (Media Prioridad)
+- Implementar Login con Google OAuth
+- Implementar Login con Widget de Telegram
+- Agregar gráficos de visualización de datos
+- Implementar subida de fotos de perfil
+
+### P3 (Baja Prioridad)
+- Agregar opción de suscripción trimestral
+
+---
+
+## Archivos de Referencia Actualizados
+
+### Backend
+- `/app/backend/src/orders/orders.service.ts` - Servicio de órdenes con fix de fechas
+- `/app/backend/src/telegram/dto/connect-channel.dto.ts` - DTOs para validación de canales (NUEVO)
+- `/app/backend/src/telegram/telegram-channels.controller.ts` - Controlador de canales actualizado
+
+### Frontend
+- `/app/frontend/src/app/dashboard/tipster/page.tsx` - Dashboard principal del tipster
+- `/app/frontend/src/app/register/page.tsx` - Registro multi-paso
+- `/app/frontend/src/app/connect-telegram/page.tsx` - Conexión post-aprobación
