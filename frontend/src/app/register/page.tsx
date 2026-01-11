@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { authApi } from '@/lib/api';
+import { authApi, telegramApi } from '@/lib/api';
+import { MessageCircle, Check, X, ExternalLink } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -25,6 +26,64 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Estado para la conexión de Telegram durante el registro
+  const [telegramConnected, setTelegramConnected] = useState(false);
+  const [telegramUserId, setTelegramUserId] = useState<string | null>(null);
+  const [telegramLinkedUsername, setTelegramLinkedUsername] = useState<string | null>(null);
+  const [showTelegramConnect, setShowTelegramConnect] = useState(false);
+  const [telegramCode, setTelegramCode] = useState('');
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [telegramError, setTelegramError] = useState('');
+  const [botUsername, setBotUsername] = useState('Antiabetbot');
+
+  // Cargar info del bot
+  useEffect(() => {
+    const loadBotInfo = async () => {
+      try {
+        const res = await telegramApi.auth.getBotInfo();
+        if (res.data.botUsername) {
+          setBotUsername(res.data.botUsername);
+        }
+      } catch (err) {
+        console.error('Error loading bot info:', err);
+      }
+    };
+    loadBotInfo();
+  }, []);
+
+  // Verificar código de Telegram
+  const handleVerifyTelegramCode = async () => {
+    if (!telegramCode.trim()) {
+      setTelegramError('Ingresa el código de vinculación');
+      return;
+    }
+
+    setVerifyingCode(true);
+    setTelegramError('');
+
+    try {
+      const res = await telegramApi.auth.connectDuringRegister(telegramCode.trim().toUpperCase());
+      if (res.data.success) {
+        setTelegramConnected(true);
+        setTelegramUserId(res.data.telegramUserId);
+        setTelegramLinkedUsername(res.data.telegramUsername);
+        setShowTelegramConnect(false);
+        setTelegramCode('');
+      }
+    } catch (err: any) {
+      setTelegramError(err.response?.data?.message || 'Código inválido o expirado');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
+  // Desconectar Telegram
+  const handleDisconnectTelegram = () => {
+    setTelegramConnected(false);
+    setTelegramUserId(null);
+    setTelegramLinkedUsername(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +131,16 @@ export default function RegisterPage() {
           promotionChannel: formData.promotionChannel,
           experience: formData.experience,
           countryIso: formData.countryIso,
+          // Incluir datos de Telegram si está conectado
+          telegramUserId: telegramUserId || undefined,
+          telegramLinkedUsername: telegramLinkedUsername || undefined,
         });
-        setSuccessMessage('¡Solicitud enviada correctamente! Un administrador revisará tu solicitud y te notificará cuando sea aprobada.');
+        
+        if (telegramConnected) {
+          setSuccessMessage('¡Solicitud enviada correctamente! Tu cuenta de Telegram ya está vinculada. Un administrador revisará tu solicitud y te notificará cuando sea aprobada.');
+        } else {
+          setSuccessMessage('¡Solicitud enviada correctamente! Un administrador revisará tu solicitud. Recuerda que necesitarás conectar tu Telegram antes de poder acceder a la plataforma.');
+        }
       } else {
         await authApi.registerClient({
           email: formData.email,
@@ -170,6 +237,133 @@ export default function RegisterPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
+              </div>
+            )}
+
+            {/* Sección de conexión de Telegram (solo para tipsters) */}
+            {userType === 'tipster' && (
+              <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-blue-50/50 to-white">
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      Conecta tu Telegram
+                      <span className="ml-2 text-xs font-normal text-gray-500">(Opcional durante el registro)</span>
+                    </h3>
+                    
+                    {telegramConnected ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg">
+                            <Check size={16} />
+                            <span className="font-medium">
+                              {telegramLinkedUsername || `ID: ${telegramUserId}`}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleDisconnectTelegram}
+                            className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <X size={14} />
+                            Cambiar
+                          </button>
+                        </div>
+                        <p className="text-sm text-green-700">
+                          ✓ Tu Telegram se vinculará automáticamente cuando tu solicitud sea aprobada.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-600">
+                          Si conectas tu Telegram ahora, cuando seas aprobado podrás acceder directamente sin pasos adicionales.
+                        </p>
+                        
+                        {!showTelegramConnect ? (
+                          <button
+                            type="button"
+                            onClick={() => setShowTelegramConnect(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors text-sm font-medium"
+                          >
+                            <MessageCircle size={16} />
+                            Conectar Telegram
+                          </button>
+                        ) : (
+                          <div className="space-y-3 p-4 bg-white rounded-lg border border-gray-200">
+                            <div className="text-sm text-gray-700 space-y-2">
+                              <p className="font-medium">Pasos para conectar:</p>
+                              <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                                <li>
+                                  <a 
+                                    href={`https://t.me/${botUsername}?start=vincular`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                  >
+                                    Abre el bot en Telegram <ExternalLink size={12} />
+                                  </a>
+                                </li>
+                                <li>Presiona "START" en el bot</li>
+                                <li>El bot te dará un código de 8 caracteres</li>
+                                <li>Cópialo e ingrésalo abajo</li>
+                              </ol>
+                            </div>
+                            
+                            {telegramError && (
+                              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                                {telegramError}
+                              </div>
+                            )}
+                            
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={telegramCode}
+                                onChange={(e) => setTelegramCode(e.target.value.toUpperCase())}
+                                placeholder="Código de 8 caracteres"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase"
+                                maxLength={8}
+                              />
+                              <button
+                                type="button"
+                                onClick={handleVerifyTelegramCode}
+                                disabled={!telegramCode.trim() || verifyingCode}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                              >
+                                {verifyingCode ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Verificando...
+                                  </>
+                                ) : (
+                                  'Verificar'
+                                )}
+                              </button>
+                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowTelegramConnect(false);
+                                setTelegramCode('');
+                                setTelegramError('');
+                              }}
+                              className="text-sm text-gray-500 hover:text-gray-700"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-gray-500">
+                          ℹ️ Si prefieres, puedes conectar tu Telegram después de que tu solicitud sea aprobada.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
