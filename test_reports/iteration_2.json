@@ -1,0 +1,85 @@
+{
+  "summary": "Completed testing of new Telegram connection flow. All 15 backend API tests passed. Frontend UI displays correctly with all required elements: registration page with optional Telegram connection for tipsters, login page, /connect-telegram page for pre-login connection, and tipster dashboard WITHOUT Telegram section in sidebar.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Tipster Dashboard - Ventas Recientes",
+        "issues": ["Shows 'Invalid Date' for recent sales dates - minor display issue"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/tests/test_telegram_new_flow.py",
+    "/app/test_reports/pytest/pytest_results_new_flow.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "All new Telegram endpoints are properly implemented and return correct error codes",
+    "Registration page correctly shows optional Telegram connection for tipsters",
+    "Login flow correctly handles TELEGRAM_REQUIRED code for approved tipsters without Telegram",
+    "/connect-telegram page correctly displays form for pre-login Telegram connection",
+    "Tipster dashboard sidebar correctly does NOT show Telegram section"
+  ],
+  "updated_files": [
+    "/app/tests/test_telegram_new_flow.py"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "100% (all UI elements present and functional)"
+  },
+  "test_credentials": {
+    "tipster_with_telegram": {
+      "email": "fausto.perez@antia.com",
+      "password": "Tipster123!"
+    },
+    "admin": {
+      "email": "admin@antia.com",
+      "password": "SuperAdmin123!"
+    }
+  },
+  "seed_data_creation": "None - used existing test accounts",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "New Telegram connection flow fully tested. Backend endpoints: POST /api/telegram/auth/connect-during-register (no auth, validates code), POST /api/telegram/auth/connect-pre-login (no JWT, uses email/password), GET /api/telegram/auth/bot-info (public). Frontend pages: /register (shows optional Telegram for tipsters), /login (handles TELEGRAM_REQUIRED), /connect-telegram (pre-login connection), /dashboard/tipster (no Telegram in sidebar).",
+  "features_tested": {
+    "backend": [
+      "GET /api/telegram/auth/bot-info - Returns bot configuration ✅",
+      "POST /api/telegram/auth/connect-during-register - Rejects invalid codes with 400 ✅",
+      "POST /api/telegram/auth/connect-during-register - Rejects short codes with 400 ✅",
+      "POST /api/telegram/auth/connect-during-register - Rejects empty codes with 400 ✅",
+      "POST /api/telegram/auth/connect-during-register - Rejects missing body with 400 ✅",
+      "POST /api/telegram/auth/connect-pre-login - Rejects invalid credentials with 400 ✅",
+      "POST /api/telegram/auth/connect-pre-login - Rejects missing email with 400 ✅",
+      "POST /api/telegram/auth/connect-pre-login - Rejects missing password with 400 ✅",
+      "POST /api/telegram/auth/connect-pre-login - Rejects missing code with 400 ✅",
+      "POST /api/telegram/auth/connect-pre-login - Rejects short code with 400 ✅",
+      "POST /api/auth/login - Tipster with Telegram can login successfully ✅",
+      "POST /api/auth/login - Admin can login successfully ✅",
+      "GET /api/telegram/auth/status - Returns isConnected for authenticated tipster ✅",
+      "GET /api/telegram/auth/status - Requires authentication (401) ✅",
+      "GET /api/telegram/channels - Returns list of connected channels ✅"
+    ],
+    "frontend": [
+      "Registration page - 'Soy Cliente' and 'Panel de Afiliados' buttons visible ✅",
+      "Registration page - 'Conecta tu Telegram' section visible when tipster selected ✅",
+      "Registration page - '(Opcional durante el registro)' label visible ✅",
+      "Registration page - 'Conectar Telegram' button expands instructions ✅",
+      "Registration page - Code input field and 'Verificar' button visible ✅",
+      "Login page - Email and password inputs visible ✅",
+      "Login page - Submit button visible ✅",
+      "/connect-telegram page - '¡Solicitud Aprobada!' banner visible ✅",
+      "/connect-telegram page - Email pre-filled from URL param ✅",
+      "/connect-telegram page - Password input visible ✅",
+      "/connect-telegram page - Code input field visible ✅",
+      "/connect-telegram page - 'Conectar y Acceder' button visible ✅",
+      "Tipster dashboard - Sidebar does NOT have 'Telegram' section ✅",
+      "Tipster dashboard - Expected menu items present (Inicio, Crear producto, Liquidaciones, Perfil, Soporte) ✅"
+    ]
+  }
+}
