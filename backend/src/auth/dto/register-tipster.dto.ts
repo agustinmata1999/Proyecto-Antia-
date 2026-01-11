@@ -24,6 +24,16 @@ export class RegisterTipsterDto {
   @IsString()
   telegramUsername: string;
 
+  @ApiProperty({ example: '123456789', description: 'ID de Telegram vinculado durante el registro', required: false })
+  @IsOptional()
+  @IsString()
+  telegramUserId?: string;
+
+  @ApiProperty({ example: '@username', description: 'Username de Telegram vinculado', required: false })
+  @IsOptional()
+  @IsString()
+  telegramLinkedUsername?: string;
+
   @ApiProperty({
     example: 'https://t.me/mi_canal o @mi_instagram',
     description: 'Canal/URL donde promociona (Telegram público, Instagram, etc.)',
