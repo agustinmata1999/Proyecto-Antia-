@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, telegramApi } from '@/lib/api';
 import { MessageCircle, Check, X, ExternalLink } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [userType, setUserType] = useState<'client' | 'tipster'>('client');
   const [formData, setFormData] = useState({
     name: '',
@@ -37,7 +39,7 @@ export default function RegisterPage() {
   const [telegramError, setTelegramError] = useState('');
   const [botUsername, setBotUsername] = useState('Antiabetbot');
 
-  // Cargar info del bot
+  // Cargar info del bot y verificar parámetros de URL
   useEffect(() => {
     const loadBotInfo = async () => {
       try {
@@ -50,9 +52,63 @@ export default function RegisterPage() {
       }
     };
     loadBotInfo();
-  }, []);
 
-  // Verificar código de Telegram
+    // Verificar si viene con código de Telegram desde el bot
+    const telegramCodeFromUrl = searchParams.get('telegram_code');
+    const telegramUsernameFromUrl = searchParams.get('telegram_username');
+    
+    if (telegramCodeFromUrl) {
+      // Cambiar a tipster automáticamente y verificar el código
+      setUserType('tipster');
+      setTelegramCode(telegramCodeFromUrl);
+      
+      // Pre-llenar el username de Telegram si viene en la URL
+      if (telegramUsernameFromUrl) {
+        setFormData(prev => ({
+          ...prev,
+          telegramUsername: telegramUsernameFromUrl.startsWith('@') ? telegramUsernameFromUrl : `@${telegramUsernameFromUrl}`
+        }));
+      }
+      
+      // Verificar el código automáticamente
+      verifyTelegramCodeFromUrl(telegramCodeFromUrl);
+    }
+  }, [searchParams]);
+
+  // Verificar código automáticamente cuando viene de la URL
+  const verifyTelegramCodeFromUrl = async (code: string) => {
+    setVerifyingCode(true);
+    setTelegramError('');
+    setShowTelegramConnect(true);
+
+    try {
+      const res = await telegramApi.auth.connectDuringRegister(code.toUpperCase());
+      if (res.data.success) {
+        setTelegramConnected(true);
+        setTelegramUserId(res.data.telegramUserId);
+        setTelegramLinkedUsername(res.data.telegramUsername);
+        setShowTelegramConnect(false);
+        setTelegramCode('');
+        
+        // Pre-llenar el username si viene del bot
+        if (res.data.telegramUsername) {
+          setFormData(prev => ({
+            ...prev,
+            telegramUsername: `@${res.data.telegramUsername}`
+          }));
+        }
+        
+        // Limpiar los parámetros de la URL
+        window.history.replaceState({}, '', '/register');
+      }
+    } catch (err: any) {
+      setTelegramError(err.response?.data?.message || 'Código inválido o expirado. Genera uno nuevo.');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
+  // Verificar código de Telegram manualmente
   const handleVerifyTelegramCode = async () => {
     if (!telegramCode.trim()) {
       setTelegramError('Ingresa el código de vinculación');
@@ -70,6 +126,14 @@ export default function RegisterPage() {
         setTelegramLinkedUsername(res.data.telegramUsername);
         setShowTelegramConnect(false);
         setTelegramCode('');
+        
+        // Pre-llenar el username si viene del bot
+        if (res.data.telegramUsername) {
+          setFormData(prev => ({
+            ...prev,
+            telegramUsername: `@${res.data.telegramUsername}`
+          }));
+        }
       }
     } catch (err: any) {
       setTelegramError(err.response?.data?.message || 'Código inválido o expirado');
