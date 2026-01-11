@@ -240,12 +240,6 @@ export class TelegramChannelsController {
   @Post('connect-by-name')
   @HttpCode(HttpStatus.OK)
   async connectByName(@Body() body: ConnectByNameDto, @Request() req) {
-      return {
-        success: false,
-        message: 'El nombre del canal es obligatorio',
-      };
-    }
-
     const tipsterId = await this.getTipsterId(req.user.id);
 
     // Buscar el canal por nombre en la tabla de canales detectados
