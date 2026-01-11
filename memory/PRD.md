@@ -195,6 +195,29 @@ Red de afiliación premium:
 
 ## Notas Técnicas
 
+### Sistema de Conexión Telegram (Flujo Actualizado - 11-01-2026)
+**Registro de Tipster:**
+1. El tipster ve opción "Conecta tu Telegram" (opcional)
+2. Si decide conectar:
+   - Abre el bot @Antiabetbot con `?start=vincular`
+   - Presiona START, recibe código de 8 caracteres
+   - Ingresa el código en el formulario de registro
+   - El código se verifica y el `telegramUserId` se guarda
+
+**Post-Aprobación (sin Telegram):**
+1. Admin aprueba la solicitud
+2. El tipster intenta hacer login
+3. Backend detecta que no tiene `telegramUserId` en perfil
+4. Devuelve error `TELEGRAM_REQUIRED`
+5. Frontend redirige a `/connect-telegram`
+6. El tipster conecta Telegram usando email/password + código
+7. Una vez conectado, puede acceder normalmente
+
+**Auto-Conexión de Canales:**
+- Los canales se conectan automáticamente cuando el bot es agregado como admin
+- Se detecta mediante evento `my_chat_member` con `administrator` o `creator`
+- El canal se vincula al tipster que tenga el `telegramUserId` del usuario que lo añadió
+
 ### Telegram Bot
 El bot usa **POLLING** (no webhooks). Esto es intencional para evitar problemas con el routing del entorno preview.
 
