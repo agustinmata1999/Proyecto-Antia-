@@ -57,6 +57,28 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-11 - Nuevo Flujo de Conexión de Telegram Durante Registro
+**Completado:**
+- ✅ **Conexión de Telegram durante registro (opcional):**
+  - Nueva sección "Conecta tu Telegram" en el formulario de registro de tipster
+  - El tipster puede conectar Telegram antes de enviar la solicitud (opcional)
+  - Si conecta, el `telegramUserId` se guarda con la solicitud
+  - Pasos: Abrir bot → START → Copiar código de 8 caracteres → Verificar
+- ✅ **Bloqueo post-aprobación sin Telegram:**
+  - Si un tipster APROBADO intenta hacer login SIN Telegram conectado:
+    - Recibe error especial `TELEGRAM_REQUIRED`
+    - Se muestra pantalla "¡Solicitud Aprobada!" con instrucciones para conectar
+    - No puede acceder hasta conectar su Telegram
+  - Nueva página `/connect-telegram` para este flujo
+- ✅ **Eliminación sección Telegram del dashboard:**
+  - La sección "Telegram" del menú lateral fue eliminada
+  - Los canales se conectan automáticamente al agregar el bot como admin
+  - El tipster ya no necesita ir a una sección separada
+- ✅ **Nuevos endpoints:**
+  - `POST /api/telegram/auth/connect-during-register` - Verificar código sin auth
+  - `POST /api/telegram/auth/connect-pre-login` - Conectar con email/password
+- ✅ **Tests:** 15/15 backend tests pasaron, frontend 100% funcional
+
 ### 2026-01-06 - Sistema de Conexión de Canales Simplificado
 **Completado:**
 - ✅ **Nuevo modal simplificado**: Solo 2 campos
