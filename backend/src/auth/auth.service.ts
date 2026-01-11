@@ -151,6 +151,9 @@ export class AuthService {
             user_id: userIdHex,
             public_name: dto.name,
             telegram_username: dto.telegramUsername || null,
+            // Telegram vinculado durante el registro (opcional)
+            telegram_user_id: dto.telegramUserId || null,
+            telegram_connected_at: dto.telegramUserId ? { $date: now } : null,
             locale: 'es',
             timezone: 'Europe/Madrid',
             module_forecasts: true,
