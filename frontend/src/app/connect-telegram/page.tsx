@@ -180,28 +180,43 @@ function ConnectTelegramContent() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 mb-3">Conectar Telegram</h3>
                     
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 mb-4">
-                      <li>
-                        <a 
-                          href={`https://t.me/${botUsername}?start=vincular`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                        >
-                          Abre el bot en Telegram <ExternalLink size={12} />
-                        </a>
-                      </li>
-                      <li>Presiona <strong>"START"</strong> en el bot</li>
-                      <li>Copia el código de 8 caracteres que recibirás</li>
-                      <li>Pégalo en el campo de abajo</li>
-                    </ol>
+                    {codeFromBot ? (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg mb-2">
+                          <Check size={16} />
+                          <span className="text-sm font-medium">Código de Telegram recibido</span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Solo ingresa tu contraseña para completar la vinculación.
+                        </p>
+                      </div>
+                    ) : (
+                      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 mb-4">
+                        <li>
+                          <a 
+                            href={`https://t.me/${botUsername}?start=vincular`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                          >
+                            Abre el bot en Telegram <ExternalLink size={12} />
+                          </a>
+                        </li>
+                        <li>Presiona <strong>"START"</strong> en el bot</li>
+                        <li>Copia el código de 8 caracteres o haz clic en el botón que te envía</li>
+                        <li>Pégalo en el campo de abajo</li>
+                      </ol>
+                    )}
                     
                     <input
                       type="text"
                       value={telegramCode}
-                      onChange={(e) => setTelegramCode(e.target.value.toUpperCase())}
+                      onChange={(e) => {
+                        setTelegramCode(e.target.value.toUpperCase());
+                        setCodeFromBot(false); // Si el usuario edita, ya no viene del bot
+                      }}
                       placeholder="XXXXXXXX"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full px-4 py-3 border rounded-lg text-center font-mono tracking-widest uppercase text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${codeFromBot ? 'border-green-300 bg-green-50' : 'border-gray-300'}`}
                       maxLength={8}
                     />
                   </div>
