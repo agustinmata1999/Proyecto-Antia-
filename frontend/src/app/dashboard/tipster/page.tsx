@@ -825,8 +825,7 @@ function TipsterDashboardContent() {
     console.log('handlePublishToTelegram called', { productId, productTitle, publicationChannel });
     
     if (!publicationChannel.configured) {
-      alert('Primero debes configurar tu Canal de Publicación en la sección de Telegram');
-      setActiveView('telegram');
+      alert('No tienes un canal de publicación configurado. Por favor, contacta a soporte.');
       return;
     }
 
