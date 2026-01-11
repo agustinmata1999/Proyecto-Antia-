@@ -4,13 +4,14 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, telegramApi } from '@/lib/api';
-import { MessageCircle, Check, X, ExternalLink } from 'lucide-react';
+import { MessageCircle, Check, X, ExternalLink, FileText, ArrowRight, Copy, CheckCircle } from 'lucide-react';
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
   const [userType, setUserType] = useState<'client' | 'tipster'>('client');
+  const [tipsterStep, setTipsterStep] = useState<'choose' | 'telegram' | 'form'>('choose');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,11 +34,12 @@ function RegisterContent() {
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramUserId, setTelegramUserId] = useState<string | null>(null);
   const [telegramLinkedUsername, setTelegramLinkedUsername] = useState<string | null>(null);
-  const [showTelegramConnect, setShowTelegramConnect] = useState(false);
+  const [showManualCode, setShowManualCode] = useState(false);
   const [telegramCode, setTelegramCode] = useState('');
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [telegramError, setTelegramError] = useState('');
   const [botUsername, setBotUsername] = useState('Antiabetbot');
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Cargar info del bot y verificar parámetros de URL
   useEffect(() => {
@@ -58,8 +60,9 @@ function RegisterContent() {
     const telegramUsernameFromUrl = searchParams.get('telegram_username');
     
     if (telegramCodeFromUrl) {
-      // Cambiar a tipster automáticamente y verificar el código
+      // Cambiar a tipster y al paso de formulario
       setUserType('tipster');
+      setTipsterStep('form');
       setTelegramCode(telegramCodeFromUrl);
       
       // Pre-llenar el username de Telegram si viene en la URL
@@ -79,7 +82,6 @@ function RegisterContent() {
   const verifyTelegramCodeFromUrl = async (code: string) => {
     setVerifyingCode(true);
     setTelegramError('');
-    setShowTelegramConnect(true);
 
     try {
       const res = await telegramApi.auth.connectDuringRegister(code.toUpperCase());
@@ -87,7 +89,6 @@ function RegisterContent() {
         setTelegramConnected(true);
         setTelegramUserId(res.data.telegramUserId);
         setTelegramLinkedUsername(res.data.telegramUsername);
-        setShowTelegramConnect(false);
         setTelegramCode('');
         
         // Pre-llenar el username si viene del bot
@@ -124,8 +125,9 @@ function RegisterContent() {
         setTelegramConnected(true);
         setTelegramUserId(res.data.telegramUserId);
         setTelegramLinkedUsername(res.data.telegramUsername);
-        setShowTelegramConnect(false);
+        setShowManualCode(false);
         setTelegramCode('');
+        setTipsterStep('form'); // Avanzar al formulario
         
         // Pre-llenar el username si viene del bot
         if (res.data.telegramUsername) {
@@ -224,14 +226,13 @@ function RegisterContent() {
     }
   };
 
+  // Pantalla de éxito
   if (successMessage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">¡Solicitud Enviada!</h2>
           <p className="text-gray-600 mb-6">{successMessage}</p>
@@ -246,6 +247,405 @@ function RegisterContent() {
     );
   }
 
+  // Renderizar pantalla de elección para tipster
+  const renderTipsterChoice = () => (
+    <div className="space-y-4">
+      <div className="text-center mb-6">
+        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-8 h-8 text-blue-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">¿Quieres solicitar acceso como Tipster?</h2>
+        <p className="text-sm text-gray-600 mt-2">
+          Para acceder al panel de tipsters debes pasar una pequeña validación
+        </p>
+      </div>
+
+      {/* Opción 1: Conectar Telegram */}
+      <button
+        type="button"
+        onClick={() => setTipsterStep('telegram')}
+        className="w-full p-4 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl transition flex items-center justify-center gap-3 font-medium"
+      >
+        <MessageCircle className="w-5 h-5" />
+        Solicitar acceso usando Telegram
+      </button>
+
+      {/* Opción 2: Dejar datos */}
+      <div className="text-center text-sm text-gray-500 my-2">
+        ¿No tienes Telegram?
+      </div>
+      
+      <button
+        type="button"
+        onClick={() => setTipsterStep('form')}
+        className="w-full p-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-xl transition flex items-center justify-center gap-3 font-medium"
+      >
+        <FileText className="w-5 h-5" />
+        Déjanos tus datos
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setUserType('client')}
+        className="w-full text-gray-500 hover:text-gray-700 text-sm mt-4"
+      >
+        ← Volver a elegir tipo de cuenta
+      </button>
+    </div>
+  );
+
+  // Renderizar pantalla de conexión de Telegram
+  const renderTelegramConnection = () => (
+    <div className="space-y-5">
+      <div className="text-center mb-4">
+        <div className="w-16 h-16 bg-[#0088cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MessageCircle className="w-8 h-8 text-[#0088cc]" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">Conectar Telegram</h2>
+        <p className="text-sm text-gray-600 mt-2">
+          Elige cómo deseas vincular tu cuenta de Telegram
+        </p>
+      </div>
+
+      {telegramConnected ? (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Check className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-medium text-green-800">¡Telegram conectado!</p>
+              <p className="text-sm text-green-700">
+                {telegramLinkedUsername ? `@${telegramLinkedUsername}` : `ID: ${telegramUserId}`}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTipsterStep('form')}
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center gap-2"
+          >
+            Continuar con el registro <ArrowRight size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={handleDisconnectTelegram}
+            className="w-full text-gray-500 hover:text-gray-700 text-sm mt-3"
+          >
+            Cambiar cuenta de Telegram
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Opción 1: Conexión automática con botón */}
+          <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-blue-50/50 to-white">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 bg-blue-600 text-white rounded-full text-sm flex items-center justify-center">1</span>
+              Conexión automática (Recomendada)
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Haz clic en el botón, el bot te enviará un enlace para volver aquí automáticamente.
+            </p>
+            <a
+              href={`https://t.me/${botUsername}?start=vincular_registro`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white py-3 rounded-lg transition font-medium flex items-center justify-center gap-2"
+            >
+              <MessageCircle size={18} />
+              Abrir Telegram
+              <ExternalLink size={14} />
+            </a>
+          </div>
+
+          {/* Opción 2: Conexión manual */}
+          <div className="border border-gray-200 rounded-xl p-5">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 bg-gray-600 text-white rounded-full text-sm flex items-center justify-center">2</span>
+              Conexión manual
+            </h3>
+            
+            {!showManualCode ? (
+              <button
+                type="button"
+                onClick={() => setShowManualCode(true)}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+              >
+                ¿Tuviste problemas? Ingresa el código manualmente <ArrowRight size={14} />
+              </button>
+            ) : (
+              <div className="space-y-3 mt-3">
+                <p className="text-sm text-gray-600">
+                  1. Abre el bot en Telegram<br />
+                  2. Envía el comando <code className="bg-gray-100 px-1 rounded">/vincular</code><br />
+                  3. Copia el código e ingrésalo abajo
+                </p>
+
+                {telegramError && (
+                  <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                    {telegramError}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={telegramCode}
+                    onChange={(e) => setTelegramCode(e.target.value.toUpperCase())}
+                    placeholder="XXXXXXXX"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase"
+                    maxLength={8}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyTelegramCode}
+                    disabled={!telegramCode.trim() || verifyingCode}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                  >
+                    {verifyingCode ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      'Verificar'
+                    )}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowManualCode(false);
+                    setTelegramCode('');
+                    setTelegramError('');
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      <div className="flex items-center gap-3 pt-4">
+        <button
+          type="button"
+          onClick={() => setTipsterStep('choose')}
+          className="flex-1 text-gray-500 hover:text-gray-700 text-sm py-2"
+        >
+          ← Volver
+        </button>
+        <button
+          type="button"
+          onClick={() => setTipsterStep('form')}
+          className="flex-1 text-blue-600 hover:text-blue-700 text-sm py-2"
+        >
+          Continuar sin Telegram →
+        </button>
+      </div>
+    </div>
+  );
+
+  // Renderizar formulario de registro
+  const renderRegistrationForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Estado de Telegram (solo para tipsters) */}
+      {userType === 'tipster' && (
+        <div className={`rounded-xl p-4 ${telegramConnected ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${telegramConnected ? 'bg-green-100' : 'bg-yellow-100'}`}>
+              <MessageCircle className={`w-5 h-5 ${telegramConnected ? 'text-green-600' : 'text-yellow-600'}`} />
+            </div>
+            <div className="flex-1">
+              {telegramConnected ? (
+                <>
+                  <p className="font-medium text-green-800">Telegram conectado</p>
+                  <p className="text-sm text-green-700">
+                    {telegramLinkedUsername ? `@${telegramLinkedUsername}` : `ID: ${telegramUserId}`}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-yellow-800">Telegram no conectado</p>
+                  <p className="text-sm text-yellow-700">
+                    Deberás conectarlo antes de acceder a la plataforma
+                  </p>
+                </>
+              )}
+            </div>
+            {telegramConnected && (
+              <button
+                type="button"
+                onClick={handleDisconnectTelegram}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {userType === 'tipster' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nombre Completo *
+          </label>
+          <input
+            type="text"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Fausto Perez"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          />
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Correo electrónico *
+        </label>
+        <input
+          type="email"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="tu@email.com"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Teléfono *
+        </label>
+        <input
+          type="tel"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="+34 611 111 111"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+        />
+      </div>
+
+      {userType === 'tipster' && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Usuario de Telegram *
+            </label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="@miusuario"
+              value={formData.telegramUsername}
+              onChange={(e) => setFormData({ ...formData, telegramUsername: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Canal o URL donde promocionas *
+            </label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="https://t.me/mi_canal o @mi_instagram"
+              value={formData.promotionChannel}
+              onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Experiencia como Tipster
+            </label>
+            <textarea
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Cuéntanos sobre tu experiencia"
+              rows={3}
+              value={formData.experience}
+              onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+            />
+          </div>
+        </>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Contraseña *
+          </label>
+          <input
+            type="password"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Confirmar *
+          </label>
+          <input
+            type="password"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          />
+        </div>
+      </div>
+
+      {/* Consents */}
+      <div className="space-y-3 pt-4 border-t">
+        <label className="flex items-start">
+          <input
+            type="checkbox"
+            required
+            className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            checked={formData.consentTerms}
+            onChange={(e) => setFormData({ ...formData, consentTerms: e.target.checked, consent18: e.target.checked, consentPrivacy: e.target.checked })}
+          />
+          <span className="ml-2 text-sm text-gray-700">
+            Acepto los <a href="#" className="text-blue-600 underline">Términos y Condiciones</a> *
+          </span>
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? 'Enviando...' : userType === 'tipster' ? 'Enviar Solicitud' : 'Crear Cuenta'}
+      </button>
+
+      {userType === 'tipster' && (
+        <button
+          type="button"
+          onClick={() => setTipsterStep('choose')}
+          className="w-full text-gray-500 hover:text-gray-700 text-sm"
+        >
+          ← Volver
+        </button>
+      )}
+    </form>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
@@ -257,331 +657,69 @@ function RegisterContent() {
           <p className="text-gray-600 mt-2">¿Cómo quieres usar Antia?</p>
         </div>
 
-        {/* User Type Selection */}
-        <div className="bg-white rounded-2xl shadow-xl p-4 mb-6">
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => setUserType('client')}
-              className={`p-4 rounded-lg border-2 transition ${
-                userType === 'client'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="text-lg font-bold">Soy Cliente</div>
-              <div className="text-sm text-gray-600 mt-1">Quiero comprar pronósticos</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setUserType('tipster')}
-              className={`p-4 rounded-lg border-2 transition ${
-                userType === 'tipster'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="text-lg font-bold">Panel de Afiliados</div>
-              <div className="text-sm text-gray-600 mt-1">Quiero vender pronósticos</div>
-            </button>
+        {/* User Type Selection - Solo si estamos eligiendo tipo o es cliente */}
+        {(userType === 'client' || (userType === 'tipster' && tipsterStep === 'choose')) && (
+          <div className="bg-white rounded-2xl shadow-xl p-4 mb-6">
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setUserType('client');
+                  setTipsterStep('choose');
+                }}
+                className={`p-4 rounded-lg border-2 transition ${
+                  userType === 'client'
+                    ? 'border-blue-600 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="text-lg font-bold">Soy Cliente</div>
+                <div className="text-sm text-gray-600 mt-1">Quiero comprar pronósticos</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUserType('tipster');
+                  setTipsterStep('choose');
+                }}
+                className={`p-4 rounded-lg border-2 transition ${
+                  userType === 'tipster'
+                    ? 'border-blue-600 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="text-lg font-bold">Panel de Afiliados</div>
+                <div className="text-sm text-gray-600 mt-1">Quiero vender pronósticos</div>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {userType === 'tipster' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="font-medium text-blue-900 mb-2">📋 Registro de Afiliado</h3>
-              <p className="text-sm text-blue-800">
-                Completa el formulario para acceder al panel de afiliados y comenzar a generar ingresos.
-              </p>
-            </div>
+          {userType === 'client' && renderRegistrationForm()}
+          
+          {userType === 'tipster' && tipsterStep === 'choose' && renderTipsterChoice()}
+          
+          {userType === 'tipster' && tipsterStep === 'telegram' && renderTelegramConnection()}
+          
+          {userType === 'tipster' && tipsterStep === 'form' && (
+            <>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 className="font-medium text-blue-900 mb-2">📋 Registro de Tipster</h3>
+                <p className="text-sm text-blue-800">
+                  Completa el formulario para solicitar acceso al panel de tipsters.
+                </p>
+              </div>
+              {renderRegistrationForm()}
+            </>
           )}
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Sección de conexión de Telegram (solo para tipsters) */}
-            {userType === 'tipster' && (
-              <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-blue-50/50 to-white">
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
-                    <MessageCircle className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      Conecta tu Telegram
-                      <span className="ml-2 text-xs font-normal text-gray-500">(Opcional durante el registro)</span>
-                    </h3>
-                    
-                    {telegramConnected ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg">
-                            <Check size={16} />
-                            <span className="font-medium">
-                              {telegramLinkedUsername || `ID: ${telegramUserId}`}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleDisconnectTelegram}
-                            className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <X size={14} />
-                            Cambiar
-                          </button>
-                        </div>
-                        <p className="text-sm text-green-700">
-                          ✓ Tu Telegram se vinculará automáticamente cuando tu solicitud sea aprobada.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-sm text-gray-600">
-                          Si conectas tu Telegram ahora, cuando seas aprobado podrás acceder directamente sin pasos adicionales.
-                        </p>
-                        
-                        {!showTelegramConnect ? (
-                          <button
-                            type="button"
-                            onClick={() => setShowTelegramConnect(true)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#0077b3] transition-colors text-sm font-medium"
-                          >
-                            <MessageCircle size={16} />
-                            Conectar Telegram
-                          </button>
-                        ) : (
-                          <div className="space-y-3 p-4 bg-white rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-700 space-y-2">
-                              <p className="font-medium">Pasos para conectar:</p>
-                              <ol className="list-decimal list-inside space-y-1 text-gray-600">
-                                <li>
-                                  <a 
-                                    href={`https://t.me/${botUsername}?start=vincular_registro`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                  >
-                                    Abre el bot en Telegram <ExternalLink size={12} />
-                                  </a>
-                                </li>
-                                <li>Presiona "START" en el bot</li>
-                                <li>El bot te enviará un botón para volver aquí</li>
-                                <li>O copia el código e ingrésalo abajo</li>
-                              </ol>
-                            </div>
-                            
-                            {telegramError && (
-                              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
-                                {telegramError}
-                              </div>
-                            )}
-                            
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={telegramCode}
-                                onChange={(e) => setTelegramCode(e.target.value.toUpperCase())}
-                                placeholder="Código de 8 caracteres"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center font-mono tracking-widest uppercase"
-                                maxLength={8}
-                              />
-                              <button
-                                type="button"
-                                onClick={handleVerifyTelegramCode}
-                                disabled={!telegramCode.trim() || verifyingCode}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-                              >
-                                {verifyingCode ? (
-                                  <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Verificando...
-                                  </>
-                                ) : (
-                                  'Verificar'
-                                )}
-                              </button>
-                            </div>
-                            
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowTelegramConnect(false);
-                                setTelegramCode('');
-                                setTelegramError('');
-                              }}
-                              className="text-sm text-gray-500 hover:text-gray-700"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        )}
-                        
-                        <p className="text-xs text-gray-500">
-                          ℹ️ Si prefieres, puedes conectar tu Telegram después de que tu solicitud sea aprobada.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {userType === 'tipster' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Fausto Perez"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Correo electrónico *
-              </label>
-              <input
-                type="email"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="tu@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono *
-              </label>
-              <input
-                type="tel"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="+34 611 111 111"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-
-            {userType === 'tipster' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Usuario de Telegram *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="@miusuario"
-                    value={formData.telegramUsername}
-                    onChange={(e) => setFormData({ ...formData, telegramUsername: e.target.value })}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Tu usuario de Telegram para que podamos verificarte</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Canal o URL donde promocionas *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="https://t.me/mi_canal o @mi_instagram"
-                    value={formData.promotionChannel}
-                    onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Tu canal público de Telegram, Instagram, Twitter, etc. para verificar tu actividad</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Experiencia como Tipster
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Cuéntanos sobre tu experiencia: deportes, tiempo como tipster, resultados, etc."
-                    rows={3}
-                    value={formData.experience}
-                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña *
-                </label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmar Contraseña *
-                </label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Consents */}
-            <div className="space-y-3 pt-4 border-t">
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  required
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  checked={formData.consentTerms}
-                  onChange={(e) => setFormData({ ...formData, consentTerms: e.target.checked, consent18: e.target.checked, consentPrivacy: e.target.checked })}
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  Acepto los <a href="#" className="text-blue-600 underline">Términos y Condiciones</a> *
-                </span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Enviando...' : userType === 'tipster' ? 'Enviar Solicitud' : 'Crear Cuenta'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Iniciar Sesión
-            </Link>
-          </div>
+        <div className="mt-6 text-center text-sm text-gray-600">
+          ¿Ya tienes cuenta?{' '}
+          <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            Iniciar Sesión
+          </Link>
         </div>
       </div>
     </div>
