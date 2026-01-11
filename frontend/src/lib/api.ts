@@ -124,6 +124,11 @@ export const telegramApi = {
     getAvailableChannels: () => api.get('/telegram/auth/available-channels'),
     autoConnectChannel: (channelId: string) => api.post('/telegram/auth/auto-connect-channel', { channelId }),
     getBotInfo: () => api.get('/telegram/auth/bot-info'),
+    // Endpoints públicos para conectar durante registro/login
+    connectPreLogin: (email: string, password: string, linkCode: string) => 
+      api.post('/telegram/auth/connect-pre-login', { email, password, linkCode }),
+    connectDuringRegister: (linkCode: string) => 
+      api.post('/telegram/auth/connect-during-register', { linkCode }),
   },
   
   // Canal de publicación (para compartir productos)
