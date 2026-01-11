@@ -2993,21 +2993,28 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     }
 
     try {
-      // Buscar si hay un tipster con este telegram_user_id
+      // Buscar el tipster MÁS RECIENTE con este telegram_user_id
+      // Esto permite que si un usuario tiene múltiples cuentas de tipster,
+      // los canales se conecten a la cuenta más reciente (activa)
       const tipsterResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_profiles',
-        filter: { telegram_user_id: addedByTelegramId },
+        filter: { 
+          telegram_user_id: addedByTelegramId,
+          application_status: 'APPROVED'  // Solo tipsters aprobados
+        },
+        sort: { created_at: -1 },  // El más reciente primero
         limit: 1,
       })) as any;
 
       const tipster = tipsterResult.cursor?.firstBatch?.[0];
 
       if (!tipster) {
-        this.logger.log(`No tipster found with telegram_user_id ${addedByTelegramId} - channel will be available when they connect`);
+        this.logger.log(`No approved tipster found with telegram_user_id ${addedByTelegramId} - channel will be available when they connect`);
         return;
       }
 
       const tipsterId = tipster._id?.$oid || tipster._id;
+      this.logger.log(`Found tipster for auto-connect: ${tipster.public_name} (${tipsterId}) - telegram_user_id: ${addedByTelegramId}`);
 
       // Verificar si el canal ya está conectado para este tipster
       const existingChannel = await this.prisma.telegramChannel.findFirst({
