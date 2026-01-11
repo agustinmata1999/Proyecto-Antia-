@@ -90,7 +90,7 @@ export class TelegramChannelsController {
    */
   @Post('verify')
   @HttpCode(HttpStatus.OK)
-  async verifyChannel(@Body() body: { channelId: string }) {
+  async verifyChannel(@Body() body: VerifyChannelDto) {
     const result = await this.channelsService.verifyChannel(body.channelId);
     return result;
   }
