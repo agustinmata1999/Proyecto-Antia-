@@ -564,6 +564,33 @@ export class TelegramAuthController {
     const telegramUserId = linkData.telegram_user_id;
     const telegramUsername = linkData.telegram_username;
 
+    // IMPORTANTE: Desconectar este telegram_user_id de otros tipsters
+    // Esto asegura que un usuario de Telegram solo puede estar vinculado a UN tipster
+    const disconnectResult = await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [
+        {
+          q: { 
+            telegram_user_id: telegramUserId,
+            _id: { $ne: { $oid: tipsterId } }  // Excepto el actual
+          },
+          u: { 
+            $set: { 
+              telegram_user_id: null,
+              telegram_username: null,
+              telegram_connected_at: null,
+              updated_at: { $date: new Date().toISOString() }
+            } 
+          },
+          multi: true,
+        },
+      ],
+    }) as any;
+
+    if (disconnectResult.nModified > 0) {
+      this.logger.warn(`⚠️ Disconnected telegram_user_id ${telegramUserId} from ${disconnectResult.nModified} other tipster(s)`);
+    }
+
     // Marcar el código como usado
     await this.prisma.$runCommandRaw({
       update: 'telegram_link_codes',
