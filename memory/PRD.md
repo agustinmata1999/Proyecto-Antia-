@@ -171,6 +171,8 @@ Red de afiliación premium:
 
 ### P0 - Alta Prioridad
 - [x] ~~Sistema automatizado de conexión de canales de Telegram~~ ✅ (Implementado 09-01-2026)
+- [x] ~~Conexión de Telegram durante registro~~ ✅ (Implementado 11-01-2026)
+- [x] ~~Eliminación sección Telegram del dashboard~~ ✅ (Implementado 11-01-2026)
 - [ ] Rediseño Dashboard Tipster (aplicar tema oscuro)
 - [ ] Rediseño Panel Admin (aplicar tema oscuro)
 - [ ] Rediseño páginas de Login/Register
