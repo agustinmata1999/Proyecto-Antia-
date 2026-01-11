@@ -2314,7 +2314,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Handle /vincular command - Link Telegram account to tipster profile
     if (text.startsWith('/vincular')) {
       this.logger.log(`📱 /vincular command from user: ${userId}`);
-      await this.handleVincularCommand(message);
+      // El comando /vincular manual es para tipsters ya aprobados
+      await this.handleVincularCommand(message, 'aprobado');
       return;
     }
 
