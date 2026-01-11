@@ -361,7 +361,7 @@ function RegisterContent() {
                               <ol className="list-decimal list-inside space-y-1 text-gray-600">
                                 <li>
                                   <a 
-                                    href={`https://t.me/${botUsername}?start=vincular`}
+                                    href={`https://t.me/${botUsername}?start=vincular_registro`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 hover:underline inline-flex items-center gap-1"
@@ -370,8 +370,8 @@ function RegisterContent() {
                                   </a>
                                 </li>
                                 <li>Presiona "START" en el bot</li>
-                                <li>El bot te dará un código de 8 caracteres</li>
-                                <li>Cópialo e ingrésalo abajo</li>
+                                <li>El bot te enviará un botón para volver aquí</li>
+                                <li>O copia el código e ingrésalo abajo</li>
                               </ol>
                             </div>
                             
