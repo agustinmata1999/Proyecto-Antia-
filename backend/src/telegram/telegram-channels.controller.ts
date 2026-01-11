@@ -304,14 +304,7 @@ export class TelegramChannelsController {
    */
   @Post('search-by-name')
   @HttpCode(HttpStatus.OK)
-  async searchByName(@Body() body: { channelName: string }) {
-    if (!body.channelName || body.channelName.trim().length === 0) {
-      return {
-        found: false,
-        error: 'El nombre del canal es obligatorio',
-      };
-    }
-
+  async searchByName(@Body() body: SearchByNameDto) {
     return this.telegramService.findChannelByName(body.channelName);
   }
 
@@ -321,14 +314,7 @@ export class TelegramChannelsController {
    */
   @Post('connect-by-id')
   @HttpCode(HttpStatus.OK)
-  async connectById(@Body() body: { channelId: string }, @Request() req) {
-    if (!body.channelId || body.channelId.trim().length === 0) {
-      return {
-        success: false,
-        message: 'El ID del canal es obligatorio',
-      };
-    }
-
+  async connectById(@Body() body: ConnectByIdDto, @Request() req) {
     const tipsterId = await this.getTipsterId(req.user.id);
 
     // Verificar si ya está conectado
@@ -355,14 +341,7 @@ export class TelegramChannelsController {
    */
   @Post('verify-by-id')
   @HttpCode(HttpStatus.OK)
-  async verifyById(@Body() body: { channelId: string }) {
-    if (!body.channelId || body.channelId.trim().length === 0) {
-      return {
-        success: false,
-        error: 'El ID del canal es obligatorio',
-      };
-    }
-
+  async verifyById(@Body() body: VerifyChannelDto) {
     return this.telegramService.verifyAndRegisterChannelById(body.channelId.trim());
   }
 }
