@@ -2333,8 +2333,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * Handle /vincular command - generates a link code for account linking
+   * @param message - Telegram message object
+   * @param context - 'registro' (during registration) or 'aprobado' (post-approval)
    */
-  private async handleVincularCommand(message: any) {
+  private async handleVincularCommand(message: any, context: 'registro' | 'aprobado' = 'aprobado') {
     const userId = message.from?.id?.toString();
     const telegramUsername = message.from?.username || null;
     const firstName = message.from?.first_name || '';
@@ -2345,13 +2347,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    this.logger.log(`📱 handleVincularCommand for user: ${userId} (@${telegramUsername})`);
+    this.logger.log(`📱 handleVincularCommand for user: ${userId} (@${telegramUsername}), context: ${context}`);
 
     try {
       // Generate unique link code
       const linkCode = this.generateLinkCode(userId);
       
-      // Save code to database
+      // Save code to database with context
       const now = new Date().toISOString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
@@ -2367,6 +2369,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                 first_name: firstName,
                 last_name: lastName,
                 link_code: linkCode,
+                context: context, // 'registro' or 'aprobado'
                 created_at: { $date: now },
                 expires_at: { $date: expiresAt },
                 used: false,
@@ -2379,23 +2382,52 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Get platform URL
       const appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
-      const linkUrl = `${appUrl}/dashboard/tipster?telegram_link=${linkCode}`;
+      
+      // Generate different links based on context
+      if (context === 'registro') {
+        // During registration - redirect back to register page
+        const linkUrl = `${appUrl}/register?telegram_code=${linkCode}&telegram_username=${encodeURIComponent(telegramUsername || '')}`;
 
-      await this.httpService.sendMessage(
-        userId,
-        '🔗 *Vincular tu cuenta de Telegram*\n\n' +
-          'Tienes dos opciones para vincular tu cuenta:\n\n' +
-          '*Opción 1 - Código de vinculación:*\n' +
-          `Tu código es: \`${linkCode}\`\n` +
-          'Cópialo e ingrésalo en la plataforma.\n\n' +
-          '*Opción 2 - Link directo:*\n' +
-          `[Haz clic aquí para vincular](${linkUrl})\n\n` +
-          '⏰ El código expira en 10 minutos.\n\n' +
-          'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
-        { parseMode: 'Markdown' },
-      );
+        await this.httpService.sendMessage(
+          userId,
+          '🔗 *Vincular tu cuenta de Telegram*\n\n' +
+            '✅ ¡Tu Telegram está listo para vincularse!\n\n' +
+            '*Para completar la vinculación:*\n' +
+            `Tu código es: \`${linkCode}\`\n\n` +
+            'Haz clic en el botón de abajo para volver al registro y completar tu solicitud como tipster.\n\n' +
+            '⏰ El código expira en 10 minutos.',
+          { 
+            parseMode: 'Markdown',
+            replyMarkup: {
+              inline_keyboard: [[{ text: '📝 Completar Registro', url: linkUrl }]],
+            },
+          },
+        );
+      } else {
+        // Post-approval - redirect to connect-telegram page
+        const linkUrl = `${appUrl}/connect-telegram?code=${linkCode}`;
 
-      this.logger.log(`✅ Link code generated for ${userId}: ${linkCode}`);
+        await this.httpService.sendMessage(
+          userId,
+          '🔗 *Vincular tu cuenta de Telegram*\n\n' +
+            'Tienes dos opciones para vincular tu cuenta:\n\n' +
+            '*Opción 1 - Código de vinculación:*\n' +
+            `Tu código es: \`${linkCode}\`\n` +
+            'Cópialo e ingrésalo en la plataforma.\n\n' +
+            '*Opción 2 - Link directo:*\n' +
+            'Haz clic en el botón de abajo para vincular y acceder a la plataforma.\n\n' +
+            '⏰ El código expira en 10 minutos.\n\n' +
+            'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
+          { 
+            parseMode: 'Markdown',
+            replyMarkup: {
+              inline_keyboard: [[{ text: '🚀 Vincular y Acceder', url: linkUrl }]],
+            },
+          },
+        );
+      }
+
+      this.logger.log(`✅ Link code generated for ${userId}: ${linkCode} (context: ${context})`);
     } catch (error) {
       this.logger.error('Error in handleVincularCommand:', error);
       await this.httpService.sendMessage(
