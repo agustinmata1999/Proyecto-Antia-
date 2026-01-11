@@ -608,4 +608,179 @@ export class TelegramAuthController {
       channels: autoConnectedChannels,
     };
   }
+
+  /**
+   * POST /api/telegram/auth/connect-pre-login - Vincular Telegram durante el flujo de login
+   * Para tipsters aprobados que aún no tienen Telegram conectado
+   * NO requiere JWT, usa email/password para autenticación
+   */
+  @Post('connect-pre-login')
+  @HttpCode(HttpStatus.OK)
+  async connectPreLogin(@Body() body: { email: string; password: string; linkCode: string }) {
+    this.logger.log(`Telegram pre-login connect request for: ${body.email}`);
+
+    if (!body.linkCode || body.linkCode.length < 6) {
+      throw new BadRequestException('Código de vinculación inválido');
+    }
+
+    if (!body.email || !body.password) {
+      throw new BadRequestException('Email y contraseña son requeridos');
+    }
+
+    // Buscar el usuario por email
+    const userResult = (await this.prisma.$runCommandRaw({
+      find: 'users',
+      filter: { email: body.email },
+      limit: 1,
+    })) as any;
+
+    const userData = userResult.cursor?.firstBatch?.[0];
+    if (!userData) {
+      throw new BadRequestException('Credenciales inválidas');
+    }
+
+    // Verificar contraseña
+    const bcrypt = await import('bcrypt');
+    const isPasswordValid = await bcrypt.compare(body.password, userData.password_hash);
+    if (!isPasswordValid) {
+      throw new BadRequestException('Credenciales inválidas');
+    }
+
+    // Verificar que es un tipster ACTIVE
+    if (userData.role !== 'TIPSTER' || userData.status !== 'ACTIVE') {
+      throw new BadRequestException('Esta operación solo está disponible para tipsters aprobados');
+    }
+
+    const userId = userData._id.$oid || userData._id.toString();
+
+    // Buscar el perfil del tipster
+    const tipsterProfile = await this.prisma.tipsterProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!tipsterProfile) {
+      throw new BadRequestException('Perfil de tipster no encontrado');
+    }
+
+    // Buscar el código en la base de datos
+    const codeResult = (await this.prisma.$runCommandRaw({
+      find: 'telegram_link_codes',
+      filter: {
+        link_code: body.linkCode.toUpperCase(),
+        used: false,
+        expires_at: { $gt: { $date: new Date().toISOString() } },
+      },
+      limit: 1,
+    })) as any;
+
+    const linkData = codeResult.cursor?.firstBatch?.[0];
+
+    if (!linkData) {
+      this.logger.warn(`Invalid or expired link code: ${body.linkCode}`);
+      throw new BadRequestException('Código inválido o expirado. Por favor, genera un nuevo código con /vincular en el bot.');
+    }
+
+    const telegramUserId = linkData.telegram_user_id;
+    const telegramUsername = linkData.telegram_username;
+
+    // Marcar el código como usado
+    await this.prisma.$runCommandRaw({
+      update: 'telegram_link_codes',
+      updates: [
+        {
+          q: { link_code: body.linkCode.toUpperCase() },
+          u: { $set: { used: true, used_at: { $date: new Date().toISOString() }, used_by_tipster: tipsterProfile.id } },
+        },
+      ],
+    });
+
+    // Actualizar el perfil del tipster con el telegram_user_id
+    const now = new Date().toISOString();
+    await this.prisma.$runCommandRaw({
+      update: 'tipster_profiles',
+      updates: [
+        {
+          q: { _id: { $oid: tipsterProfile.id } },
+          u: {
+            $set: {
+              telegram_user_id: telegramUserId,
+              telegram_username: telegramUsername ? `@${telegramUsername}` : null,
+              telegram_connected_at: { $date: now },
+              updated_at: { $date: now },
+            },
+          },
+        },
+      ],
+    });
+
+    this.logger.log(`✅ Telegram connected pre-login for tipster ${tipsterProfile.id}: ${telegramUserId}`);
+
+    // Buscar canales que este usuario añadió el bot y conectarlos automáticamente
+    const autoConnectedChannels = await this.autoConnectChannels(tipsterProfile.id, telegramUserId);
+
+    return {
+      success: true,
+      message: 'Telegram vinculado correctamente. Ya puedes iniciar sesión.',
+      telegramId: telegramUserId,
+      telegramUsername: telegramUsername,
+      autoConnectedChannels: autoConnectedChannels.length,
+    };
+  }
+
+  /**
+   * POST /api/telegram/auth/connect-during-register - Vincular Telegram durante el registro
+   * Devuelve el telegramUserId para guardarlo con la solicitud de registro
+   * NO requiere JWT
+   */
+  @Post('connect-during-register')
+  @HttpCode(HttpStatus.OK)
+  async connectDuringRegister(@Body() body: { linkCode: string }) {
+    this.logger.log(`Telegram connect during register request`);
+
+    if (!body.linkCode || body.linkCode.length < 6) {
+      throw new BadRequestException('Código de vinculación inválido');
+    }
+
+    // Buscar el código en la base de datos
+    const codeResult = (await this.prisma.$runCommandRaw({
+      find: 'telegram_link_codes',
+      filter: {
+        link_code: body.linkCode.toUpperCase(),
+        used: false,
+        expires_at: { $gt: { $date: new Date().toISOString() } },
+      },
+      limit: 1,
+    })) as any;
+
+    const linkData = codeResult.cursor?.firstBatch?.[0];
+
+    if (!linkData) {
+      this.logger.warn(`Invalid or expired link code for register: ${body.linkCode}`);
+      throw new BadRequestException('Código inválido o expirado. Por favor, genera un nuevo código con /vincular en el bot.');
+    }
+
+    const telegramUserId = linkData.telegram_user_id;
+    const telegramUsername = linkData.telegram_username;
+
+    // NO marcamos el código como usado aquí - se marcará cuando se complete el registro
+    // Pero guardamos que fue verificado
+    await this.prisma.$runCommandRaw({
+      update: 'telegram_link_codes',
+      updates: [
+        {
+          q: { link_code: body.linkCode.toUpperCase() },
+          u: { $set: { verified_at: { $date: new Date().toISOString() } } },
+        },
+      ],
+    });
+
+    this.logger.log(`✅ Telegram code verified for register: ${telegramUserId}`);
+
+    return {
+      success: true,
+      telegramUserId,
+      telegramUsername,
+      message: 'Telegram verificado. Completa el registro para finalizar la vinculación.',
+    };
+  }
 }
