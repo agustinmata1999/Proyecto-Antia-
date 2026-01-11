@@ -405,6 +405,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     });
 
     // Comando /vincular - Vincular cuenta de Telegram al perfil de tipster
+    // Este es el handler de Telegraf (fallback si el webhook no funciona)
     this.bot.command('vincular', async (ctx) => {
       try {
         const telegramUserId = ctx.from.id.toString();
@@ -412,7 +413,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const firstName = ctx.from.first_name || '';
         const lastName = ctx.from.last_name || '';
 
-        this.logger.log(`📱 /vincular command from user: ${telegramUserId} (@${telegramUsername})`);
+        this.logger.log(`📱 /vincular command (Telegraf) from user: ${telegramUserId} (@${telegramUsername})`);
 
         // Generar código de vinculación único
         const linkCode = this.generateLinkCode(telegramUserId);
@@ -433,6 +434,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                   first_name: firstName,
                   last_name: lastName,
                   link_code: linkCode,
+                  context: 'aprobado', // Comando manual es para tipsters aprobados
                   created_at: { $date: now },
                   expires_at: { $date: expiresAt },
                   used: false,
@@ -445,7 +447,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
         // Obtener URL de la plataforma
         const appUrl = this.config.get<string>('APP_URL') || 'https://antia.com';
-        const linkUrl = `${appUrl}/dashboard/tipster?telegram_link=${linkCode}`;
+        const linkUrl = `${appUrl}/connect-telegram?code=${linkCode}`;
 
         await ctx.reply(
           '🔗 *Vincular tu cuenta de Telegram*\n\n' +
@@ -454,12 +456,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             `Tu código es: \`${linkCode}\`\n` +
             'Cópialo e ingrésalo en la plataforma.\n\n' +
             '*Opción 2 - Link directo:*\n' +
-            `[Haz clic aquí para vincular](${linkUrl})\n\n` +
+            'Haz clic en el botón de abajo para vincular y acceder a la plataforma.\n\n' +
             '⏰ El código expira en 10 minutos.\n\n' +
             'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
           { 
             parse_mode: 'Markdown',
             link_preview_options: { is_disabled: true },
+            reply_markup: {
+              inline_keyboard: [[{ text: '🚀 Vincular y Acceder', url: linkUrl }]],
+            },
           },
         );
 
