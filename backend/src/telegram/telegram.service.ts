@@ -3049,10 +3049,10 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         } else {
           this.logger.log(`Channel ${channelTitle} already connected to tipster ${tipsterId}`);
         }
-        return;
+        continue; // Continuar con el siguiente tipster
       }
 
-      // Obtener invite link
+      // Obtener invite link (solo una vez, para el primer tipster)
       let inviteLink: string | null = null;
       try {
         if (this.httpService) {
@@ -3086,7 +3086,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         ],
       });
 
-      // Marcar el canal detectado como auto-conectado
+      // Marcar el canal detectado como auto-conectado (al primer tipster)
       await this.prisma.$runCommandRaw({
         update: 'detected_telegram_channels',
         updates: [
@@ -3098,21 +3098,25 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
       });
 
       this.logger.log(`🎉 AUTO-CONNECTED channel ${channelTitle} to tipster ${tipster.public_name || tipsterId}`);
+      } // Fin del for loop
 
-      // Enviar mensaje de confirmación al canal
-      try {
-        await this.httpService.sendMessage(
-          channelId,
-          `✅ *¡Canal conectado automáticamente!*\n\n` +
-            `Este canal ha sido vinculado a *${tipster.public_name || 'tu cuenta'}* en la plataforma.\n\n` +
-            `Ahora puedes:\n` +
-            `• Asociar productos a este canal\n` +
-            `• Dar acceso automático a clientes que compren\n` +
-            `• Publicar tus pronósticos`,
-          { parseMode: 'Markdown' },
-        );
-      } catch (msgError) {
-        this.logger.warn(`Could not send welcome message to channel: ${msgError.message}`);
+      // Enviar mensaje de confirmación al canal (solo una vez)
+      if (tipsters.length > 0) {
+        const tipsterNames = tipsters.map(t => t.public_name || 'cuenta').join(', ');
+        try {
+          await this.httpService.sendMessage(
+            channelId,
+            `✅ *¡Canal conectado automáticamente!*\n\n` +
+              `Este canal ha sido vinculado a *${tipsterNames}* en la plataforma.\n\n` +
+              `Ahora puedes:\n` +
+              `• Asociar productos a este canal\n` +
+              `• Dar acceso automático a clientes que compren\n` +
+              `• Publicar tus pronósticos`,
+            { parseMode: 'Markdown' },
+          );
+        } catch (msgError) {
+          this.logger.warn(`Could not send welcome message to channel: ${msgError.message}`);
+        }
       }
 
     } catch (error) {
