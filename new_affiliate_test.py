@@ -12,7 +12,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://campaign-manager-48.preview.emergentagent.com"
+BASE_URL = "https://telelink-7.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials from review request
