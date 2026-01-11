@@ -19,6 +19,13 @@ import {
 } from './telegram-channels.service';
 import { TelegramService } from './telegram.service';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  ConnectByInviteLinkDto,
+  ConnectByNameDto,
+  ConnectByIdDto,
+  VerifyChannelDto,
+  SearchByNameDto,
+} from './dto/connect-channel.dto';
 
 @Controller('telegram/channels')
 @UseGuards(JwtAuthGuard)
