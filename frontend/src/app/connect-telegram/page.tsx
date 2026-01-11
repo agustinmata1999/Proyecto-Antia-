@@ -150,9 +150,9 @@ function ConnectTelegramContent() {
                   type="email"
                   required
                   value={email}
-                  disabled={!!email}
-                  onChange={(e) => {}}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                  disabled={!!emailFromUrl}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg ${emailFromUrl ? 'bg-gray-50 text-gray-600' : 'focus:ring-2 focus:ring-blue-500 focus:border-transparent'}`}
                   placeholder="tu@email.com"
                 />
               </div>
