@@ -74,6 +74,18 @@ export class OrdersService {
 
       const orders = result.cursor?.firstBatch || [];
 
+      // Helper to convert BSON date to ISO string
+      const toISOString = (date: any): string | null => {
+        if (!date) return null;
+        // Handle BSON extended JSON format { $date: "..." }
+        if (date.$date) return date.$date;
+        // Handle Date object
+        if (date instanceof Date) return date.toISOString();
+        // Handle string
+        if (typeof date === 'string') return date;
+        return null;
+      };
+
       // Map orders to a cleaner format
       return orders.map((order: any) => ({
         id: order._id.$oid || order._id,
@@ -84,8 +96,8 @@ export class OrdersService {
         email: order.email_backup,
         telegramUsername: order.telegram_username,
         paymentProvider: order.payment_provider,
-        paidAt: order.paid_at,
-        createdAt: order.created_at,
+        paidAt: toISOString(order.paid_at),
+        createdAt: toISOString(order.created_at),
       }));
     } catch (error) {
       this.logger.error('Error finding sales by tipster:', error);
