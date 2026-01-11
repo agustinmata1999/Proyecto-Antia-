@@ -2400,11 +2400,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             '*Para completar la vinculación:*\n' +
             `Tu código es: \`${linkCode}\`\n\n` +
             'Haz clic en el botón de abajo para volver al registro y completar tu solicitud como tipster.\n\n' +
-            '⏰ El código expira en 10 minutos.',
+            '⏰ El código expira en 10 minutos.\n\n' +
+            '_Si el botón no funciona, copia el código e ingrésalo manualmente en la página de registro._',
           { 
             parseMode: 'Markdown',
             replyMarkup: {
-              inline_keyboard: [[{ text: '📝 Completar Registro', url: linkUrl }]],
+              inline_keyboard: [
+                [{ text: '📝 Completar Registro', url: linkUrl }],
+              ],
             },
           },
         );
@@ -2415,18 +2418,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         await this.httpService.sendMessage(
           userId,
           '🔗 *Vincular tu cuenta de Telegram*\n\n' +
-            'Tienes dos opciones para vincular tu cuenta:\n\n' +
-            '*Opción 1 - Código de vinculación:*\n' +
+            '✅ ¡Tu Telegram está listo para vincularse!\n\n' +
+            '*Opción 1 - Automática (Recomendada):*\n' +
+            'Haz clic en el botón de abajo para vincular y acceder directamente.\n\n' +
+            '*Opción 2 - Manual:*\n' +
             `Tu código es: \`${linkCode}\`\n` +
             'Cópialo e ingrésalo en la plataforma.\n\n' +
-            '*Opción 2 - Link directo:*\n' +
-            'Haz clic en el botón de abajo para vincular y acceder a la plataforma.\n\n' +
             '⏰ El código expira en 10 minutos.\n\n' +
             'Una vez vinculado, todos los canales donde añadas el bot como admin se conectarán automáticamente.',
           { 
             parseMode: 'Markdown',
             replyMarkup: {
-              inline_keyboard: [[{ text: '🚀 Vincular y Acceder', url: linkUrl }]],
+              inline_keyboard: [
+                [{ text: '🚀 Vincular y Acceder', url: linkUrl }],
+              ],
             },
           },
         );
