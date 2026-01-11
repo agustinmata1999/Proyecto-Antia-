@@ -640,8 +640,8 @@ export class TelegramAuthController {
     }
 
     // Verificar contraseña
-    const bcrypt = await import('bcrypt');
-    const isPasswordValid = await bcrypt.compare(body.password, userData.password_hash);
+    const bcryptjs = await import('bcryptjs');
+    const isPasswordValid = await bcryptjs.compare(body.password, userData.password_hash);
     if (!isPasswordValid) {
       throw new BadRequestException('Credenciales inválidas');
     }
