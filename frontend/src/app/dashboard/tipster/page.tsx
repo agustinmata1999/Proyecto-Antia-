@@ -12,7 +12,7 @@ import KycForm from '@/components/KycForm';
 import { NotificationsBell } from '@/components/NotificationsBell';
 import TipsterTelegramAutoView from '@/components/tipster/TipsterTelegramAutoView';
 
-type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'telegram' | 'kyc' | 'support';
+type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'kyc' | 'support';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
 
 interface TelegramChannel {
