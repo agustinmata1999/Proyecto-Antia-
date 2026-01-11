@@ -10,16 +10,18 @@ function ConnectTelegramContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Obtener credenciales de los parámetros de URL (encriptados/codificados)
-  const email = searchParams.get('email') || '';
-  const tempAuth = searchParams.get('auth') || ''; // Password temporal codificado
+  // Obtener parámetros de URL
+  const emailFromUrl = searchParams.get('email') || '';
+  const codeFromUrl = searchParams.get('code') || '';
   
+  const [email, setEmail] = useState(emailFromUrl);
   const [password, setPassword] = useState('');
-  const [telegramCode, setTelegramCode] = useState('');
+  const [telegramCode, setTelegramCode] = useState(codeFromUrl);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [botUsername, setBotUsername] = useState('Antiabetbot');
+  const [codeFromBot, setCodeFromBot] = useState(!!codeFromUrl);
 
   // Cargar info del bot
   useEffect(() => {
@@ -34,7 +36,12 @@ function ConnectTelegramContent() {
       }
     };
     loadBotInfo();
-  }, []);
+    
+    // Si viene con código desde el bot, mostrarlo precargado
+    if (codeFromUrl) {
+      setCodeFromBot(true);
+    }
+  }, [codeFromUrl]);
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
