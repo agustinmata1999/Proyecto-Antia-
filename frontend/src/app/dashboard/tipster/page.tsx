@@ -2045,119 +2045,173 @@ function TipsterDashboardContent() {
               {/* Sub-vista: Solicitar Retiro */}
               {payoutsSubView === 'retiros' && (
                 <div className="space-y-6">
-                  {/* Balance Card */}
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
+                  {/* Header */}
+                  <div className="mb-2">
+                    <h2 className="text-2xl font-bold text-gray-900">💸 Solicitar Retiro</h2>
+                    <p className="text-gray-600 mt-1">Solicita el pago de tus ganancias acumuladas</p>
+                  </div>
+
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-lg shadow p-5 border-l-4 border-green-500">
+                      <div className="text-sm text-gray-500 mb-1">💰 Saldo Disponible</div>
+                      <div className="text-2xl font-bold text-green-600">{formatPrice(withdrawalBalance?.availableBalanceCents || 0)}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-5">
+                      <div className="text-sm text-gray-500 mb-1">📈 Total Ganado</div>
+                      <div className="text-2xl font-bold text-gray-900">{formatPrice(withdrawalBalance?.totalEarnedCents || 0)}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-5">
+                      <div className="text-sm text-gray-500 mb-1">✅ Ya Retirado</div>
+                      <div className="text-2xl font-bold text-blue-600">{formatPrice(withdrawalBalance?.totalWithdrawnCents || 0)}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-5">
+                      <div className="text-sm text-gray-500 mb-1">⏳ Pendiente</div>
+                      <div className="text-2xl font-bold text-yellow-600">{formatPrice(withdrawalBalance?.pendingWithdrawalCents || 0)}</div>
+                    </div>
+                  </div>
+
+                  {/* Action Card - Request Withdrawal */}
+                  <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
-                        <p className="text-green-100 text-sm mb-1">Saldo Disponible para Retiro</p>
-                        <p className="text-4xl font-bold">
-                          {formatPrice(withdrawalBalance?.availableBalanceCents || 0)}
-                        </p>
-                        <p className="text-green-100 text-sm mt-2">
-                          Total ganado: {formatPrice(withdrawalBalance?.totalEarnedCents || 0)} | 
-                          Ya retirado: {formatPrice(withdrawalBalance?.totalWithdrawnCents || 0)}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">¿Listo para retirar tus ganancias?</h3>
+                        <p className="text-gray-600 text-sm">
+                          Puedes solicitar el retiro de tu saldo disponible. El monto mínimo es de €5.00.
+                          <br />
+                          <span className="text-gray-500">Ventas totales: {withdrawalBalance?.orderCount || 0} | Retiros procesados: {withdrawalBalance?.withdrawalCount || 0}</span>
                         </p>
                       </div>
                       <button
                         onClick={() => setShowWithdrawalModal(true)}
                         disabled={(withdrawalBalance?.availableBalanceCents || 0) < 500}
-                        className="px-6 py-3 bg-white text-green-600 font-semibold rounded-xl hover:bg-green-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         💰 Solicitar Retiro
                       </button>
                     </div>
-                    {(withdrawalBalance?.pendingWithdrawalCents || 0) > 0 && (
-                      <div className="mt-4 p-3 bg-white/10 rounded-lg">
-                        <p className="text-sm">
-                          ⏳ Tienes {formatPrice(withdrawalBalance.pendingWithdrawalCents)} en solicitudes pendientes
+                    {(withdrawalBalance?.availableBalanceCents || 0) < 500 && (
+                      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-700">
+                          ⚠️ Necesitas al menos €5.00 de saldo disponible para solicitar un retiro.
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Info Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-gray-100">
-                      <div className="text-sm text-gray-500 mb-1">Total Ventas</div>
-                      <div className="text-2xl font-bold text-gray-900">{withdrawalBalance?.orderCount || 0}</div>
-                    </div>
-                    <div className="bg-white rounded-xl p-5 border border-gray-100">
-                      <div className="text-sm text-gray-500 mb-1">Retiros Procesados</div>
-                      <div className="text-2xl font-bold text-green-600">{withdrawalBalance?.withdrawalCount || 0}</div>
-                    </div>
-                    <div className="bg-white rounded-xl p-5 border border-gray-100">
-                      <div className="text-sm text-gray-500 mb-1">Solicitudes Pendientes</div>
-                      <div className="text-2xl font-bold text-orange-600">{withdrawalBalance?.pendingCount || 0}</div>
-                    </div>
-                  </div>
-
                   {/* Withdrawal History */}
-                  <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Historial de Solicitudes de Retiro</h3>
+                  <div className="bg-white rounded-lg shadow">
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">📋 Historial de Solicitudes</h3>
                       <button
                         onClick={loadWithdrawals}
-                        className="text-sm text-blue-600 hover:text-blue-700"
+                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
                       >
                         🔄 Actualizar
                       </button>
                     </div>
                     
                     {withdrawalsLoading ? (
-                      <div className="p-8 text-center">
+                      <div className="p-12 text-center">
                         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        <p className="text-gray-500 mt-2">Cargando...</p>
+                        <p className="text-gray-500 mt-4">Cargando solicitudes...</p>
                       </div>
                     ) : withdrawals.length === 0 ? (
                       <div className="p-12 text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </div>
+                        <div className="text-5xl mb-4">📭</div>
                         <p className="text-gray-500 font-medium">No hay solicitudes de retiro</p>
                         <p className="text-sm text-gray-400 mt-1">Cuando solicites un retiro, aparecerá aquí</p>
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50">
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factura</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Importe</th>
-                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-50">
-                            {withdrawals.map((w: any) => (
-                              <tr key={w.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4">
-                                  <span className="font-mono text-sm text-gray-900">{w.invoiceNumber}</span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                  {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  }) : '-'}
-                                </td>
-                                <td className="px-6 py-4">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    w.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                                    w.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
-                                    w.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                                    w.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                    'bg-gray-100 text-gray-700'
-                                  }`}>
-                                    {w.status === 'PAID' ? '✅ Pagado' :
-                                     w.status === 'APPROVED' ? '✓ Aprobado' :
-                                     w.status === 'PENDING' ? '⏳ Pendiente' :
-                                     w.status === 'REJECTED' ? '❌ Rechazado' :
-                                     w.status}
-                                  </span>
-                                  {w.status === 'REJECTED' && w.rejectionReason && (
+                      <div className="divide-y divide-gray-100">
+                        {withdrawals.map((w: any) => (
+                          <div key={w.id} className="p-6 hover:bg-gray-50 transition">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                {/* Header */}
+                                <div className="flex items-center gap-3 mb-3">
+                                  <span className="font-mono font-medium text-gray-900">{w.invoiceNumber}</span>
+                                  {w.status === 'PENDING' && (
+                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">⏳ Pendiente</span>
+                                  )}
+                                  {w.status === 'APPROVED' && (
+                                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">✓ Aprobada</span>
+                                  )}
+                                  {w.status === 'PAID' && (
+                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">✅ Pagada</span>
+                                  )}
+                                  {w.status === 'REJECTED' && (
+                                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">❌ Rechazada</span>
+                                  )}
+                                </div>
+
+                                {/* Info Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-gray-400 block text-xs">Fecha Solicitud</span>
+                                    <p className="font-medium text-gray-700">
+                                      {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      }) : '-'}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-400 block text-xs">Importe</span>
+                                    <p className="font-bold text-green-600 text-lg">{formatPrice(w.amountCents)}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-400 block text-xs">Método</span>
+                                    <p className="font-medium text-gray-700">
+                                      {w.bankAccountType === 'IBAN' ? '🏦 Banco' : w.bankAccountType === 'PAYPAL' ? '💳 PayPal' : '₿ Crypto'}
+                                    </p>
+                                  </div>
+                                  {w.status === 'PAID' && w.paidAt && (
+                                    <div>
+                                      <span className="text-gray-400 block text-xs">Fecha de Pago</span>
+                                      <p className="font-medium text-green-600">
+                                        {new Date(w.paidAt).toLocaleDateString('es-ES')}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Rejection reason */}
+                                {w.status === 'REJECTED' && w.rejectionReason && (
+                                  <div className="mt-3 p-3 bg-red-50 rounded-lg">
+                                    <span className="text-red-600 text-sm font-medium">Motivo: </span>
+                                    <span className="text-red-700 text-sm">{w.rejectionReason}</span>
+                                  </div>
+                                )}
+
+                                {/* Payment reference */}
+                                {w.status === 'PAID' && w.paymentReference && (
+                                  <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                                    <span className="text-green-600 text-sm font-medium">Ref. de pago: </span>
+                                    <span className="text-green-700 text-sm font-mono">{w.paymentReference}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Actions */}
+                              <div className="ml-4">
+                                {w.invoicePdfUrl && (
+                                  <a
+                                    href={w.invoicePdfUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition inline-flex items-center gap-2"
+                                  >
+                                    📄 Ver Factura
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                                     <p className="text-xs text-red-500 mt-1">{w.rejectionReason}</p>
                                   )}
                                 </td>
