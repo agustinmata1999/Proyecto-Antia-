@@ -825,6 +825,72 @@ model LandingImpressionEvent {
   @@map("landing_impression_events")
 }
 
+// ==================== MÓDULO DE RETIROS ====================
+
+// Solicitudes de Retiro de los Tipsters
+model WithdrawalRequest {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  tipsterId             String    @map("tipster_id")
+  
+  // Monto solicitado
+  amountCents           Int       @map("amount_cents")
+  currency              String    @default("EUR")
+  
+  // Estado del retiro
+  status                String    @default("PENDING") @map("status") // PENDING, APPROVED, PAID, REJECTED
+  
+  // Factura generada
+  invoiceNumber         String    @unique @map("invoice_number")    // Ej: ANTIA-2025-0001
+  invoicePdfUrl         String?   @map("invoice_pdf_url")           // URL del PDF generado
+  
+  // Datos fiscales del tipster al momento de la solicitud (snapshot)
+  tipsterName           String    @map("tipster_name")
+  tipsterEmail          String?   @map("tipster_email")
+  tipsterLegalName      String?   @map("tipster_legal_name")        // Nombre o razón social
+  tipsterDocumentType   String?   @map("tipster_document_type")     // DNI, NIE, CIF, etc.
+  tipsterDocumentNumber String?   @map("tipster_document_number")
+  tipsterCountry        String?   @map("tipster_country")
+  tipsterAddress        String?   @map("tipster_address")           // Dirección fiscal
+  tipsterCity           String?   @map("tipster_city")
+  tipsterPostalCode     String?   @map("tipster_postal_code")
+  
+  // Datos bancarios del tipster (snapshot al momento)
+  bankAccountType       String?   @map("bank_account_type")         // IBAN, PAYPAL, CRYPTO
+  bankAccountDetails    Json?     @map("bank_account_details")      // { iban, swift, paypalEmail, cryptoAddress, etc }
+  
+  // Notas y comentarios
+  tipsterNotes          String?   @map("tipster_notes")             // Notas del tipster
+  adminNotes            String?   @map("admin_notes")               // Notas internas del admin
+  rejectionReason       String?   @map("rejection_reason")
+  
+  // Desglose del período (para la factura)
+  periodStart           DateTime? @map("period_start")
+  periodEnd             DateTime? @map("period_end")
+  grossAmountCents      Int?      @map("gross_amount_cents")        // Bruto antes de comisiones
+  platformFeeCents      Int?      @map("platform_fee_cents")        // Comisión Antia
+  gatewayFeeCents       Int?      @map("gateway_fee_cents")         // Comisiones pasarela
+  
+  // Datos de pago (cuando se paga)
+  paymentMethod         String?   @map("payment_method")            // BANK_TRANSFER, PAYPAL, CRYPTO
+  paymentReference      String?   @map("payment_reference")         // Referencia de transferencia
+  paidBy                String?   @map("paid_by")                   // Admin que procesó el pago
+  
+  // Timestamps
+  requestedAt           DateTime  @default(now()) @map("requested_at")
+  approvedAt            DateTime? @map("approved_at")
+  approvedBy            String?   @map("approved_by")
+  paidAt                DateTime? @map("paid_at")
+  rejectedAt            DateTime? @map("rejected_at")
+  rejectedBy            String?   @map("rejected_by")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([tipsterId, status])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@map("withdrawal_requests")
+}
+
 // Configuración de tracking por casa (extensible para cada casa)
 model BettingHouseTrackingConfig {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
