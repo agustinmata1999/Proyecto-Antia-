@@ -21,22 +21,23 @@ interface Notification {
   metadata?: Record<string, any>;
 }
 
-const getNotificationIcon = (type: string) => {
+// Get category label based on notification type
+const getNotificationCategory = (type: string) => {
   switch (type) {
     case 'SALE':
-      return '💰';
+      return 'Pagos e informes · Ventas';
     case 'SUBSCRIPTION_NEW':
-      return '🔄';
+      return 'Suscripciones · Nueva';
     case 'SUBSCRIPTION_CANCELLED':
-      return '❌';
+      return 'Suscripciones · Cancelada';
     case 'SUBSCRIPTION_EXPIRED':
-      return '⏰';
+      return 'Suscripciones · Expirada';
     case 'SETTLEMENT':
-      return '💵';
+      return 'Pagos e informes · Liquidación';
     case 'PAYOUT':
-      return '✅';
+      return 'Pagos e informes · Pagos';
     default:
-      return '📢';
+      return 'General';
   }
 };
 
@@ -45,10 +46,10 @@ const formatTimeAgo = (date: string) => {
   const then = new Date(date);
   const seconds = Math.floor((now.getTime() - then.getTime()) / 1000);
 
-  if (seconds < 60) return 'Ahora';
-  if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
-  if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} h`;
-  if (seconds < 604800) return `Hace ${Math.floor(seconds / 86400)} días`;
+  if (seconds < 60) return 'ahora';
+  if (seconds < 3600) return `hace ${Math.floor(seconds / 60)} min`;
+  if (seconds < 86400) return `hace ${Math.floor(seconds / 3600)} horas`;
+  if (seconds < 604800) return `hace ${Math.floor(seconds / 86400)} días`;
   return then.toLocaleDateString('es-ES');
 };
 
@@ -57,6 +58,7 @@ export function NotificationsBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'principales' | 'notificaciones'>('notificaciones');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchNotifications = async () => {
@@ -110,6 +112,11 @@ export function NotificationsBell() {
     };
   }, []);
 
+  // Filter notifications based on active tab
+  const filteredNotifications = activeTab === 'principales' 
+    ? notifications.filter(n => !n.is_read).slice(0, 5)
+    : notifications;
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -127,57 +134,90 @@ export function NotificationsBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold">Notificaciones</h3>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-blue-600 hover:text-blue-700"
-              onClick={markAllAsRead}
-              disabled={isLoading}
-            >
-              <CheckCheck className="h-4 w-4 mr-1" />
-              Marcar todas
-            </Button>
-          )}
+      <PopoverContent className="w-96 p-0" align="end">
+        {/* Header with Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 pt-3">
+            <div className="flex gap-6">
+              <button
+                onClick={() => setActiveTab('principales')}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'principales'
+                    ? 'text-slate-900 border-slate-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                }`}
+              >
+                Principales
+              </button>
+              <button
+                onClick={() => setActiveTab('notificaciones')}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'notificaciones'
+                    ? 'text-slate-900 border-slate-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                }`}
+              >
+                Notificaciones
+              </button>
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                disabled={isLoading}
+                className="pb-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Ver todo
+              </button>
+            )}
+          </div>
         </div>
         
-        <ScrollArea className="h-[300px]">
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
-              <Bell className="h-8 w-8 mb-2 opacity-50" />
-              <p className="text-sm">No hay notificaciones</p>
+        {/* Notifications List */}
+        <ScrollArea className="h-[350px]">
+          {filteredNotifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[250px] text-gray-500">
+              <Bell className="h-10 w-10 mb-3 opacity-30" />
+              <p className="text-sm font-medium">No hay notificaciones</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {activeTab === 'principales' ? 'No tienes notificaciones importantes' : 'Cuando tengas actividad aparecerá aquí'}
+              </p>
             </div>
           ) : (
-            <div className="divide-y">
-              {notifications.map((notification) => (
+            <div>
+              {filteredNotifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.is_read ? 'bg-blue-50' : ''
+                  className={`px-4 py-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    !notification.is_read ? 'bg-blue-50/50' : ''
                   }`}
                   onClick={() => !notification.is_read && markAsRead(notification.id)}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl">
-                      {getNotificationIcon(notification.type)}
-                    </span>
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!notification.is_read ? 'font-semibold' : 'font-medium'} text-gray-900`}>
+                      {/* Category and Time */}
+                      <p className="text-xs text-gray-500 mb-1">
+                        {getNotificationCategory(notification.type)} · {formatTimeAgo(notification.created_at)}
+                      </p>
+                      
+                      {/* Title */}
+                      <p className={`text-sm ${!notification.is_read ? 'font-semibold' : 'font-medium'} text-gray-900 mb-0.5`}>
                         {notification.title}
                       </p>
-                      <p className="text-sm text-gray-600 truncate">
+                      
+                      {/* Message - truncated */}
+                      <p className="text-sm text-gray-600 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {formatTimeAgo(notification.created_at)}
-                      </p>
                     </div>
-                    {!notification.is_read && (
-                      <div className="h-2 w-2 rounded-full bg-blue-500 mt-2" />
-                    )}
+                    
+                    {/* Bell icon on the right */}
+                    <div className="flex-shrink-0 mt-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        !notification.is_read ? 'bg-blue-100' : 'bg-gray-100'
+                      }`}>
+                        <Bell className={`h-4 w-4 ${!notification.is_read ? 'text-blue-600' : 'text-gray-400'}`} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -185,16 +225,17 @@ export function NotificationsBell() {
           )}
         </ScrollArea>
         
+        {/* Footer */}
         {notifications.length > 0 && (
-          <div className="px-4 py-2 border-t text-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-gray-500"
-              onClick={() => setIsOpen(false)}
+          <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
+            <button
+              onClick={markAllAsRead}
+              disabled={isLoading || unreadCount === 0}
+              className="w-full text-center text-sm text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
             >
-              Cerrar
-            </Button>
+              <CheckCheck className="h-4 w-4 inline mr-1.5" />
+              Marcar todas como leídas
+            </button>
           </div>
         )}
       </PopoverContent>
