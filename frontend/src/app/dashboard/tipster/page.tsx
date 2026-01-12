@@ -2364,7 +2364,6 @@ function TipsterDashboardContent() {
             </div>
           </>
         )}
-      </main>
 
       {/* Modal: Confirmar Compartir en Telegram */}
       {showShareConfirmModal && productToShare && (
