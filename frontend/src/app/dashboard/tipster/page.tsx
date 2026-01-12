@@ -1140,22 +1140,15 @@ function TipsterDashboardContent() {
   // Build nav items dynamically
   const navItems = [
     { id: 'dashboard', label: 'Inicio', icon: null },
-    ...(enabledModules.forecasts ? [{ id: 'products', label: 'Crear producto', icon: null }] : []),
-    ...(enabledModules.affiliate ? [{ id: 'referrals', label: 'Campanas', icon: null }] : []),
+    { id: 'products', label: 'Crear producto', icon: null },
+    { id: 'referrals', label: 'Campanas', icon: null },
     { 
       id: 'payouts', 
       label: 'Liquidaciones', 
       icon: null,
-      badge: (salesStats?.netEarningsCents || 0) > 0 ? formatPrice(salesStats?.netEarningsCents || 0) : undefined,
+      badge: undefined,
       badgeColor: 'bg-green-100 text-green-700'
     },
-    ...(kycStatus.needsKyc ? [{
-      id: 'kyc',
-      label: 'Datos de Cobro',
-      icon: null,
-      badge: 'Pendiente',
-      badgeColor: 'bg-orange-100 text-orange-700'
-    }] : []),
     { id: 'profile', label: 'Perfil', icon: null },
     { id: 'support', label: 'Soporte', icon: null },
   ];
