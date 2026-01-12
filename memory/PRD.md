@@ -252,6 +252,45 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 
 ## Historial de Cambios
 
+### 2026-01-12 - Intento de Refactorización DashboardLayout
+
+**Tarea:** Consolidar la lógica duplicada del sidebar responsive en un componente reutilizable.
+
+**Estado:** BLOQUEADO por error de tooling
+
+**Lo que se intentó:**
+1. Crear/mejorar componente `DashboardLayout.tsx` con soporte para:
+   - Sidebar colapsable en móvil
+   - Navegación dinámica via props `navItems`
+   - Badges para notificaciones
+   - Colores configurables (azul/rojo)
+   - Header actions customizables
+
+2. El componente ya funciona correctamente en `/app/frontend/src/app/dashboard/client/page.tsx`
+
+3. Al intentar aplicar el mismo patrón a `admin/page.tsx` y `tipster/page.tsx`, SWC produce error:
+   ```
+   Unexpected token `DashboardLayout`. Expected jsx identifier
+   ```
+
+**Investigación realizada:**
+- Verificado que todos los brackets/paréntesis están balanceados
+- Verificado encoding UTF-8 correcto
+- El error ocurre en la línea del `return (<DashboardLayout...`
+- No es problema de importaciones (DashboardLayout se importa correctamente)
+- No es problema de nombres de variables
+- El componente funciona en client pero no en admin/tipster
+
+**Decisión:** Dejar la refactorización como deuda técnica. Los dashboards funcionan correctamente con código duplicado.
+
+**Archivos involucrados:**
+- `/app/frontend/src/components/DashboardLayout.tsx` - Componente creado y funcional
+- `/app/frontend/src/app/dashboard/client/page.tsx` - USA DashboardLayout ✅
+- `/app/frontend/src/app/dashboard/admin/page.tsx` - Sidebar duplicado (original)
+- `/app/frontend/src/app/dashboard/tipster/page.tsx` - Sidebar duplicado (original)
+
+---
+
 ### 2026-01-12 - PWA (Progressive Web App)
 
 **Implementación completa de PWA para instalación como app nativa:**
