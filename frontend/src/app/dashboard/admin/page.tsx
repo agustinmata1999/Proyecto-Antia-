@@ -194,12 +194,33 @@ export default function AdminDashboard() {
   const [sendingReply, setSendingReply] = useState(false);
   const [ticketStats, setTicketStats] = useState({ open: 0, inProgress: 0, resolved: 0 });
 
+  // Withdrawals state (Admin)
+  const [adminWithdrawals, setAdminWithdrawals] = useState<any[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [withdrawalStats, setWithdrawalStats] = useState({
+    pending: { count: 0, totalCents: 0 },
+    approved: { count: 0, totalCents: 0 },
+    paid: { count: 0, totalCents: 0 },
+    rejected: { count: 0, totalCents: 0 },
+  });
+  const [withdrawalFilter, setWithdrawalFilter] = useState('');
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
+  const [showWithdrawalActionModal, setShowWithdrawalActionModal] = useState(false);
+  const [withdrawalAction, setWithdrawalAction] = useState<'approve' | 'pay' | 'reject' | null>(null);
+  const [withdrawalPaymentMethod, setWithdrawalPaymentMethod] = useState('BANK_TRANSFER');
+  const [withdrawalPaymentRef, setWithdrawalPaymentRef] = useState('');
+  const [withdrawalAdminNotes, setWithdrawalAdminNotes] = useState('');
+  const [withdrawalRejectionReason, setWithdrawalRejectionReason] = useState('');
+  const [processingWithdrawal, setProcessingWithdrawal] = useState(false);
+
   useEffect(() => {
     checkAuth();
     // Load application stats for badge in sidebar
     loadApplicationStats();
     // Load ticket stats for badge
     loadTicketStats();
+    // Load withdrawal stats for badge
+    loadWithdrawalStats();
   }, []);
 
   useEffect(() => {
