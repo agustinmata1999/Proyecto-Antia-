@@ -1005,6 +1005,50 @@ function TipsterDashboardContent() {
     setShowProductForm(true);
   };
 
+  // Handle avatar upload
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Solo se permiten imágenes (JPG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('La imagen no puede superar 2MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const response = await uploadApi.uploadAvatar(file);
+      if (response.data.success) {
+        // Update local user state with new avatar
+        setUser((prev: any) => ({
+          ...prev,
+          tipsterProfile: {
+            ...prev?.tipsterProfile,
+            avatarUrl: response.data.avatarUrl,
+          },
+        }));
+        alert('✅ Foto de perfil actualizada');
+      }
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      alert('Error al subir la imagen: ' + (error.response?.data?.message || 'Inténtalo de nuevo'));
+    } finally {
+      setUploadingAvatar(false);
+      // Reset file input
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleEditProduct = (product: any) => {
     setSelectedProduct(product);
     setFormData({
