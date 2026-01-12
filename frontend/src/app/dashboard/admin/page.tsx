@@ -534,9 +534,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Nav items for DashboardLayout
-  const EmptyIcon = () => <span></span>;
-  
+  // Nav items for DashboardLayout  
   const navItems = [
     { 
       id: 'applications', 
