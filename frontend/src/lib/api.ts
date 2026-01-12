@@ -415,3 +415,21 @@ export const affiliateApi = {
       api.patch(`/admin/affiliate/payouts/${id}/pay`, data),
   },
 };
+
+// Upload API
+export const uploadApi = {
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  uploadTicketFiles: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    return api.post('/upload/tickets', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
