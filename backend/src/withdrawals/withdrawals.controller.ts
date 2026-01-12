@@ -14,38 +14,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { WithdrawalsService } from './withdrawals.service';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
-
-// DTO para crear solicitud
-class CreateWithdrawalDto {
-  @IsNumber()
-  @Min(500)
-  amountCents: number;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
-}
-
-// DTO para aprobar/pagar
-class PayWithdrawalDto {
-  @IsString()
-  paymentMethod: string;
-
-  @IsOptional()
-  @IsString()
-  paymentReference?: string;
-
-  @IsOptional()
-  @IsString()
-  adminNotes?: string;
-}
-
-// DTO para rechazar
-class RejectWithdrawalDto {
-  @IsString()
-  rejectionReason: string;
-}
+import { CreateWithdrawalDto, PayWithdrawalDto, RejectWithdrawalDto, ApproveWithdrawalDto } from './dto/withdrawals.dto';
 
 @Controller('withdrawals')
 @UseGuards(JwtAuthGuard)
@@ -118,7 +87,7 @@ export class AdminWithdrawalsController {
   async approveWithdrawal(
     @Param('id') id: string,
     @Request() req,
-    @Body() dto: { adminNotes?: string },
+    @Body() dto: ApproveWithdrawalDto,
   ) {
     return this.withdrawalsService.approveWithdrawal(id, req.user.sub, dto.adminNotes);
   }
