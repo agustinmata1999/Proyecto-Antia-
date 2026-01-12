@@ -1139,25 +1139,25 @@ function TipsterDashboardContent() {
 
   // Build nav items dynamically
   const navItems = [
-    { id: 'dashboard', label: 'Inicio', icon: <HomeIcon /> },
-    ...(enabledModules.forecasts ? [{ id: 'products', label: 'Crear producto', icon: <ProductIcon /> }] : []),
-    ...(enabledModules.affiliate ? [{ id: 'referrals', label: 'Campanas', icon: <UsersIcon /> }] : []),
+    { id: 'dashboard', label: 'Inicio', icon: null },
+    ...(enabledModules.forecasts ? [{ id: 'products', label: 'Crear producto', icon: null }] : []),
+    ...(enabledModules.affiliate ? [{ id: 'referrals', label: 'Campanas', icon: null }] : []),
     { 
       id: 'payouts', 
       label: 'Liquidaciones', 
-      icon: <CurrencyIcon />,
+      icon: null,
       badge: (salesStats?.netEarningsCents || 0) > 0 ? formatPrice(salesStats?.netEarningsCents || 0) : undefined,
       badgeColor: 'bg-green-100 text-green-700'
     },
     ...(kycStatus.needsKyc ? [{
       id: 'kyc',
       label: 'Datos de Cobro',
-      icon: <KycIcon />,
+      icon: null,
       badge: 'Pendiente',
       badgeColor: 'bg-orange-100 text-orange-700'
     }] : []),
-    { id: 'profile', label: 'Perfil', icon: <SettingsIcon /> },
-    { id: 'support', label: 'Soporte', icon: <SupportIcon /> },
+    { id: 'profile', label: 'Perfil', icon: null },
+    { id: 'support', label: 'Soporte', icon: null },
   ];
 
   return (
