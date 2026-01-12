@@ -57,6 +57,43 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-12 - Sistema de Solicitudes de Retiro (Panel Tipster + Admin)
+**Completado:**
+- ✅ **Nuevo modelo `WithdrawalRequest`** en Prisma schema:
+  - ID, tipsterId, amountCents, currency, status (PENDING/APPROVED/PAID/REJECTED)
+  - Datos fiscales del tipster snapshot (nombre, documento, país, dirección)
+  - Datos bancarios snapshot (IBAN/PayPal/Crypto)
+  - Número de factura único (ANTIA-YYYY-####)
+  - URL del PDF de factura generado
+  - Timestamps de cada estado (requestedAt, approvedAt, paidAt, rejectedAt)
+- ✅ **Backend - Módulo de Retiros:**
+  - `GET /api/withdrawals/balance` - Saldo disponible para retiro (ingresos - retirado - pendiente)
+  - `POST /api/withdrawals/request` - Crear solicitud de retiro con generación automática de factura
+  - `GET /api/withdrawals/my` - Mis solicitudes de retiro
+  - `GET /api/admin/withdrawals` - Admin: Listar todas con stats
+  - `PATCH /api/admin/withdrawals/:id/approve` - Admin: Aprobar solicitud
+  - `PATCH /api/admin/withdrawals/:id/pay` - Admin: Marcar como pagado
+  - `PATCH /api/admin/withdrawals/:id/reject` - Admin: Rechazar solicitud
+- ✅ **Panel Tipster - Nueva pestaña "Solicitar Retiro" en Liquidaciones:**
+  - Tarjeta de saldo disponible con botón "Solicitar Retiro"
+  - Estadísticas: Total ventas, Retiros procesados, Solicitudes pendientes
+  - Tabla de historial con: Factura, Fecha, Estado, Importe, Ver Factura
+  - Modal para crear solicitud con validaciones (mínimo €5, saldo suficiente, datos bancarios requeridos)
+  - Botones rápidos para montos comunes (€25, €50, €100, Todo)
+- ✅ **Panel Admin - Nueva sección "Retiros / Pagos" en sidebar:**
+  - Cards de estadísticas: Pendientes, Aprobadas, Pagadas, Rechazadas (con filtros)
+  - Tabla completa: Factura, Tipster (nombre, email, fiscal), Fecha, Estado, Método, Importe
+  - Acciones: Aprobar, Marcar Pagado, Rechazar
+  - Modal de acción con formulario según tipo (pago: método+referencia, rechazo: motivo obligatorio)
+  - Badge en sidebar con cantidad de solicitudes pendientes
+- ✅ **Generación de Facturas HTML:**
+  - Factura profesional con datos de Antia y del tipster
+  - Número de factura único (ANTIA-2026-XXXX)
+  - Datos del beneficiario (nombre fiscal, documento, país)
+  - Datos bancarios para la transferencia
+  - Concepto y desglose del importe
+  - Guardado en `/app/backend/public/invoices/`
+
 ### 2026-01-12 - Foto de Perfil y Nuevo Diseño Catálogo de Productos
 **Completado:**
 - ✅ **Subida de Foto de Perfil:**
