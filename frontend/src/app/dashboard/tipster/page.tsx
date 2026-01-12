@@ -2215,27 +2215,6 @@ function TipsterDashboardContent() {
                   </div>
                 </div>
               )}
-                                <td className="px-6 py-4 text-center">
-                                  {w.invoicePdfUrl && (
-                                    <a
-                                      href={w.invoicePdfUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                    >
-                                      📄 Ver Factura
-                                    </a>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Sub-vista: Liquidaciones */}
               {payoutsSubView === 'liquidaciones' && (
