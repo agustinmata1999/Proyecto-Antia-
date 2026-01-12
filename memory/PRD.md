@@ -57,6 +57,27 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-12 - Foto de Perfil y Nuevo Diseño Catálogo de Productos
+**Completado:**
+- ✅ **Subida de Foto de Perfil:**
+  - Nuevo endpoint `POST /api/upload/avatar` para subir avatares
+  - UI en sección "Perfil" con preview de imagen actual
+  - Validación de tipos (JPG, PNG, GIF, WEBP) y tamaño máximo 2MB
+  - Avatar se guarda en `uploads/avatars/` y URL en `tipster_profiles.avatar_url`
+- ✅ **Nuevo Diseño de "Mis productos" estilo catálogo (según diseño de Alex):**
+  - Header banner con gradiente oscuro azul/morado
+  - Avatar del tipster (cuadrado con bordes redondeados)
+  - Nombre de tienda y subtítulo
+  - Tab "Productos" con botón "+ Crear Producto"
+  - Cards de productos rediseñadas:
+    - Icono según tipo (bolsa = pago único, telegram = suscripción)
+    - Título, descripción, badges (Activo/Pausado, tipo, canal Telegram)
+    - Precio destacado en grande
+    - Botones: Editar, Ver, Copiar Link, Compartir
+  - Responsive mobile optimizado
+- ✅ **Todas las funcionalidades anteriores mantenidas:**
+  - Crear producto, Editar, Ver, Copiar enlaces, Compartir
+
 ### 2026-01-12 - Historial de Ventas en Mis Productos
 **Completado:**
 - ✅ **Renombrado "Crear producto" → "Mis productos"** en el sidebar del tipster
