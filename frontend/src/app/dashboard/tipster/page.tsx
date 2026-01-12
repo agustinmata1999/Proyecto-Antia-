@@ -1099,30 +1099,83 @@ function TipsterDashboardContent() {
     );
   }
 
+  // Helper to close sidebar on mobile after navigation
+  const handleMobileNav = (view: ViewType) => {
+    setActiveView(view);
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              data-testid="mobile-menu-button"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="text-xl font-bold text-gray-900">Antia</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationsBell />
+            <CurrencySelector variant="pill" />
+          </div>
+        </div>
+      </header>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-100">
-        <div className="p-6">
-          <div className="text-2xl font-bold text-gray-900 mb-8">Antia</div>
+      <aside className={`
+        fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-100 z-50
+        transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+      `}>
+        <div className="p-6 h-full flex flex-col">
+          {/* Logo and close button */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="text-2xl font-bold text-gray-900">Antia</div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-lg lg:hidden"
+              data-testid="close-sidebar-button"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
           
           <div className="mb-6 pb-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <div>
-                <div className="text-sm font-medium text-gray-900">{user?.tipsterProfile?.publicName || user?.email || 'Cargando...'}</div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-gray-900 truncate">{user?.tipsterProfile?.publicName || user?.email || 'Cargando...'}</div>
                 <div className="text-xs text-gray-400">#{user?.tipsterProfile?.id?.slice(-4) || '----'}</div>
               </div>
             </div>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="space-y-1 flex-1 overflow-y-auto">
             <button
-              onClick={() => setActiveView('dashboard')}
+              onClick={() => handleMobileNav('dashboard')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeView === 'dashboard' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
