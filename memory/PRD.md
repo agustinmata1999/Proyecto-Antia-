@@ -57,6 +57,18 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-12 - Historial de Ventas en Mis Productos
+**Completado:**
+- ✅ **Renombrado "Crear producto" → "Mis productos"** en el sidebar del tipster
+- ✅ **Nueva sección "Historial de Ventas"** debajo de la lista de productos:
+  - Fecha y hora de cada venta
+  - Nombre del producto y tipo (Suscripción/Pago único)
+  - Email del cliente
+  - Usuario de Telegram (si lo proporcionó)
+  - Método de pago (Stripe, Redsys, Test)
+  - Importe con moneda
+  - Total de ventas y suma total de importes
+
 ### 2026-01-12 - Refactorización Dashboard Layout (P0 Completado)
 **Completado:**
 - ✅ **Refactorización de los 3 dashboards para usar `DashboardLayout` compartido:**
