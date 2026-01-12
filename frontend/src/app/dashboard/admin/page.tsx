@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
+import { adminApi, authApi, currencyApi, affiliateApi, withdrawalsApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
