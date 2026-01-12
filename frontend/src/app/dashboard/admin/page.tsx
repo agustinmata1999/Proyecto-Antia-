@@ -6,7 +6,6 @@ import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import DashboardLayout from '@/components/DashboardLayout';
 
 type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
@@ -70,6 +69,7 @@ export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<AdminView>('tipsters');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Tipsters state
   const [tipsters, setTipsters] = useState<Tipster[]>([]);
@@ -531,43 +531,130 @@ export default function AdminDashboard() {
     );
   }
 
-  // Nav items for DashboardLayout  
-  const navItems = [
-    { 
-      id: 'applications', 
-      label: 'Solicitudes', 
-      icon: null,
-      badge: applicationStats.pending > 0 ? applicationStats.pending : undefined,
-      badgeColor: 'bg-yellow-500 text-white animate-pulse'
-    },
-    { id: 'tipsters', label: 'Gestion Tipsters', icon: null },
-    { id: 'sales', label: 'Ventas Checkout', icon: null },
-    { 
-      id: 'support', 
-      label: 'Soporte', 
-      icon: null,
-      badge: ticketStats.open > 0 ? ticketStats.open : undefined,
-      badgeColor: 'bg-blue-500 text-white'
-    },
-    { id: 'affiliate', label: 'Afiliacion', icon: null },
-    { id: 'commissions', label: 'Comisiones', icon: null },
-    { id: 'reports', label: 'Reportes', icon: null },
-  ];
+  // Helper to close sidebar on mobile after navigation
+  const handleMobileNav = (view: AdminView) => {
+    setActiveView(view);
+    setSidebarOpen(false);
+  };
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      activeView={activeView}
-      onNavChange={(view) => setActiveView(view as AdminView)}
-      userInfo={{
-        name: 'Administrador',
-      }}
-      onLogout={handleLogout}
-      brandName="Antia Admin"
-      brandColor="red"
-      badgeText="SuperAdmin"
-      headerActions={<CurrencySelector variant="pill" />}
-    >
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              data-testid="mobile-menu-button"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="text-xl font-bold text-red-600">Admin</span>
+          </div>
+          <CurrencySelector variant="pill" />
+        </div>
+      </header>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-200 z-50 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 ${sidebarOpen ? '!translate-x-0' : ''}`}>
+        <div className="p-6 h-full flex flex-col">
+          {/* Logo and close button */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-red-600">Antia Admin</div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-lg lg:hidden"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded inline-block mb-6 w-fit">
+            SuperAdmin
+          </div>
+
+          <nav className="space-y-2 flex-1 overflow-y-auto">
+            <button
+              onClick={() => handleMobileNav('applications')}
+              className={`w-full text-left px-4 py-2 rounded-lg flex items-center justify-between ${activeView === 'applications' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <span>📋 Solicitudes</span>
+              {applicationStats.pending > 0 && (
+                <span className="bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
+                  {applicationStats.pending}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => handleMobileNav('tipsters')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'tipsters' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              👥 Gestión Tipsters
+            </button>
+            <button
+              onClick={() => handleMobileNav('sales')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'sales' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              🛒 Ventas Checkout
+            </button>
+            <button
+              onClick={() => handleMobileNav('support')}
+              className={`w-full text-left px-4 py-2 rounded-lg flex items-center justify-between ${activeView === 'support' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              <span>🎫 Soporte</span>
+              {ticketStats.open > 0 && (
+                <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {ticketStats.open}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => handleMobileNav('affiliate')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'affiliate' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              🤝 Afiliación
+            </button>
+            <button
+              onClick={() => handleMobileNav('commissions')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'commissions' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              💰 Comisiones
+            </button>
+            <button
+              onClick={() => handleMobileNav('reports')}
+              className={`w-full text-left px-4 py-2 rounded-lg ${activeView === 'reports' ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+            >
+              📊 Reportes
+            </button>
+            <button
+              onClick={() => { handleLogout(); setSidebarOpen(false); }}
+              className="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50"
+            >
+              🚪 Cerrar Sesión
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="pt-16 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8">
+        {/* Currency Selector - Fixed top right (desktop only) */}
+        <div className="hidden lg:block fixed top-4 right-8 z-50">
+          <CurrencySelector variant="pill" />
+        </div>
+
         {/* APPLICATIONS VIEW */}
         {activeView === 'applications' && (
           <>
@@ -2160,6 +2247,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </div>
   );
 }
