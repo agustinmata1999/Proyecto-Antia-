@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense, ReactNode, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi, uploadApi } from '@/lib/api';
+import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi, uploadApi, withdrawalsApi } from '@/lib/api';
 import AffiliateSection from '@/components/AffiliateSection';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
