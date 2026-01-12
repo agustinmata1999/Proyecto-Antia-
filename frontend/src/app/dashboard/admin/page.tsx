@@ -656,6 +656,13 @@ export default function AdminDashboard() {
       { id: 'tipsters', label: 'Gestión Tipsters', icon: <span>👥</span> },
       { id: 'sales', label: 'Ventas Checkout', icon: <span>🛒</span> },
       {
+        id: 'withdrawals',
+        label: 'Retiros / Pagos',
+        icon: <span>💸</span>,
+        badge: withdrawalStats.pending.count > 0 ? withdrawalStats.pending.count : undefined,
+        badgeColor: 'bg-green-100 text-green-700',
+      },
+      {
         id: 'support',
         label: 'Soporte',
         icon: <span>🎫</span>,
