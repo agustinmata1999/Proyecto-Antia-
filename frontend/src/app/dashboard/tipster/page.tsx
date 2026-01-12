@@ -11,7 +11,7 @@ import KycBanner from '@/components/KycBanner';
 import KycForm from '@/components/KycForm';
 import { NotificationsBell } from '@/components/NotificationsBell';
 import TipsterTelegramAutoView from '@/components/tipster/TipsterTelegramAutoView';
-import DashLayout from '@/components/DashLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'kyc' | 'support';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
@@ -1154,7 +1154,7 @@ function TipsterDashboardContent() {
   ];
 
   return (
-    <DashLayout
+    <DashboardLayout
       navItems={navItems}
       activeView={activeView}
       onNavChange={(view) => setActiveView(view as ViewType)}
@@ -2758,7 +2758,7 @@ function TipsterDashboardContent() {
           </div>
         </div>
       )}
-    </DashLayout>
+    </DashboardLayout>
   );
 }
 
