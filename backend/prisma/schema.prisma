@@ -886,8 +886,6 @@ model WithdrawalRequest {
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
   @@index([tipsterId, status])
-  @@index([status])
-  @@index([invoiceNumber])
   @@map("withdrawal_requests")
 }
 
