@@ -1658,6 +1658,116 @@ function TipsterDashboardContent() {
                 )}
               </div>
             </div>
+
+            {/* Historial de Ventas */}
+            <div className="bg-white rounded-lg shadow mt-6">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">Historial de Ventas</h2>
+                <p className="text-sm text-gray-500 mt-1">Todas las ventas realizadas a través de tus productos</p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                {recentSales.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500">Aún no tienes ventas</p>
+                    <p className="text-sm text-gray-400 mt-1">Comparte tus productos para empezar a vender</p>
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100 bg-gray-50">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método de Pago</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {recentSales.map((sale: any) => {
+                        const product = products.find((p: any) => p.id === sale.productId);
+                        return (
+                          <tr key={sale.id} className="hover:bg-gray-50 transition">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {new Date(sale.paidAt || sale.createdAt).toLocaleDateString('es-ES', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(sale.paidAt || sale.createdAt).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {product?.title || 'Producto eliminado'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {product?.billingType === 'SUBSCRIPTION' ? 'Suscripción' : 'Pago único'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900">{sale.email || '-'}</div>
+                              {sale.telegramUsername && (
+                                <div className="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                  </svg>
+                                  @{sale.telegramUsername}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                sale.paymentProvider === 'stripe' 
+                                  ? 'bg-purple-100 text-purple-800' 
+                                  : sale.paymentProvider === 'redsys'
+                                  ? 'bg-orange-100 text-orange-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {sale.paymentProvider === 'stripe' && '💳 Stripe'}
+                                {sale.paymentProvider === 'redsys' && '🏦 Redsys'}
+                                {sale.paymentProvider === 'test_simulated' && '🧪 Test'}
+                                {!['stripe', 'redsys', 'test_simulated'].includes(sale.paymentProvider) && (sale.paymentProvider || 'Desconocido')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="text-sm font-semibold text-green-600">
+                                {formatPrice(sale.amountCents)}
+                              </div>
+                              <div className="text-xs text-gray-500">{sale.currency || 'EUR'}</div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              
+              {recentSales.length > 0 && (
+                <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      Mostrando {recentSales.length} venta{recentSales.length !== 1 ? 's' : ''}
+                    </span>
+                    <div className="text-sm font-medium text-gray-900">
+                      Total: <span className="text-green-600">{formatPrice(recentSales.reduce((sum: number, s: any) => sum + (s.amountCents || 0), 0))}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </>
         )}
 
