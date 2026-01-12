@@ -531,32 +531,37 @@ export default function AdminDashboard() {
     );
   }
 
-  // Navigation items for DashboardLayout
-  const navItems = [
-    {
-      id: 'applications',
-      label: 'Solicitudes',
-      icon: <span>📋</span>,
-      badge: applicationStats.pending > 0 ? applicationStats.pending : undefined,
-      badgeColor: 'bg-yellow-100 text-yellow-700',
-    },
-    { id: 'tipsters', label: 'Gestión Tipsters', icon: <span>👥</span> },
-    { id: 'sales', label: 'Ventas Checkout', icon: <span>🛒</span> },
-    {
-      id: 'support',
-      label: 'Soporte',
-      icon: <span>🎫</span>,
-      badge: ticketStats.open > 0 ? ticketStats.open : undefined,
-      badgeColor: 'bg-blue-100 text-blue-700',
-    },
-    { id: 'affiliate', label: 'Afiliación', icon: <span>🤝</span> },
-    { id: 'commissions', label: 'Comisiones', icon: <span>💰</span> },
-    { id: 'reports', label: 'Reportes', icon: <span>📊</span> },
-  ];
+  // Define navItems inside the component to access state for badges
+  const getNavItems = () => {
+    const items = [
+      {
+        id: 'applications',
+        label: 'Solicitudes',
+        icon: <span>📋</span>,
+        badge: applicationStats.pending > 0 ? applicationStats.pending : undefined,
+        badgeColor: 'bg-yellow-100 text-yellow-700',
+      },
+      { id: 'tipsters', label: 'Gestión Tipsters', icon: <span>👥</span> },
+      { id: 'sales', label: 'Ventas Checkout', icon: <span>🛒</span> },
+      {
+        id: 'support',
+        label: 'Soporte',
+        icon: <span>🎫</span>,
+        badge: ticketStats.open > 0 ? ticketStats.open : undefined,
+        badgeColor: 'bg-blue-100 text-blue-700',
+      },
+      { id: 'affiliate', label: 'Afiliación', icon: <span>🤝</span> },
+      { id: 'commissions', label: 'Comisiones', icon: <span>💰</span> },
+      { id: 'reports', label: 'Reportes', icon: <span>📊</span> },
+    ];
+    return items;
+  };
+
+  const adminNavItems = getNavItems();
 
   return (
     <DashboardLayout
-      navItems={navItems}
+      navItems={adminNavItems}
       activeView={activeView}
       onNavChange={(view) => setActiveView(view as AdminView)}
       userInfo={{ name: 'SuperAdmin' }}
