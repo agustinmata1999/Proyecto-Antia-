@@ -2950,6 +2950,159 @@ function TipsterDashboardContent() {
         </div>
       )}
 
+      {/* Modal: Solicitar Retiro */}
+      {showWithdrawalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowWithdrawalModal(false)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">💰</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Solicitar Retiro</h3>
+                  <p className="text-green-100 text-sm">
+                    Disponible: {formatPrice(withdrawalBalance?.availableBalanceCents || 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {/* Verificar KYC */}
+              {!kycStatus.kycCompleted && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl">⚠️</span>
+                    <div>
+                      <p className="text-sm text-orange-800 font-medium">Datos bancarios pendientes</p>
+                      <p className="text-sm text-orange-600 mt-1">
+                        Debes completar tus datos de cobro antes de solicitar un retiro.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setShowWithdrawalModal(false);
+                          setActiveView('kyc');
+                        }}
+                        className="mt-2 text-sm text-orange-700 font-medium hover:underline"
+                      >
+                        Ir a Datos de Cobro →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Monto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Monto a retirar (€)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                  <input
+                    type="number"
+                    value={withdrawalAmount}
+                    onChange={(e) => setWithdrawalAmount(e.target.value)}
+                    placeholder="0.00"
+                    min="5"
+                    max={(withdrawalBalance?.availableBalanceCents || 0) / 100}
+                    step="0.01"
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Mínimo: €5.00</p>
+              </div>
+
+              {/* Quick amounts */}
+              <div className="flex gap-2">
+                {[25, 50, 100].map((amount) => (
+                  <button
+                    key={amount}
+                    onClick={() => {
+                      const maxAvailable = (withdrawalBalance?.availableBalanceCents || 0) / 100;
+                      setWithdrawalAmount(Math.min(amount, maxAvailable).toString());
+                    }}
+                    disabled={(withdrawalBalance?.availableBalanceCents || 0) < amount * 100}
+                    className="flex-1 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    €{amount}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setWithdrawalAmount(((withdrawalBalance?.availableBalanceCents || 0) / 100).toFixed(2))}
+                  disabled={(withdrawalBalance?.availableBalanceCents || 0) < 500}
+                  className="flex-1 py-2 bg-green-50 border border-green-200 rounded-lg text-sm font-medium text-green-700 hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Todo
+                </button>
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notas (opcional)
+                </label>
+                <textarea
+                  value={withdrawalNotes}
+                  onChange={(e) => setWithdrawalNotes(e.target.value)}
+                  placeholder="Añade cualquier información relevante..."
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                />
+              </div>
+
+              {/* Info */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">ℹ️</span>
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Al solicitar el retiro:</p>
+                    <ul className="list-disc list-inside space-y-1 text-blue-700">
+                      <li>Se generará una factura automáticamente</li>
+                      <li>El equipo de Antia revisará tu solicitud</li>
+                      <li>Recibirás el pago en tu cuenta bancaria registrada</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowWithdrawalModal(false);
+                  setWithdrawalAmount('');
+                  setWithdrawalNotes('');
+                }}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateWithdrawal}
+                disabled={creatingWithdrawal || !withdrawalAmount || parseFloat(withdrawalAmount) < 5 || !kycStatus.kycCompleted}
+                className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingWithdrawal ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <span>💸</span> Solicitar Retiro
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal: Añadir Canal */}
       {showAddChannelForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAddChannelForm(false)}>
