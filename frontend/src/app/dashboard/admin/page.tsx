@@ -6,7 +6,7 @@ import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import DashboardLayout from '@/components/DashboardLayout';
+import DashLayout from '@/components/DashLayout';
 
 type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
@@ -531,7 +531,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Nav items for DashboardLayout  
+  // Nav items for DashLayout  
   const navItems = [
     { 
       id: 'applications', 
@@ -555,7 +555,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <DashboardLayout
+    <DashLayout
       navItems={navItems}
       activeView={activeView}
       onNavChange={(view) => setActiveView(view as AdminView)}
@@ -2160,6 +2160,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </DashLayout>
   );
 }
