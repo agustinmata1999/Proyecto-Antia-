@@ -28,6 +28,15 @@ interface TelegramChannel {
   connectedAt: string;
 }
 
+// Type for navigation items (moved outside component)
+interface NavItem {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  badge?: string | number;
+  badgeColor?: string;
+}
+
 // Wrapper component to handle Suspense for useSearchParams
 function TipsterDashboardContent() {
   const searchParams = useSearchParams();
