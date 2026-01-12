@@ -252,6 +252,29 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 
 ## Historial de Cambios
 
+### 2026-01-12 - Responsive Design Completo
+
+**Implementación de diseño responsive para toda la plataforma:**
+
+- **Dashboard Tipster:** Sidebar colapsable con menú hamburguesa en móvil/tablet, visible en desktop
+- **Dashboard Cliente:** Mismo patrón de sidebar responsive
+- **Dashboard Admin:** Mismo patrón de sidebar responsive
+- **Técnica usada:** CSS `-translate-x-full lg:translate-x-0` con `!translate-x-0` cuando está abierto
+- **Tailwind safelist:** Agregadas clases de transformación para asegurar disponibilidad
+- **Mobile header:** Header fijo con botón hamburguesa, logo, notificaciones y selector de moneda
+- **Overlay:** Fondo oscuro al abrir sidebar en móvil
+- **Navegación:** El sidebar se cierra automáticamente al navegar en móvil
+
+**Archivos modificados:**
+- `/app/frontend/src/app/dashboard/tipster/page.tsx`
+- `/app/frontend/src/app/dashboard/client/page.tsx`
+- `/app/frontend/src/app/dashboard/admin/page.tsx`
+- `/app/frontend/tailwind.config.ts`
+
+**Testing:** 100% success rate (iteration_3.json)
+
+---
+
 ### 2026-01-11 - Correcciones de Issues P2
 
 **Issue 1: "Invalid Date" en Dashboard - CORREGIDO**
@@ -280,7 +303,7 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 ## Issues Pendientes
 
 ### P1 (Alta Prioridad)
-- Continuar rediseño del frontend (secciones Clientes, Mi Cuenta)
+- ~~Responsive design para toda la plataforma~~ ✅ COMPLETADO
 
 ### P2 (Media Prioridad)
 - Implementar Login con Google OAuth
@@ -301,6 +324,10 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 - `/app/backend/src/telegram/telegram-channels.controller.ts` - Controlador de canales actualizado
 
 ### Frontend
-- `/app/frontend/src/app/dashboard/tipster/page.tsx` - Dashboard principal del tipster
+- `/app/frontend/src/app/dashboard/tipster/page.tsx` - Dashboard del tipster (RESPONSIVE)
+- `/app/frontend/src/app/dashboard/client/page.tsx` - Dashboard del cliente (RESPONSIVE)
+- `/app/frontend/src/app/dashboard/admin/page.tsx` - Dashboard del admin (RESPONSIVE)
+- `/app/frontend/tailwind.config.ts` - Safelist para clases de transformación
 - `/app/frontend/src/app/register/page.tsx` - Registro multi-paso
 - `/app/frontend/src/app/connect-telegram/page.tsx` - Conexión post-aprobación
+
