@@ -1598,36 +1598,32 @@ function TipsterDashboardContent() {
           <>
             {/* Header Banner - Estilo TipsAnalistas */}
             <div className="mb-6">
-              {/* Banner Image */}
-              <div className="h-48 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-t-2xl relative overflow-hidden">
+              {/* Banner Image - Full width */}
+              <div className="h-48 sm:h-56 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-purple-900/30"></div>
                 {/* Pattern overlay */}
                 <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%)', backgroundSize: '30px 30px'}}></div>
               </div>
               
-              {/* Profile Section - Below banner */}
-              <div className="bg-white px-6 py-4 rounded-b-2xl shadow-sm border border-gray-100 border-t-0">
-                <div className="flex items-center gap-4">
-                  {/* Avatar */}
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden -mt-12">
-                    {user?.tipsterProfile?.avatarUrl ? (
-                      <img 
-                        src={user.tipsterProfile.avatarUrl} 
-                        alt="Avatar" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl font-bold text-white">
-                        {user?.tipsterProfile?.publicName?.charAt(0)?.toUpperCase() || 'T'}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Name */}
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900">{user?.tipsterProfile?.publicName || 'Mi Tienda'}</h1>
-                  </div>
+              {/* Profile Section - Completely below banner */}
+              <div className="flex items-center gap-4 mt-4 px-2">
+                {/* Avatar - Circular */}
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white shadow-md flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {user?.tipsterProfile?.avatarUrl ? (
+                    <img 
+                      src={user.tipsterProfile.avatarUrl} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xl font-bold text-white">
+                      {user?.tipsterProfile?.publicName?.charAt(0)?.toUpperCase() || 'T'}
+                    </span>
+                  )}
                 </div>
+                
+                {/* Tipster Name */}
+                <h1 className="text-xl font-bold text-gray-900">{user?.tipsterProfile?.publicName || user?.email?.split('@')[0] || 'Tipster'}</h1>
               </div>
             </div>
 
