@@ -212,6 +212,9 @@ export default function AdminDashboard() {
   const [withdrawalAdminNotes, setWithdrawalAdminNotes] = useState('');
   const [withdrawalRejectionReason, setWithdrawalRejectionReason] = useState('');
   const [processingWithdrawal, setProcessingWithdrawal] = useState(false);
+  const [withdrawalSearch, setWithdrawalSearch] = useState('');
+  const [withdrawalDateFrom, setWithdrawalDateFrom] = useState('');
+  const [withdrawalDateTo, setWithdrawalDateTo] = useState('');
 
   useEffect(() => {
     checkAuth();
