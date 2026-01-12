@@ -8,9 +8,6 @@ import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import DashboardLayout from '@/components/DashboardLayout';
 
-// Empty icon for nav items (defined outside component to avoid recreation)
-const EmptyIcon = () => <span></span>;
-
 type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
 
