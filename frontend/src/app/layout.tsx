@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body>
         <CurrencyProvider>
           {children}
+          <PWAInstallPrompt />
         </CurrencyProvider>
         <script
           dangerouslySetInnerHTML={{
