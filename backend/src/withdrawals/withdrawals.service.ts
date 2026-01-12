@@ -10,16 +10,45 @@ export class WithdrawalsService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Obtener el ID del perfil de tipster a partir del userId
+   */
+  private async getTipsterProfileId(userId: string): Promise<string | null> {
+    const profile = await this.prisma.tipsterProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    return profile?.id || null;
+  }
+
+  /**
    * Obtener saldo disponible para retiro de un tipster
    */
-  async getAvailableBalance(tipsterId: string) {
+  async getAvailableBalance(userId: string) {
+    // Primero obtener el profileId del tipster
+    const profileId = await this.getTipsterProfileId(userId);
+    if (!profileId) {
+      return {
+        totalEarnedCents: 0,
+        totalGrossCents: 0,
+        totalPlatformFeeCents: 0,
+        totalGatewayFeeCents: 0,
+        totalWithdrawnCents: 0,
+        pendingWithdrawalCents: 0,
+        availableBalanceCents: 0,
+        orderCount: 0,
+        withdrawalCount: 0,
+        pendingCount: 0,
+        currency: 'EUR',
+      };
+    }
+
     // Calcular ingresos netos totales de órdenes pagadas
     const ordersResult = (await this.prisma.$runCommandRaw({
       aggregate: 'orders',
       pipeline: [
         {
           $match: {
-            tipster_id: tipsterId,
+            tipster_id: profileId,
             status: { $in: ['PAGADA', 'ACCESS_GRANTED', 'COMPLETED', 'paid'] },
           },
         },
@@ -45,13 +74,13 @@ export class WithdrawalsService {
       orderCount: 0,
     };
 
-    // Calcular retiros ya pagados
+    // Calcular retiros ya pagados (usando el userId, no profileId)
     const withdrawalsResult = (await this.prisma.$runCommandRaw({
       aggregate: 'withdrawal_requests',
       pipeline: [
         {
           $match: {
-            tipster_id: tipsterId,
+            tipster_id: userId,
             status: { $in: ['APPROVED', 'PAID'] },
           },
         },
@@ -77,7 +106,7 @@ export class WithdrawalsService {
       pipeline: [
         {
           $match: {
-            tipster_id: tipsterId,
+            tipster_id: userId,
             status: 'PENDING',
           },
         },
