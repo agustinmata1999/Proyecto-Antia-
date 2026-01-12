@@ -92,7 +92,8 @@ export class AdminWithdrawalsController {
     @Request() req,
     @Body() dto: ApproveWithdrawalDto,
   ) {
-    return this.withdrawalsService.approveWithdrawal(id, req.user.sub, dto.adminNotes);
+    const adminId = req.user.id || req.user.sub;
+    return this.withdrawalsService.approveWithdrawal(id, adminId, dto.adminNotes);
   }
 
   /**
@@ -104,7 +105,8 @@ export class AdminWithdrawalsController {
     @Request() req,
     @Body() dto: PayWithdrawalDto,
   ) {
-    return this.withdrawalsService.markAsPaid(id, req.user.sub, dto);
+    const adminId = req.user.id || req.user.sub;
+    return this.withdrawalsService.markAsPaid(id, adminId, dto);
   }
 
   /**
@@ -116,6 +118,7 @@ export class AdminWithdrawalsController {
     @Request() req,
     @Body() dto: RejectWithdrawalDto,
   ) {
-    return this.withdrawalsService.rejectWithdrawal(id, req.user.sub, dto.rejectionReason);
+    const adminId = req.user.id || req.user.sub;
+    return this.withdrawalsService.rejectWithdrawal(id, adminId, dto.rejectionReason);
   }
 }
