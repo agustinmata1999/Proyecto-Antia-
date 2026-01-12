@@ -539,22 +539,22 @@ export default function AdminDashboard() {
     { 
       id: 'applications', 
       label: 'Solicitudes', 
-      icon: <EmptyIcon />,
+      icon: null,
       badge: applicationStats.pending > 0 ? applicationStats.pending : undefined,
       badgeColor: 'bg-yellow-500 text-white animate-pulse'
     },
-    { id: 'tipsters', label: 'Gestion Tipsters', icon: <EmptyIcon /> },
-    { id: 'sales', label: 'Ventas Checkout', icon: <EmptyIcon /> },
+    { id: 'tipsters', label: 'Gestion Tipsters', icon: null },
+    { id: 'sales', label: 'Ventas Checkout', icon: null },
     { 
       id: 'support', 
       label: 'Soporte', 
-      icon: <EmptyIcon />,
+      icon: null,
       badge: ticketStats.open > 0 ? ticketStats.open : undefined,
       badgeColor: 'bg-blue-500 text-white'
     },
-    { id: 'affiliate', label: 'Afiliacion', icon: <EmptyIcon /> },
-    { id: 'commissions', label: 'Comisiones', icon: <EmptyIcon /> },
-    { id: 'reports', label: 'Reportes', icon: <EmptyIcon /> },
+    { id: 'affiliate', label: 'Afiliacion', icon: null },
+    { id: 'commissions', label: 'Comisiones', icon: null },
+    { id: 'reports', label: 'Reportes', icon: null },
   ];
 
   return (
