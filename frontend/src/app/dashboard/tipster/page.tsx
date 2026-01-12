@@ -1997,7 +1997,17 @@ function TipsterDashboardContent() {
               {/* Tabs */}
               <div className="bg-white rounded-lg shadow-sm mb-6">
                 <div className="border-b border-gray-100">
-                  <nav className="flex">
+                  <nav className="flex flex-wrap">
+                    <button
+                      onClick={() => setPayoutsSubView('retiros')}
+                      className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
+                        payoutsSubView === 'retiros'
+                          ? 'border-green-500 text-green-600 bg-green-50/50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      💰 Solicitar Retiro
+                    </button>
                     <button
                       onClick={() => setPayoutsSubView('liquidaciones')}
                       className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
