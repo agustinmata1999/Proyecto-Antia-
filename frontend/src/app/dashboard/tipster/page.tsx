@@ -1188,7 +1188,7 @@ function TipsterDashboardContent() {
             {enabledModules.forecasts && (
               <>
                 <button
-                  onClick={() => setActiveView('products')}
+                  onClick={() => handleMobileNav('products')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeView === 'products' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1202,7 +1202,7 @@ function TipsterDashboardContent() {
             {/* Módulo: Afiliación - Solo si está habilitado */}
             {enabledModules.affiliate && (
               <button
-                onClick={() => setActiveView('referrals')}
+                onClick={() => handleMobileNav('referrals')}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeView === 'referrals' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1213,7 +1213,7 @@ function TipsterDashboardContent() {
             )}
             
             <button
-              onClick={() => setActiveView('payouts')}
+              onClick={() => handleMobileNav('payouts')}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm ${activeView === 'payouts' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <span className="flex items-center gap-3">
@@ -1232,7 +1232,7 @@ function TipsterDashboardContent() {
             {/* KYC / Datos de Cobro - Visible solo si necesita completar */}
             {kycStatus.needsKyc && (
               <button
-                onClick={() => setActiveView('kyc')}
+                onClick={() => handleMobileNav('kyc')}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm ${activeView === 'kyc' ? 'bg-orange-50 text-orange-600 font-medium' : 'text-orange-500 hover:bg-orange-50'}`}
               >
                 <span className="flex items-center gap-3">
@@ -1248,7 +1248,7 @@ function TipsterDashboardContent() {
             )}
             
             <button
-              onClick={() => setActiveView('profile')}
+              onClick={() => handleMobileNav('profile')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeView === 'profile' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1258,7 +1258,7 @@ function TipsterDashboardContent() {
               Perfil
             </button>
             <button
-              onClick={() => setActiveView('support')}
+              onClick={() => handleMobileNav('support')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeView === 'support' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1269,7 +1269,7 @@ function TipsterDashboardContent() {
             
             <div className="pt-4 mt-4 border-t border-gray-100">
               <button
-                onClick={handleLogout}
+                onClick={() => { handleLogout(); setSidebarOpen(false); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1283,9 +1283,9 @@ function TipsterDashboardContent() {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 p-8">
-        {/* Currency Selector & Notifications - Fixed top right */}
-        <div className="fixed top-4 right-8 z-50 flex items-center gap-3">
+      <main className="pt-16 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8">
+        {/* Currency Selector & Notifications - Fixed top right (desktop only) */}
+        <div className="hidden lg:flex fixed top-4 right-8 z-50 items-center gap-3">
           <NotificationsBell />
           <CurrencySelector variant="pill" />
         </div>
