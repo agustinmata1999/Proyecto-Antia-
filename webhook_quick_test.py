@@ -7,7 +7,7 @@ import requests
 import json
 import time
 
-BASE_URL = "https://tips-dashboard-1.preview.emergentagent.com"
+BASE_URL = "https://layout-master-10.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 def test_webhook_quick():

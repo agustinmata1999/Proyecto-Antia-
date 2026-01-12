@@ -26,7 +26,7 @@ Ejecuta el siguiente comando reemplazando `NUEVO-DOMINIO` con tu dominio actual:
 ```
 
 ### Ejemplo:
-Si tu preview es `https://tips-dashboard-1.preview.emergentagent.com`, ejecuta:
+Si tu preview es `https://layout-master-10.preview.emergentagent.com`, ejecuta:
 
 ```bash
 /app/cambiar_dominio.sh tipster-platform.preview.emergentagent.com
