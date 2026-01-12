@@ -325,6 +325,13 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 
 ## Issues Pendientes
 
+### P0 (Refactorización - Bloqueada Técnicamente)
+- **Refactorizar Dashboard Layout:** La lógica del sidebar responsive está duplicada en los tres dashboards (tipster, admin, client). Existe un componente `DashboardLayout.tsx` que funciona correctamente con el client dashboard, pero al intentar aplicarlo a admin y tipster, se produce un error de parsing de SWC: "Unexpected token DashboardLayout. Expected jsx identifier". Este error NO está relacionado con la sintaxis del código (todos los brackets están balanceados y el código es válido TypeScript/JSX).
+  - **Estado:** Bloqueado por bug de tooling (SWC/Next.js)
+  - **Workaround actual:** Los dashboards funcionan con código duplicado
+  - **Impacto:** Solo afecta mantenibilidad, no funcionalidad
+  - **Nota para siguiente sesión:** Investigar si es problema de encoding UTF-8 o incompatibilidad específica de SWC con archivos grandes (~2000+ líneas)
+
 ### P1 (Alta Prioridad)
 - ~~Responsive design para toda la plataforma~~ ✅ COMPLETADO
 
