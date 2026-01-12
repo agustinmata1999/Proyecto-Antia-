@@ -73,6 +73,7 @@ import { HealthController } from './health.controller';
     NotificationsModule,
     UploadModule,
     SimulatorModule,
+    WithdrawalsModule,
   ],
   controllers: [HealthController],
 })
