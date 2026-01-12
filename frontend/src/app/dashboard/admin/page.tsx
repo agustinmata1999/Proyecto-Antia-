@@ -537,23 +537,23 @@ export default function AdminDashboard() {
   const navItems = [
     { 
       id: 'applications', 
-      label: '📋 Solicitudes', 
+      label: 'Solicitudes', 
       icon: <EmptyIcon />,
       badge: applicationStats.pending > 0 ? applicationStats.pending : undefined,
       badgeColor: 'bg-yellow-500 text-white animate-pulse'
     },
-    { id: 'tipsters', label: '👥 Gestión Tipsters', icon: <EmptyIcon /> },
-    { id: 'sales', label: '🛒 Ventas Checkout', icon: <EmptyIcon /> },
+    { id: 'tipsters', label: 'Gestion Tipsters', icon: <EmptyIcon /> },
+    { id: 'sales', label: 'Ventas Checkout', icon: <EmptyIcon /> },
     { 
       id: 'support', 
-      label: '🎫 Soporte', 
+      label: 'Soporte', 
       icon: <EmptyIcon />,
       badge: ticketStats.open > 0 ? ticketStats.open : undefined,
       badgeColor: 'bg-blue-500 text-white'
     },
-    { id: 'affiliate', label: '🤝 Afiliación', icon: <EmptyIcon /> },
-    { id: 'commissions', label: '💰 Comisiones', icon: <EmptyIcon /> },
-    { id: 'reports', label: '📊 Reportes', icon: <EmptyIcon /> },
+    { id: 'affiliate', label: 'Afiliacion', icon: <EmptyIcon /> },
+    { id: 'commissions', label: 'Comisiones', icon: <EmptyIcon /> },
+    { id: 'reports', label: 'Reportes', icon: <EmptyIcon /> },
   ];
 
   return (
