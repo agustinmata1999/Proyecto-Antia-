@@ -2133,14 +2133,14 @@ export default function AdminDashboard() {
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-gray-100 text-gray-500'
                   }`}>
-                    {selectedTipsterDetail.modules.forecasts ? '✓' : '✗'} Pronósticos
+                    {selectedTipsterDetail.modules.forecasts ? '✓' : '✗'} Pronosticos
                   </div>
                   <div className={`px-3 py-1 rounded text-sm ${
                     selectedTipsterDetail.modules.affiliate 
                       ? 'bg-purple-100 text-purple-800' 
                       : 'bg-gray-100 text-gray-500'
                   }`}>
-                    {selectedTipsterDetail.modules.affiliate ? '✓' : '✗'} Afiliación
+                    {selectedTipsterDetail.modules.affiliate ? '✓' : '✗'} Afiliacion
                   </div>
                 </div>
               </div>
@@ -2158,6 +2158,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
