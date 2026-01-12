@@ -2212,12 +2212,9 @@ function TipsterDashboardContent() {
                         ))}
                       </div>
                     )}
-                                    <p className="text-xs text-red-500 mt-1">{w.rejectionReason}</p>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                  <span className="font-semibold text-gray-900">{formatPrice(w.amountCents)}</span>
-                                </td>
+                  </div>
+                </div>
+              )}
                                 <td className="px-6 py-4 text-center">
                                   {w.invoicePdfUrl && (
                                     <a
