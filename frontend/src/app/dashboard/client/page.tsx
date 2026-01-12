@@ -80,6 +80,7 @@ export default function ClientDashboard() {
   const router = useRouter();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Data states
   const [profile, setProfile] = useState<any>(null);
