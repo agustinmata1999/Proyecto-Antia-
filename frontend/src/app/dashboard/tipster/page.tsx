@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { productsApi, referralsApi, payoutsApi, authApi, telegramApi, ordersApi, settlementsApi, userModulesApi, affiliateApi, usersApi, tipsterApi } from '@/lib/api';
@@ -11,6 +11,7 @@ import KycBanner from '@/components/KycBanner';
 import KycForm from '@/components/KycForm';
 import { NotificationsBell } from '@/components/NotificationsBell';
 import TipsterTelegramAutoView from '@/components/tipster/TipsterTelegramAutoView';
+import DashboardLayout from '@/components/DashboardLayout';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'kyc' | 'support';
 type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
