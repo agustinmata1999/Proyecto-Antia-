@@ -2765,7 +2765,7 @@ function TipsterDashboardContent() {
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 
