@@ -8,7 +8,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://layout-master-10.preview.emergentagent.com"
+BASE_URL = "https://tipstats.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
