@@ -2544,6 +2544,180 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Modal: Acciones de Retiro */}
+      {showWithdrawalActionModal && selectedWithdrawal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => {
+          setShowWithdrawalActionModal(false);
+          resetWithdrawalForm();
+        }}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className={`p-6 text-white ${
+              withdrawalAction === 'approve' ? 'bg-blue-600' :
+              withdrawalAction === 'pay' ? 'bg-green-600' :
+              'bg-red-600'
+            }`}>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">
+                    {withdrawalAction === 'approve' ? '✓' : withdrawalAction === 'pay' ? '💰' : '❌'}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">
+                    {withdrawalAction === 'approve' ? 'Aprobar Solicitud' :
+                     withdrawalAction === 'pay' ? 'Marcar como Pagado' :
+                     'Rechazar Solicitud'}
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    {selectedWithdrawal.invoiceNumber} - {selectedWithdrawal.tipsterName}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Summary */}
+            <div className="p-6 bg-gray-50 border-b">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Importe</p>
+                  <p className="font-bold text-xl">{formatCurrency(selectedWithdrawal.amountCents)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Método de pago</p>
+                  <p className="font-medium">{selectedWithdrawal.bankAccountType || 'No especificado'}</p>
+                </div>
+                {selectedWithdrawal.bankAccountDetails?.iban && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500">IBAN</p>
+                    <p className="font-mono text-sm">{selectedWithdrawal.bankAccountDetails.iban}</p>
+                  </div>
+                )}
+                {selectedWithdrawal.bankAccountDetails?.paypalEmail && (
+                  <div className="col-span-2">
+                    <p className="text-gray-500">PayPal</p>
+                    <p className="font-mono text-sm">{selectedWithdrawal.bankAccountDetails.paypalEmail}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {withdrawalAction === 'pay' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Método de pago usado
+                    </label>
+                    <select
+                      value={withdrawalPaymentMethod}
+                      onChange={(e) => setWithdrawalPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="BANK_TRANSFER">Transferencia bancaria</option>
+                      <option value="PAYPAL">PayPal</option>
+                      <option value="CRYPTO">Crypto</option>
+                      <option value="OTHER">Otro</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Referencia del pago (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={withdrawalPaymentRef}
+                      onChange={(e) => setWithdrawalPaymentRef(e.target.value)}
+                      placeholder="Ej: REF-123456"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </>
+              )}
+
+              {withdrawalAction === 'reject' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Motivo del rechazo <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={withdrawalRejectionReason}
+                    onChange={(e) => setWithdrawalRejectionReason(e.target.value)}
+                    placeholder="Explica el motivo por el cual se rechaza esta solicitud..."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 resize-none"
+                  />
+                </div>
+              )}
+
+              {(withdrawalAction === 'approve' || withdrawalAction === 'pay') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notas internas (opcional)
+                  </label>
+                  <textarea
+                    value={withdrawalAdminNotes}
+                    onChange={(e) => setWithdrawalAdminNotes(e.target.value)}
+                    placeholder="Añadir notas internas..."
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+              )}
+
+              {/* Warning for reject */}
+              {withdrawalAction === 'reject' && (
+                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">⚠️</span>
+                    <div className="text-sm text-red-800">
+                      <p className="font-medium mb-1">Esta acción no se puede deshacer</p>
+                      <p className="text-red-700">El tipster será notificado del rechazo y podrá ver el motivo.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowWithdrawalActionModal(false);
+                  resetWithdrawalForm();
+                }}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleWithdrawalAction}
+                disabled={processingWithdrawal || (withdrawalAction === 'reject' && !withdrawalRejectionReason.trim())}
+                className={`px-5 py-2.5 text-white rounded-lg font-medium transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  withdrawalAction === 'approve' ? 'bg-blue-600 hover:bg-blue-700' :
+                  withdrawalAction === 'pay' ? 'bg-green-600 hover:bg-green-700' :
+                  'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {processingWithdrawal ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    {withdrawalAction === 'approve' ? '✓ Aprobar' :
+                     withdrawalAction === 'pay' ? '💰 Confirmar Pago' :
+                     '❌ Rechazar'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
