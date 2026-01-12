@@ -43,7 +43,7 @@ function TipsterDashboardContent() {
   const router = useRouter();
   const { formatPrice, symbol } = useCurrency();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
-  const [payoutsSubView, setPayoutsSubView] = useState<PayoutsSubView>('liquidaciones');
+  const [payoutsSubView, setPayoutsSubView] = useState<PayoutsSubView>('retiros');
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState([]);
   const [metrics, setMetrics] = useState<any>(null);
