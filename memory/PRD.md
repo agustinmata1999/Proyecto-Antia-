@@ -252,6 +252,29 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 
 ## Historial de Cambios
 
+### 2026-01-12 - PWA (Progressive Web App)
+
+**Implementación completa de PWA para instalación como app nativa:**
+
+- **Manifest.json:** Configuración completa con nombre, iconos, shortcuts, tema
+- **Service Worker:** Cache de assets estáticos, modo offline, notificaciones push
+- **Iconos:** Generados en todas las resoluciones necesarias (72-512px)
+- **Apple Support:** Meta tags para iOS/Safari (apple-touch-icon, apple-mobile-web-app-capable)
+- **Install Prompt:** Componente que muestra banner para instalar la app
+- **Offline Page:** Página dedicada cuando no hay conexión
+
+**Archivos creados:**
+- `/app/frontend/public/manifest.json`
+- `/app/frontend/public/sw.js`
+- `/app/frontend/public/offline.html`
+- `/app/frontend/public/icons/*` (todos los tamaños)
+- `/app/frontend/src/components/PWAInstallPrompt.tsx`
+
+**Archivos modificados:**
+- `/app/frontend/src/app/layout.tsx` - Meta tags, manifest link, SW registration
+
+---
+
 ### 2026-01-12 - Responsive Design Completo
 
 **Implementación de diseño responsive para toda la plataforma:**
