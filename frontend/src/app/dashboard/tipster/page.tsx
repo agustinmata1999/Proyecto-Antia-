@@ -2114,6 +2114,50 @@ function TipsterDashboardContent() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Foto de Perfil */}
+              <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Foto de Perfil</h2>
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    {user?.tipsterProfile?.avatarUrl ? (
+                      <img 
+                        src={user.tipsterProfile.avatarUrl} 
+                        alt="Avatar" 
+                        className="w-24 h-24 rounded-full object-cover border-4 border-blue-100"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center border-4 border-blue-100">
+                        <span className="text-3xl font-bold text-white">
+                          {user?.tipsterProfile?.publicName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                    )}
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      ref={avatarInputRef}
+                      onChange={handleAvatarUpload}
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    >
+                      {uploadingAvatar ? 'Subiendo...' : 'Cambiar foto'}
+                    </button>
+                    <p className="text-xs text-gray-500 mt-2">JPG, PNG, GIF o WEBP. Máximo 2MB.</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Información Personal */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Información Personal</h2>
