@@ -1141,7 +1141,7 @@ function TipsterDashboardContent() {
   const navItems = [
     { id: 'dashboard', label: 'Inicio', icon: <HomeIcon /> },
     ...(enabledModules.forecasts ? [{ id: 'products', label: 'Crear producto', icon: <ProductIcon /> }] : []),
-    ...(enabledModules.affiliate ? [{ id: 'referrals', label: 'Campañas', icon: <UsersIcon /> }] : []),
+    ...(enabledModules.affiliate ? [{ id: 'referrals', label: 'Campanas', icon: <UsersIcon /> }] : []),
     { 
       id: 'payouts', 
       label: 'Liquidaciones', 
