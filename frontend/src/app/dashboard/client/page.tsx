@@ -365,32 +365,34 @@ export default function ClientDashboard() {
     );
   }
 
-  // Nav items for DashboardLayout
+  // Emoji icons for nav items
+  const EmojiIcon = ({ emoji }: { emoji: string }) => <span>{emoji}</span>;
+
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <span>🏠</span> },
+    { id: 'dashboard', label: 'Dashboard', icon: <EmojiIcon emoji="🏠" /> },
     { 
       id: 'purchases', 
       label: 'Mis Compras', 
-      icon: <span>🛒</span>,
+      icon: <EmojiIcon emoji="🛒" />,
       badge: activePurchases > 0 ? activePurchases : undefined,
       badgeColor: 'bg-green-100 text-green-700'
     },
     { 
       id: 'subscriptions', 
       label: 'Mis Suscripciones', 
-      icon: <span>🔄</span>,
+      icon: <EmojiIcon emoji="🔄" />,
       badge: subscriptions.filter(s => s.status === 'active').length > 0 ? subscriptions.filter(s => s.status === 'active').length : undefined,
       badgeColor: 'bg-blue-100 text-blue-700'
     },
-    { id: 'payments', label: 'Facturas y Pagos', icon: <span>📄</span> },
+    { id: 'payments', label: 'Facturas y Pagos', icon: <EmojiIcon emoji="📄" /> },
     { 
       id: 'support', 
       label: 'Soporte', 
-      icon: <span>💬</span>,
+      icon: <EmojiIcon emoji="💬" />,
       badge: openTickets > 0 ? openTickets : undefined,
       badgeColor: 'bg-yellow-100 text-yellow-700'
     },
-    { id: 'profile', label: 'Mi Perfil', icon: <span>⚙️</span> },
+    { id: 'profile', label: 'Mi Perfil', icon: <EmojiIcon emoji="⚙️" /> },
   ];
 
   return (
