@@ -1596,121 +1596,219 @@ function TipsterDashboardContent() {
 
         {activeView === 'products' && (
           <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Mis Productos</h1>
-              <p className="text-gray-600 mt-1">Gestiona tus pronósticos y suscripciones</p>
+            {/* Catálogo Header - Estilo Alex */}
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden shadow-xl mb-8">
+              {/* Banner Image */}
+              <div className="h-40 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 relative">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+              </div>
+              
+              {/* Profile Section */}
+              <div className="px-6 pb-6 -mt-16 relative">
+                <div className="flex items-end gap-4">
+                  {/* Avatar */}
+                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 border-4 border-slate-900 flex items-center justify-center overflow-hidden shadow-lg">
+                    {user?.tipsterProfile?.avatarUrl ? (
+                      <img 
+                        src={user.tipsterProfile.avatarUrl} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-4xl font-bold text-white">
+                        {user?.tipsterProfile?.publicName?.charAt(0)?.toUpperCase() || 'T'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Info */}
+                  <div className="pb-2">
+                    <h1 className="text-2xl font-bold text-white">{user?.tipsterProfile?.publicName || 'Mi Tienda'}</h1>
+                    <p className="text-slate-400 text-sm mt-1">Catálogo de productos</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
+            {/* Tabs: Productos */}
+            <div className="bg-white rounded-xl shadow-sm mb-6">
+              <div className="border-b border-gray-100 px-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-gray-900">Lista de Productos</h2>
+                  <div className="flex">
+                    <button className="px-6 py-4 text-sm font-semibold text-blue-600 border-b-2 border-blue-600">
+                      Productos
+                    </button>
+                  </div>
                   <button 
                     onClick={handleCreateProduct}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                    className="my-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-2"
+                    data-testid="create-product-btn"
                   >
-                    + Crear Producto
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Crear Producto
                   </button>
                 </div>
               </div>
-              
-              <div className="p-6">
-                {products.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500 mb-4">No tienes productos aún</p>
-                    <button 
-                      onClick={handleCreateProduct}
-                      className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-                    >
-                      Crear tu primer producto
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {products.map((product: any) => (
-                      <div key={product.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">{product.title}</h3>
-                            <p className="text-sm text-gray-500 mt-1">{product.description}</p>
-                            <div className="flex items-center gap-4 mt-2">
-                              <span className="text-sm font-medium text-green-600">
-                                €{(product.priceCents / 100).toFixed(2)}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded ${product.active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                {product.active ? 'Activo' : 'Pausado'}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {product.billingType === 'SUBSCRIPTION' ? 'Suscripción' : 'Pago único'}
-                              </span>
-                              {product.telegramChannelId && (
-                                <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700">
-                                  📱 {getChannelNameForProduct(product.telegramChannelId)}
+            </div>
+
+            {/* Products Grid */}
+            {(products as any[]).length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No tienes productos aún</h3>
+                <p className="text-gray-500 mb-6">Crea tu primer producto para empezar a vender</p>
+                <button 
+                  onClick={handleCreateProduct}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Crear Producto
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(products as any[]).map((product: any) => (
+                  <div 
+                    key={product.id} 
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group"
+                  >
+                    <div className="p-5">
+                      <div className="flex items-start gap-4">
+                        {/* Product Icon */}
+                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          product.billingType === 'SUBSCRIPTION' 
+                            ? 'bg-blue-100' 
+                            : 'bg-amber-100'
+                        }`}>
+                          {product.billingType === 'SUBSCRIPTION' ? (
+                            <svg className="w-7 h-7 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                            </svg>
+                          ) : (
+                            <svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                          )}
+                        </div>
+                        
+                        {/* Product Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg">{product.title}</h3>
+                              {product.description && (
+                                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                              )}
+                              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                                  product.active 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {product.active ? '● Activo' : '○ Pausado'}
                                 </span>
+                                <span className="text-xs text-gray-500">
+                                  {product.billingType === 'SUBSCRIPTION' ? 'Suscripción mensual' : 'Pago único'}
+                                </span>
+                                {product.telegramChannelId && (
+                                  <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                    </svg>
+                                    {getChannelNameForProduct(product.telegramChannelId)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Price & Actions */}
+                            <div className="text-right flex-shrink-0">
+                              <div className="text-2xl font-bold text-gray-900">
+                                {formatPrice(product.priceCents)}
+                              </div>
+                              {product.billingType === 'SUBSCRIPTION' && (
+                                <span className="text-xs text-gray-500">/mes</span>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button 
-                              onClick={() => {
-                                const checkoutUrl = `${window.location.origin}/checkout/${product.id}`;
-                                const suggestedText = `🔥 ${product.title}\n\n${product.description || ''}\n\n💰 Precio: €${(product.priceCents / 100).toFixed(2)}\n\n👉 Comprar aquí: ${checkoutUrl}`;
-                                navigator.clipboard.writeText(suggestedText);
-                                alert('✅ Texto copiado al portapapeles!\n\nPégalo en tu canal de Telegram, Instagram, o donde quieras.');
-                              }}
-                              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-green-700"
-                              title="Copiar link de checkout con texto sugerido"
-                            >
-                              📋 Copiar Link
-                            </button>
-                            <button 
-                              onClick={() => handleEditProduct(product)}
-                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                            >
-                              Editar
-                            </button>
-                            <button 
-                              onClick={() => handleViewProduct(product)}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                            >
-                              Ver
-                            </button>
-                          </div>
-                        </div>
-                        {/* Link de Checkout Directo - Para publicar en canales */}
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-green-600 font-medium mb-1">💳 Link de Pago Directo (para tu canal)</p>
-                              <code className="text-xs text-green-800 bg-white px-2 py-1 rounded border border-green-200 block truncate">
-                                {typeof window !== 'undefined' ? window.location.origin : ''}/checkout/{product.id}
-                              </code>
-                            </div>
-                            <button
-                              onClick={() => {
-                                const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-                                navigator.clipboard.writeText(`${baseUrl}/checkout/${product.id}`);
-                                alert('✅ Link de checkout copiado');
-                              }}
-                              className="flex-shrink-0 px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                            >
-                              📋 Copiar
-                            </button>
-                          </div>
-                          <p className="text-xs text-green-700 mt-2">
-                            📢 Publica este link en tu canal. El cliente paga y automáticamente recibe acceso via Telegram.
-                          </p>
                         </div>
                       </div>
-                    ))}
+                      
+                      {/* Actions Row */}
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleEditProduct(product)}
+                            className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition flex items-center gap-1.5"
+                            data-testid={`edit-product-${product.id}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Editar
+                          </button>
+                          <button 
+                            onClick={() => handleViewProduct(product)}
+                            className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition flex items-center gap-1.5"
+                            data-testid={`view-product-${product.id}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Ver
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                              navigator.clipboard.writeText(`${baseUrl}/checkout/${product.id}`);
+                              alert('✅ Link de checkout copiado');
+                            }}
+                            className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition flex items-center gap-1.5"
+                            data-testid={`copy-link-${product.id}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Copiar Link
+                          </button>
+                          <button 
+                            onClick={() => {
+                              const checkoutUrl = `${window.location.origin}/checkout/${product.id}`;
+                              const suggestedText = `🔥 ${product.title}\n\n${product.description || ''}\n\n💰 Precio: ${formatPrice(product.priceCents)}\n\n👉 Comprar aquí: ${checkoutUrl}`;
+                              navigator.clipboard.writeText(suggestedText);
+                              alert('✅ Texto promocional copiado al portapapeles!\n\nPégalo en tu canal de Telegram, Instagram, o donde quieras.');
+                            }}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center gap-2"
+                            data-testid={`share-product-${product.id}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            Compartir
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            </div>
+            )}
 
             {/* Historial de Ventas */}
-            <div className="bg-white rounded-lg shadow mt-6">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-white rounded-xl shadow-sm mt-8">
+              <div className="p-6 border-b border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900">Historial de Ventas</h2>
                 <p className="text-sm text-gray-500 mt-1">Todas las ventas realizadas a través de tus productos</p>
               </div>
