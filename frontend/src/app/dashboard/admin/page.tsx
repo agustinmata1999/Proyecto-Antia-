@@ -301,6 +301,96 @@ export default function AdminDashboard() {
     }
   };
 
+  // ==================== WITHDRAWALS ADMIN FUNCTIONS ====================
+
+  const loadAdminWithdrawals = async () => {
+    setWithdrawalsLoading(true);
+    try {
+      const response = await withdrawalsApi.admin.getAll(
+        withdrawalFilter ? { status: withdrawalFilter } : undefined
+      );
+      setAdminWithdrawals(response.data.withdrawals || []);
+      setWithdrawalStats(response.data.stats || {
+        pending: { count: 0, totalCents: 0 },
+        approved: { count: 0, totalCents: 0 },
+        paid: { count: 0, totalCents: 0 },
+        rejected: { count: 0, totalCents: 0 },
+      });
+    } catch (err) {
+      console.error('Error loading withdrawals:', err);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  const loadWithdrawalStats = async () => {
+    try {
+      const response = await withdrawalsApi.admin.getAll();
+      setWithdrawalStats(response.data.stats || {
+        pending: { count: 0, totalCents: 0 },
+        approved: { count: 0, totalCents: 0 },
+        paid: { count: 0, totalCents: 0 },
+        rejected: { count: 0, totalCents: 0 },
+      });
+    } catch (err) {
+      console.error('Error loading withdrawal stats:', err);
+    }
+  };
+
+  const handleWithdrawalAction = async () => {
+    if (!selectedWithdrawal || !withdrawalAction) return;
+
+    setProcessingWithdrawal(true);
+    try {
+      let response;
+      
+      if (withdrawalAction === 'approve') {
+        response = await withdrawalsApi.admin.approve(selectedWithdrawal.id, withdrawalAdminNotes || undefined);
+      } else if (withdrawalAction === 'pay') {
+        response = await withdrawalsApi.admin.pay(selectedWithdrawal.id, {
+          paymentMethod: withdrawalPaymentMethod,
+          paymentReference: withdrawalPaymentRef || undefined,
+          adminNotes: withdrawalAdminNotes || undefined,
+        });
+      } else if (withdrawalAction === 'reject') {
+        if (!withdrawalRejectionReason.trim()) {
+          alert('Por favor, indica el motivo del rechazo');
+          setProcessingWithdrawal(false);
+          return;
+        }
+        response = await withdrawalsApi.admin.reject(selectedWithdrawal.id, withdrawalRejectionReason);
+      }
+
+      if (response?.data.success) {
+        alert(`✅ ${withdrawalAction === 'approve' ? 'Solicitud aprobada' : withdrawalAction === 'pay' ? 'Marcado como pagado' : 'Solicitud rechazada'}`);
+        setShowWithdrawalActionModal(false);
+        resetWithdrawalForm();
+        loadAdminWithdrawals();
+        loadWithdrawalStats();
+      }
+    } catch (err: any) {
+      console.error('Error processing withdrawal:', err);
+      alert('Error: ' + (err.response?.data?.message || 'No se pudo procesar'));
+    } finally {
+      setProcessingWithdrawal(false);
+    }
+  };
+
+  const resetWithdrawalForm = () => {
+    setSelectedWithdrawal(null);
+    setWithdrawalAction(null);
+    setWithdrawalPaymentMethod('BANK_TRANSFER');
+    setWithdrawalPaymentRef('');
+    setWithdrawalAdminNotes('');
+    setWithdrawalRejectionReason('');
+  };
+
+  const openWithdrawalAction = (withdrawal: any, action: 'approve' | 'pay' | 'reject') => {
+    setSelectedWithdrawal(withdrawal);
+    setWithdrawalAction(action);
+    setShowWithdrawalActionModal(true);
+  };
+
   const handleAdminReply = async () => {
     if (!selectedAdminTicket || !adminReplyMessage.trim()) return;
     
