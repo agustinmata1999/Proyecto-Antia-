@@ -433,3 +433,24 @@ export const uploadApi = {
     });
   },
 };
+
+// Withdrawals API (Solicitudes de Retiro)
+export const withdrawalsApi = {
+  // Tipster endpoints
+  getBalance: () => api.get('/withdrawals/balance'),
+  createRequest: (data: { amountCents: number; notes?: string }) => 
+    api.post('/withdrawals/request', data),
+  getMy: () => api.get('/withdrawals/my'),
+
+  // Admin endpoints
+  admin: {
+    getAll: (filters?: { status?: string; tipsterId?: string; startDate?: string; endDate?: string }) =>
+      api.get('/admin/withdrawals', { params: filters }),
+    approve: (id: string, adminNotes?: string) =>
+      api.patch(`/admin/withdrawals/${id}/approve`, { adminNotes }),
+    pay: (id: string, data: { paymentMethod: string; paymentReference?: string; adminNotes?: string }) =>
+      api.patch(`/admin/withdrawals/${id}/pay`, data),
+    reject: (id: string, rejectionReason: string) =>
+      api.patch(`/admin/withdrawals/${id}/reject`, { rejectionReason }),
+  },
+};
