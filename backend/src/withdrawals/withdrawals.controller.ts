@@ -9,12 +9,46 @@ import {
   UseGuards,
   Request,
   Logger,
+  Res,
+  NotFoundException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { WithdrawalsService } from './withdrawals.service';
 import { CreateWithdrawalDto, PayWithdrawalDto, RejectWithdrawalDto, ApproveWithdrawalDto } from './dto/withdrawals.dto';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// ==================== PUBLIC INVOICE CONTROLLER ====================
+@Controller('invoices')
+export class InvoicesController {
+  private readonly logger = new Logger(InvoicesController.name);
+
+  /**
+   * Servir archivo de factura (público)
+   */
+  @Get(':filename')
+  async getInvoice(@Param('filename') filename: string, @Res() res: Response) {
+    try {
+      // Sanitizar nombre de archivo
+      const safeFilename = filename.replace(/[^a-zA-Z0-9\-_.]/g, '');
+      const filePath = path.join(process.cwd(), 'public', 'invoices', safeFilename);
+
+      if (!fs.existsSync(filePath)) {
+        throw new NotFoundException('Factura no encontrada');
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      res.setHeader('Content-Type', 'text/html');
+      res.send(content);
+    } catch (error) {
+      this.logger.error(`Error serving invoice ${filename}: ${error}`);
+      throw new NotFoundException('Factura no encontrada');
+    }
+  }
+}
 
 @Controller('withdrawals')
 @UseGuards(JwtAuthGuard)
