@@ -6,6 +6,7 @@ import { adminApi, authApi, currencyApi, affiliateApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import DashboardLayout from '@/components/DashboardLayout';
 
 type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
