@@ -8,7 +8,7 @@ import CurrencySelector from '@/components/CurrencySelector';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import DashboardLayout from '@/components/DashboardLayout';
 
-type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate';
+type AdminView = 'tipsters' | 'applications' | 'sales' | 'support' | 'commissions' | 'reports' | 'affiliate' | 'withdrawals';
 type ReportType = 'summary' | 'sales' | 'platform' | 'settlements' | 'tipsters';
 
 interface Tipster {
