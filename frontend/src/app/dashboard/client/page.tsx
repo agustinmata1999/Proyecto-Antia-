@@ -1057,7 +1057,6 @@ export default function ClientDashboard() {
             </div>
           </>
         )}
-      </main>
 
       {/* Modal: Crear Ticket */}
       {showTicketForm && (
