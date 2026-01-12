@@ -1793,13 +1793,6 @@ function TipsterDashboardContent() {
                 ))}
               </div>
             )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Historial de Ventas */}
             <div className="bg-white rounded-xl shadow-sm mt-8">
