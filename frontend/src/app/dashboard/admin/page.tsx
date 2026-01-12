@@ -1725,7 +1725,6 @@ export default function AdminDashboard() {
         {activeView === 'affiliate' && (
           <AffiliateAdminPanel />
         )}
-      </main>
 
       {/* Commission Modal */}
       {showCommissionModal && selectedTipster && (
