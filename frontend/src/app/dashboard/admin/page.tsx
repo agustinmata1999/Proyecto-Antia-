@@ -1845,6 +1845,268 @@ export default function AdminDashboard() {
           <AffiliateAdminPanel />
         )}
 
+        {/* Vista: Retiros / Pagos */}
+        {activeView === 'withdrawals' && (
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">💸 Retiros / Pagos</h2>
+              <p className="text-gray-500 mt-1">Gestiona las solicitudes de retiro de los tipsters</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div 
+                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'PENDING' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-100 bg-white hover:border-yellow-200'}`}
+                onClick={() => setWithdrawalFilter(withdrawalFilter === 'PENDING' ? '' : 'PENDING')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">Pendientes</p>
+                    <p className="text-2xl font-bold text-yellow-600">{withdrawalStats.pending.count}</p>
+                  </div>
+                  <span className="text-3xl">⏳</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {formatCurrency(withdrawalStats.pending.totalCents)}
+                </p>
+              </div>
+
+              <div 
+                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'APPROVED' ? 'border-blue-400 bg-blue-50' : 'border-gray-100 bg-white hover:border-blue-200'}`}
+                onClick={() => setWithdrawalFilter(withdrawalFilter === 'APPROVED' ? '' : 'APPROVED')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">Aprobadas</p>
+                    <p className="text-2xl font-bold text-blue-600">{withdrawalStats.approved.count}</p>
+                  </div>
+                  <span className="text-3xl">✓</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {formatCurrency(withdrawalStats.approved.totalCents)}
+                </p>
+              </div>
+
+              <div 
+                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'PAID' ? 'border-green-400 bg-green-50' : 'border-gray-100 bg-white hover:border-green-200'}`}
+                onClick={() => setWithdrawalFilter(withdrawalFilter === 'PAID' ? '' : 'PAID')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">Pagadas</p>
+                    <p className="text-2xl font-bold text-green-600">{withdrawalStats.paid.count}</p>
+                  </div>
+                  <span className="text-3xl">💰</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {formatCurrency(withdrawalStats.paid.totalCents)}
+                </p>
+              </div>
+
+              <div 
+                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'REJECTED' ? 'border-red-400 bg-red-50' : 'border-gray-100 bg-white hover:border-red-200'}`}
+                onClick={() => setWithdrawalFilter(withdrawalFilter === 'REJECTED' ? '' : 'REJECTED')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">Rechazadas</p>
+                    <p className="text-2xl font-bold text-red-600">{withdrawalStats.rejected.count}</p>
+                  </div>
+                  <span className="text-3xl">❌</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {formatCurrency(withdrawalStats.rejected.totalCents)}
+                </p>
+              </div>
+            </div>
+
+            {/* Filter Info */}
+            {withdrawalFilter && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Filtro activo:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  withdrawalFilter === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                  withdrawalFilter === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
+                  withdrawalFilter === 'PAID' ? 'bg-green-100 text-green-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {withdrawalFilter === 'PENDING' ? 'Pendientes' :
+                   withdrawalFilter === 'APPROVED' ? 'Aprobadas' :
+                   withdrawalFilter === 'PAID' ? 'Pagadas' : 'Rechazadas'}
+                </span>
+                <button 
+                  onClick={() => setWithdrawalFilter('')}
+                  className="text-sm text-gray-400 hover:text-gray-600"
+                >
+                  ✕ Quitar filtro
+                </button>
+              </div>
+            )}
+
+            {/* Withdrawals Table */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 className="font-semibold text-gray-900">Lista de Solicitudes</h3>
+                <button
+                  onClick={loadAdminWithdrawals}
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  🔄 Actualizar
+                </button>
+              </div>
+
+              {withdrawalsLoading ? (
+                <div className="p-8 text-center">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Cargando...</p>
+                </div>
+              ) : adminWithdrawals.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">💸</span>
+                  </div>
+                  <p className="text-gray-500 font-medium">No hay solicitudes de retiro</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {withdrawalFilter ? 'No hay solicitudes con este filtro' : 'Cuando un tipster solicite un retiro, aparecerá aquí'}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100 bg-gray-50">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factura</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipster</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Importe</th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {adminWithdrawals.map((w: any) => (
+                        <tr key={w.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            <div>
+                              <span className="font-mono text-sm text-gray-900">{w.invoiceNumber}</span>
+                              {w.invoicePdfUrl && (
+                                <a
+                                  href={w.invoicePdfUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-xs text-blue-600 hover:underline mt-1"
+                                >
+                                  📄 Ver factura
+                                </a>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="font-medium text-gray-900">{w.tipsterName}</p>
+                              <p className="text-xs text-gray-500">{w.tipsterEmail}</p>
+                              {w.tipsterLegalName && w.tipsterLegalName !== w.tipsterName && (
+                                <p className="text-xs text-gray-400">{w.tipsterLegalName}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }) : '-'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              w.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                              w.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
+                              w.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                              w.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {w.status === 'PAID' ? '✅ Pagado' :
+                               w.status === 'APPROVED' ? '✓ Aprobado' :
+                               w.status === 'PENDING' ? '⏳ Pendiente' :
+                               w.status === 'REJECTED' ? '❌ Rechazado' :
+                               w.status}
+                            </span>
+                            {w.paidAt && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Pagado: {new Date(w.paidAt).toLocaleDateString('es-ES')}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm">
+                              <span className={`px-2 py-0.5 rounded text-xs ${
+                                w.bankAccountType === 'IBAN' ? 'bg-blue-50 text-blue-700' :
+                                w.bankAccountType === 'PAYPAL' ? 'bg-indigo-50 text-indigo-700' :
+                                'bg-orange-50 text-orange-700'
+                              }`}>
+                                {w.bankAccountType || 'N/A'}
+                              </span>
+                              {w.bankAccountDetails && (
+                                <p className="text-xs text-gray-400 mt-1 font-mono truncate max-w-[120px]">
+                                  {w.bankAccountDetails.iban?.slice(-8) || w.bankAccountDetails.paypalEmail?.split('@')[0] || '***'}
+                                </p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="font-semibold text-gray-900">{formatCurrency(w.amountCents)}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              {w.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    onClick={() => openWithdrawalAction(w, 'approve')}
+                                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200 transition"
+                                  >
+                                    ✓ Aprobar
+                                  </button>
+                                  <button
+                                    onClick={() => openWithdrawalAction(w, 'pay')}
+                                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium hover:bg-green-200 transition"
+                                  >
+                                    💰 Pagar
+                                  </button>
+                                  <button
+                                    onClick={() => openWithdrawalAction(w, 'reject')}
+                                    className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition"
+                                  >
+                                    ✕
+                                  </button>
+                                </>
+                              )}
+                              {w.status === 'APPROVED' && (
+                                <button
+                                  onClick={() => openWithdrawalAction(w, 'pay')}
+                                  className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
+                                >
+                                  💰 Marcar Pagado
+                                </button>
+                              )}
+                              {(w.status === 'PAID' || w.status === 'REJECTED') && (
+                                <span className="text-xs text-gray-400">Sin acciones</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       {/* Commission Modal */}
       {showCommissionModal && selectedTipster && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
