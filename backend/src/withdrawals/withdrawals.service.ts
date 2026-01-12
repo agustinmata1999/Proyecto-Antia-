@@ -549,8 +549,9 @@ export class WithdrawalsService {
       const filePath = path.join(invoicesDir, fileName);
       fs.writeFileSync(filePath, html);
 
-      const baseUrl = process.env.BACKEND_URL || 'http://localhost:8001';
-      return `${baseUrl}/invoices/${fileName}`;
+      // Usar la URL pública de la aplicación
+      const baseUrl = process.env.APP_URL || process.env.BACKEND_URL || 'http://localhost:8001';
+      return `${baseUrl}/api/invoices/${fileName}`;
     } catch (error) {
       this.logger.error(`Error generating invoice PDF: ${error}`);
       return null;
