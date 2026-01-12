@@ -1690,7 +1690,7 @@ function TipsterDashboardContent() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {recentSales.map((sale: any) => {
-                        const product = products.find((p: any) => p.id === sale.productId);
+                        const product = (products as any[]).find((p: any) => p.id === sale.productId);
                         return (
                           <tr key={sale.id} className="hover:bg-gray-50 transition">
                             <td className="px-6 py-4 whitespace-nowrap">
