@@ -134,7 +134,7 @@ export function NotificationsBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
+      <PopoverContent className="w-96 p-0 z-[100]" align="end" sideOffset={8}>
         {/* Header with Tabs */}
         <div className="border-b border-gray-200">
           <div className="flex items-center justify-between px-4 pt-3">
