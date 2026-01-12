@@ -210,7 +210,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="pt-16 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8">
+      <main className="pt-20 lg:pt-8 lg:ml-64 px-4 sm:px-6 lg:px-8 pb-8">
         {/* Desktop Header Actions */}
         {headerActions && (
           <div className="hidden lg:flex fixed top-4 right-8 z-30 items-center gap-3">
@@ -218,8 +218,10 @@ export default function DashboardLayout({
           </div>
         )}
 
-        {/* Page Content */}
-        {children}
+        {/* Page Content with top margin for breathing room */}
+        <div className="mt-2 lg:mt-4">
+          {children}
+        </div>
       </main>
     </div>
   );
