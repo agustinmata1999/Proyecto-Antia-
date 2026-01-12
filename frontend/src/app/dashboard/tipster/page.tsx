@@ -323,6 +323,18 @@ function TipsterDashboardContent() {
       } catch (error) {
         console.error('Error loading KYC status:', error);
       }
+
+      // Load withdrawal balance and history
+      try {
+        const [balanceRes, withdrawalsRes] = await Promise.all([
+          withdrawalsApi.getBalance(),
+          withdrawalsApi.getMy(),
+        ]);
+        setWithdrawalBalance(balanceRes.data);
+        setWithdrawals(withdrawalsRes.data.withdrawals || []);
+      } catch (error) {
+        console.error('Error loading withdrawals:', error);
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
