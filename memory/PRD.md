@@ -49,7 +49,7 @@ Red de afiliación premium:
 3. **Cliente** - Suscriptores de contenido
 
 ## Credenciales de Prueba
-- SuperAdmin: `admin@antia.com` / `SuperAdmin123!`
+- SuperAdmin: `admin@antia.com` / `Admin123!`
 - Tipster: `fausto.perez@antia.com` / `Tipster123!`
 - Cliente: `cliente@example.com` / `Client123!`
 
