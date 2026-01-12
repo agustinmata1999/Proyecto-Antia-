@@ -57,6 +57,26 @@ Red de afiliación premium:
 
 ## Changelog
 
+### 2026-01-12 - Refactorización Dashboard Layout (P0 Completado)
+**Completado:**
+- ✅ **Refactorización de los 3 dashboards para usar `DashboardLayout` compartido:**
+  - `/app/frontend/src/app/dashboard/client/page.tsx` - Ya estaba refactorizado
+  - `/app/frontend/src/app/dashboard/admin/page.tsx` - **REFACTORIZADO**
+  - `/app/frontend/src/app/dashboard/tipster/page.tsx` - **REFACTORIZADO**
+- ✅ **Eliminación de código duplicado:**
+  - Eliminado state `sidebarOpen`, `setSidebarOpen` de cada dashboard
+  - Eliminada función `handleMobileNav` de cada dashboard
+  - Eliminado JSX duplicado del Mobile Header, Overlay, y Aside (sidebar)
+- ✅ **`DashboardLayout` componente compartido ahora maneja:**
+  - Sidebar responsive (desktop fijo, mobile con slide-in)
+  - Mobile header con botón hamburguesa
+  - Overlay para cerrar sidebar en mobile
+  - User info section
+  - Navigation items con badges
+  - Logout button
+  - Header actions (NotificationsBell, CurrencySelector)
+- ✅ **Build exitoso y tests visuales pasados**
+
 ### 2026-01-11 - Nuevo Flujo de Conexión de Telegram Durante Registro
 **Completado:**
 - ✅ **Conexión de Telegram durante registro (opcional):**
