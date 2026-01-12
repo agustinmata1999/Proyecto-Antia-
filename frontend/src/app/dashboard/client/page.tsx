@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clientApi, supportApi, authApi } from '@/lib/api';
+import DashboardLayout from '@/components/DashboardLayout';
 
 type ViewType = 'dashboard' | 'purchases' | 'subscriptions' | 'payments' | 'support' | 'profile';
 
