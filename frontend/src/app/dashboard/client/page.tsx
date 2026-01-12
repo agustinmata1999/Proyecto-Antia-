@@ -365,152 +365,47 @@ export default function ClientDashboard() {
     );
   }
 
-  // Helper to close sidebar on mobile after navigation
-  const handleMobileNav = (view: ViewType) => {
-    setActiveView(view);
-    setSidebarOpen(false);
-  };
+  // Nav items for DashboardLayout
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: <span>🏠</span> },
+    { 
+      id: 'purchases', 
+      label: 'Mis Compras', 
+      icon: <span>🛒</span>,
+      badge: activePurchases > 0 ? activePurchases : undefined,
+      badgeColor: 'bg-green-100 text-green-700'
+    },
+    { 
+      id: 'subscriptions', 
+      label: 'Mis Suscripciones', 
+      icon: <span>🔄</span>,
+      badge: subscriptions.filter(s => s.status === 'active').length > 0 ? subscriptions.filter(s => s.status === 'active').length : undefined,
+      badgeColor: 'bg-blue-100 text-blue-700'
+    },
+    { id: 'payments', label: 'Facturas y Pagos', icon: <span>📄</span> },
+    { 
+      id: 'support', 
+      label: 'Soporte', 
+      icon: <span>💬</span>,
+      badge: openTickets > 0 ? openTickets : undefined,
+      badgeColor: 'bg-yellow-100 text-yellow-700'
+    },
+    { id: 'profile', label: 'Mi Perfil', icon: <span>⚙️</span> },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-              data-testid="mobile-menu-button"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <span className="text-xl font-bold text-blue-600">Antia</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-200 shadow-sm z-50 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 ${sidebarOpen ? '!translate-x-0' : ''}`}>
-        <div className="p-6 h-full flex flex-col">
-          {/* Logo and close button */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="text-2xl font-bold text-blue-600">Antia</div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-lg lg:hidden"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <div className="text-sm font-medium text-gray-900 truncate">{user?.name || user?.email || 'Mi Cuenta'}</div>
-            <div className="text-xs text-gray-500 mt-1 truncate">{user?.email}</div>
-          </div>
-
-          <nav className="space-y-1 flex-1 overflow-y-auto">
-            <button
-              onClick={() => handleMobileNav('dashboard')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'dashboard' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>🏠</span> Dashboard
-            </button>
-            <button
-              onClick={() => handleMobileNav('purchases')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'purchases' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>🛒</span> Mis Compras
-              {activePurchases > 0 && (
-                <span className="ml-auto bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">
-                  {activePurchases}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => handleMobileNav('subscriptions')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'subscriptions' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>🔄</span> Mis Suscripciones
-              {subscriptions.filter(s => s.status === 'active').length > 0 && (
-                <span className="ml-auto bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
-                  {subscriptions.filter(s => s.status === 'active').length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => handleMobileNav('payments')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'payments' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>📄</span> Facturas y Pagos
-            </button>
-            <button
-              onClick={() => handleMobileNav('support')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'support' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>💬</span> Soporte
-              {openTickets > 0 && (
-                <span className="ml-auto bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs">
-                  {openTickets}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => handleMobileNav('profile')}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${
-                activeView === 'profile' 
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <span>⚙️</span> Mi Perfil
-            </button>
-            
-            <div className="pt-4 border-t border-gray-200 mt-4">
-              <button
-                onClick={() => { handleLogout(); setSidebarOpen(false); }}
-                className="w-full text-left px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-3 transition"
-              >
-                <span>🚪</span> Cerrar Sesión
-              </button>
-            </div>
-          </nav>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="pt-16 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8">
+    <DashboardLayout
+      navItems={navItems}
+      activeView={activeView}
+      onNavChange={(view) => setActiveView(view as ViewType)}
+      userInfo={{
+        name: user?.name || user?.email || 'Mi Cuenta',
+        subtitle: user?.email,
+      }}
+      onLogout={handleLogout}
+      brandName="Antia"
+      brandColor="blue"
+    >
         {/* Dashboard View */}
         {activeView === 'dashboard' && (
           <>
