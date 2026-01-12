@@ -69,6 +69,7 @@ export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<AdminView>('tipsters');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Tipsters state
   const [tipsters, setTipsters] = useState<Tipster[]>([]);
