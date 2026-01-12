@@ -14,7 +14,7 @@ import TipsterTelegramAutoView from '@/components/tipster/TipsterTelegramAutoVie
 import DashboardLayout from '@/components/DashboardLayout';
 
 type ViewType = 'dashboard' | 'products' | 'referrals' | 'payouts' | 'profile' | 'kyc' | 'support';
-type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos';
+type PayoutsSubView = 'liquidaciones' | 'facturas' | 'pagos' | 'retiros';
 
 interface TelegramChannel {
   id: string;
