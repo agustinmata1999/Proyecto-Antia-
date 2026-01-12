@@ -353,6 +353,60 @@ function TipsterDashboardContent() {
     }
   };
 
+  // ==================== WITHDRAWAL FUNCTIONS ====================
+
+  const loadWithdrawals = async () => {
+    setWithdrawalsLoading(true);
+    try {
+      const [balanceRes, withdrawalsRes] = await Promise.all([
+        withdrawalsApi.getBalance(),
+        withdrawalsApi.getMy(),
+      ]);
+      setWithdrawalBalance(balanceRes.data);
+      setWithdrawals(withdrawalsRes.data.withdrawals || []);
+    } catch (error) {
+      console.error('Error loading withdrawals:', error);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  const handleCreateWithdrawal = async () => {
+    const amount = parseFloat(withdrawalAmount);
+    if (isNaN(amount) || amount < 5) {
+      alert('El monto mínimo de retiro es €5.00');
+      return;
+    }
+
+    const amountCents = Math.round(amount * 100);
+    if (withdrawalBalance && amountCents > withdrawalBalance.availableBalanceCents) {
+      alert(`Saldo insuficiente. Disponible: €${(withdrawalBalance.availableBalanceCents / 100).toFixed(2)}`);
+      return;
+    }
+
+    setCreatingWithdrawal(true);
+    try {
+      const response = await withdrawalsApi.createRequest({
+        amountCents,
+        notes: withdrawalNotes || undefined,
+      });
+
+      if (response.data.success) {
+        alert(`✅ Solicitud de retiro creada\nNúmero de factura: ${response.data.invoiceNumber}`);
+        setShowWithdrawalModal(false);
+        setWithdrawalAmount('');
+        setWithdrawalNotes('');
+        // Reload data
+        await loadWithdrawals();
+      }
+    } catch (error: any) {
+      console.error('Error creating withdrawal:', error);
+      alert('❌ Error: ' + (error.response?.data?.message || 'No se pudo crear la solicitud'));
+    } finally {
+      setCreatingWithdrawal(false);
+    }
+  };
+
   // ==================== SUPPORT TICKETS FUNCTIONS ====================
   
   const loadTickets = async () => {
