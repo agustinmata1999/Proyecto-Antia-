@@ -32,7 +32,8 @@ export class WithdrawalsController {
   @UseGuards(RolesGuard)
   @Roles('TIPSTER')
   async getBalance(@Request() req) {
-    return this.withdrawalsService.getAvailableBalance(req.user.sub);
+    const userId = req.user.id || req.user.sub;
+    return this.withdrawalsService.getAvailableBalance(userId);
   }
 
   /**
@@ -42,7 +43,8 @@ export class WithdrawalsController {
   @UseGuards(RolesGuard)
   @Roles('TIPSTER')
   async createRequest(@Request() req, @Body() dto: CreateWithdrawalDto) {
-    return this.withdrawalsService.createWithdrawalRequest(req.user.sub, dto);
+    const userId = req.user.id || req.user.sub;
+    return this.withdrawalsService.createWithdrawalRequest(userId, dto);
   }
 
   /**
@@ -52,7 +54,8 @@ export class WithdrawalsController {
   @UseGuards(RolesGuard)
   @Roles('TIPSTER')
   async getMyWithdrawals(@Request() req) {
-    const withdrawals = await this.withdrawalsService.getTipsterWithdrawals(req.user.sub);
+    const userId = req.user.id || req.user.sub;
+    const withdrawals = await this.withdrawalsService.getTipsterWithdrawals(userId);
     return { withdrawals };
   }
 }
