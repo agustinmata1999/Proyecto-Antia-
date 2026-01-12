@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factura ANTIA-2026-0002</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f8f9fa; padding: 40px; color: #333; }
+    .invoice { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; }
+    .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 40px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .header .logo { font-size: 32px; font-weight: bold; }
+    .header .invoice-info { text-align: right; }
+    .header .invoice-number { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+    .header .invoice-date { opacity: 0.9; }
+    .body { padding: 40px; }
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #6b7280; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .info-block { }
+    .info-block h3 { font-size: 16px; color: #111; margin-bottom: 8px; }
+    .info-block p { color: #4b5563; line-height: 1.6; }
+    .amount-box { background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 32px; text-align: center; margin: 32px 0; }
+    .amount-label { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
+    .amount-value { font-size: 48px; font-weight: bold; color: #1e3a8a; }
+    .amount-currency { font-size: 24px; color: #3b82f6; }
+    .details-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    .details-table th, .details-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .details-table th { background: #f9fafb; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 600; }
+    .details-table td { color: #374151; }
+    .footer { background: #f9fafb; padding: 24px 40px; text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; }
+    .status { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; background: #fef3c7; color: #92400e; }
+    @media print {
+      body { background: white; padding: 0; }
+      .invoice { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice">
+    <div class="header">
+      <div class="logo">ANTIA</div>
+      <div class="invoice-info">
+        <div class="invoice-number">ANTIA-2026-0002</div>
+        <div class="invoice-date">12 de enero de 2026</div>
+        <div style="margin-top: 8px;"><span class="status">Solicitud de Retiro</span></div>
+      </div>
+    </div>
+    
+    <div class="body">
+      <div class="info-grid">
+        <div class="info-block">
+          <div class="section-title">Datos del Emisor</div>
+          <h3>ANTIA PLATFORM S.L.</h3>
+          <p>
+            CIF: B-XXXXXXXX<br>
+            Calle Principal 123<br>
+            28001 Madrid, España<br>
+            info@antia.com
+          </p>
+        </div>
+        
+        <div class="info-block">
+          <div class="section-title">Datos del Beneficiario</div>
+          <h3>Ramiro Mata</h3>
+          <p>
+            DNI: 47080656<br>
+            País: España<br>
+            fausto.perez@antia.com
+          </p>
+        </div>
+      </div>
+      
+      <div class="amount-box">
+        <div class="amount-label">Importe a Transferir</div>
+        <div class="amount-value">50.00 <span class="amount-currency">EUR</span></div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Datos de Pago</div>
+        <table class="details-table">
+          <tr>
+            <th>Método de Pago</th>
+            <td>OTHER</td>
+          </tr>
+          <tr>
+            <th>Datos de la Cuenta</th>
+            <td>No especificado</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Concepto</div>
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th style="text-align: right;">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Liquidación de ingresos por servicios de predicción deportiva</td>
+              <td style="text-align: right; font-weight: 600;">50.00 EUR</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Este documento sirve como comprobante de solicitud de retiro.</p>
+      <p style="margin-top: 8px;">ANTIA PLATFORM - www.antia.com</p>
+    </div>
+  </div>
+</body>
+</html>
+    
