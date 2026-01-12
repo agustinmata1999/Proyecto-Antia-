@@ -1850,127 +1850,182 @@ export default function AdminDashboard() {
 
         {/* Vista: Retiros / Pagos */}
         {activeView === 'withdrawals' && (
-          <div className="p-6 space-y-6">
+          <div className="p-6 bg-[#0c1222] min-h-screen">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+              <span>Admin</span>
+              <span>›</span>
+              <span className="text-white font-medium">Retiros</span>
+            </div>
+
             {/* Header */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">💸 Retiros / Pagos</h2>
-              <p className="text-gray-500 mt-1">Gestiona las solicitudes de retiro de los tipsters</p>
-            </div>
+            <h1 className="text-2xl font-bold text-white mb-6">Solicitudes de Retiro</h1>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div 
-                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'PENDING' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-100 bg-white hover:border-yellow-200'}`}
-                onClick={() => setWithdrawalFilter(withdrawalFilter === 'PENDING' ? '' : 'PENDING')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Pendientes</p>
-                    <p className="text-2xl font-bold text-yellow-600">{withdrawalStats.pending.count}</p>
-                  </div>
-                  <span className="text-3xl">⏳</span>
+            {/* Stats Cards - Dark Theme */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-[#151d2e] rounded-xl p-5 border border-gray-700/50">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {formatCurrency(withdrawalStats.pending.totalCents)}
+                <p className="text-3xl font-bold text-white">
+                  {withdrawalStats.pending.count + withdrawalStats.approved.count + withdrawalStats.paid.count + withdrawalStats.rejected.count}
                 </p>
+                <p className="text-sm text-gray-400 mt-1">Solicitudes Totales</p>
               </div>
 
-              <div 
-                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'APPROVED' ? 'border-blue-400 bg-blue-50' : 'border-gray-100 bg-white hover:border-blue-200'}`}
-                onClick={() => setWithdrawalFilter(withdrawalFilter === 'APPROVED' ? '' : 'APPROVED')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Aprobadas</p>
-                    <p className="text-2xl font-bold text-blue-600">{withdrawalStats.approved.count}</p>
-                  </div>
-                  <span className="text-3xl">✓</span>
+              <div className="bg-[#151d2e] rounded-xl p-5 border border-gray-700/50">
+                <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {formatCurrency(withdrawalStats.approved.totalCents)}
+                <p className="text-3xl font-bold text-white">
+                  {withdrawalStats.pending.count} <span className="text-lg font-normal text-gray-400">({formatCurrency(withdrawalStats.pending.totalCents)})</span>
                 </p>
+                <p className="text-sm text-gray-400 mt-1">Pendientes</p>
               </div>
 
-              <div 
-                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'PAID' ? 'border-green-400 bg-green-50' : 'border-gray-100 bg-white hover:border-green-200'}`}
-                onClick={() => setWithdrawalFilter(withdrawalFilter === 'PAID' ? '' : 'PAID')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Pagadas</p>
-                    <p className="text-2xl font-bold text-green-600">{withdrawalStats.paid.count}</p>
-                  </div>
-                  <span className="text-3xl">💰</span>
+              <div className="bg-[#151d2e] rounded-xl p-5 border border-gray-700/50">
+                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {formatCurrency(withdrawalStats.paid.totalCents)}
-                </p>
+                <p className="text-3xl font-bold text-white">{formatCurrency(withdrawalStats.approved.totalCents + withdrawalStats.paid.totalCents)}</p>
+                <p className="text-sm text-gray-400 mt-1">Aprobados</p>
               </div>
 
-              <div 
-                className={`rounded-xl p-5 border-2 cursor-pointer transition ${withdrawalFilter === 'REJECTED' ? 'border-red-400 bg-red-50' : 'border-gray-100 bg-white hover:border-red-200'}`}
-                onClick={() => setWithdrawalFilter(withdrawalFilter === 'REJECTED' ? '' : 'REJECTED')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Rechazadas</p>
-                    <p className="text-2xl font-bold text-red-600">{withdrawalStats.rejected.count}</p>
-                  </div>
-                  <span className="text-3xl">❌</span>
+              <div className="bg-[#151d2e] rounded-xl p-5 border border-gray-700/50">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  {formatCurrency(withdrawalStats.rejected.totalCents)}
-                </p>
+                <p className="text-3xl font-bold text-white">{formatCurrency(withdrawalStats.paid.totalCents)}</p>
+                <p className="text-sm text-gray-400 mt-1">Total Retirado</p>
               </div>
             </div>
 
-            {/* Filter Info */}
-            {withdrawalFilter && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Filtro activo:</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  withdrawalFilter === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                  withdrawalFilter === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
-                  withdrawalFilter === 'PAID' ? 'bg-green-100 text-green-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {withdrawalFilter === 'PENDING' ? 'Pendientes' :
-                   withdrawalFilter === 'APPROVED' ? 'Aprobadas' :
-                   withdrawalFilter === 'PAID' ? 'Pagadas' : 'Rechazadas'}
-                </span>
-                <button 
-                  onClick={() => setWithdrawalFilter('')}
-                  className="text-sm text-gray-400 hover:text-gray-600"
-                >
-                  ✕ Quitar filtro
-                </button>
-              </div>
-            )}
-
-            {/* Withdrawals Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">Lista de Solicitudes</h3>
+            {/* Filters Section */}
+            <div className="bg-[#151d2e] rounded-xl p-4 border border-gray-700/50 mb-6">
+              {/* Tab Filters */}
+              <div className="flex flex-wrap gap-2 mb-4">
                 <button
-                  onClick={loadAdminWithdrawals}
-                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  onClick={() => setWithdrawalFilter('')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    withdrawalFilter === '' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                  }`}
                 >
-                  🔄 Actualizar
+                  Todos <span className="ml-1 text-xs opacity-75">{withdrawalStats.pending.count + withdrawalStats.approved.count + withdrawalStats.paid.count + withdrawalStats.rejected.count}</span>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('PAID')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    withdrawalFilter === 'PAID' 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Éxito <span className="ml-1 text-xs opacity-75">{withdrawalStats.paid.count}</span>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('PENDING')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    withdrawalFilter === 'PENDING' 
+                      ? 'bg-yellow-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Pendiente <span className="ml-1 text-xs opacity-75">{withdrawalStats.pending.count}</span>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('REJECTED')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    withdrawalFilter === 'REJECTED' 
+                      ? 'bg-red-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Rechazado <span className="ml-1 text-xs opacity-75">{withdrawalStats.rejected.count}</span>
                 </button>
               </div>
 
+              {/* Date Range */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Rango de Fechas:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Desde</label>
+                    <input
+                      type="date"
+                      value={withdrawalDateFrom}
+                      onChange={(e) => setWithdrawalDateFrom(e.target.value)}
+                      className="px-3 py-1.5 bg-gray-800 border border-gray-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Hasta</label>
+                    <input
+                      type="date"
+                      value={withdrawalDateTo}
+                      onChange={(e) => setWithdrawalDateTo(e.target.value)}
+                      className="px-3 py-1.5 bg-gray-800 border border-gray-600 rounded-lg text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search and Table */}
+            <div className="bg-[#151d2e] rounded-xl border border-gray-700/50 overflow-hidden">
+              {/* Search Bar */}
+              <div className="p-4 border-b border-gray-700/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={withdrawalSearch}
+                    onChange={(e) => setWithdrawalSearch(e.target.value)}
+                    placeholder="Buscar por ID de solicitud, método o usuario..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-600 rounded-lg text-sm text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span>Elementos por página:</span>
+                  <select className="bg-gray-800 border border-gray-600 rounded-lg px-2 py-1 text-white">
+                    <option>5</option>
+                    <option>10</option>
+                    <option>25</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Table */}
               {withdrawalsLoading ? (
                 <div className="p-8 text-center">
                   <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Cargando...</p>
+                  <p className="text-gray-400 mt-2">Cargando...</p>
                 </div>
               ) : adminWithdrawals.length === 0 ? (
                 <div className="p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">💸</span>
+                  <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                   </div>
-                  <p className="text-gray-500 font-medium">No hay solicitudes de retiro</p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-gray-400 font-medium">No hay solicitudes de retiro</p>
+                  <p className="text-sm text-gray-500 mt-1">
                     {withdrawalFilter ? 'No hay solicitudes con este filtro' : 'Cuando un tipster solicite un retiro, aparecerá aquí'}
                   </p>
                 </div>
@@ -1978,129 +2033,102 @@ export default function AdminDashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50">
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factura</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipster</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Importe</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                      <tr className="border-b border-gray-700/50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID de Solicitud</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nombre</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance Disponible</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Monto Solicitado</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Método de Pago</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fecha de Solicitud</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {adminWithdrawals.map((w: any) => (
-                        <tr key={w.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div>
-                              <span className="font-mono text-sm text-gray-900">{w.invoiceNumber}</span>
-                              {w.invoicePdfUrl && (
-                                <a
-                                  href={w.invoicePdfUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block text-xs text-blue-600 hover:underline mt-1"
-                                >
-                                  📄 Ver factura
-                                </a>
-                              )}
-                            </div>
+                    <tbody className="divide-y divide-gray-700/30">
+                      {adminWithdrawals
+                        .filter(w => {
+                          if (!withdrawalSearch) return true;
+                          const search = withdrawalSearch.toLowerCase();
+                          return (
+                            w.id?.toLowerCase().includes(search) ||
+                            w.invoiceNumber?.toLowerCase().includes(search) ||
+                            w.tipsterName?.toLowerCase().includes(search) ||
+                            w.bankAccountType?.toLowerCase().includes(search)
+                          );
+                        })
+                        .map((w: any) => (
+                        <tr key={w.id} className="hover:bg-gray-800/30 transition">
+                          <td className="px-4 py-4">
+                            <span className="font-mono text-sm text-gray-300">{w.id?.substring(0, 16)}...</span>
                           </td>
-                          <td className="px-6 py-4">
-                            <div>
-                              <p className="font-medium text-gray-900">{w.tipsterName}</p>
-                              <p className="text-xs text-gray-500">{w.tipsterEmail}</p>
-                              {w.tipsterLegalName && w.tipsterLegalName !== w.tipsterName && (
-                                <p className="text-xs text-gray-400">{w.tipsterLegalName}</p>
-                              )}
-                            </div>
+                          <td className="px-4 py-4">
+                            <span className="text-white font-medium">{w.tipsterName}</span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            }) : '-'}
+                          <td className="px-4 py-4">
+                            <span className="text-yellow-400 font-medium">€0.00</span>
+                            <span className="ml-1 text-yellow-500 text-xs">⚠</span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              w.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                              w.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
-                              w.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                              w.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {w.status === 'PAID' ? '✅ Pagado' :
-                               w.status === 'APPROVED' ? '✓ Aprobado' :
-                               w.status === 'PENDING' ? '⏳ Pendiente' :
-                               w.status === 'REJECTED' ? '❌ Rechazado' :
-                               w.status}
+                          <td className="px-4 py-4">
+                            <span className="text-white font-semibold">{formatCurrency(w.amountCents)}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-gray-300">{w.bankAccountType === 'IBAN' ? 'BANK' : w.bankAccountType || 'N/A'}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-gray-300">
+                              {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES') : '-'}
                             </span>
-                            {w.paidAt && (
-                              <p className="text-xs text-gray-400 mt-1">
-                                Pagado: {new Date(w.paidAt).toLocaleDateString('es-ES')}
-                              </p>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-3 py-1 rounded-md text-xs font-medium ${
+                              w.status === 'PAID' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                              w.status === 'APPROVED' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                              w.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                              'bg-red-500/20 text-red-400 border border-red-500/30'
+                            }`}>
+                              {w.status === 'PAID' ? 'Aprobado' :
+                               w.status === 'APPROVED' ? 'Aprobado' :
+                               w.status === 'PENDING' ? 'Pendiente' :
+                               'Rechazado'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            {w.status === 'PENDING' && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => openWithdrawalAction(w, 'reject')}
+                                  className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-md text-xs font-medium hover:bg-red-500/30 transition"
+                                >
+                                  Rechazado
+                                </button>
+                              </div>
+                            )}
+                            {(w.status === 'APPROVED' || w.status === 'PAID') && (
+                              <button
+                                onClick={() => openWithdrawalAction(w, 'pay')}
+                                className="px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-md text-xs font-medium hover:bg-green-500/30 transition flex items-center gap-1"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Pagado
+                              </button>
+                            )}
+                            {w.status === 'REJECTED' && (
+                              <span className="px-3 py-1.5 bg-gray-700/50 text-gray-400 rounded-md text-xs font-medium">
+                                Rechazado
+                              </span>
                             )}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm">
-                              <span className={`px-2 py-0.5 rounded text-xs ${
-                                w.bankAccountType === 'IBAN' ? 'bg-blue-50 text-blue-700' :
-                                w.bankAccountType === 'PAYPAL' ? 'bg-indigo-50 text-indigo-700' :
-                                'bg-orange-50 text-orange-700'
-                              }`}>
-                                {w.bankAccountType || 'N/A'}
-                              </span>
-                              {w.bankAccountDetails && (
-                                <p className="text-xs text-gray-400 mt-1 font-mono truncate max-w-[120px]">
-                                  {w.bankAccountDetails.iban?.slice(-8) || w.bankAccountDetails.paypalEmail?.split('@')[0] || '***'}
-                                </p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <span className="font-semibold text-gray-900">{formatCurrency(w.amountCents)}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-center gap-2">
-                              {w.status === 'PENDING' && (
-                                <>
-                                  <button
-                                    onClick={() => openWithdrawalAction(w, 'approve')}
-                                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200 transition"
-                                  >
-                                    ✓ Aprobar
-                                  </button>
-                                  <button
-                                    onClick={() => openWithdrawalAction(w, 'pay')}
-                                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium hover:bg-green-200 transition"
-                                  >
-                                    💰 Pagar
-                                  </button>
-                                  <button
-                                    onClick={() => openWithdrawalAction(w, 'reject')}
-                                    className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200 transition"
-                                  >
-                                    ✕
-                                  </button>
-                                </>
-                              )}
-                              {w.status === 'APPROVED' && (
-                                <button
-                                  onClick={() => openWithdrawalAction(w, 'pay')}
-                                  className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
-                                >
-                                  💰 Marcar Pagado
-                                </button>
-                              )}
-                              {(w.status === 'PAID' || w.status === 'REJECTED') && (
-                                <span className="text-xs text-gray-400">Sin acciones</span>
-                              )}
-                            </div>
-                          </td>
                         </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
                       ))}
                     </tbody>
                   </table>
