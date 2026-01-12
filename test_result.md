@@ -9,7 +9,7 @@
 4. **P2**: Test Conversion Postback
 
 ### Test Environment
-- API URL: https://tiplink-register.preview.emergentagent.com
+- API URL: https://tips-dashboard-1.preview.emergentagent.com
 - Frontend URL: http://localhost:3000
 
 ### Test Credentials
@@ -138,7 +138,7 @@ backend:
     status_history:
       - working: true
         agent: "testing"
-        comment: "✅ P0 test passed. Bot status endpoint returns correct data: initialized=true, botUsername=Antiabetbot, webhookConfigured=true, proxyMode=true, lastError=null. Webhook URL properly configured at https://tiplink-register.preview.emergentagent.com/api/telegram/webhook"
+        comment: "✅ P0 test passed. Bot status endpoint returns correct data: initialized=true, botUsername=Antiabetbot, webhookConfigured=true, proxyMode=true, lastError=null. Webhook URL properly configured at https://tips-dashboard-1.preview.emergentagent.com/api/telegram/webhook"
 
   - task: "Health Check API"
     implemented: true
