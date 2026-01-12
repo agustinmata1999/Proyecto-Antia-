@@ -51,6 +51,15 @@ function TipsterDashboardContent() {
   const [recentSales, setRecentSales] = useState<any[]>([]);
   const [settlementsData, setSettlementsData] = useState<any>(null);
   
+  // Withdrawals / Retiros state
+  const [withdrawalBalance, setWithdrawalBalance] = useState<any>(null);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalNotes, setWithdrawalNotes] = useState('');
+  const [creatingWithdrawal, setCreatingWithdrawal] = useState(false);
+  
   // KYC Status
   const [kycStatus, setKycStatus] = useState<{
     kycCompleted: boolean;
