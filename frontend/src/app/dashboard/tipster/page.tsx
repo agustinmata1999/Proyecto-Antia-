@@ -1157,15 +1157,6 @@ function TipsterDashboardContent() {
     );
   }
 
-  // Type for navigation items
-  interface NavItem {
-    id: string;
-    label: string;
-    icon: ReactNode;
-    badge?: string | number;
-    badgeColor?: string;
-  }
-
   // Build navigation items dynamically based on enabled modules
   const buildNavItems = (): NavItem[] => {
     const items: NavItem[] = [
