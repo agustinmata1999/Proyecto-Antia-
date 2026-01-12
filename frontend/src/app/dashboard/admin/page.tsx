@@ -231,12 +231,13 @@ export default function AdminDashboard() {
     }
     if (activeView === 'support') loadAdminTickets();
     if (activeView === 'sales') loadSales();
+    if (activeView === 'withdrawals') loadAdminWithdrawals();
     if (activeView === 'commissions') {
       loadCommissions();
       loadExchangeRates();
     }
     if (activeView === 'reports') loadReport();
-  }, [activeView, reportType, reportCurrency, applicationFilter]);
+  }, [activeView, reportType, reportCurrency, applicationFilter, withdrawalFilter]);
 
   const checkAuth = async () => {
     const token = localStorage.getItem('access_token');
