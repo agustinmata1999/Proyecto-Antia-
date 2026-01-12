@@ -2042,6 +2042,150 @@ function TipsterDashboardContent() {
                 </div>
               </div>
 
+              {/* Sub-vista: Solicitar Retiro */}
+              {payoutsSubView === 'retiros' && (
+                <div className="space-y-6">
+                  {/* Balance Card */}
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div>
+                        <p className="text-green-100 text-sm mb-1">Saldo Disponible para Retiro</p>
+                        <p className="text-4xl font-bold">
+                          {formatPrice(withdrawalBalance?.availableBalanceCents || 0)}
+                        </p>
+                        <p className="text-green-100 text-sm mt-2">
+                          Total ganado: {formatPrice(withdrawalBalance?.totalEarnedCents || 0)} | 
+                          Ya retirado: {formatPrice(withdrawalBalance?.totalWithdrawnCents || 0)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowWithdrawalModal(true)}
+                        disabled={(withdrawalBalance?.availableBalanceCents || 0) < 500}
+                        className="px-6 py-3 bg-white text-green-600 font-semibold rounded-xl hover:bg-green-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        💰 Solicitar Retiro
+                      </button>
+                    </div>
+                    {(withdrawalBalance?.pendingWithdrawalCents || 0) > 0 && (
+                      <div className="mt-4 p-3 bg-white/10 rounded-lg">
+                        <p className="text-sm">
+                          ⏳ Tienes {formatPrice(withdrawalBalance.pendingWithdrawalCents)} en solicitudes pendientes
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-xl p-5 border border-gray-100">
+                      <div className="text-sm text-gray-500 mb-1">Total Ventas</div>
+                      <div className="text-2xl font-bold text-gray-900">{withdrawalBalance?.orderCount || 0}</div>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 border border-gray-100">
+                      <div className="text-sm text-gray-500 mb-1">Retiros Procesados</div>
+                      <div className="text-2xl font-bold text-green-600">{withdrawalBalance?.withdrawalCount || 0}</div>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 border border-gray-100">
+                      <div className="text-sm text-gray-500 mb-1">Solicitudes Pendientes</div>
+                      <div className="text-2xl font-bold text-orange-600">{withdrawalBalance?.pendingCount || 0}</div>
+                    </div>
+                  </div>
+
+                  {/* Withdrawal History */}
+                  <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">Historial de Solicitudes de Retiro</h3>
+                      <button
+                        onClick={loadWithdrawals}
+                        className="text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        🔄 Actualizar
+                      </button>
+                    </div>
+                    
+                    {withdrawalsLoading ? (
+                      <div className="p-8 text-center">
+                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p className="text-gray-500 mt-2">Cargando...</p>
+                      </div>
+                    ) : withdrawals.length === 0 ? (
+                      <div className="p-12 text-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 font-medium">No hay solicitudes de retiro</p>
+                        <p className="text-sm text-gray-400 mt-1">Cuando solicites un retiro, aparecerá aquí</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-gray-100 bg-gray-50">
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factura</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Importe</th>
+                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {withdrawals.map((w: any) => (
+                              <tr key={w.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4">
+                                  <span className="font-mono text-sm text-gray-900">{w.invoiceNumber}</span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                  {w.requestedAt ? new Date(w.requestedAt).toLocaleDateString('es-ES', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  }) : '-'}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    w.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                                    w.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
+                                    w.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                    w.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                    'bg-gray-100 text-gray-700'
+                                  }`}>
+                                    {w.status === 'PAID' ? '✅ Pagado' :
+                                     w.status === 'APPROVED' ? '✓ Aprobado' :
+                                     w.status === 'PENDING' ? '⏳ Pendiente' :
+                                     w.status === 'REJECTED' ? '❌ Rechazado' :
+                                     w.status}
+                                  </span>
+                                  {w.status === 'REJECTED' && w.rejectionReason && (
+                                    <p className="text-xs text-red-500 mt-1">{w.rejectionReason}</p>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <span className="font-semibold text-gray-900">{formatPrice(w.amountCents)}</span>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  {w.invoicePdfUrl && (
+                                    <a
+                                      href={w.invoicePdfUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                    >
+                                      📄 Ver Factura
+                                    </a>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Sub-vista: Liquidaciones */}
               {payoutsSubView === 'liquidaciones' && (
                 <div className="space-y-6">
