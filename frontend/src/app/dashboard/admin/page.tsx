@@ -2129,14 +2129,6 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
       {/* Commission Modal */}
       {showCommissionModal && selectedTipster && (
