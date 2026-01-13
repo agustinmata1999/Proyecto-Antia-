@@ -735,17 +735,22 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
           this.logger.log(
-            `✅ Found channel: ${channelTitle} (ID: ${channelId}, link: ${channelLink ? 'YES' : 'NO'})`,
+            `✅ Found channel: ${channelTitle} (ID: ${channelId}, saved link: ${channelLink ? 'YES' : 'NO'})`,
           );
 
-          // Si no hay invite_link, intentar generarlo ahora
-          if (!channelLink && channelId) {
-            this.logger.log(`⚠️ Channel ${channelId} has no invite_link, trying to generate...`);
+          // SIEMPRE generar un link fresco para evitar links expirados
+          if (channelId) {
+            this.logger.log(`🔄 Generating fresh invite link for channel ${channelId}...`);
             try {
-              channelLink = await this.bot.telegram.exportChatInviteLink(channelId);
-              this.logger.log(`✅ Generated invite link: ${channelLink}`);
+              // Intentar crear un nuevo link de invitación (no expira)
+              const inviteResult = await this.bot.telegram.createChatInviteLink(channelId, {
+                creates_join_request: false,
+                name: `Access-${Date.now()}`, // Nombre único para tracking
+              });
+              channelLink = inviteResult.invite_link;
+              this.logger.log(`✅ Created fresh invite link: ${channelLink}`);
 
-              // Guardar el link generado en la base de datos
+              // Actualizar el link en la base de datos
               const channelOid = channel._id?.$oid || channel._id;
               if (channelOid) {
                 await this.prisma.$runCommandRaw({
@@ -762,19 +767,21 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                     },
                   ],
                 });
-                this.logger.log(`✅ Saved invite link to database`);
+                this.logger.log(`✅ Updated invite link in database`);
               }
             } catch (e) {
-              this.logger.error(`Failed to generate invite link for ${channelId}: ${e.message}`);
-              // Try creating a new invite link
+              this.logger.error(`Failed to create invite link: ${e.message}`);
+              // Si falla, intentar con exportChatInviteLink como fallback
               try {
-                const inviteResult = await this.bot.telegram.createChatInviteLink(channelId, {
-                  creates_join_request: false,
-                });
-                channelLink = inviteResult.invite_link;
-                this.logger.log(`✅ Created new invite link: ${channelLink}`);
+                channelLink = await this.bot.telegram.exportChatInviteLink(channelId);
+                this.logger.log(`✅ Generated invite link via export: ${channelLink}`);
               } catch (e2) {
-                this.logger.error(`Also failed to create invite link: ${e2.message}`);
+                this.logger.error(`Also failed to export invite link: ${e2.message}`);
+                // Usar el link guardado como último recurso
+                if (channel.invite_link) {
+                  channelLink = channel.invite_link;
+                  this.logger.warn(`⚠️ Using saved invite link as fallback (may be expired)`);
+                }
               }
             }
           }
