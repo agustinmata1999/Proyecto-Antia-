@@ -20,6 +20,7 @@ function RegisterContent() {
     confirmPassword: '',
     countryIso: 'ES',
     telegramUsername: '',
+    telegramChannel: '', // Canal de Telegram para dar acceso a clientes
     promotionChannel: '',
     experience: '',
     consent18: false,
