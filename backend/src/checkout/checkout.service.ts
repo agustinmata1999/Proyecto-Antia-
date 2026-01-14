@@ -419,8 +419,15 @@ export class CheckoutService {
         );
       }
 
-      // Notify tipster
+      // Calculate commissions for proper net amount
       if (order) {
+        const commissions = await this.calculateOrderCommissions(
+          order.tipsterId,
+          order.amountCents || 0,
+          'redsys',
+        );
+
+        // Notify tipster with net amount
         await this.telegramService.notifyTipsterNewSale(
           order.tipsterId,
           result.orderId,
@@ -429,6 +436,7 @@ export class CheckoutService {
           order.currency,
           order.emailBackup,
           order.telegramUsername,
+          commissions.netAmountCents, // Pass net amount
         );
       }
 
@@ -1043,6 +1051,13 @@ export class CheckoutService {
 
     this.logger.log(`Simulated payment for order ${orderId}`);
 
+    // Calculate commissions for proper net amount
+    const commissions = await this.calculateOrderCommissions(
+      product.tipsterId,
+      product.priceCents,
+      'test_simulated',
+    );
+
     // 4. Send Telegram notification to BUYER if user came from Telegram
     let telegramResult = null;
     if (data.telegramUserId) {
@@ -1053,7 +1068,7 @@ export class CheckoutService {
       );
     }
 
-    // 5. Notify TIPSTER about new sale
+    // 5. Notify TIPSTER about new sale with net amount
     await this.telegramService.notifyTipsterNewSale(
       product.tipsterId,
       orderId,
@@ -1062,6 +1077,7 @@ export class CheckoutService {
       product.currency,
       data.email,
       data.telegramUsername,
+      commissions.netAmountCents, // Pass net amount
     );
 
     // 6. Get tipster info for emails
