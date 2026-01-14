@@ -3171,14 +3171,26 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
         continue; // Continuar con el siguiente tipster
       }
 
-      // Obtener invite link (solo una vez, para el primer tipster)
+      // Crear invite link con JOIN REQUEST (solo una vez, para el primer tipster)
       let inviteLink: string | null = null;
       try {
         if (this.httpService) {
-          inviteLink = await this.httpService.exportChatInviteLink(channelId);
+          // Crear un enlace de invitación que REQUIERE APROBACIÓN
+          const inviteResult = await this.httpService.createChatInviteLink(channelId, {
+            createsJoinRequest: true,
+            name: `AutoConnect-${Date.now()}`,
+          });
+          inviteLink = inviteResult.invite_link;
+          this.logger.log(`📎 Created join request link for auto-connect: ${inviteLink}`);
         }
       } catch (e) {
-        this.logger.warn(`Could not get invite link for auto-connect: ${e.message}`);
+        this.logger.warn(`Could not create invite link for auto-connect: ${e.message}`);
+        // Fallback: intentar obtener el link principal
+        try {
+          inviteLink = await this.httpService.exportChatInviteLink(channelId);
+        } catch (e2) {
+          this.logger.warn(`Also failed to get primary link: ${e2.message}`);
+        }
       }
 
       // Crear el canal automáticamente
