@@ -3,18 +3,18 @@
   "/antialink/page": "app/antialink/page.js",
   "/antiapay/page": "app/antiapay/page.js",
   "/api/telegram/webhook/route": "app/api/telegram/webhook/route.js",
-  "/checkout/success/page": "app/checkout/success/page.js",
   "/checkout/cancel/page": "app/checkout/cancel/page.js",
   "/checkout/[productId]/page": "app/checkout/[productId]/page.js",
+  "/checkout/success/page": "app/checkout/success/page.js",
   "/connect-telegram/page": "app/connect-telegram/page.js",
-  "/dashboard/client/page": "app/dashboard/client/page.js",
   "/dashboard/admin/page": "app/dashboard/admin/page.js",
-  "/go/[slug]/page": "app/go/[slug]/page.js",
+  "/dashboard/client/page": "app/dashboard/client/page.js",
   "/dashboard/tipster/page": "app/dashboard/tipster/page.js",
+  "/go/[slug]/page": "app/go/[slug]/page.js",
   "/health/route": "app/health/route.js",
-  "/register/page": "app/register/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
   "/r/[code]/page": "app/r/[code]/page.js",
-  "/telegram-webhook/route": "app/telegram-webhook/route.js"
+  "/telegram-webhook/route": "app/telegram-webhook/route.js",
+  "/register/page": "app/register/page.js"
 }
