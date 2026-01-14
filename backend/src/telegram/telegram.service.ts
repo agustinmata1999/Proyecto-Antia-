@@ -285,10 +285,30 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           this.logger.log(`📬 Channel post received in: ${chat.title} (${chat.id})`);
           // Auto-registrar el canal si el bot puede ver mensajes (es admin)
           await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+          
+          // Guardar mensaje si el canal está siendo monitoreado
+          await this.saveMonitoredMessage(ctx.channelPost, chat);
         }
       } catch (error) {
         // Silently ignore errors
         this.logger.warn(`Error handling channel_post: ${error.message}`);
+      }
+    });
+
+    // Handler para mensajes en grupos/supergrupos (monitoreo)
+    this.bot.on('message', async (ctx) => {
+      try {
+        const chat = ctx.chat;
+        const message = ctx.message;
+        
+        // Solo procesar mensajes de grupos
+        if (chat.type === 'supergroup' || chat.type === 'group') {
+          // Guardar mensaje si el grupo está siendo monitoreado
+          await this.saveMonitoredMessage(message, chat);
+        }
+      } catch (error) {
+        // Silently ignore errors to not disrupt other handlers
+        this.logger.warn(`Error handling group message: ${error.message}`);
       }
     });
 
