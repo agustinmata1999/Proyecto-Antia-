@@ -2500,18 +2500,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
         await this.httpService.sendMessage(
           userId,
-          '🔗 *Vincular tu cuenta de Telegram*\n\n' +
-            '✅ ¡Tu Telegram está listo para vincularse!\n\n' +
-            '*Para completar la vinculación:*\n' +
-            `Tu código es: \`${linkCode}\`\n\n` +
-            'Haz clic en el botón de abajo para volver al registro y completar tu solicitud como tipster.\n\n' +
-            '⏰ El código expira en 10 minutos.\n\n' +
-            '_Si el botón no funciona, copia el código e ingrésalo manualmente en la página de registro._',
+          '🔗 *Vinculación de Telegram*\n\n' +
+            'Para continuar con el registro, pulsa el botón de abajo:\n',
           { 
             parseMode: 'Markdown',
             replyMarkup: {
               inline_keyboard: [
-                [{ text: '📝 Completar Registro', url: linkUrl }],
+                [{ text: '✅ Completar Registro', url: linkUrl }],
               ],
             },
           },
