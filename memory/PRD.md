@@ -481,6 +481,8 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 - `/app/backend/src/orders/orders.service.ts` - Servicio de órdenes con fix de fechas
 - `/app/backend/src/telegram/dto/connect-channel.dto.ts` - DTOs para validación de canales (NUEVO)
 - `/app/backend/src/telegram/telegram-channels.controller.ts` - Controlador de canales actualizado
+- `/app/backend/src/admin/admin-channel-monitor.service.ts` - Servicio de monitoreo de canales (NUEVO - 14/01/2026)
+- `/app/backend/src/admin/admin-channel-monitor.controller.ts` - Controlador de monitoreo (NUEVO - 14/01/2026)
 
 ### Frontend
 - `/app/frontend/src/app/dashboard/tipster/page.tsx` - Dashboard del tipster (RESPONSIVE)
@@ -489,4 +491,36 @@ Disponible en `/api/simulator/*` para testing end-to-end del flujo de afiliació
 - `/app/frontend/tailwind.config.ts` - Safelist para clases de transformación
 - `/app/frontend/src/app/register/page.tsx` - Registro multi-paso
 - `/app/frontend/src/app/connect-telegram/page.tsx` - Conexión post-aprobación
+- `/app/frontend/src/components/ChannelMonitorPanel.tsx` - Panel de monitoreo de canales (NUEVO - 14/01/2026)
+
+---
+
+## Changelog - 14/01/2026
+
+### ✅ Monitor de Canales de Telegram (Opción B)
+Nueva funcionalidad para que el SuperAdmin pueda monitorear las conversaciones de los canales privados de los tipsters.
+
+**Características implementadas:**
+- Panel de administración con lista de todos los canales donde el bot es admin
+- Filtro por tipster
+- Activar/desactivar monitoreo por canal (bajo demanda)
+- Captura de mensajes en tiempo real cuando el monitoreo está activo
+- Solo texto (para fotos/videos se registra que fueron enviados pero no el contenido)
+- Visualización de mensajes con filtros de fecha
+
+**Modelos de BD añadidos:**
+- `ChannelMonitorConfig` - Configuración de monitoreo por canal
+- `ChannelMessage` - Mensajes capturados de canales monitoreados
+
+**Endpoints añadidos:**
+- `GET /api/admin/channel-monitor/tipsters` - Lista tipsters con canales
+- `GET /api/admin/channel-monitor/channels` - Lista canales disponibles
+- `GET /api/admin/channel-monitor/stats` - Estadísticas de monitoreo
+- `POST /api/admin/channel-monitor/channels/:channelId/toggle` - Activar/desactivar monitoreo
+- `GET /api/admin/channel-monitor/channels/:channelId/messages` - Ver mensajes de un canal
+
+**Nota importante:**
+- Los mensajes se capturan en tiempo real, NO se pueden recuperar mensajes anteriores a la activación del monitoreo
+- Esta funcionalidad requiere que el "Modo Privacidad" del bot esté DESHABILITADO en @BotFather (ya está configurado)
+
 
