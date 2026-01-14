@@ -319,7 +319,7 @@ export class AdminChannelMonitorService {
     ]);
 
     // Get channel info
-    const channelConfig = await this.prisma.channelMonitorConfig.findUnique({
+    const channelConfig = await this.prisma.channelMonitorConfig.findFirst({
       where: { channelId },
     });
 
