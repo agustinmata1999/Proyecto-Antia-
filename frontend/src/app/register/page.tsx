@@ -556,18 +556,18 @@ function RegisterContent() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Canal de Telegram para clientes *
+              Canal de Telegram (público) *
             </label>
             <input
               type="text"
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="@mi_canal_premium o https://t.me/mi_canal"
+              placeholder="@mi_canal o https://t.me/mi_canal"
               value={formData.telegramChannel}
               onChange={(e) => setFormData({ ...formData, telegramChannel: e.target.value })}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Este es el canal donde tus clientes recibirán acceso al pagar
+              Indica tu canal público de Telegram para que podamos revisarlo
             </p>
           </div>
 
