@@ -316,6 +316,21 @@ export const adminApi = {
       responseType: 'blob',
     }),
   },
+  
+  // Channel Monitoring
+  channelMonitor: {
+    getTipsters: () => api.get('/admin/channel-monitor/tipsters'),
+    getChannels: (tipsterId?: string) => api.get('/admin/channel-monitor/channels', { params: { tipsterId } }),
+    getStats: () => api.get('/admin/channel-monitor/stats'),
+    toggleMonitoring: (channelId: string, enable: boolean) => 
+      api.post(`/admin/channel-monitor/channels/${channelId}/toggle`, { enable }),
+    getMessages: (channelId: string, params?: { 
+      startDate?: string; 
+      endDate?: string; 
+      limit?: number; 
+      offset?: number;
+    }) => api.get(`/admin/channel-monitor/channels/${channelId}/messages`, { params }),
+  },
 };
 
 // Currency API (public)
