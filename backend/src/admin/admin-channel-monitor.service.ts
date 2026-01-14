@@ -268,10 +268,15 @@ export class AdminChannelMonitorService {
       });
 
       // Update message count
-      await this.prisma.channelMonitorConfig.update({
+      const config = await this.prisma.channelMonitorConfig.findFirst({
         where: { channelId: data.channelId },
-        data: { messageCount: { increment: 1 } },
       });
+      if (config) {
+        await this.prisma.channelMonitorConfig.update({
+          where: { id: config.id },
+          data: { messageCount: { increment: 1 } },
+        });
+      }
 
       this.logger.debug(`💬 Saved message ${data.messageId} from channel ${data.channelId}`);
       return message;
