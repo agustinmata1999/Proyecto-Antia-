@@ -3824,9 +3824,9 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
       const channelId = chat.id.toString();
       
       // Check if this channel is being monitored
-      const monitorConfig = await this.prisma.channelMonitorConfig.findUnique({
+      const monitorConfig = await this.prisma.channelMonitorConfig.findFirst({
         where: { channelId },
-        select: { isMonitoring: true },
+        select: { isMonitoring: true, id: true },
       });
 
       if (!monitorConfig?.isMonitoring) {
