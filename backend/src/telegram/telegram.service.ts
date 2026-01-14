@@ -738,17 +738,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
             `✅ Found channel: ${channelTitle} (ID: ${channelId}, saved link: ${channelLink ? 'YES' : 'NO'})`,
           );
 
-          // SIEMPRE generar un link fresco para evitar links expirados
+          // SIEMPRE generar un link con JOIN REQUEST para validación
           if (channelId) {
-            this.logger.log(`🔄 Generating fresh invite link for channel ${channelId}...`);
+            this.logger.log(`🔄 Generating join request link for channel ${channelId}...`);
             try {
-              // Intentar crear un nuevo link de invitación (no expira)
+              // Crear link de invitación que REQUIERE APROBACIÓN
               const inviteResult = await this.bot.telegram.createChatInviteLink(channelId, {
-                creates_join_request: false,
-                name: `Access-${Date.now()}`, // Nombre único para tracking
+                creates_join_request: true,  // ← REQUIERE APROBACIÓN DEL BOT
+                name: `JoinReq-${Date.now()}`, // Nombre único para tracking
               });
               channelLink = inviteResult.invite_link;
-              this.logger.log(`✅ Created fresh invite link: ${channelLink}`);
+              this.logger.log(`✅ Created join request link: ${channelLink}`);
 
               // Actualizar el link en la base de datos
               const channelOid = channel._id?.$oid || channel._id;
@@ -770,17 +770,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                 this.logger.log(`✅ Updated invite link in database`);
               }
             } catch (e) {
-              this.logger.error(`Failed to create invite link: ${e.message}`);
-              // Si falla, intentar con exportChatInviteLink como fallback
+              this.logger.error(`Failed to create join request link: ${e.message}`);
+              // Si falla, intentar crear link normal como fallback
               try {
-                channelLink = await this.bot.telegram.exportChatInviteLink(channelId);
-                this.logger.log(`✅ Generated invite link via export: ${channelLink}`);
+                const fallbackLink = await this.bot.telegram.createChatInviteLink(channelId, {
+                  creates_join_request: true,
+                });
+                channelLink = fallbackLink.invite_link;
+                this.logger.log(`✅ Created fallback join request link: ${channelLink}`);
               } catch (e2) {
-                this.logger.error(`Also failed to export invite link: ${e2.message}`);
+                this.logger.error(`Also failed to create fallback link: ${e2.message}`);
                 // Usar el link guardado como último recurso
                 if (channel.invite_link) {
                   channelLink = channel.invite_link;
-                  this.logger.warn(`⚠️ Using saved invite link as fallback (may be expired)`);
+                  this.logger.warn(`⚠️ Using saved invite link as fallback`);
                 }
               }
             }
