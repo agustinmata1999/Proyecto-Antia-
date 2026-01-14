@@ -674,6 +674,7 @@ export default function AdminDashboard() {
         badgeColor: 'bg-blue-100 text-blue-700',
       },
       { id: 'affiliate', label: 'Afiliación', icon: <span>🤝</span> },
+      { id: 'channel-monitor', label: 'Monitor Canales', icon: <span>📡</span> },
       { id: 'commissions', label: 'Comisiones', icon: <span>💰</span> },
       { id: 'reports', label: 'Reportes', icon: <span>📊</span> },
     ];
