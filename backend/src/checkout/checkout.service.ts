@@ -858,7 +858,7 @@ export class CheckoutService {
       );
     }
 
-    // Send notification to TIPSTER about new sale
+    // Send notification to TIPSTER about new sale (with net amount)
     if (product) {
       await this.telegramService.notifyTipsterNewSale(
         product.tipsterId,
@@ -868,6 +868,7 @@ export class CheckoutService {
         order.currency,
         order.emailBackup,
         order.telegramUsername,
+        commissions.netAmountCents, // Pass net amount for correct earnings
       );
     }
 
