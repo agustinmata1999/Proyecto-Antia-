@@ -1094,21 +1094,25 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         const channel = channelResult.cursor?.firstBatch?.[0];
 
         if (channel) {
-          channelLink = channel.invite_link;
           channelTitle = channel.channel_title || product.title;
           channelId = channel.channel_id;
           this.logger.log(
-            `✅ Found channel: ${channelTitle} (link: ${channelLink ? 'YES' : 'NO'})`,
+            `✅ Found channel: ${channelTitle} (ID: ${channelId})`,
           );
 
-          // Generate invite link if not present - via proxy
-          if (!channelLink && channelId) {
-            this.logger.log(`⚠️ No invite link, generating via proxy...`);
+          // SIEMPRE generar un nuevo enlace con JOIN REQUEST para cada compra
+          // Esto garantiza que el enlace sea válido y funcione correctamente
+          if (channelId) {
+            this.logger.log(`🔄 Generating fresh join request link for channel ${channelId}...`);
             try {
-              channelLink = await this.httpService.exportChatInviteLink(channelId);
-              this.logger.log(`✅ Generated invite link via proxy: ${channelLink}`);
+              const inviteResult = await this.httpService.createChatInviteLink(channelId, {
+                createsJoinRequest: true,
+                name: `Purchase-${Date.now()}`,
+              });
+              channelLink = inviteResult.invite_link;
+              this.logger.log(`✅ Created join request link via proxy: ${channelLink}`);
 
-              // Save to database
+              // Save to database for reference
               const channelOid = channel._id?.$oid || channel._id;
               if (channelOid) {
                 await this.prisma.$runCommandRaw({
@@ -1127,15 +1131,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                 });
               }
             } catch (e) {
-              this.logger.error(`Failed to generate invite link: ${e.message}`);
-              // Try creating new link
-              try {
-                const inviteResult = await this.httpService.createChatInviteLink(channelId, {
-                  createsJoinRequest: false,
-                });
-                channelLink = inviteResult.invite_link;
-              } catch (e2) {
-                this.logger.error(`Also failed: ${e2.message}`);
+              this.logger.error(`Failed to create join request link: ${e.message}`);
+              // Fallback: usar el enlace guardado si existe
+              if (channel.invite_link) {
+                channelLink = channel.invite_link;
+                this.logger.warn(`⚠️ Using saved invite link as fallback: ${channelLink}`);
               }
             }
           }
