@@ -1150,19 +1150,24 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         { parse_mode: 'Markdown' },
       );
 
-      // Send channel access
+      // Send channel access with join request flow
       if (channelLink) {
         await sendMessage(
-          `🎯 *Acceso a tu canal*\n\n` + `Haz clic en el botón para unirte a *${channelTitle}*:`,
+          `🎯 *Acceso a tu canal premium*\n\n` +
+            `Para unirte a *${channelTitle}*:\n\n` +
+            `1️⃣ Haz clic en el botón de abajo\n` +
+            `2️⃣ Pulsa *"Solicitar unirme"*\n` +
+            `3️⃣ Tu solicitud será *aprobada automáticamente* ✅\n\n` +
+            `_El sistema verificará tu compra y te dará acceso al instante._`,
           {
             parse_mode: 'Markdown',
             reply_markup: {
-              inline_keyboard: [[{ text: `🚀 Entrar a ${channelTitle}`, url: channelLink }]],
+              inline_keyboard: [[{ text: `🚀 Solicitar acceso a ${channelTitle}`, url: channelLink }]],
             },
           },
         );
 
-        // Update order with access granted
+        // Update order with link sent (access will be granted when join request is approved)
         await this.prisma.$runCommandRaw({
           update: 'orders',
           updates: [
@@ -1170,7 +1175,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               q: { _id: { $oid: orderId } },
               u: {
                 $set: {
-                  access_granted: true,
+                  access_granted: false,
+                  access_link_sent: true,
                   access_granted_at: { $date: new Date().toISOString() },
                   channel_link_sent: channelLink,
                 },
@@ -1179,7 +1185,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           ],
         });
 
-        this.logger.log(`✅ Access granted to user ${telegramUserId} for order ${orderId}`);
+        this.logger.log(`✅ Join request link sent to user ${telegramUserId} for order ${orderId}`);
       } else {
         await sendMessage(
           `ℹ️ *Acceso pendiente*\n\n` +
