@@ -17,6 +17,22 @@
       "static/chunks/120-9f762cec9f26d4ec.js",
       "static/chunks/app/layout-c93cdcc360e448f3.js"
     ],
+    "/antialink/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/app/antialink/page-d7b97d7f59503c97.js"
+    ],
+    "/antiapay/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/app/antiapay/page-3575d145fa23f61b.js"
+    ],
     "/checkout/[productId]/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -71,14 +87,6 @@
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/app/dashboard/client/page-55d5fa651d5900dd.js"
     ],
-    "/go/[slug]/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/699-d9b0034a5a59d616.js",
-      "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
-    ],
     "/dashboard/tipster/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -89,15 +97,13 @@
       "static/chunks/120-9f762cec9f26d4ec.js",
       "static/chunks/app/dashboard/tipster/page-14323871739a3724.js"
     ],
-    "/login/page": [
+    "/go/[slug]/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
-      "static/chunks/593-8aca88244fa49943.js",
-      "static/chunks/app/login/page-65172ae4379cea5b.js"
+      "static/chunks/699-d9b0034a5a59d616.js",
+      "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
     ],
     "/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -115,6 +121,16 @@
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/app/r/[code]/page-d21dd73ba841be49.js"
     ],
+    "/login/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/593-8aca88244fa49943.js",
+      "static/chunks/app/login/page-65172ae4379cea5b.js"
+    ],
     "/register/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -124,22 +140,6 @@
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/593-8aca88244fa49943.js",
       "static/chunks/app/register/page-d344249794d5cdda.js"
-    ],
-    "/antiapay/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
-      "static/chunks/app/antiapay/page-3575d145fa23f61b.js"
-    ],
-    "/antialink/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
-      "static/chunks/app/antialink/page-d7b97d7f59503c97.js"
     ]
   }
 }
