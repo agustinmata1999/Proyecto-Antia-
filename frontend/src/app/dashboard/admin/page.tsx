@@ -2113,6 +2113,13 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Vista: Monitor de Canales */}
+        {activeView === 'channel-monitor' && (
+          <div className="p-6">
+            <ChannelMonitorPanel />
+          </div>
+        )}
+
       {/* Commission Modal */}
       {showCommissionModal && selectedTipster && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
