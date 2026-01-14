@@ -1211,68 +1211,150 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const { chat, from } = ctx.chatJoinRequest;
       const channelId = chat.id.toString();
       const telegramUserId = from.id.toString();
+      const telegramUsername = from.username || null;
+      const firstName = from.first_name || 'Usuario';
 
-      this.logger.log(`📥 Join request from user ${telegramUserId} to channel ${channelId}`);
+      this.logger.log(`📥 Join request from user ${telegramUserId} (@${telegramUsername}) to channel ${channelId} (${chat.title})`);
+
+      // Buscar el canal para obtener info del producto
+      const channelResult = (await this.prisma.$runCommandRaw({
+        find: 'telegram_channels',
+        filter: { channel_id: channelId },
+        limit: 1,
+      })) as any;
+      const channel = channelResult.cursor?.firstBatch?.[0];
 
       // Buscar si el usuario tiene una orden pagada para este canal
       const orderResult = (await this.prisma.$runCommandRaw({
         find: 'orders',
         filter: {
           telegram_user_id: telegramUserId,
-          status: { $in: ['PAGADA', 'COMPLETED', 'paid'] },
+          status: { $in: ['PAGADA', 'COMPLETED', 'paid', 'ACCESS_GRANTED'] },
         },
         sort: { created_at: -1 },
-        limit: 10,
+        limit: 20,
       })) as any;
 
       const orders = orderResult.cursor?.firstBatch || [];
+      this.logger.log(`Found ${orders.length} paid orders for user ${telegramUserId}`);
 
       // Verificar si alguna orden tiene acceso a este canal
       for (const order of orders) {
+        // Buscar el producto de la orden
         const product: any = await this.prisma.product.findUnique({
           where: { id: order.product_id },
         });
 
-        if (product && product.telegramChannelId === channelId) {
+        if (!product) {
+          this.logger.warn(`Product ${order.product_id} not found for order ${order._id}`);
+          continue;
+        }
+
+        // Verificar si el producto está vinculado a este canal
+        const productChannelId = product.telegramChannelId || product.telegram_channel_id;
+        
+        this.logger.log(`Checking product ${product.id}: channelId=${productChannelId} vs requested=${channelId}`);
+
+        if (productChannelId === channelId) {
+          // Verificar si la suscripción no ha expirado (si aplica)
+          if (order.subscription_end_date) {
+            const endDate = new Date(order.subscription_end_date.$date || order.subscription_end_date);
+            if (endDate < new Date()) {
+              this.logger.warn(`Subscription expired for order ${order._id}`);
+              continue; // Suscripción expirada, seguir buscando otras órdenes
+            }
+          }
+
           // ¡Usuario autorizado! Aprobar solicitud
           try {
             await this.bot.telegram.approveChatJoinRequest(channelId, parseInt(telegramUserId));
-            this.logger.log(
-              `✅ Approved join request for user ${telegramUserId} to channel ${channelId}`,
-            );
+            this.logger.log(`✅ APPROVED join request for user ${telegramUserId} to channel ${channelId}`);
+
+            // Marcar orden como con acceso otorgado
+            await this.prisma.$runCommandRaw({
+              update: 'orders',
+              updates: [
+                {
+                  q: { _id: { $oid: order._id.$oid || order._id.toString() } },
+                  u: {
+                    $set: {
+                      access_granted: true,
+                      channel_access_date: { $date: new Date().toISOString() },
+                      updated_at: { $date: new Date().toISOString() },
+                    },
+                  },
+                },
+              ],
+            });
 
             // Enviar mensaje privado de confirmación
-            await this.bot.telegram.sendMessage(
-              telegramUserId,
-              `✅ *¡Bienvenido!*\n\n` +
-                `Tu solicitud de unión a *${chat.title}* ha sido aprobada.\n\n` +
-                `Disfruta del contenido premium 🎯`,
-              { parse_mode: 'Markdown' },
-            );
+            try {
+              await this.bot.telegram.sendMessage(
+                telegramUserId,
+                `✅ *¡Bienvenido, ${firstName}!*\n\n` +
+                  `Tu solicitud de unión a *${chat.title}* ha sido aprobada automáticamente.\n\n` +
+                  `Ya puedes acceder al canal y disfrutar del contenido premium 🎯\n\n` +
+                  `¡Gracias por tu compra!`,
+                { parse_mode: 'Markdown' },
+              );
+            } catch (msgErr) {
+              this.logger.warn('Could not send approval message:', msgErr.message);
+            }
             return;
-          } catch (approveError) {
-            this.logger.error('Error approving join request:', approveError);
+          } catch (approveError: any) {
+            this.logger.error('Error approving join request:', approveError.message);
+            // Si falla la aprobación, intentar notificar al usuario
+            try {
+              await this.bot.telegram.sendMessage(
+                telegramUserId,
+                `⚠️ Hubo un problema al aprobar tu solicitud.\n\nPor favor, intenta unirte nuevamente en unos minutos.`,
+                { parse_mode: 'Markdown' },
+              );
+            } catch (e) {}
           }
         }
       }
 
-      // Usuario no autorizado - rechazar o ignorar
-      this.logger.warn(`❌ User ${telegramUserId} not authorized for channel ${channelId}`);
+      // Usuario no autorizado - NO tiene compra válida para este canal
+      this.logger.warn(`❌ User ${telegramUserId} NOT authorized for channel ${channelId} - no valid purchase found`);
 
-      // Opcional: Enviar mensaje de que necesita comprar
+      // Rechazar la solicitud
       try {
+        await this.bot.telegram.declineChatJoinRequest(channelId, parseInt(telegramUserId));
+        this.logger.log(`Declined join request for user ${telegramUserId}`);
+      } catch (declineErr: any) {
+        this.logger.warn('Could not decline join request:', declineErr.message);
+      }
+
+      // Enviar mensaje explicando que necesita comprar
+      try {
+        // Obtener información del tipster para el link de compra
+        let purchaseInfo = '';
+        if (channel?.tipster_id) {
+          const tipster = await this.prisma.tipsterProfile.findUnique({
+            where: { id: channel.tipster_id },
+          });
+          if (tipster?.publicName) {
+            purchaseInfo = `\n\nPuedes adquirir acceso visitando el perfil de *${tipster.publicName}* en nuestra plataforma.`;
+          }
+        }
+
         await this.bot.telegram.sendMessage(
           telegramUserId,
           `❌ *Acceso denegado*\n\n` +
-            `No tienes una compra válida para este canal.\n\n` +
-            `Para obtener acceso, busca el enlace de compra en el canal público del tipster.`,
+            `Hola ${firstName}, no encontramos una compra válida asociada a tu cuenta de Telegram para el canal *${chat.title}*.\n\n` +
+            `📋 *Posibles causas:*\n` +
+            `• No has realizado la compra del producto\n` +
+            `• Tu suscripción ha expirado\n` +
+            `• Usaste un Telegram diferente al momento de la compra\n\n` +
+            `Para obtener acceso, necesitas comprar el producto correspondiente.${purchaseInfo}`,
           { parse_mode: 'Markdown' },
         );
-      } catch (msgError) {
-        this.logger.warn('Could not send denial message:', msgError);
+      } catch (msgError: any) {
+        this.logger.warn('Could not send denial message:', msgError.message);
       }
-    } catch (error) {
-      this.logger.error('Error in handleJoinRequest:', error);
+    } catch (error: any) {
+      this.logger.error('Error in handleJoinRequest:', error.message);
     }
   }
 
