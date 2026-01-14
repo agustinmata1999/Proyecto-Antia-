@@ -2046,29 +2046,32 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // Si hay un enlace de canal configurado, enviarlo
+      // Si hay un enlace de canal configurado, enviarlo con flujo de join request
       if (channelLink) {
-        // Mensaje 2: Acceso al canal premium
+        // Mensaje 2: Acceso al canal premium con instrucciones de join request
         const accessMessage =
-          `🎯 *Compra autorizada*\n\n` +
-          `Puede entrar al canal del servicio *${channelTitle}* pinchando aquí:\n\n` +
-          `${channelLink}`;
+          `🎯 *Acceso a tu canal premium*\n\n` +
+          `Para unirte a *${channelTitle}*:\n\n` +
+          `1️⃣ Haz clic en el botón de abajo\n` +
+          `2️⃣ Pulsa *"Solicitar unirme"*\n` +
+          `3️⃣ Tu solicitud será *aprobada automáticamente* ✅\n\n` +
+          `_El sistema verificará tu compra y te dará acceso al instante._`;
 
         await sendMessageViaProxy(telegramUserId, accessMessage, {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: [[{ text: '🚀 Entrar al Canal', url: channelLink }]],
+            inline_keyboard: [[{ text: '🚀 Solicitar acceso al Canal', url: channelLink }]],
           },
         });
 
         // Mensaje 3: Confirmación final
         await sendMessageViaProxy(
           telegramUserId,
-          `✅ *Compra finalizada*\n\nYa tienes acceso al contenido premium.`,
+          `✅ *Compra finalizada*\n\nSolicita tu acceso usando el botón de arriba.`,
         );
 
         this.logger.log(
-          `✅ Payment success notification with channel link sent to ${telegramUserId}`,
+          `✅ Payment success notification with join request link sent to ${telegramUserId}`,
         );
         return { success: true, inviteLink: channelLink };
       } else {
