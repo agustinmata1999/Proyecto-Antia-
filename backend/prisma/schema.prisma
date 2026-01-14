@@ -916,3 +916,56 @@ model BettingHouseTrackingConfig {
   @@map("betting_house_tracking_configs")
 }
 
+// ==================== MÓDULO DE MONITOREO DE CANALES (ADMIN) ====================
+
+// Configuración de monitoreo por canal
+model ChannelMonitorConfig {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  channelId         String    @unique @map("channel_id")       // ID de Telegram del canal/grupo
+  channelTitle      String    @map("channel_title")            // Título del canal
+  tipsterId         String?   @map("tipster_id")               // ID del tipster dueño (si se conoce)
+  tipsterName       String?   @map("tipster_name")             // Nombre del tipster
+  isMonitoring      Boolean   @default(false) @map("is_monitoring") // Si está activamente monitoreando
+  startedAt         DateTime? @map("started_at")               // Cuándo se activó el monitoreo
+  stoppedAt         DateTime? @map("stopped_at")               // Cuándo se desactivó
+  startedBy         String?   @map("started_by")               // Admin que activó
+  messageCount      Int       @default(0) @map("message_count") // Contador de mensajes capturados
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([tipsterId])
+  @@index([isMonitoring])
+  @@map("channel_monitor_configs")
+}
+
+// Mensajes capturados de canales monitoreados
+model ChannelMessage {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  channelId         String    @map("channel_id")               // ID del canal de Telegram
+  channelTitle      String?   @map("channel_title")            // Título del canal
+  messageId         Int       @map("message_id")               // ID del mensaje en Telegram
+  
+  // Info del remitente
+  senderUserId      String?   @map("sender_user_id")           // ID de Telegram del remitente
+  senderUsername    String?   @map("sender_username")          // @username del remitente
+  senderFirstName   String?   @map("sender_first_name")        // Nombre
+  senderLastName    String?   @map("sender_last_name")         // Apellido
+  
+  // Contenido
+  messageType       String    @map("message_type")             // text, photo, video, document, audio, sticker, voice
+  textContent       String?   @map("text_content")             // Texto del mensaje (si aplica)
+  caption           String?                                    // Caption de media (si aplica)
+  
+  // Metadata
+  replyToMessageId  Int?      @map("reply_to_message_id")      // Si es respuesta a otro mensaje
+  forwardFromId     String?   @map("forward_from_id")          // Si es reenviado
+  
+  // Timestamps
+  telegramDate      DateTime  @map("telegram_date")            // Fecha/hora según Telegram
+  capturedAt        DateTime  @default(now()) @map("captured_at")
+
+  @@index([channelId, telegramDate])
+  @@index([channelId, messageId])
+  @@map("channel_messages")
+}
+
