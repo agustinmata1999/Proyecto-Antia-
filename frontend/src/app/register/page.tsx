@@ -173,6 +173,10 @@ function RegisterContent() {
         setError('El usuario de Telegram es obligatorio');
         return;
       }
+      if (!formData.telegramChannel) {
+        setError('Debes indicar tu canal de Telegram donde darás acceso a tus clientes');
+        return;
+      }
       if (!formData.promotionChannel) {
         setError('Debes indicar dónde promocionas tu contenido (canal de Telegram, Instagram, etc.)');
         return;
