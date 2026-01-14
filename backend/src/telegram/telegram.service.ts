@@ -3814,4 +3814,90 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     // Ahora conectar usando el método existente
     return this.connectChannelManually(tipsterId, channelId);
   }
+
+  /**
+   * Save a message to the monitored messages collection
+   * Only saves if the channel is being actively monitored
+   */
+  private async saveMonitoredMessage(message: any, chat: any): Promise<void> {
+    try {
+      const channelId = chat.id.toString();
+      
+      // Check if this channel is being monitored
+      const monitorConfig = await this.prisma.channelMonitorConfig.findUnique({
+        where: { channelId },
+        select: { isMonitoring: true },
+      });
+
+      if (!monitorConfig?.isMonitoring) {
+        return; // Not monitored, skip
+      }
+
+      // Determine message type
+      let messageType = 'text';
+      let textContent = message.text || null;
+      let caption = message.caption || null;
+
+      if (message.photo) messageType = 'photo';
+      else if (message.video) messageType = 'video';
+      else if (message.document) messageType = 'document';
+      else if (message.audio) messageType = 'audio';
+      else if (message.voice) messageType = 'voice';
+      else if (message.sticker) messageType = 'sticker';
+      else if (message.animation) messageType = 'animation';
+      else if (message.video_note) messageType = 'video_note';
+      else if (message.location) messageType = 'location';
+      else if (message.contact) messageType = 'contact';
+      else if (message.poll) messageType = 'poll';
+
+      // Get sender info (from for groups, sender_chat for channels)
+      const sender = message.from || message.sender_chat;
+      const senderUserId = sender?.id?.toString() || null;
+      const senderUsername = sender?.username || null;
+      const senderFirstName = sender?.first_name || sender?.title || null;
+      const senderLastName = sender?.last_name || null;
+
+      // Check for duplicate
+      const existing = await this.prisma.channelMessage.findFirst({
+        where: {
+          channelId,
+          messageId: message.message_id,
+        },
+      });
+
+      if (existing) {
+        return; // Already saved
+      }
+
+      // Save the message
+      await this.prisma.channelMessage.create({
+        data: {
+          channelId,
+          channelTitle: chat.title || null,
+          messageId: message.message_id,
+          senderUserId,
+          senderUsername,
+          senderFirstName,
+          senderLastName,
+          messageType,
+          textContent,
+          caption,
+          replyToMessageId: message.reply_to_message?.message_id || null,
+          forwardFromId: message.forward_from?.id?.toString() || message.forward_from_chat?.id?.toString() || null,
+          telegramDate: new Date(message.date * 1000),
+        },
+      });
+
+      // Update message count
+      await this.prisma.channelMonitorConfig.update({
+        where: { channelId },
+        data: { messageCount: { increment: 1 } },
+      });
+
+      this.logger.debug(`💬 Monitored message saved: ${message.message_id} from ${chat.title}`);
+    } catch (error) {
+      // Log but don't throw - monitoring should not interrupt normal operation
+      this.logger.warn(`Error saving monitored message: ${error.message}`);
+    }
+  }
 }
