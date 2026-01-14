@@ -875,17 +875,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // Notificar al tipster sobre la venta
-      if (tipster) {
-        await this.notifyTipsterNewSale(
-          tipster.id,
-          orderId,
-          product.id,
-          order.amount_cents || product.priceCents,
-          order.currency || 'EUR',
-          order.email_backup,
-        );
-      }
+      // REMOVED: Tipster notification is already sent from checkout.service.ts
+      // Keeping it here would cause DUPLICATE notifications
+      // if (tipster) {
+      //   await this.notifyTipsterNewSale(...);
+      // }
     } catch (error) {
       this.logger.error('Error in handlePostPaymentAccess:', error);
       await ctx.reply(
@@ -1195,17 +1189,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         );
       }
 
-      // Notify tipster about sale
-      if (tipster) {
-        await this.notifyTipsterNewSale(
-          tipster.id,
-          orderId,
-          product.id,
-          order.amount_cents || product.priceCents,
-          order.currency || 'EUR',
-          order.email_backup,
-        );
-      }
+      // REMOVED: Tipster notification is already sent from checkout.service.ts
+      // Keeping it here would cause DUPLICATE notifications
+      // if (tipster) {
+      //   await this.notifyTipsterNewSale(...);
+      // }
     } catch (error) {
       this.logger.error('Error in handlePostPaymentAccessViaProxy:', error);
       await sendMessage(
@@ -2105,6 +2093,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     currency: string,
     buyerEmail?: string,
     buyerUsername?: string,
+    netAmountCents?: number, // NEW: Net amount after commissions
   ) {
     try {
       this.logger.log(`Notifying tipster ${tipsterId} about sale ${orderId}`);
@@ -2124,11 +2113,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         where: { id: productId },
       });
 
-      // Format price
-      const priceFormatted = new Intl.NumberFormat('es-ES', {
+      // Use net amount if provided, otherwise calculate approximate (fallback)
+      const earningsAmount = netAmountCents ?? Math.round(amountCents * 0.9); // Default ~10% commission if not provided
+      
+      // Format prices
+      const grossFormatted = new Intl.NumberFormat('es-ES', {
         style: 'currency',
         currency: currency,
       }).format(amountCents / 100);
+      
+      const netFormatted = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: currency,
+      }).format(earningsAmount / 100);
 
       // Get tipster's Telegram ID to send notification
       if (tipster.telegramUserId) {
@@ -2136,7 +2133,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           `💰 *¡Nueva Venta!*\n\n` +
           `Has recibido una nueva compra:\n\n` +
           `📦 *Producto:* ${product?.title || 'Producto'}\n` +
-          `💵 *Importe:* ${priceFormatted}\n` +
+          `💵 *Importe bruto:* ${grossFormatted}\n` +
+          `✅ *Tu ganancia:* ${netFormatted}\n` +
           `👤 *Comprador:* ${buyerUsername || buyerEmail || 'Anónimo'}\n` +
           `📅 *Fecha:* ${new Date().toLocaleString('es-ES')}\n\n` +
           `El cliente ya tiene acceso al contenido.`;
@@ -2152,8 +2150,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // Update tipster's earnings in database
-      await this.updateTipsterEarnings(tipsterId, amountCents, currency);
+      // Update tipster's earnings in database with NET amount (not gross)
+      await this.updateTipsterEarnings(tipsterId, earningsAmount, currency);
 
       return { success: true };
     } catch (error) {
