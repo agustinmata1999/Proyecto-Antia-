@@ -138,34 +138,56 @@ export class AdminChannelMonitorService {
     });
 
     // Check if config exists
-    const existingConfig = await this.prisma.channelMonitorConfig.findUnique({
+    const existingConfig = await this.prisma.channelMonitorConfig.findFirst({
       where: { channelId },
     });
 
-    if (existingConfig) {
-      // Update existing config
-      await this.prisma.channelMonitorConfig.update({
-        where: { channelId },
-        data: {
-          isMonitoring: enable,
-          startedAt: enable ? new Date() : existingConfig.startedAt,
-          stoppedAt: enable ? null : new Date(),
-          startedBy: enable ? adminEmail : existingConfig.startedBy,
-        },
-      });
-    } else {
-      // Create new config
-      await this.prisma.channelMonitorConfig.create({
-        data: {
-          channelId,
-          channelTitle: channel.channelTitle,
-          tipsterId: tipster?.id || null,
-          tipsterName: tipster?.publicName || null,
-          isMonitoring: enable,
-          startedAt: enable ? new Date() : null,
-          startedBy: adminEmail,
-        },
-      });
+    try {
+      if (existingConfig) {
+        // Update existing config
+        await this.prisma.channelMonitorConfig.update({
+          where: { id: existingConfig.id },
+          data: {
+            isMonitoring: enable,
+            startedAt: enable ? new Date() : existingConfig.startedAt,
+            stoppedAt: enable ? null : new Date(),
+            startedBy: enable ? adminEmail : existingConfig.startedBy,
+          },
+        });
+      } else {
+        // Create new config
+        await this.prisma.channelMonitorConfig.create({
+          data: {
+            channelId,
+            channelTitle: channel.channelTitle,
+            tipsterId: tipster?.id || null,
+            tipsterName: tipster?.publicName || null,
+            isMonitoring: enable,
+            startedAt: enable ? new Date() : null,
+            startedBy: adminEmail,
+          },
+        });
+      }
+    } catch (error) {
+      // If duplicate key error, try update instead
+      if (error.code === 'P2002') {
+        const config = await this.prisma.channelMonitorConfig.findFirst({
+          where: { channelId },
+        });
+        if (config) {
+          await this.prisma.channelMonitorConfig.update({
+            where: { id: config.id },
+            data: {
+              isMonitoring: enable,
+              startedAt: enable ? new Date() : config.startedAt,
+              stoppedAt: enable ? null : new Date(),
+              startedBy: enable ? adminEmail : config.startedBy,
+            },
+          });
+        }
+      } else {
+        throw error;
+      }
     }
 
     this.logger.log(`📡 Monitoring ${enable ? 'ENABLED' : 'DISABLED'} for channel: ${channel.channelTitle} (${channelId}) by ${adminEmail}`);
