@@ -14,10 +14,10 @@ Sistema completo implementado con:
 ## 🌐 ACCESO A LA PLATAFORMA
 
 ### URLs de Acceso
-- **Frontend**: https://paymenz.preview.emergentagent.com
-- **API Backend**: https://paymenz.preview.emergentagent.com/api
-- **Swagger Docs**: https://paymenz.preview.emergentagent.com/api/docs
-- **Health Check**: https://paymenz.preview.emergentagent.com/api/health
+- **Frontend**: https://tip-gateway.preview.emergentagent.com
+- **API Backend**: https://tip-gateway.preview.emergentagent.com/api
+- **Swagger Docs**: https://tip-gateway.preview.emergentagent.com/api/docs
+- **Health Check**: https://tip-gateway.preview.emergentagent.com/api/health
 
 ### Credenciales de Prueba
 
@@ -582,7 +582,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
 
 2. **Login Tipster:**
    ```
-   https://paymenz.preview.emergentagent.com/login
+   https://tip-gateway.preview.emergentagent.com/login
    → Accede con fausto.perez@antia.com / Tipster123!
    ```
 
@@ -604,7 +604,7 @@ El frontend está implementado siguiendo el diseño de Figma proporcionado:
    ```
    Simular webhook de pago con curl:
    
-   curl -X POST https://paymenz.preview.emergentagent.com/api/webhooks/payments/confirm \
+   curl -X POST https://tip-gateway.preview.emergentagent.com/api/webhooks/payments/confirm \
      -H "Content-Type: application/json" \
      -d '{
        "product_id": "PRODUCT_ID",
@@ -709,7 +709,7 @@ Propietario - Todos los derechos reservados © 2025 Antia
 
 El sistema está completamente operativo y listo para usar.
 
-**Accede ahora:** https://paymenz.preview.emergentagent.com
+**Accede ahora:** https://tip-gateway.preview.emergentagent.com
 
 **Credenciales:**
 - SuperAdmin: admin@antia.com / SuperAdmin123!
