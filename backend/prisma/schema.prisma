@@ -921,7 +921,7 @@ model BettingHouseTrackingConfig {
 // Configuración de monitoreo por canal
 model ChannelMonitorConfig {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  channelId         String    @unique @map("channel_id")       // ID de Telegram del canal/grupo
+  channelId         String    @map("channel_id")       // ID de Telegram del canal/grupo
   channelTitle      String    @map("channel_title")            // Título del canal
   tipsterId         String?   @map("tipster_id")               // ID del tipster dueño (si se conoce)
   tipsterName       String?   @map("tipster_name")             // Nombre del tipster
@@ -933,6 +933,7 @@ model ChannelMonitorConfig {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
+  @@index([channelId])
   @@index([tipsterId])
   @@index([isMonitoring])
   @@map("channel_monitor_configs")
