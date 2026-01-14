@@ -155,6 +155,7 @@ export class AdminChannelMonitorService {
       });
     } else {
       // Create new config using raw MongoDB command to avoid transaction issues
+      const now = new Date();
       await this.prisma.$runCommandRaw({
         insert: 'channel_monitor_configs',
         documents: [
@@ -164,12 +165,12 @@ export class AdminChannelMonitorService {
             tipster_id: tipster?.id || null,
             tipster_name: tipster?.publicName || null,
             is_monitoring: enable,
-            started_at: enable ? new Date() : null,
+            started_at: enable ? { $date: now.toISOString() } : null,
             stopped_at: null,
             started_by: adminEmail,
             message_count: 0,
-            created_at: new Date(),
-            updated_at: new Date(),
+            created_at: { $date: now.toISOString() },
+            updated_at: { $date: now.toISOString() },
           },
         ],
       });
