@@ -174,7 +174,7 @@ function RegisterContent() {
         return;
       }
       if (!formData.telegramChannel) {
-        setError('Debes indicar tu canal de Telegram donde darás acceso a tus clientes');
+        setError('Debes indicar tu canal público de Telegram para que podamos revisarlo');
         return;
       }
     }
