@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { adminApi, authApi, currencyApi, affiliateApi, withdrawalsApi } from '@/lib/api';
 import AffiliateAdminPanel from '@/components/AffiliateAdminPanel';
 import CurrencySelector from '@/components/CurrencySelector';
+import ChannelMonitorPanel from '@/components/ChannelMonitorPanel';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import DashboardLayout from '@/components/DashboardLayout';
 
