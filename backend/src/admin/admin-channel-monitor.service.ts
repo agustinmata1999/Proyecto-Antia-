@@ -204,7 +204,7 @@ export class AdminChannelMonitorService {
    * Check if a channel is being monitored (used by telegram service)
    */
   async isChannelMonitored(channelId: string): Promise<boolean> {
-    const config = await this.prisma.channelMonitorConfig.findUnique({
+    const config = await this.prisma.channelMonitorConfig.findFirst({
       where: { channelId },
       select: { isMonitoring: true },
     });
