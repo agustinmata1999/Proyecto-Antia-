@@ -137,25 +137,36 @@ export class AdminChannelMonitorService {
       },
     });
 
-    // Upsert monitor config
-    const config = await this.prisma.channelMonitorConfig.upsert({
+    // Check if config exists
+    const existingConfig = await this.prisma.channelMonitorConfig.findUnique({
       where: { channelId },
-      create: {
-        channelId,
-        channelTitle: channel.channelTitle,
-        tipsterId: tipster?.id || null,
-        tipsterName: tipster?.publicName || null,
-        isMonitoring: enable,
-        startedAt: enable ? new Date() : null,
-        startedBy: adminEmail,
-      },
-      update: {
-        isMonitoring: enable,
-        startedAt: enable ? new Date() : undefined,
-        stoppedAt: enable ? null : new Date(),
-        startedBy: enable ? adminEmail : undefined,
-      },
     });
+
+    if (existingConfig) {
+      // Update existing config
+      await this.prisma.channelMonitorConfig.update({
+        where: { channelId },
+        data: {
+          isMonitoring: enable,
+          startedAt: enable ? new Date() : existingConfig.startedAt,
+          stoppedAt: enable ? null : new Date(),
+          startedBy: enable ? adminEmail : existingConfig.startedBy,
+        },
+      });
+    } else {
+      // Create new config
+      await this.prisma.channelMonitorConfig.create({
+        data: {
+          channelId,
+          channelTitle: channel.channelTitle,
+          tipsterId: tipster?.id || null,
+          tipsterName: tipster?.publicName || null,
+          isMonitoring: enable,
+          startedAt: enable ? new Date() : null,
+          startedBy: adminEmail,
+        },
+      });
+    }
 
     this.logger.log(`📡 Monitoring ${enable ? 'ENABLED' : 'DISABLED'} for channel: ${channel.channelTitle} (${channelId}) by ${adminEmail}`);
 
