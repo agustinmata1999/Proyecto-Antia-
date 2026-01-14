@@ -35,11 +35,20 @@ export class RegisterTipsterDto {
   telegramLinkedUsername?: string;
 
   @ApiProperty({
-    example: 'https://t.me/mi_canal o @mi_instagram',
-    description: 'Canal/URL donde promociona (Telegram público, Instagram, etc.)',
+    example: '@mi_canal_premium',
+    description: 'Canal de Telegram donde los clientes recibirán acceso',
   })
   @IsString()
-  promotionChannel: string;
+  telegramChannel: string;
+
+  @ApiProperty({
+    example: 'https://t.me/mi_canal o @mi_instagram',
+    description: 'Canal/URL donde promociona (Telegram público, Instagram, etc.)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  promotionChannel?: string;
 
   @ApiProperty({ example: 'ES', required: false })
   @IsOptional()
