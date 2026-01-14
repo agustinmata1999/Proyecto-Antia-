@@ -2937,15 +2937,27 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     try {
       const now = new Date().toISOString();
 
-      // Intentar obtener el invite link del canal
+      // Crear un nuevo invite link con JOIN REQUEST para el canal
       let inviteLink: string | null = null;
       try {
         if (this.httpService) {
-          inviteLink = await this.httpService.exportChatInviteLink(channelId);
-          this.logger.log(`📎 Got invite link for channel ${channelTitle}: ${inviteLink}`);
+          // Crear un enlace de invitación que REQUIERE APROBACIÓN
+          const inviteResult = await this.httpService.createChatInviteLink(channelId, {
+            createsJoinRequest: true,
+            name: `Channel-${Date.now()}`,
+          });
+          inviteLink = inviteResult.invite_link;
+          this.logger.log(`📎 Created join request link for channel ${channelTitle}: ${inviteLink}`);
         }
       } catch (inviteError) {
-        this.logger.warn(`Could not get invite link for ${channelTitle}: ${inviteError.message}`);
+        this.logger.warn(`Could not create invite link for ${channelTitle}: ${inviteError.message}`);
+        // Fallback: intentar obtener el link principal
+        try {
+          inviteLink = await this.httpService.exportChatInviteLink(channelId);
+          this.logger.log(`📎 Fallback: Got primary invite link for channel ${channelTitle}: ${inviteLink}`);
+        } catch (e) {
+          this.logger.warn(`Also failed to get primary link: ${e.message}`);
+        }
       }
 
       // Verificar si ya existe
