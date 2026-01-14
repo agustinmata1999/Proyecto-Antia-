@@ -78,7 +78,7 @@ export class UploadController {
         updates: [
           {
             q: { user_id: userId },
-            u: { $set: { avatar_url: avatarUrl, updated_at: new Date() } },
+            u: { $set: { avatar_url: avatarUrl, updated_at: { $date: new Date().toISOString() } } },
           },
         ],
       });
