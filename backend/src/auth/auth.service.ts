@@ -184,6 +184,7 @@ export class AuthService {
             application_experience: dto.experience || null,
             application_social_media: dto.socialMedia || null,
             application_website: dto.website || null,
+            telegram_channel: dto.telegramChannel || null, // Canal de Telegram para clientes
             promotion_channel: dto.promotionChannel || null,
             // KYC fields (vacíos, se completan post-aprobación)
             kyc_completed: false,
