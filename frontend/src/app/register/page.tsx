@@ -199,6 +199,7 @@ function RegisterContent() {
           phone: formData.phone,
           password: formData.password,
           telegramUsername: formData.telegramUsername,
+          telegramChannel: formData.telegramChannel,
           promotionChannel: formData.promotionChannel,
           experience: formData.experience,
           countryIso: formData.countryIso,
