@@ -3888,13 +3888,16 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
         },
       });
 
-      // Update message count
-      if (monitorConfig?.id) {
-        await this.prisma.channelMonitorConfig.update({
-          where: { id: monitorConfig.id },
-          data: { messageCount: { increment: 1 } },
-        });
-      }
+      // Update message count using raw command
+      await this.prisma.$runCommandRaw({
+        update: 'channel_monitor_configs',
+        updates: [
+          {
+            q: { channel_id: channelId },
+            u: { $inc: { message_count: 1 } },
+          },
+        ],
+      });
 
       this.logger.debug(`ðŸ’¬ Monitored message saved: ${message.message_id} from ${chat.title}`);
     } catch (error) {
