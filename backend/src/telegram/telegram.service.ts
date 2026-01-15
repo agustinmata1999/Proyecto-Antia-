@@ -3823,15 +3823,22 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}�
     try {
       const channelId = chat.id.toString();
       
+      this.logger.log(`🔍 Checking if channel ${channelId} is monitored...`);
+      
       // Check if this channel is being monitored
       const monitorConfig = await this.prisma.channelMonitorConfig.findFirst({
         where: { channelId },
         select: { isMonitoring: true, id: true },
       });
 
+      this.logger.log(`🔍 Monitor config for ${channelId}: ${JSON.stringify(monitorConfig)}`);
+
       if (!monitorConfig?.isMonitoring) {
+        this.logger.log(`⏭️ Channel ${channelId} not monitored, skipping`);
         return; // Not monitored, skip
       }
+
+      this.logger.log(`✅ Channel ${channelId} IS monitored, saving message...`);
 
       // Determine message type
       let messageType = 'text';
