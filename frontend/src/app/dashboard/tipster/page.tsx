@@ -1774,8 +1774,8 @@ function TipsterDashboardContent() {
                         <div className="flex flex-col">
                           <span className="text-sm text-gray-500">
                             {product.telegramChannelId 
-                              ? 'Suscripción mensual a telegram'
-                              : 'Suscripción mensual a telegram'
+                              ? (product.billingType === 'SUBSCRIPTION' ? 'Suscripción mensual a telegram' : 'Pago único a telegram')
+                              : (product.billingType === 'SUBSCRIPTION' ? 'Suscripción mensual' : 'Pago único')
                             }
                           </span>
                           <span className="font-semibold text-gray-900">{product.title}</span>
