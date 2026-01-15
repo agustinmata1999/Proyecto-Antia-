@@ -2153,8 +2153,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           `💰 *¡Nueva Venta!*\n\n` +
           `Has recibido una nueva compra:\n\n` +
           `📦 *Producto:* ${product?.title || 'Producto'}\n` +
-          `💵 *Importe bruto:* ${grossFormatted}\n` +
-          `✅ *Tu ganancia:* ${netFormatted}\n` +
+          `💵 *Importe:* ${grossFormatted}\n` +
           `👤 *Comprador:* ${buyerUsername || buyerEmail || 'Anónimo'}\n` +
           `📅 *Fecha:* ${new Date().toLocaleString('es-ES')}\n\n` +
           `El cliente ya tiene acceso al contenido.`;
