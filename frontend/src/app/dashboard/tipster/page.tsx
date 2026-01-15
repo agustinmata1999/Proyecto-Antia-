@@ -3477,13 +3477,23 @@ function TipsterDashboardContent() {
                   </p>
                 </div>
 
-                {selectedProduct.telegramChannelId && (
+                {selectedProduct.telegramChannelId ? (
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Canal de Telegram</h3>
                     <p className="text-gray-900 flex items-center gap-2">
                       📱 {getChannelNameForProduct(selectedProduct.telegramChannelId)}
                       <span className="text-xs text-gray-500">({selectedProduct.telegramChannelId})</span>
                     </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Canal de Telegram</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium">
+                        SIN CANAL
+                      </span>
+                      <span className="text-gray-500 text-sm">Solo pago, sin acceso a canal</span>
+                    </div>
                   </div>
                 )}
 
