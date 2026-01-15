@@ -27,6 +27,11 @@ function CheckoutSuccessContent() {
     return `https://t.me/${getBotUsername()}`;
   };
 
+  // Check if product has Telegram channel
+  const hasTelegramChannel = () => {
+    return orderData?.product?.telegramChannelId ? true : false;
+  };
+
   useEffect(() => {
     if (orderId) {
       completePayment();
@@ -36,9 +41,9 @@ function CheckoutSuccessContent() {
     }
   }, [orderId, sessionId]);
 
-  // Countdown y redirección automática
+  // Countdown y redirección automática - SOLO si tiene canal de Telegram
   useEffect(() => {
-    if (!loading && !error && orderData) {
+    if (!loading && !error && orderData && hasTelegramChannel()) {
       setRedirecting(true);
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -166,63 +171,85 @@ function CheckoutSuccessContent() {
             </div>
           )}
 
-          {/* Telegram Redirect - MAIN ACTION */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <MessageCircle className="w-6 h-6 text-blue-600" />
-              <h3 className="font-bold text-blue-900 text-lg">Acceso a tu canal</h3>
-            </div>
-            
-            {redirecting && countdown > 0 && (
-              <div className="mb-4">
-                <p className="text-sm text-blue-800 mb-2">
-                  Serás redirigido a Telegram en...
+          {/* Telegram Redirect - SOLO si tiene canal de Telegram */}
+          {hasTelegramChannel() ? (
+            <>
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <MessageCircle className="w-6 h-6 text-blue-600" />
+                  <h3 className="font-bold text-blue-900 text-lg">Acceso a tu canal</h3>
+                </div>
+                
+                {redirecting && countdown > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm text-blue-800 mb-2">
+                      Serás redirigido a Telegram en...
+                    </p>
+                    <div className="text-4xl font-bold text-blue-600">{countdown}</div>
+                  </div>
+                )}
+
+                <p className="text-sm text-blue-800 mb-4">
+                  Haz clic en el botón para ir a Telegram y recibir tu acceso al canal premium.
                 </p>
-                <div className="text-4xl font-bold text-blue-600">{countdown}</div>
+
+                <button
+                  onClick={handleManualRedirect}
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  Ir a Telegram Ahora
+                </button>
+
+                <p className="text-xs text-blue-600 mt-3">
+                  Se abrirá la app de Telegram automáticamente
+                </p>
               </div>
-            )}
 
-            <p className="text-sm text-blue-800 mb-4">
-              Haz clic en el botón para ir a Telegram y recibir tu acceso al canal premium.
-            </p>
+              {/* Instructions - SOLO si tiene canal */}
+              <div className="bg-green-50 rounded-xl p-4 mb-6 text-left">
+                <h3 className="font-semibold text-green-900 mb-2">📋 Qué pasará ahora</h3>
+                <ul className="text-sm text-green-800 space-y-2">
+                  <li>1️⃣ Serás redirigido al bot de Antia en Telegram</li>
+                  <li>2️⃣ El bot verificará tu pago automáticamente</li>
+                  <li>3️⃣ Recibirás el enlace para unirte al canal</li>
+                  <li>4️⃣ ¡Listo! Empieza a recibir los pronósticos</li>
+                </ul>
+              </div>
 
-            <button
-              onClick={handleManualRedirect}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-lg"
+              {/* Alternative link */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-2">¿No se abre automáticamente?</p>
+                <a
+                  href={getTelegramBotUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline text-sm flex items-center justify-center gap-1"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Abrir en nueva pestaña
+                </a>
+              </div>
+            </>
+          ) : (
+            /* Sin canal de Telegram - Solo mensaje de éxito */
+            <div className="bg-green-50 rounded-xl p-6 mb-6">
+              <h3 className="font-semibold text-green-900 mb-2">✅ Compra completada</h3>
+              <p className="text-sm text-green-800">
+                Tu pago ha sido procesado correctamente. Recibirás un email de confirmación con los detalles de tu compra.
+              </p>
+            </div>
+          )}
+
+          {/* Volver al inicio - para productos sin canal */}
+          {!hasTelegramChannel() && (
+            <Link
+              href="/"
+              className="inline-block bg-black text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors w-full text-center"
             >
-              <MessageCircle className="w-6 h-6" />
-              Ir a Telegram Ahora
-            </button>
-
-            <p className="text-xs text-blue-600 mt-3">
-              Se abrirá la app de Telegram automáticamente
-            </p>
-          </div>
-
-          {/* Instructions */}
-          <div className="bg-green-50 rounded-xl p-4 mb-6 text-left">
-            <h3 className="font-semibold text-green-900 mb-2">📋 Qué pasará ahora</h3>
-            <ul className="text-sm text-green-800 space-y-2">
-              <li>1️⃣ Serás redirigido al bot de Antia en Telegram</li>
-              <li>2️⃣ El bot verificará tu pago automáticamente</li>
-              <li>3️⃣ Recibirás el enlace para unirte al canal</li>
-              <li>4️⃣ ¡Listo! Empieza a recibir los pronósticos</li>
-            </ul>
-          </div>
-
-          {/* Alternative link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">¿No se abre automáticamente?</p>
-            <a
-              href={getTelegramBotUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm flex items-center justify-center gap-1"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Abrir en nueva pestaña
-            </a>
-          </div>
+              Volver al inicio
+            </Link>
+          )}
         </div>
 
         {/* Support */}
