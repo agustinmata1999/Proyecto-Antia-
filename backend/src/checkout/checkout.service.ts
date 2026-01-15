@@ -856,9 +856,11 @@ export class CheckoutService {
         })
       : null;
 
-    // Send Telegram notification to BUYER if user came from Telegram
+    // Send Telegram notification to BUYER ONLY if:
+    // 1. User came from Telegram AND
+    // 2. Product has a Telegram channel
     let telegramResult = null;
-    if (order.telegramUserId) {
+    if (order.telegramUserId && product?.telegramChannelId) {
       telegramResult = await this.telegramService.notifyPaymentSuccess(
         order.telegramUserId,
         orderId,
