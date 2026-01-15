@@ -1752,16 +1752,8 @@ function TipsterDashboardContent() {
                 {(products as any[]).map((product: any) => (
                   <div 
                     key={product.id} 
-                    className={`bg-white rounded-xl shadow-sm border overflow-hidden relative ${
-                      product.telegramChannelId ? 'border-gray-100' : 'border-orange-300'
-                    }`}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
                   >
-                    {/* Cinta SIN CANAL */}
-                    {!product.telegramChannelId && (
-                      <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
-                        SIN CANAL
-                      </div>
-                    )}
                     <div className="p-5">
                       {/* Product Type Label with Logo */}
                       <div className="flex items-center gap-3 mb-3">
