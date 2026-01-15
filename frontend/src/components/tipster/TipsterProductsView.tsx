@@ -293,40 +293,41 @@ export default function TipsterProductsView({
       ) : (
         <div className="grid gap-4">
           {products.map((product) => (
-            <div key={product.id} className={`bg-white rounded-xl p-6 border shadow-sm relative overflow-hidden ${
-              product.telegramChannelId ? 'border-gray-200' : 'border-orange-300'
-            }`}>
-              {/* Cinta SIN CANAL */}
-              {!product.telegramChannelId && (
-                <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 transform translate-x-2 -translate-y-0 rotate-0 rounded-bl-lg">
-                  SIN CANAL
-                </div>
-              )}
+            <div key={product.id} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{product.title}</h3>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {product.active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </div>
-                  {product.description && (
-                    <p className="text-gray-600 text-sm mb-3">{product.description}</p>
+                <div className="flex items-start gap-4 flex-1">
+                  {/* Logo indicator */}
+                  {product.telegramChannelId ? (
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                      </svg>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-xl">A</span>
+                    </div>
                   )}
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="font-semibold text-blue-600">
-                      {formatPrice(product.priceCents)}
-                    </span>
-                    <span className="text-gray-500">
-                      {getBillingLabel(product.billingType, product.billingPeriod)}
-                    </span>
-                    {product.telegramChannelId && (
-                      <span className="text-green-600">
-                        📢 {channels.find(c => c.channelId === product.telegramChannelId)?.channelTitle || 'Canal vinculado'}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{product.title}</h3>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {product.active ? 'Activo' : 'Inactivo'}
                       </span>
+                    </div>
+                    {product.description && (
+                      <p className="text-gray-600 text-sm mb-3">{product.description}</p>
                     )}
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="font-semibold text-blue-600">
+                        {formatPrice(product.priceCents)}
+                      </span>
+                      <span className="text-gray-500">
+                        {getBillingLabel(product.billingType, product.billingPeriod)}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
