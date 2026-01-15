@@ -17,20 +17,12 @@
       "static/chunks/120-eb3fa0d0dbc4c3a8.js",
       "static/chunks/app/layout-c93cdcc360e448f3.js"
     ],
-    "/antialink/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
-      "static/chunks/app/antialink/page-d7b97d7f59503c97.js"
-    ],
     "/antiapay/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/app/antiapay/page-3575d145fa23f61b.js"
     ],
     "/checkout/[productId]/page": [
@@ -47,8 +39,16 @@
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/app/checkout/cancel/page-8a090b5f620b0699.js"
+    ],
+    "/antialink/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
+      "static/chunks/app/antialink/page-d7b97d7f59503c97.js"
     ],
     "/checkout/success/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -56,7 +56,7 @@
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/593-0137b9f4f0a5e3dd.js",
       "static/chunks/app/checkout/success/page-f63d5eb6d573ba38.js"
     ],
@@ -66,7 +66,7 @@
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/593-0137b9f4f0a5e3dd.js",
       "static/chunks/app/connect-telegram/page-046df5833f6381f0.js"
     ],
@@ -95,23 +95,13 @@
       "static/chunks/699-d9b0034a5a59d616.js",
       "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
     ],
-    "/dashboard/tipster/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/113-046a33bed99e56f9.js",
-      "static/chunks/120-eb3fa0d0dbc4c3a8.js",
-      "static/chunks/app/dashboard/tipster/page-480535767b319e2b.js"
-    ],
     "/login/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/593-0137b9f4f0a5e3dd.js",
       "static/chunks/app/login/page-65172ae4379cea5b.js"
     ],
@@ -120,7 +110,7 @@
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/app/page-cadd18c0842944f7.js"
     ],
     "/r/[code]/page": [
@@ -137,9 +127,19 @@
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/648-6b8fad69fc09e952.js",
       "static/chunks/593-0137b9f4f0a5e3dd.js",
       "static/chunks/app/register/page-7037cc01d939309d.js"
+    ],
+    "/dashboard/tipster/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/113-064fe41ecb467c2c.js",
+      "static/chunks/120-eb3fa0d0dbc4c3a8.js",
+      "static/chunks/app/dashboard/tipster/page-8362d9484b17f781.js"
     ]
   }
 }
