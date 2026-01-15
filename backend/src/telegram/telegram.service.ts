@@ -2637,13 +2637,59 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         await this.httpService.approveChatJoinRequest(chatId, parseInt(userId));
         this.logger.log(`✅ Approved join request for ${userId} in ${chatId}`);
 
-        await this.httpService.sendMessage(
-          userId,
-          '✅ *¡Solicitud aprobada!*\n\n' +
-            `Has sido añadido al canal *${chat.title}*.\n` +
-            '¡Disfruta del contenido!',
-          { parseMode: 'Markdown' },
-        );
+        // Try to get or create invite link for the channel
+        let inviteLink: string | null = null;
+        try {
+          // First try to get existing invite link from tipster_channels
+          const channelResult = (await this.prisma.$runCommandRaw({
+            find: 'tipster_channels',
+            filter: { channel_id: chatId },
+            projection: { invite_link: 1 },
+            limit: 1,
+          })) as any;
+          
+          const channel = channelResult.cursor?.firstBatch?.[0];
+          if (channel?.invite_link) {
+            inviteLink = channel.invite_link;
+          } else {
+            // Try to create a new invite link
+            const newLink = await this.httpService.createChatInviteLink(chatId, {
+              name: 'Auto-join link',
+              createsJoinRequest: false,
+            });
+            if (newLink?.invite_link) {
+              inviteLink = newLink.invite_link;
+            }
+          }
+        } catch (linkError) {
+          this.logger.warn(`Could not get invite link for ${chatId}: ${linkError.message}`);
+        }
+
+        // Send message with or without button
+        if (inviteLink) {
+          await this.httpService.sendMessage(
+            userId,
+            '✅ *¡Solicitud aprobada!*\n\n' +
+              `Ya puedes acceder al canal *${chat.title}*.\n` +
+              '¡Disfruta del contenido!',
+            { 
+              parseMode: 'Markdown',
+              replyMarkup: {
+                inline_keyboard: [[
+                  { text: `🚀 Entrar a ${chat.title}`, url: inviteLink }
+                ]]
+              }
+            },
+          );
+        } else {
+          await this.httpService.sendMessage(
+            userId,
+            '✅ *¡Solicitud aprobada!*\n\n' +
+              `Has sido añadido al canal *${chat.title}*.\n` +
+              '¡Disfruta del contenido!',
+            { parseMode: 'Markdown' },
+          );
+        }
       } else {
         await this.httpService.declineChatJoinRequest(chatId, parseInt(userId));
         this.logger.log(`❌ Declined join request for ${userId} in ${chatId} (no purchase)`);
