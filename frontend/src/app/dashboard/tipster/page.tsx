@@ -1573,7 +1573,15 @@ function TipsterDashboardContent() {
                     ) : (
                       <div className="space-y-4">
                         {products.slice(0, 5).map((product: any) => (
-                          <div key={product.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+                          <div key={product.id} className={`flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition relative overflow-hidden ${
+                            product.telegramChannelId ? 'border-gray-100' : 'border-orange-300 bg-orange-50/30'
+                          }`}>
+                            {/* Indicador SIN CANAL */}
+                            {!product.telegramChannelId && (
+                              <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+                                SIN CANAL
+                              </div>
+                            )}
                             <div className="flex-1">
                               <h3 className="font-medium text-gray-900">{product.title}</h3>
                               <div className="flex items-center gap-3 mt-1">
