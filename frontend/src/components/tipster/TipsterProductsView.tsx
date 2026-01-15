@@ -293,7 +293,15 @@ export default function TipsterProductsView({
       ) : (
         <div className="grid gap-4">
           {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div key={product.id} className={`bg-white rounded-xl p-6 border shadow-sm relative overflow-hidden ${
+              product.telegramChannelId ? 'border-gray-200' : 'border-orange-300'
+            }`}>
+              {/* Cinta SIN CANAL */}
+              {!product.telegramChannelId && (
+                <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 transform translate-x-2 -translate-y-0 rotate-0 rounded-bl-lg">
+                  SIN CANAL
+                </div>
+              )}
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
@@ -314,11 +322,11 @@ export default function TipsterProductsView({
                     <span className="text-gray-500">
                       {getBillingLabel(product.billingType, product.billingPeriod)}
                     </span>
-                    <span className={`${
-                      product.telegramChannelId ? 'text-green-600' : 'text-gray-400'
-                    }`}>
-                      {product.telegramChannelId ? '\ud83d\udce2 Con canal' : '\ud83d\udce7 Solo email'}
-                    </span>
+                    {product.telegramChannelId && (
+                      <span className="text-green-600">
+                        📢 {channels.find(c => c.channelId === product.telegramChannelId)?.channelTitle || 'Canal vinculado'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
