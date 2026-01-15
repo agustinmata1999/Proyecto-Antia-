@@ -1763,41 +1763,38 @@ function TipsterDashboardContent() {
                       </div>
                     )}
                     <div className="p-5">
-                      {/* Product Type Label with Icon */}
-                      <div className="flex items-center gap-2 mb-3">
+                      {/* Product Type Label with Logo */}
+                      <div className="flex items-center gap-3 mb-3">
                         {product.telegramChannelId ? (
-                          product.billingType === 'SUBSCRIPTION' ? (
-                            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                          /* Logo Telegram - Azul con avión blanco */
+                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                             </svg>
-                          ) : (
-                            <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                          )
+                          </div>
                         ) : (
-                          <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
+                          /* Logo Antia - Negro con A blanca */
+                          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-lg">A</span>
+                          </div>
                         )}
-                        <span className="text-sm text-gray-600">
-                          {product.telegramChannelId 
-                            ? (product.billingType === 'SUBSCRIPTION' 
-                                ? 'Suscripción mensual a Telegram' 
-                                : 'Pago único a Telegram')
-                            : (product.billingType === 'SUBSCRIPTION'
-                                ? 'Suscripción mensual (solo pago)'
-                                : 'Pago único (solo pago)')
-                          }
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-sm text-gray-500">
+                            {product.telegramChannelId 
+                              ? 'Suscripción mensual a telegram'
+                              : 'Suscripción mensual a telegram'
+                            }
+                          </span>
+                          <span className="font-semibold text-gray-900">{product.title}</span>
+                        </div>
                         {!product.active && (
                           <span className="ml-auto text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">Pausado</span>
                         )}
                       </div>
 
-                      {/* Product Title */}
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
+                      {/* Product Title - Removed since it's now in the header */}
                       
+
                       {/* Product Description */}
                       {product.description && (
                         <p className="text-gray-600 text-sm mb-4 leading-relaxed">{product.description}</p>
