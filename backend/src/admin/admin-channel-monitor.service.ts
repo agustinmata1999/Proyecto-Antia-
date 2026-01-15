@@ -146,20 +146,26 @@ export class AdminChannelMonitorService {
 
     if (existingConfig) {
       // Update existing config using raw MongoDB command
+      const updateData: any = {
+        is_monitoring: enable,
+        started_by: enable ? adminEmail : existingConfig.startedBy,
+        updated_at: { $date: now.toISOString() },
+      };
+      
+      if (enable) {
+        updateData.started_at = { $date: now.toISOString() };
+        updateData.stopped_at = null;
+      } else {
+        // Keep existing started_at, set stopped_at
+        updateData.stopped_at = { $date: now.toISOString() };
+      }
+      
       await this.prisma.$runCommandRaw({
         update: 'channel_monitor_configs',
         updates: [
           {
             q: { channel_id: channelId },
-            u: {
-              $set: {
-                is_monitoring: enable,
-                started_at: enable ? { $date: now.toISOString() } : existingConfig.startedAt,
-                stopped_at: enable ? null : { $date: now.toISOString() },
-                started_by: enable ? adminEmail : existingConfig.startedBy,
-                updated_at: { $date: now.toISOString() },
-              },
-            },
+            u: { $set: updateData },
           },
         ],
       });
