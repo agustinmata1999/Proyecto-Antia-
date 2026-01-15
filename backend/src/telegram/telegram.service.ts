@@ -2278,6 +2278,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         if (chat && chat.type === 'channel') {
           this.logger.log(`📬 Webhook channel_post: ${chat.title} (${chat.id})`);
           await this.saveDetectedChannel(chat.id.toString(), chat.title, chat.username, chat.type);
+          
+          // Save message if channel is being monitored
+          await this.saveMonitoredMessage(update.channel_post, chat);
+          
           this.logger.log('Webhook channel_post processed - channel saved');
         }
         return;
@@ -2285,6 +2289,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
       // Process message updates directly (bypass Telegraf to use proxy)
       if (update.message) {
+        const chat = update.message.chat;
+        // Also check for monitored messages in groups
+        if (chat && (chat.type === 'supergroup' || chat.type === 'group')) {
+          await this.saveMonitoredMessage(update.message, chat);
+        }
+        
         setImmediate(async () => {
           try {
             await this.handleMessageUpdateViaProxy(update.message);
