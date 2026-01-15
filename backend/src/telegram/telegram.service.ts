@@ -3874,35 +3874,40 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
       const senderFirstName = sender?.first_name || sender?.title || null;
       const senderLastName = sender?.last_name || null;
 
-      // Check for duplicate
-      const existing = await this.prisma.channelMessage.findFirst({
-        where: {
-          channelId,
-          messageId: message.message_id,
-        },
-      });
+      // Check for duplicate using raw query
+      const existingCount = await this.prisma.$runCommandRaw({
+        count: 'channel_messages',
+        query: { channel_id: channelId, message_id: message.message_id },
+      }) as any;
 
-      if (existing) {
+      if (existingCount?.n > 0) {
         return; // Already saved
       }
 
-      // Save the message
-      await this.prisma.channelMessage.create({
-        data: {
-          channelId,
-          channelTitle: chat.title || null,
-          messageId: message.message_id,
-          senderUserId,
-          senderUsername,
-          senderFirstName,
-          senderLastName,
-          messageType,
-          textContent,
-          caption,
-          replyToMessageId: message.reply_to_message?.message_id || null,
-          forwardFromId: message.forward_from?.id?.toString() || message.forward_from_chat?.id?.toString() || null,
-          telegramDate: new Date(message.date * 1000),
-        },
+      const now = new Date();
+      const telegramDate = new Date(message.date * 1000);
+
+      // Save the message using raw MongoDB command
+      await this.prisma.$runCommandRaw({
+        insert: 'channel_messages',
+        documents: [
+          {
+            channel_id: channelId,
+            channel_title: chat.title || null,
+            message_id: message.message_id,
+            sender_user_id: senderUserId,
+            sender_username: senderUsername,
+            sender_first_name: senderFirstName,
+            sender_last_name: senderLastName,
+            message_type: messageType,
+            text_content: textContent,
+            caption: caption,
+            reply_to_message_id: message.reply_to_message?.message_id || null,
+            forward_from_id: message.forward_from?.id?.toString() || message.forward_from_chat?.id?.toString() || null,
+            telegram_date: { $date: telegramDate.toISOString() },
+            captured_at: { $date: now.toISOString() },
+          },
+        ],
       });
 
       // Update message count using raw command
@@ -3916,7 +3921,7 @@ ${product.description ? this.escapeMarkdown(product.description) + '\n\n' : ''}ð
         ],
       });
 
-      this.logger.debug(`ðŸ’¬ Monitored message saved: ${message.message_id} from ${chat.title}`);
+      this.logger.log(`ðŸ’¬ Monitored message saved: ${message.message_id} from ${chat.title}`);
     } catch (error) {
       // Log but don't throw - monitoring should not interrupt normal operation
       this.logger.warn(`Error saving monitored message: ${error.message}`);
