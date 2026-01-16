@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { affiliateApi } from '@/lib/api';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { Search, Plus, Check, X, ChevronDown, Trash2 } from 'lucide-react';
+import { Search, Plus, Check, X, ChevronDown, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface HouseWithLink {
   house: {
