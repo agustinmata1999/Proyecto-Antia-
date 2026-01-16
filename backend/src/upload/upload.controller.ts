@@ -20,11 +20,15 @@ import { PrismaService } from '../prisma/prisma.service';
 // Ensure upload directories exist
 const ticketsDir = join(process.cwd(), 'uploads', 'tickets');
 const avatarsDir = join(process.cwd(), 'uploads', 'avatars');
+const campaignsDir = join(process.cwd(), 'uploads', 'campaigns');
 if (!existsSync(ticketsDir)) {
   mkdirSync(ticketsDir, { recursive: true });
 }
 if (!existsSync(avatarsDir)) {
   mkdirSync(avatarsDir, { recursive: true });
+}
+if (!existsSync(campaignsDir)) {
+  mkdirSync(campaignsDir, { recursive: true });
 }
 
 @ApiTags('Upload')
