@@ -301,6 +301,7 @@ export class LandingService {
       slug: landing.slug,
       title: landing.title,
       description: landing.description,
+      imageUrl: landing.image_url || null, // Imagen de portada
       countriesEnabled: landing.countries_enabled || [],
       isActive: landing.is_active,
       totalClicks: realClicks,
