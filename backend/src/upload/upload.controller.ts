@@ -73,7 +73,7 @@ export class UploadController {
 
     const userId = req.user.id;
     const baseUrl = process.env.APP_URL || 'http://localhost:8001';
-    const avatarUrl = `${baseUrl}/uploads/avatars/${file.filename}`;
+    const avatarUrl = `${baseUrl}/api/uploads/avatars/${file.filename}`;
 
     // Update the tipster profile with the new avatar URL
     try {
