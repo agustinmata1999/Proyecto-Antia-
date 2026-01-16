@@ -12,18 +12,10 @@
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/css/f494b5c8be5c239d.css",
+      "static/css/e528b9bc12eb032e.css",
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/120-3f11523fee8ebcf9.js",
       "static/chunks/app/layout-c93cdcc360e448f3.js"
-    ],
-    "/antiapay/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/648-eb9bf2d27cd5e8e6.js",
-      "static/chunks/app/antiapay/page-3575d145fa23f61b.js"
     ],
     "/antialink/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -32,6 +24,14 @@
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/app/antialink/page-d7b97d7f59503c97.js"
+    ],
+    "/antiapay/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/648-eb9bf2d27cd5e8e6.js",
+      "static/chunks/app/antiapay/page-3575d145fa23f61b.js"
     ],
     "/checkout/[productId]/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -60,16 +60,6 @@
       "static/chunks/593-d5cafe5dd7ce5584.js",
       "static/chunks/app/checkout/success/page-0fd7c302d71c3b02.js"
     ],
-    "/dashboard/tipster/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/507-d12b7e048c64a854.js",
-      "static/chunks/120-3f11523fee8ebcf9.js",
-      "static/chunks/app/dashboard/tipster/page-b506e77fde206bdf.js"
-    ],
     "/connect-telegram/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -79,6 +69,14 @@
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/593-d5cafe5dd7ce5584.js",
       "static/chunks/app/connect-telegram/page-046df5833f6381f0.js"
+    ],
+    "/dashboard/client/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/app/dashboard/client/page-f42d8ac8c2ba6f52.js"
     ],
     "/go/[slug]/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -97,6 +95,16 @@
       "static/chunks/120-3f11523fee8ebcf9.js",
       "static/chunks/app/dashboard/admin/page-f727284966f42dc9.js"
     ],
+    "/dashboard/tipster/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/507-d12b7e048c64a854.js",
+      "static/chunks/120-3f11523fee8ebcf9.js",
+      "static/chunks/app/dashboard/tipster/page-fd8736b99992b479.js"
+    ],
     "/login/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -106,14 +114,6 @@
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/593-d5cafe5dd7ce5584.js",
       "static/chunks/app/login/page-65172ae4379cea5b.js"
-    ],
-    "/dashboard/client/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/app/dashboard/client/page-f42d8ac8c2ba6f52.js"
     ],
     "/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
