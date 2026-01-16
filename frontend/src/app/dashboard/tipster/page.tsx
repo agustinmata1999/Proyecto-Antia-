@@ -1680,222 +1680,270 @@ function TipsterDashboardContent() {
         )}
 
         {activeView === 'products' && (
-          <>
-            {/* Header Banner - Estilo TipsAnalistas */}
-            <div className="mb-6">
-              {/* Banner Image - Full width */}
-              <div className="h-48 sm:h-56 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-purple-900/30"></div>
-                {/* Pattern overlay */}
-                <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%)', backgroundSize: '30px 30px'}}></div>
-              </div>
-              
-              {/* Profile Section - Completely below banner */}
-              <div className="flex items-center gap-4 mt-4 px-2">
-                {/* Avatar - Circular */}
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white shadow-md flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {user?.tipsterProfile?.avatarUrl ? (
-                    <img 
-                      src={user.tipsterProfile.avatarUrl} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xl font-bold text-white">
-                      {user?.tipsterProfile?.publicName?.charAt(0)?.toUpperCase() || 'T'}
-                    </span>
-                  )}
-                </div>
-                
-                {/* Tipster Name */}
-                <h1 className="text-xl font-bold text-gray-900">{user?.tipsterProfile?.publicName || user?.email?.split('@')[0] || 'Tipster'}</h1>
-              </div>
-            </div>
-
-            {/* Tabs: Mis productos / Ventas */}
+          <div className="min-h-screen bg-gray-50 -mx-6 -mt-6 px-6 pt-6">
+            {/* Header - Estilo AntiaPay */}
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setProductsSubView('productos')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
-                    productsSubView === 'productos'
-                      ? 'bg-slate-800 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  data-testid="tab-mis-productos"
-                >
-                  Mis productos
-                </button>
-                <button
-                  onClick={() => setProductsSubView('ventas')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
-                    productsSubView === 'ventas'
-                      ? 'bg-slate-800 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  data-testid="tab-ventas"
-                >
-                  Ventas
-                </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
+                <p className="text-sm text-gray-500">Mis productos</p>
               </div>
-              {productsSubView === 'productos' && (
-                <button 
-                  onClick={handleCreateProduct}
-                  className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition text-sm font-medium flex items-center gap-2"
-                  data-testid="create-product-btn"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <div className="flex items-center gap-4">
+                {/* Search Bar */}
+                <div className="relative">
+                  <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Crear Producto
-                </button>
-              )}
-            </div>
-
-            {/* Products List - Only shown when 'productos' tab is active */}
-            {productsSubView === 'productos' && (
-              <>
-                {(products as any[]).length === 0 ? (
-                  <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
+                  <input 
+                    type="text" 
+                    placeholder="Buscar" 
+                    className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No tienes productos aún</h3>
-                <p className="text-gray-500 mb-6">Crea tu primer producto para empezar a vender</p>
-                <button 
-                  onClick={handleCreateProduct}
-                  className="inline-flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition font-medium"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Crear Producto
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {(products as any[]).map((product: any) => (
-                  <div 
-                    key={product.id} 
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-                  >
-                    <div className="p-5">
-                      {/* Product Type Label with Logo */}
-                      <div className="flex items-center gap-3 mb-3">
-                        {product.telegramChannelId ? (
-                          /* Logo Telegram - Azul con avión blanco */
-                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                            </svg>
-                          </div>
-                        ) : (
-                          /* Logo Antia - Negro con A blanca */
-                          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-lg">A</span>
-                          </div>
-                        )}
-                        <div className="flex flex-col">
-                          <span className="text-sm text-gray-500">
-                            {product.telegramChannelId 
-                              ? (product.billingType === 'SUBSCRIPTION' ? 'Suscripción mensual a telegram' : 'Pago único a telegram')
-                              : (product.billingType === 'SUBSCRIPTION' ? 'Suscripción mensual' : 'Pago único')
-                            }
-                          </span>
-                          <span className="font-semibold text-gray-900">{product.title}</span>
-                        </div>
-                        {!product.active && (
-                          <span className="ml-auto text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">Pausado</span>
-                        )}
-                      </div>
-
-                      {/* Product Title - Removed since it's now in the header */}
-                      
-                      {/* Product Description */}
-                      {product.description && (
-                        <p className="text-gray-600 text-sm mb-4 leading-relaxed">{product.description}</p>
-                      )}
-
-                      {/* Main CTA Button - Estilo TipsAnalistas */}
-                      <button
-                        onClick={() => {
-                          const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-                          navigator.clipboard.writeText(`${baseUrl}/checkout/${product.id}`);
-                          alert('✅ Link de checkout copiado');
-                        }}
-                        className="w-full bg-slate-800 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-700 transition text-base"
-                        data-testid={`buy-btn-${product.id}`}
-                      >
-                        {product.billingType === 'SUBSCRIPTION' 
-                          ? `Suscribirse por ${formatPrice(product.priceCents)}`
-                          : `Comprar por ${formatPrice(product.priceCents)}`}
-                      </button>
-
-                      {/* Admin Actions Row */}
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-1">
-                          <button 
-                            onClick={() => handleEditProduct(product)}
-                            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition flex items-center gap-1.5"
-                            data-testid={`edit-product-${product.id}`}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Editar
-                          </button>
-                          <button 
-                            onClick={() => handleViewProduct(product)}
-                            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition flex items-center gap-1.5"
-                            data-testid={`view-product-${product.id}`}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Ver
-                          </button>
-                          <button
-                            onClick={() => {
-                              const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-                              navigator.clipboard.writeText(`${baseUrl}/checkout/${product.id}`);
-                              alert('✅ Link de checkout copiado');
-                            }}
-                            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition flex items-center gap-1.5"
-                            data-testid={`copy-link-${product.id}`}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                            Copiar Link
-                          </button>
-                        </div>
-                        
-                        <button 
-                          onClick={() => {
-                            const checkoutUrl = `${window.location.origin}/checkout/${product.id}`;
-                            const suggestedText = `🔥 ${product.title}\n\n${product.description || ''}\n\n💰 Precio: ${formatPrice(product.priceCents)}\n\n👉 Comprar aquí: ${checkoutUrl}`;
-                            navigator.clipboard.writeText(suggestedText);
-                            alert('✅ Texto promocional copiado al portapapeles!\n\nPégalo en tu canal de Telegram, Instagram, o donde quieras.');
-                          }}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center gap-2"
-                          data-testid={`share-product-${product.id}`}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                          </svg>
-                          Compartir
-                        </button>
-                      </div>
+                {/* User Info */}
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 bg-gray-300 rounded-full"></div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">{user?.tipsterProfile?.publicName || 'Usuario'}</p>
+                      <p className="text-xs text-gray-500">@{user?.email?.split('@')[0] || 'usuario'}</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            )}
-              </>
-            )}
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Total ventas */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-500">Total ventas</p>
+                    <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} sold</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.grossEarningsCents || 0).replace('€', '')}€</p>
+                    <p className="text-xs text-emerald-500">+ 6.9%</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Transacciones */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-500">Transacciones</p>
+                    <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} Ventas</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-gray-900">{salesStats?.totalSales || 0}</p>
+                    <p className="text-xs text-emerald-500">+ 6.9%</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Suscripciones */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-500">Suscripciones</p>
+                    <p className="text-xs text-gray-400">0 suscripciones</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.netEarningsCents || 0).replace('€', '')}€</p>
+                    <p className="text-xs text-emerald-500">+ 6.9%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Card */}
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              {/* Tabs */}
+              <div className="flex items-center justify-between px-6 pt-4 pb-0 border-b border-gray-100">
+                <div className="flex items-center gap-6">
+                  <button
+                    onClick={() => setProductsSubView('productos')}
+                    className={`pb-3 text-sm font-medium border-b-2 transition ${
+                      productsSubView === 'productos'
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                    data-testid="tab-mis-productos"
+                  >
+                    Mis productos
+                  </button>
+                  <button
+                    onClick={() => setProductsSubView('ventas')}
+                    className={`pb-3 text-sm font-medium border-b-2 transition ${
+                      productsSubView === 'ventas'
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                    data-testid="tab-ventas"
+                  >
+                    Ventas
+                  </button>
+                </div>
+                {productsSubView === 'productos' && (
+                  <button 
+                    onClick={handleCreateProduct}
+                    className="mb-3 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition text-sm font-medium flex items-center gap-2"
+                    data-testid="create-product-btn"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Crear Producto
+                  </button>
+                )}
+              </div>
+
+              {/* Products Table - Only shown when 'productos' tab is active */}
+              {productsSubView === 'productos' && (
+                <>
+                  {(products as any[]).length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No tienes productos aún</h3>
+                      <p className="text-gray-500 mb-6">Crea tu primer producto para empezar a vender</p>
+                      <button 
+                        onClick={handleCreateProduct}
+                        className="inline-flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition font-medium"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Crear Producto
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[700px]">
+                        <thead>
+                          <tr className="border-b border-gray-100">
+                            <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Nombre</th>
+                            <th className="px-4 py-4 text-center text-sm font-medium text-gray-700">Pago</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Precio</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Ventas</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Total</th>
+                            <th className="px-6 py-4 text-center text-sm font-medium text-blue-500">URL</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {(products as any[]).map((product: any) => {
+                            // Calculate sales for this product
+                            const productSales = recentSales.filter((s: any) => s.productId === product.id);
+                            const salesCount = productSales.length;
+                            const totalEarnings = productSales.reduce((sum: number, s: any) => sum + (s.amountCents || 0), 0);
+                            
+                            return (
+                              <tr key={product.id} className="hover:bg-gray-50/50 transition group">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    {/* Logo */}
+                                    {product.telegramChannelId ? (
+                                      <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                        </svg>
+                                      </div>
+                                    ) : (
+                                      <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <span className="text-white font-bold text-lg">A</span>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900">{product.title}</p>
+                                      <p className="text-xs text-gray-400">ID{product.id?.slice(-5) || '00000'}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-4 text-center">
+                                  <span className="text-sm text-gray-600">
+                                    {product.billingType === 'SUBSCRIPTION' ? 'Suscripción' : 'Unico'}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <span className="text-sm text-gray-900">{formatPrice(product.priceCents)}</span>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <span className="text-sm text-gray-900">{salesCount > 0 ? formatPrice(salesCount * (product.priceCents || 0)) : '0€'}</span>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <span className="text-sm font-medium text-gray-900">{formatPrice(totalEarnings)}</span>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <button
+                                    onClick={() => {
+                                      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                                      navigator.clipboard.writeText(`${baseUrl}/checkout/${product.id}`);
+                                      alert('✅ Link copiado');
+                                    }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+                                    data-testid={`copy-url-${product.id}`}
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    Copiar
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  
+                  {/* Quick Actions for each product - shown on hover or always visible */}
+                  {(products as any[]).length > 0 && (
+                    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500">
+                          {(products as any[]).length} producto{(products as any[]).length !== 1 ? 's' : ''} en total
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400">Acciones rápidas:</span>
+                          {(products as any[]).slice(0, 3).map((product: any) => (
+                            <div key={product.id} className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleEditProduct(product)}
+                                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white rounded transition"
+                                title={`Editar ${product.title}`}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleViewProduct(product)}
+                                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white rounded transition"
+                                title={`Ver ${product.title}`}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
             {/* Sección de Ventas - Only shown when 'ventas' tab is active */}
             {productsSubView === 'ventas' && (
