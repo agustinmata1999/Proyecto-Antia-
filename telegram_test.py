@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://conversion-tracker-4.preview.emergentagent.com"
+BASE_URL = "https://campaign-tracker-47.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials
