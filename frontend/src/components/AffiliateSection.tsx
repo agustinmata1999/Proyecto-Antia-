@@ -3,7 +3,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { affiliateApi } from '@/lib/api';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { Search, Plus, Check, X, ChevronDown, Trash2, Upload, Image as ImageIcon, Users, Link as LinkIcon, Copy, TrendingUp } from 'lucide-react';
+import { Search, Plus, Check, X, ChevronDown, Trash2, Upload, Image as ImageIcon, Users, Link as LinkIcon, Copy, TrendingUp, Bell } from 'lucide-react';
+
+interface AffiliateSectionProps {
+  userName?: string;
+  userHandle?: string;
+  userAvatar?: string;
+}
 
 interface HouseWithLink {
   house: {
