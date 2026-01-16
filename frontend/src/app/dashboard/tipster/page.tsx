@@ -3315,33 +3315,36 @@ function TipsterDashboardContent() {
         </div>
       )}
 
-      {/* Modal: Formulario de Producto */}
+      {/* Modal: Formulario de Producto - Estilo AntiaPay */}
       {showProductForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeModals}>
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={closeModals}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {selectedProduct ? 'Editar Producto' : 'Crear nuevo producto'}
                 </h2>
-                <button onClick={closeModals} className="text-gray-400 hover:text-gray-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onClick={closeModals} className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
+              <p className="text-sm text-gray-500">Completa los datos de tu producto</p>
             </div>
             
-            <div className="p-6">
+            <div className="px-6 pb-6">
               {formError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
                   <p className="text-sm text-red-600">{formError}</p>
                 </div>
               )}
 
               <div className="space-y-4">
+                {/* Título */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Título del Producto <span className="text-red-500">*</span>
                   </label>
                   <input 
@@ -3349,24 +3352,26 @@ function TipsterDashboardContent() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Ej: Pronósticos Premium Mensuales"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm"
                   />
                 </div>
                 
+                {/* Descripción */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
                   <textarea 
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Describe tu producto..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Precio y Tipo de Facturación */}
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Precio (€) <span className="text-red-500">*</span>
                     </label>
                     <input 
@@ -3376,54 +3381,54 @@ function TipsterDashboardContent() {
                       value={formData.priceCents}
                       onChange={(e) => setFormData({ ...formData, priceCents: e.target.value })}
                       placeholder="29.99"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Facturación</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Pago</label>
                     <select 
                       value={formData.billingType}
                       onChange={(e) => setFormData({ ...formData, billingType: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm appearance-none cursor-pointer"
                     >
                       <option value="ONE_TIME">Pago único</option>
                       <option value="SUBSCRIPTION">Suscripción</option>
                     </select>
                   </div>
-
-                  {/* Frecuencia de Suscripción - Solo si es SUBSCRIPTION */}
-                  {formData.billingType === 'SUBSCRIPTION' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia de Cobro</label>
-                      <select 
-                        value={formData.subscriptionInterval}
-                        onChange={(e) => setFormData({ ...formData, subscriptionInterval: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="MONTHLY">Mensual</option>
-                        <option value="QUARTERLY">Trimestral (cada 3 meses)</option>
-                        <option value="ANNUAL">Anual</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Si el cliente no renueva, perderá acceso automáticamente al canal
-                      </p>
-                    </div>
-                  )}
                 </div>
 
-                {/* Selector de Canal de Telegram */}
+                {/* Frecuencia de Suscripción */}
+                {formData.billingType === 'SUBSCRIPTION' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Frecuencia de Cobro</label>
+                    <select 
+                      value={formData.subscriptionInterval}
+                      onChange={(e) => setFormData({ ...formData, subscriptionInterval: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="MONTHLY">Mensual</option>
+                      <option value="QUARTERLY">Trimestral (cada 3 meses)</option>
+                      <option value="ANNUAL">Anual</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1.5">
+                      Si el cliente no renueva, perderá acceso automáticamente al canal
+                    </p>
+                  </div>
+                )}
+
+                {/* Canal de Telegram */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Canal de Telegram <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Canal de Telegram
                   </label>
                   {telegramChannels.length === 0 ? (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-sm text-yellow-800 mb-2">
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                      <p className="text-sm text-amber-800 mb-2">
                         ⚠️ No tienes canales conectados
                       </p>
-                      <p className="text-xs text-yellow-700 mb-3">
-                        Para conectar un canal, añade el bot <strong>@Antiabetbot</strong> como administrador en tu canal de Telegram. Se detectará automáticamente.
+                      <p className="text-xs text-amber-700 mb-3">
+                        Añade el bot <strong>@Antiabetbot</strong> como administrador en tu canal.
                       </p>
                       <a
                         href="https://t.me/Antiabetbot"
@@ -3431,16 +3436,16 @@ function TipsterDashboardContent() {
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline font-medium"
                       >
-                        Abrir @Antiabetbot en Telegram →
+                        Abrir @Antiabetbot →
                       </a>
                     </div>
                   ) : (
                     <select 
                       value={formData.telegramChannelId}
                       onChange={(e) => setFormData({ ...formData, telegramChannelId: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm appearance-none cursor-pointer"
                     >
-                      <option value="">🚫 Sin canal (solo confirmación de pago)</option>
+                      <option value="">Sin canal (solo confirmación de pago)</option>
                       {telegramChannels.map((channel) => (
                         <option key={channel.id} value={channel.channelId}>
                           {channel.channelType === 'public' ? '🌐' : '🔒'} {channel.channelTitle}
@@ -3449,43 +3454,45 @@ function TipsterDashboardContent() {
                       ))}
                     </select>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-1.5">
                     {formData.telegramChannelId 
-                      ? 'Los clientes recibirán acceso a este canal después de pagar' 
-                      : 'Sin canal: Los clientes solo recibirán confirmación de pago'}
+                      ? 'Los clientes recibirán acceso después de pagar' 
+                      : 'Sin canal: Solo recibirán confirmación de pago'}
                   </p>
                 </div>
 
-                <div className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id="active"
-                    checked={formData.active}
-                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="active" className="ml-2 text-sm text-gray-700">
+                {/* Producto activo */}
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, active: !formData.active })}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${formData.active ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${formData.active ? 'translate-x-5' : ''}`} />
+                  </button>
+                  <label className="text-sm text-gray-700">
                     Producto activo
                   </label>
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-3 justify-end">
+              {/* Botones */}
+              <div className="mt-6 flex gap-3">
                 <button 
                   onClick={closeModals}
                   disabled={saving}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700 disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={handleSaveProduct}
                   disabled={saving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+                  className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                       Guardando...
                     </>
                   ) : (
@@ -3493,6 +3500,86 @@ function TipsterDashboardContent() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Producto Creado Exitosamente */}
+      {showProductSuccess && createdProduct && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={closeModals}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="p-8 text-center">
+              {/* Success Icon */}
+              <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              
+              <h2 className="text-xl font-bold text-gray-900 mb-2">¡Producto creado exitosamente!</h2>
+              <p className="text-gray-500 text-sm mb-6">Ya puedes compartir tu producto</p>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3 mb-4">
+                <button
+                  onClick={() => {
+                    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                    navigator.clipboard.writeText(`${baseUrl}/checkout/${createdProduct.id}`);
+                    alert('✅ Link copiado');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition text-sm font-medium text-gray-700 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copiar
+                </button>
+                <button
+                  onClick={() => {
+                    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                    const checkoutUrl = `${baseUrl}/checkout/${createdProduct.id}`;
+                    const text = `🔥 ${createdProduct.title}\n\n💰 Precio: €${(createdProduct.priceCents / 100).toFixed(2)}\n\n👉 Comprar: ${checkoutUrl}`;
+                    navigator.clipboard.writeText(text);
+                    alert('✅ Texto promocional copiado');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition text-sm font-medium text-gray-700 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  Compartir
+                </button>
+              </div>
+              
+              {/* Create New Product */}
+              <button
+                onClick={() => {
+                  setShowProductSuccess(false);
+                  setCreatedProduct(null);
+                  setFormData({
+                    title: '',
+                    description: '',
+                    priceCents: '',
+                    billingType: 'ONE_TIME',
+                    subscriptionInterval: 'MONTHLY',
+                    telegramChannelId: '',
+                    active: true,
+                  });
+                  setShowProductForm(true);
+                }}
+                className="w-full px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition text-sm font-medium mb-3"
+              >
+                Crear nuevo producto
+              </button>
+              
+              {/* Close Link */}
+              <button
+                onClick={closeModals}
+                className="text-sm text-gray-500 hover:text-gray-700 transition"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
