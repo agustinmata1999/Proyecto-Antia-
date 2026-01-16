@@ -52,6 +52,15 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
 - **Campaign image save fix (Jan 16, 2026):** Fixed bug where campaign cover images weren't being saved
   - Root cause: MongoDB documents had `_id` stored as string instead of ObjectId
   - Solution: Update query now tries ObjectId first, then falls back to string _id
+- **Affiliate Section UI Redesign (Jan 16, 2026):** Complete redesign to match AntiaPay mockups
+  - Stats cards at top: Total generado, Afiliados, Clicks totales (with % change indicators)
+  - Filter row with dropdowns: País, Categoría, Casa de afiliación
+  - "Crear Campaña +" button
+  - Search bar below filters
+  - Tabs: Campañas activas, Casas de apuestas, Afiliados
+  - Campaign table: Image + title, countries (flags), affiliates count, total, copy URL button
+  - Houses table: Logo, countries, name, commission type, category
+  - Affiliates table: House logo + user name, date, country with flag, CPA
 
 ## Architecture
 
