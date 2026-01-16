@@ -1385,6 +1385,59 @@ export default function AffiliateSection() {
                   />
                 </div>
 
+                {/* Cover Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imagen de portada (opcional)
+                  </label>
+                  <input
+                    type="file"
+                    ref={editFileInputRef}
+                    onChange={handleEditImageUpload}
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    className="hidden"
+                  />
+                  {editForm.imageUrl ? (
+                    <div className="relative w-36 h-28 rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={editForm.imageUrl}
+                        alt="Portada"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditForm(prev => ({ ...prev, imageUrl: '' }))}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="absolute bottom-1 right-1 p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                      >
+                        <Upload className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => editFileInputRef.current?.click()}
+                      disabled={editUploading}
+                      className="w-36 h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors disabled:opacity-50"
+                    >
+                      {editUploading ? (
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-8 h-8 mb-1" />
+                          <span className="text-xs">Subir imagen</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
                 {/* Countries Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
