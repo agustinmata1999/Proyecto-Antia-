@@ -44,6 +44,7 @@ function TipsterDashboardContent() {
   const { formatPrice, symbol } = useCurrency();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [payoutsSubView, setPayoutsSubView] = useState<PayoutsSubView>('retiros');
+  const [productsSubView, setProductsSubView] = useState<'productos' | 'ventas'>('productos');
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState([]);
   const [metrics, setMetrics] = useState<any>(null);
