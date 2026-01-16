@@ -12,7 +12,7 @@
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/css/58a008c2089baad6.css",
+      "static/css/1e9f44fafca7db99.css",
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/120-5369a5fd38f289ab.js",
       "static/chunks/app/layout-c93cdcc360e448f3.js"
@@ -60,14 +60,6 @@
       "static/chunks/593-c55f09d9fa0498ed.js",
       "static/chunks/app/checkout/success/page-0fd7c302d71c3b02.js"
     ],
-    "/dashboard/client/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/app/dashboard/client/page-1ebcbd62b0b8aa6d.js"
-    ],
     "/connect-telegram/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -78,14 +70,13 @@
       "static/chunks/593-c55f09d9fa0498ed.js",
       "static/chunks/app/connect-telegram/page-046df5833f6381f0.js"
     ],
-    "/dashboard/admin/page": [
+    "/dashboard/client/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/120-5369a5fd38f289ab.js",
-      "static/chunks/app/dashboard/admin/page-82861f01efae699a.js"
+      "static/chunks/app/dashboard/client/page-1ebcbd62b0b8aa6d.js"
     ],
     "/go/[slug]/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -95,15 +86,24 @@
       "static/chunks/699-d9b0034a5a59d616.js",
       "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
     ],
+    "/dashboard/admin/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/120-5369a5fd38f289ab.js",
+      "static/chunks/app/dashboard/admin/page-82861f01efae699a.js"
+    ],
     "/dashboard/tipster/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
       "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/113-046a33bed99e56f9.js",
+      "static/chunks/473-970ce7e9f5da557a.js",
       "static/chunks/120-5369a5fd38f289ab.js",
-      "static/chunks/app/dashboard/tipster/page-43e1d6e3bf144124.js"
+      "static/chunks/app/dashboard/tipster/page-5d7bdf589305a1f4.js"
     ],
     "/login/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
@@ -123,14 +123,6 @@
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/app/page-cadd18c0842944f7.js"
     ],
-    "/r/[code]/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/464-14a4a9243b7bb404.js",
-      "static/chunks/app/r/[code]/page-4f0c4f423cf9e060.js"
-    ],
     "/register/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -140,6 +132,14 @@
       "static/chunks/648-eb9bf2d27cd5e8e6.js",
       "static/chunks/593-c55f09d9fa0498ed.js",
       "static/chunks/app/register/page-7037cc01d939309d.js"
+    ],
+    "/r/[code]/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/464-14a4a9243b7bb404.js",
+      "static/chunks/app/r/[code]/page-4f0c4f423cf9e060.js"
     ]
   }
 }
