@@ -111,9 +111,11 @@ export default function AffiliateSection() {
     title: '',
     description: '',
     channel: 'Telegram',
-    selectedHouseIds: [] as string[],
-    countriesEnabled: ['ES'],
+    countriesEnabled: [] as string[],
+    countryConfigs: [] as CountryConfig[],
   });
+  const [newCampaignAvailableHouses, setNewCampaignAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
+  const [newCampaignError, setNewCampaignError] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Edit campaign modal
