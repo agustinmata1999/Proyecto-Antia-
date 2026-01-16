@@ -38,6 +38,10 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
   - Description field
   - All 10 countries available
   - Per-country betting house selection
+- **Campaign cover images:** Upload custom cover images for campaigns
+  - New endpoint: POST /api/upload/campaign
+  - Image preview in create/edit modals
+  - Custom image displayed in campaign list (replaces country flags fallback)
 
 ## Architecture
 
