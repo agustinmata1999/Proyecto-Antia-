@@ -253,6 +253,22 @@ export default function AffiliateSection() {
     }
   };
 
+  // Load houses for a specific country (for create modal)
+  const loadNewCampaignHousesForCountry = async (country: string) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/tipster/landings/houses/${country}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNewCampaignAvailableHouses(prev => ({ ...prev, [country]: data }));
+      }
+    } catch (err) {
+      console.error('Error loading houses for country:', err);
+    }
+  };
+
   const handleOpenEdit = async (campaign: Campaign) => {
     setEditingCampaign(campaign);
     setEditForm({
