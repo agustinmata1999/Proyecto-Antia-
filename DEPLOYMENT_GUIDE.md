@@ -48,7 +48,7 @@ Antes de cualquier deployment, **SIEMPRE** limpia el caché:
 ### 1.2 Verificar que el Preview Funciona
 
 Antes de desplegar a tu dominio, verifica que la app funciona en el preview de Emergent:
-- URL de preview: https://telegram-product.preview.emergentagent.com
+- URL de preview: https://conversion-tracker-4.preview.emergentagent.com
 - Si el preview no funciona, NO despliegues hasta arreglarlo
 
 ---

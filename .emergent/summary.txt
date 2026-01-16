@@ -1,44 +1,76 @@
 <analysis>**original_problem_statement:**
-The user initially reported that Telegram purchase confirmation links () were not working, which was diagnosed as a webhook conflict with an old server. While that was pending, the user requested several fixes and a new feature.
+The user initially requested to align the functionality of the New Campaign and Edit Campaign modals within the affiliate section. After this was completed, the user requested the ability to add a cover image to these campaigns. This involved implementing file upload functionality on both the frontend and backend, which required debugging issues related to a missing API endpoint, static file serving, and incorrect URL generation.
 
-The main feature developed in this session was a **Channel Monitoring System** for the super admin. This system allows the admin to view all private Telegram groups/channels the bot is a part of, activate or deactivate message monitoring on-demand, and view the captured messages in a chat-like interface to prevent scams or fraudulent activity.
+Most recently, the user requested a new Afiliados tab within the affiliate section. This tab should display a table of all affiliate sign-ups (referrals) with the following details: Betting House, User's Name, Campaign Name, Registration Date, Country, and CPA (Cost Per Acquisition). The agent has implemented the tab and the table, but the Campaign Name is currently missing.
 
 **User's preferred language**: Spanish
 
 **what currently exists?**
-The application is stable. The core functionality for the Channel Monitoring System has been fully implemented and verified by the user. This includes the backend services for capturing messages and the frontend UI in the admin panel to manage and view the monitored channels and their content.
+The application is a full-stack application with a NestJS backend and a React frontend.
 
-The agent successfully navigated and resolved several complex backend issues during development, including:
--   Bypassing Prisma ORM limitations on a MongoDB instance without a replica set by refactoring CUD operations to use raw MongoDB commands ().
--   Fixing a critical webhook misconfiguration caused by a hardcoded URL in the  file.
--   Solving a recurring data corruption bug where dates were being saved as  types instead of the required  BSON type, which was causing API failures.
+The following has been implemented in this session:
+1.  **Unified Campaign Modals:** The New Campaign and Edit Campaign modals now share the same fields and functionality, including a description field and an expanded list of countries with per-country bookmaker selection.
+2.  **Campaign Cover Images:** Users can now upload, edit, and view a cover image for each affiliate campaign. The backend has been updated with a new upload endpoint, and the frontend modals and campaign views have been adjusted to handle image uploads and display.
+3.  **Afiliados Tab:** A new tab has been added to the affiliate section that displays a table of affiliate referrals. The table currently shows the betting house (with logo), user name, registration date, country, status, and CPA. The backend endpoint was updated to provide the necessary data.
 
 **Last working item**:
--   **Last item agent was working:** The agent was performing final bug fixes on the new Channel Monitoring feature. The user reported that the panel was not loading any channels. The agent diagnosed this as a 500 error caused by another corrupted date entry ( as a string) in the database.
--   The agent wrote a script to clean all corrupted date fields in the  collection and patched the backend code to ensure all date values passed to raw MongoDB commands are correctly formatted as BSON dates ().
--   **Status:** USER VERIFICATION PENDING
--   **Agent Testing Done:** Y
--   **Which testing method agent to use?** Manual testing by the user. The user confirmed the fix was successful with the message perfecto si aparece (perfect, yes it appears).
--   **User Testing Done:** Y
+-   **Last item agent was working:** Implementing the new Afiliados tab in the affiliate dashboard. The agent successfully created the UI, including statistical cards and a table displaying referral data fetched from the backend. The last piece of the request, adding the Campaign Name to the referral table, is still pending.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** Y (Verified via screenshots that the new tab and table render correctly with the available data.)
+-   **Which testing method agent to use?** Backend testing agent to investigate the database schema and backend logic, followed by manual testing of the frontend.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** The original Telegram bot purchase flow issue caused by a webhook conflict with an old server () remains unresolved.
-    -   **Attempted fixes:** The issue was diagnosed in the previous session. The user was to confirm when the old server was shut down.
-    -   **Next debug checklist:** The new agent should ask the user if the old server has been shut down and if they can perform a test purchase to verify the fix.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical P0 user-facing issue that prevents customers from accessing purchased content.
+-   **Issue 1 (P0):** The Afiliados tab is missing the Campaign Name for each referral.
+-   **Issue 2 (P1):** The original Telegram bot purchase flow issue (webhook conflict) remains unresolved.
+-   **Issue 3 (P1):** A set of four features from a previous session (Net earnings calculation, no duplicate notifications, mandatory public channel, and a simplified Telegram message) are still awaiting final user verification.
+-   **Issue 4 (P1):** The major UX/UI and workflow changes from the session before this one (direct join button, product UI differentiation, modified checkout flow) are also awaiting user verification.
+
+**Issues Detail:**
+-   **Issue 1:**
+    -   **Attempted fixes:** The agent identified that the  model in the database does not have a direct foreign key to the  (Campaign) model. It was noted that the  field might contain the campaign identifier, but this was not investigated further.
+    -   **Next debug checklist:**
+        1.  Investigate the  field within the  model () to determine if it stores the .
+        2.  Check the frontend logic in  that generates affiliate links to understand how  is constructed.
+        3.  Modify the backend service  (in ) to parse the  from the tracking ID, fetch the corresponding campaign's name, and include it in the API response.
+        4.  Update the Afiliados table in  to display the campaign name.
+    -   **Why fix this issue and what will be achieved with the fix?** To complete the user's explicit requirement for the new Afiliados feature.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on other issue:** None.
+
+-   **Issue 2:**
+    -   **Attempted fixes:** The issue was diagnosed as a webhook conflict with an old server.
+    -   **Next debug checklist:** Ask the user if the old server () is now offline. If so, perform a test purchase to validate the fix.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical P1 bug preventing customers from completing purchases.
     -   **Status:** BLOCKED
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** User action (confirming old server is offline).
+    -   **Blocked on other issue:** User action (confirming old server status).
+
+-   **Issue 3 & 4:**
+    -   **Attempted fixes:** N/A.
+    -   **Next debug checklist:** Ask the user to perform end-to-end testing and confirm if all the features implemented in the previous two sessions are working as expected.
+    -   **Why fix this issue and what will be achieved with the fix?** To close out completed tasks and ensure the platform is stable before adding more features.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** N/A (User verification)
+    -   **Blocked on other issue:** None.
 
 **In progress Task List**:
--   None.
+-   **Task 1: Complete Afiliados Tab**
+    -   **Where to resume:** Backend investigation of the  model and the  field. Start by viewing .
+    -   **What will be achieved with this?** The Afiliados tab will be fully functional as per the user's request, displaying all required data points including the campaign name.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
-*   P0: User verification for the four tasks implemented in the previous session (Net earnings calculation, no duplicate notifications, mandatory public channel, and simplified Telegram message).
-*   P1: Implement a 'trimestral' (quarterly) subscription option.
-*   P2: **Channel Monitor V2:** Add support for storing and viewing multimedia files (photos, videos) from monitored channels. The user has approved this as a future enhancement.
+*   **P0:** User verification for all changes from the last three sessions.
+*   **P1:** Implement a 'trimestral' (quarterly) subscription option.
+*   **P2:** **Channel Monitor V2:** Add support for storing and viewing multimedia files (photos, videos) from monitored channels.
 
 **Future Tasks:**
 *   P2: Add email notifications for tipsters when their withdrawal request is processed.
@@ -46,94 +78,96 @@ The agent successfully navigated and resolved several complex backend issues dur
 *   P2: Implement a keyword search functionality within the captured channel messages.
 
 **Completed work in this session**
--   **Implemented Channel Monitoring Feature (V1 - Text Only):**
-    -   Created a new Monitor de Canales section in the admin panel ().
-    -   Admins can activate/deactivate message monitoring for any channel where the bot is present.
-    -   Captured messages are displayed in a chat interface with date filtering.
-    -   Created new backend models (, ) and services () to handle the logic.
-    -   Modified  to intercept and save messages from monitored channels.
--   **Resolved Critical Backend & Configuration Bugs:**
-    -   **Prisma/MongoDB Compatibility:** Refactored database operations to use Prisma's  to work around the lack of replica set support for transactions in the environment.
-    -   **Webhook Misconfiguration:** Identified and corrected a hardcoded  in .
-    -   **Data Integrity:** Found and fixed multiple instances of dates being stored as strings instead of , and corrected the code to prevent recurrence.
+-   **Unified Campaign Modals:** The New Campaign and Edit Campaign modals in  were merged to provide a consistent user experience.
+-   **Campaign Cover Image Feature:**
+    -   Implemented image upload functionality in both the create and edit campaign modals.
+    -   Created a new backend endpoint  in .
+    -   Configured static file serving in  to make uploaded images accessible via .
+    -   Updated the  model and associated services () to store and retrieve the .
+-   **Afiliados Tab Implementation (Partial):**
+    -   Added a new Afiliados tab to .
+    -   The tab displays affiliate statistics and a table with referral data (excluding campaign name).
+    -   Updated the backend to include the betting house logo URL in the  API response.
+-   **Domain Update:** Correctly configured the application's domain for the forked environment.
 
 **Earlier issues found/mentioned but not fixed**
--   None.
+-   The P1 Telegram purchase webhook conflict remains blocked.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Telegram bot instability. This session saw two more instances: a hardcoded webhook URL in the supervisor config and the original webhook conflict. This points to a fragile bot setup.
+-   **Issue recurrence in previous fork:** Telegram bot instability.
 -   **Recurrence count:** 3
--   **Status:** BLOCKED (for the original conflict), RESOLVED (for the supervisor config issue).
+-   **Status:** BLOCKED (due to the webhook conflict).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Prisma with MongoDB (No Replica Set):** The key takeaway is that Prisma's transactional features (, unique constraints) are not compatible with this environment. The established workaround is to use  for CUD (Create, Update, Delete) operations.
--   **BSON Data Formatting:** A persistent bug was caused by storing dates as strings. When using raw MongoDB commands, dates **must** be wrapped in the  format to be stored as a proper  object.
--   **Environment Configuration Layers:** A hardcoded  in  overrode the  file, highlighting that configuration can exist at multiple levels and all must be checked during debugging.
--   **Componentization:** The agent made a good decision to create a separate  component instead of adding to the already large (2700+ lines) .
+-   **NestJS Static File Serving:** Configured the backend to serve the local  directory via a public URL prefix () using  in , which was necessary to work with the environment's routing proxy.
+-   **NestJS File Uploads:** Used  to create a file upload endpoint that saves images locally and returns a publicly accessible URL.
+-   **Backend Build Process:** It was discovered that backend changes (especially to controllers and modules) require a manual rebuild (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. inside ) followed by a service restart (backend: stopped
+backend: started) for changes to be applied.
+-   **Frontend Build Process:** Confirmed that frontend changes require a manual rebuild (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. inside ) and service restart (frontend: stopped
+frontend: started).
 
 **key DB schema**
--   ****: Stores configuration for each channel (e.g., , , ).
--   ****: Stores individual captured messages (e.g., , , , , sender info).
+-   ****: Extended with an optional  field.
+-   ****: Contains referral data. Includes the field , which is the likely key to linking a conversion back to a specific  (campaign). It has no direct relation/foreign key to the  model.
 
 **changes in tech stack**
--   No change in the stack itself, but a significant shift in data access patterns away from pure Prisma ORM to a hybrid approach using  for specific operations due to environment constraints.
+-   None.
 
 **All files of reference**
--   
--   
--   
--   
--   
+-    (Primary frontend file)
+-    (Backend campaign logic)
+-    (Backend affiliate data endpoint)
+-    (Backend upload logic)
+-    (Backend entrypoint and configuration)
+-    (Database schema definition)
 
 **Areas that need refactoring**:
--   The  file has grown to over 3900 lines and is a major source of technical debt. It should be broken down into smaller, single-responsibility services (e.g., , ).
--   The main admin page () is still over 2700 lines and would benefit from further decomposition into smaller components.
+-    has grown excessively large and complex. It now manages the state and UI for three distinct tabs (Campaigns, Houses, Affiliates) and multiple complex modals. It should be broken down into smaller, single-responsibility components to improve maintainability.
 
 **key api endpoints**
--   
--   
--   
+-   : **Modified.** Fetches data for the Afiliados tab.
+-   : **New.** Handles cover image uploads for campaigns.
+-   : **New.** Serves the static campaign images.
+-   : **Modified.** Payload updated to include .
+-   : **Modified.** Payload updated to include .
 
 **Critical Info for New Agent**
--   **Primary Language is Spanish:** All communication with the user must be in Spanish.
--   **MongoDB/Prisma Limitations:** Do not use Prisma's  or  on fields with  constraints for the new collections. The established pattern is to use .
--   **Date Formatting is Critical:** When using raw MongoDB commands, all date objects must be explicitly formatted as . Assuming automatic type conversion will lead to bugs.
--   **Start with Blocked Issue:** The first thing to do is to check with the user about the original  issue regarding the Telegram purchase flow and the old server.
+-   **Primary Language:** You must communicate with the user in **Spanish**.
+-   **Manual Build Process:** Any changes to the frontend () or backend () require a manual build (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. in the respective directory) and a service restart (). Forgetting this will cause your changes not to appear, as seen with the backend endpoint registration issue in this session.
+-   **Next Task:** The immediate priority is to complete the Afiliados tab by figuring out how to retrieve and display the Campaign Name for each referral. Start by investigating the  in the  model.
+-   **Pending Verifications:** Once the current task is complete, it is crucial to ask the user to verify all the features implemented in this session and previous ones to ensure the application is stable.
 
 **documents and test reports created in this job**
--    was updated to include the specifications for the new Channel Monitoring feature.
+-    was updated.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Reports the new monitor panel isn't showing any channels. (Status: **Resolved**)
-2.  **User:** Confirms the fix works (perfecto si aparece) and asks the agent to pause. (Status: **Completed**)
-3.  **User:** Reports issues with stopping monitoring and messages not being captured. (Status: **Resolved**)
-4.  **User:** Asks for details on what the chat view will look like. (Status: **Completed**)
-5.  **User:** Approves the implementation plan for on-demand, text-only monitoring. (Status: **Completed**)
-6.  **User:** Asks for clarification on BotFather settings. (Status: **Completed**)
-7.  **User:** Proposes an alternative implementation (on-demand fetching), which the agent explains is not possible. (Status: **Completed**)
-8.  **User:** Requests the new feature to monitor tipster channels. (Status: **Completed**)
-9.  **User:** Provides BotFather setting screenshot. (Status: **Completed**)
-10. **Agent:** Asks the user to perform a final test of the system. (Status: **Completed by user**)
+1.  **User (Image):** Shows an error when trying to upload a cover image. (Status: **Resolved**)
+2.  **User (Image):** Shows that the image is being uploaded incorrectly. (Status: **Resolved**)
+3.  **User (Image):** Shows that after saving changes, the image is not being displayed in the campaign list. (Status: **Resolved**)
+4.  **User:** I need you to create an Affiliates module next to Betting Houses... it should have the Betting House, the name of the person who registered, the date they did it, the country, and the CPA... and also the name of the campaign. (Status: **In Progress**)
 
 **Project Health Check:**
--   **Broken:** The core Telegram purchase flow is still  and needs user verification.
+-   **Broken:** The core Telegram purchase flow remains  due to a webhook conflict.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **Telegraf.js (Telegram Bot API):** The integration was heavily modified to add message-capturing logic. The webhook URL is now correctly configured in the supervisor environment.
+-   **Telegraf.js (Telegram Bot API):** No changes in this session.
 
 **Testing status**
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** [None]
--   **Known regressions:** The data corruption issue with dates being stored as strings was a recurring regression that has now been patched at the code level.
+-   **Test files created:** None
+-   **Known regressions:** None identified.
 
 **Credentials to test flow:**
 -   **Admin:**  / 
 -   **Tipster:**  / 
 
 **What agent forgot to execute**
--   The agent did not re-address the original, P0-level bug regarding the Telegram purchase webhook conflict after implementing the new feature. This critical issue remains blocked and should be the first point of discussion in the next session.</analysis>
+-   The agent did not add the campaign name to the affiliates table, which was part of the user's last request. This is now the highest priority pending task.</analysis>
