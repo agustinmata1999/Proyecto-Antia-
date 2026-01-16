@@ -636,6 +636,52 @@ export default function AffiliateSection({ userName = 'Usuario', userHandle = '@
 
   return (
     <div className="bg-gray-50 min-h-full">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left - Greeting */}
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Hola {userName}</h1>
+            <p className="text-sm text-gray-400">Me alegro de verte de nuevo</p>
+          </div>
+
+          {/* Right - Search, Notification, User */}
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar"
+                className="w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Notification Bell */}
+            <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <Bell className="w-5 h-5 text-gray-500" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            {/* User Profile */}
+            <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                {userAvatar ? (
+                  <img src={userAvatar} alt={userName} className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-white text-sm font-medium">{userName.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{userName}</p>
+                <p className="text-xs text-gray-400">{userHandle}</p>
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="px-6 py-4">
         <div className="grid grid-cols-3 gap-4 mb-6">
