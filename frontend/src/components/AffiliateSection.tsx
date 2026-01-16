@@ -645,18 +645,8 @@ export default function AffiliateSection({ userName = 'Usuario', userHandle = '@
             <p className="text-sm text-gray-400">Me alegro de verte de nuevo</p>
           </div>
 
-          {/* Right - Search, Notification, User */}
+          {/* Right - Notification, User */}
           <div className="flex items-center gap-4">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar"
-                className="w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
             {/* Notification Bell */}
             <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <Bell className="w-5 h-5 text-gray-500" />
