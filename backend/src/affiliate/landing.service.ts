@@ -316,13 +316,6 @@ export class LandingService {
    * Actualizar una landing
    */
   async updateLanding(landingId: string, tipsterId: string, dto: UpdateLandingDto) {
-    // Log incoming data
-    console.log('[LandingService] updateLanding called with:', {
-      landingId,
-      tipsterId,
-      dto: JSON.stringify(dto),
-    });
-
     // Verificar propiedad
     const landing = await this.getLandingById(landingId);
     if (landing.tipsterId !== tipsterId) {
@@ -338,8 +331,6 @@ export class LandingService {
     if (dto.countriesEnabled) updateFields.countries_enabled = dto.countriesEnabled;
     if (dto.isActive !== undefined) updateFields.is_active = dto.isActive;
 
-    console.log('[LandingService] updateFields:', JSON.stringify(updateFields));
-
     // Try to update with ObjectId first
     let updateResult: any = await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
@@ -351,9 +342,8 @@ export class LandingService {
       ],
     });
 
-    // If no documents modified, try with string _id
+    // If no documents modified, try with string _id (for legacy documents)
     if (updateResult.nModified === 0 || updateResult.n === 0) {
-      console.log('[LandingService] ObjectId update failed, trying string _id...');
       updateResult = await this.prisma.$runCommandRaw({
         update: 'tipster_affiliate_landings',
         updates: [
@@ -363,7 +353,6 @@ export class LandingService {
           },
         ],
       });
-      console.log('[LandingService] String _id update result:', JSON.stringify(updateResult));
     }
 
     // Si hay countryConfigs, actualizar items
