@@ -42,6 +42,13 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
   - New endpoint: POST /api/upload/campaign
   - Image preview in create/edit modals
   - Custom image displayed in campaign list (replaces country flags fallback)
+- **"Afiliados" tab (Jan 16, 2026):** New tab in affiliate section showing all referrals
+  - Table columns: Casa de Apuestas, Nombre, Campaña, Fecha, País, Estado, CPA
+  - Stats cards: Total, Aprobados, Pendientes, Ganancias
+  - Campaign name resolution using multiple strategies:
+    1. Extract clickId from tipsterTrackingId (format: tipsterId_clickId)
+    2. Match by house_id from landing_click_events
+    3. Fallback to single campaign if tipster has only one
 
 ## Architecture
 
