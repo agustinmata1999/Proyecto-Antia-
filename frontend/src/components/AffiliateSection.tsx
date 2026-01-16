@@ -1054,6 +1054,131 @@ export default function AffiliateSection() {
             )}
           </div>
         )}
+
+        {/* Affiliates Tab */}
+        {activeTab === 'affiliates' && (
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Afiliados</h2>
+              <button
+                onClick={loadReferrals}
+                disabled={loadingReferrals}
+                className="text-sm text-blue-500 hover:text-blue-600 disabled:opacity-50"
+              >
+                {loadingReferrals ? 'Actualizando...' : 'Actualizar'}
+              </button>
+            </div>
+
+            {/* Stats Cards */}
+            {referralsData && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-500">Total</p>
+                  <p className="text-2xl font-bold text-gray-900">{referralsData.stats.total}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <p className="text-sm text-green-600">Aprobados</p>
+                  <p className="text-2xl font-bold text-green-700">{referralsData.stats.approved}</p>
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-4">
+                  <p className="text-sm text-yellow-600">Pendientes</p>
+                  <p className="text-2xl font-bold text-yellow-700">{referralsData.stats.pending}</p>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-sm text-blue-600">Ganancias</p>
+                  <p className="text-2xl font-bold text-blue-700">{formatPrice(referralsData.stats.totalEarningsEur)}</p>
+                </div>
+              </div>
+            )}
+
+            {loadingReferrals ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="text-gray-500 mt-4">Cargando afiliados...</p>
+              </div>
+            ) : referralsData && referralsData.referrals.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Casa de Apuestas</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Nombre</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Fecha</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">País</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Estado</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">CPA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referralsData.referrals.map((referral) => (
+                      <tr key={referral.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-10 bg-[#1a1f2e] rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {referral.houseLogoUrl ? (
+                                <img
+                                  src={referral.houseLogoUrl}
+                                  alt={referral.houseName}
+                                  className="max-w-[90%] max-h-[90%] object-contain"
+                                />
+                              ) : (
+                                <span className="text-white font-bold text-xs">{referral.houseName.slice(0, 3)}</span>
+                              )}
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">{referral.houseName}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-900">{referral.userName}</span>
+                          {referral.userEmail && (
+                            <p className="text-xs text-gray-500 truncate max-w-[150px]">{referral.userEmail}</p>
+                          )}
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-600">
+                            {referral.convertedAt ? new Date(referral.convertedAt).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            }) : '-'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-lg" title={referral.country}>
+                            {COUNTRY_INFO[referral.country]?.flag || '🌍'}
+                          </span>
+                          <span className="ml-2 text-sm text-gray-600">{referral.country}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            referral.status === 'APPROVED' 
+                              ? 'bg-green-100 text-green-700' 
+                              : referral.status === 'PENDING'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {referral.status === 'APPROVED' ? 'Aprobado' : referral.status === 'PENDING' ? 'Pendiente' : 'Rechazado'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <span className={`font-semibold ${referral.status === 'APPROVED' ? 'text-green-600' : 'text-gray-400'}`}>
+                            {formatPrice(referral.commissionEur)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="mb-2">No tienes afiliados registrados</p>
+                <p className="text-sm">Comparte tus campañas para empezar a recibir afiliados</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Select Campaign Modal */}
