@@ -1192,16 +1192,21 @@ function TipsterDashboardContent() {
             await productsApi.pause(selectedProduct.id);
           }
         }
+        await loadData();
+        closeModals();
       } else {
         const response = await productsApi.create(payload);
         
         if (formData.active && response.data?.id) {
           await productsApi.publish(response.data.id);
         }
+        
+        // Show success screen for new products
+        setCreatedProduct(response.data);
+        setShowProductForm(false);
+        setShowProductSuccess(true);
+        await loadData();
       }
-
-      await loadData();
-      closeModals();
       
     } catch (error: any) {
       console.error('Error saving product:', error);
