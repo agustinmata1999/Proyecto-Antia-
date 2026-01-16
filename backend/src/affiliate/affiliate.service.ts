@@ -825,6 +825,8 @@ export class AffiliateService {
         houseId: conv.houseId,
         houseName: house?.name || 'Desconocido',
         houseSlug: house?.slug || '',
+        houseLogoUrl: house?.logoUrl || null,
+        userName: conv.userEmail?.split('@')[0] || conv.userTelegram || 'Usuario',
         userEmail: conv.userEmail || null,
         userTelegram: conv.userTelegram || null,
         country: conv.countryCode || 'N/A',
