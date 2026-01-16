@@ -15,7 +15,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://channelmonitor.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://telegram-product.preview.emergentagent.com')
 
 # Test credentials
 TIPSTER_WITH_TELEGRAM_EMAIL = "fausto.perez@antia.com"
