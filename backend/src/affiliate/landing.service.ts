@@ -340,7 +340,8 @@ export class LandingService {
 
     console.log('[LandingService] updateFields:', JSON.stringify(updateFields));
 
-    await this.prisma.$runCommandRaw({
+    // Try to update with ObjectId first
+    let updateResult: any = await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
       updates: [
         {
@@ -349,6 +350,21 @@ export class LandingService {
         },
       ],
     });
+
+    // If no documents modified, try with string _id
+    if (updateResult.nModified === 0 || updateResult.n === 0) {
+      console.log('[LandingService] ObjectId update failed, trying string _id...');
+      updateResult = await this.prisma.$runCommandRaw({
+        update: 'tipster_affiliate_landings',
+        updates: [
+          {
+            q: { _id: landingId },
+            u: { $set: updateFields },
+          },
+        ],
+      });
+      console.log('[LandingService] String _id update result:', JSON.stringify(updateResult));
+    }
 
     // Si hay countryConfigs, actualizar items
     if (dto.countryConfigs) {
