@@ -1982,7 +1982,11 @@ function TipsterDashboardContent() {
         )}
 
         {activeView === 'referrals' && (
-          <AffiliateSection />
+          <AffiliateSection 
+            userName={user?.name || user?.email?.split('@')[0] || 'Usuario'} 
+            userHandle={user?.email ? `@${user.email.split('@')[0]}` : '@usuario'}
+            userAvatar={user?.avatarUrl}
+          />
         )}
 
         {activeView === 'payouts' && (
