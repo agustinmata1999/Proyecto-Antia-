@@ -1945,176 +1945,107 @@ function TipsterDashboardContent() {
                 </>
               )}
 
-            {/* Sección de Ventas - Only shown when 'ventas' tab is active */}
-            {productsSubView === 'ventas' && (
-              <div>
-                {/* Stats Cards */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                    {/* Total ventas */}
-                    <div className="py-4 md:py-0 md:px-6 first:pt-0 md:first:pl-0 last:pb-0 md:last:pr-0">
-                      <div className="flex items-baseline justify-between md:block">
-                        <div>
-                          <p className="text-sm text-gray-500">Total ventas</p>
-                          <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} sold</p>
-                        </div>
-                        <div className="text-right md:text-left md:mt-1">
-                        <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.grossEarningsCents || 0).replace('€', '')}€</p>
-                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
+              {/* Sección de Ventas - Only shown when 'ventas' tab is active */}
+              {productsSubView === 'ventas' && (
+                <>
+                  {recentSales.length === 0 ? (
+                    <div className="p-16 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
                       </div>
+                      <p className="text-gray-500 font-medium">Aún no tienes ventas</p>
+                      <p className="text-sm text-gray-400 mt-1">Comparte tus productos para empezar a vender</p>
                     </div>
-                  </div>
-                  
-                  {/* Transacciones */}
-                  <div className="py-4 md:py-0 md:px-6">
-                    <div className="flex items-baseline justify-between md:block">
-                      <div>
-                        <p className="text-sm text-gray-500">Transacciones</p>
-                        <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} Ventas</p>
-                      </div>
-                      <div className="text-right md:text-left md:mt-1">
-                        <p className="text-2xl font-bold text-gray-900">{salesStats?.totalSales || 0}</p>
-                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
-                      </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[800px]">
+                        <thead>
+                          <tr className="border-b border-gray-100">
+                            <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Nombre</th>
+                            <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Fecha</th>
+                            <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Usuario</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Precio</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Bruto</th>
+                            <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Neto</th>
+                            <th className="px-6 py-4 text-right text-sm font-medium text-gray-700">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {recentSales.map((sale: any) => {
+                            const product = (products as any[]).find((p: any) => p.id === sale.productId);
+                            const grossCents = sale.amountCents || 0;
+                            const netCents = Math.round(grossCents * 0.9);
+                            
+                            const getPaymentLogo = (provider: string) => {
+                              switch (provider) {
+                                case 'stripe':
+                                  return (
+                                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                      <span className="text-white text-[10px] font-bold">Stripe</span>
+                                    </div>
+                                  );
+                                case 'redsys':
+                                  return (
+                                    <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
+                                      <span className="text-white text-[10px] font-bold">Redsys</span>
+                                    </div>
+                                  );
+                                default:
+                                  return (
+                                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                                      <span className="text-white font-bold text-lg">A</span>
+                                    </div>
+                                  );
+                              }
+                            };
+                            
+                            return (
+                              <tr key={sale.id} className="hover:bg-gray-50/50 transition">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    {getPaymentLogo(sale.paymentProvider)}
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900">{product?.title || 'Producto'}</p>
+                                      <p className="text-xs text-gray-400">ID{sale.id?.slice(-5) || '00000'}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-4">
+                                  <p className="text-sm text-gray-700">
+                                    {new Date(sale.paidAt || sale.createdAt).toLocaleDateString('es-ES', {
+                                      day: 'numeric',
+                                      month: 'long'
+                                    })}
+                                  </p>
+                                </td>
+                                <td className="px-4 py-4">
+                                  <p className="text-sm text-blue-600">{sale.email || sale.telegramUsername || '-'}</p>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <p className="text-sm text-gray-700">{formatPrice(grossCents)}</p>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <p className="text-sm text-gray-700">{formatPrice(grossCents)}</p>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <p className="text-sm text-gray-700">{formatPrice(netCents)}</p>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <p className="text-sm font-medium text-gray-900">{formatPrice(netCents)}</p>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-                  
-                  {/* Ventas netas */}
-                  <div className="py-4 md:py-0 md:px-6 last:pb-0 md:last:pr-0">
-                    <div className="flex items-baseline justify-between md:block">
-                      <div>
-                        <p className="text-sm text-gray-500">Ventas netas</p>
-                        <p className="text-xs text-gray-400">venta netas</p>
-                      </div>
-                      <div className="text-right md:text-left md:mt-1">
-                        <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.netEarningsCents || 0).replace('€', '')}€</p>
-                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Sales Table */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {recentSales.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-500 font-medium">Aún no tienes ventas</p>
-                    <p className="text-sm text-gray-400 mt-1">Comparte tus productos para empezar a vender</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[800px]">
-                      <thead>
-                        <tr className="border-b border-gray-100">
-                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Nombre</th>
-                          <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Fecha</th>
-                          <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Usuario</th>
-                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Precio</th>
-                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Bruto</th>
-                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Neto</th>
-                          <th className="px-6 py-4 text-right text-sm font-medium text-gray-700">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                        {recentSales.map((sale: any) => {
-                          const product = (products as any[]).find((p: any) => p.id === sale.productId);
-                          // Calculate net (assuming 10% platform fee for demo)
-                          const grossCents = sale.amountCents || 0;
-                          const netCents = Math.round(grossCents * 0.9);
-                          
-                          // Payment provider logo
-                          const getPaymentLogo = (provider: string) => {
-                            switch (provider) {
-                              case 'stripe':
-                                return (
-                                  <div className="w-12 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded flex items-center justify-center">
-                                    <span className="text-white text-xs font-bold">Stripe</span>
-                                  </div>
-                                );
-                              case 'redsys':
-                                return (
-                                  <div className="w-12 h-8 bg-red-500 rounded flex items-center justify-center">
-                                    <span className="text-white text-xs font-bold">Redsys</span>
-                                  </div>
-                                );
-                              case 'bizum':
-                                return (
-                                  <div className="w-12 h-8 bg-teal-500 rounded flex items-center justify-center">
-                                    <span className="text-white text-[10px] font-bold">bizum</span>
-                                  </div>
-                                );
-                              case 'apple_pay':
-                                return (
-                                  <div className="w-12 h-8 bg-black rounded flex items-center justify-center">
-                                    <span className="text-white text-[10px] font-bold">Pay</span>
-                                  </div>
-                                );
-                              case 'visa':
-                                return (
-                                  <div className="w-12 h-8 bg-blue-700 rounded flex items-center justify-center">
-                                    <span className="text-white text-[10px] font-bold italic">VISA</span>
-                                  </div>
-                                );
-                              default:
-                                return (
-                                  <div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center">
-                                    <span className="text-gray-600 text-[10px] font-medium">Pago</span>
-                                  </div>
-                                );
-                            }
-                          };
-                          
-                          return (
-                            <tr key={sale.id} className="hover:bg-gray-50/50 transition">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  {getPaymentLogo(sale.paymentProvider)}
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-900">{product?.title || 'Producto'}</p>
-                                    <p className="text-xs text-gray-400">ID{sale.id?.slice(-5) || '00000'}</p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-4">
-                                <p className="text-sm text-gray-700">
-                                  {new Date(sale.paidAt || sale.createdAt).toLocaleDateString('es-ES', {
-                                    day: 'numeric',
-                                    month: 'long'
-                                  }).replace(' de ', ' ').replace(/^(\d+)/, '$1')}
-                                </p>
-                              </td>
-                              <td className="px-4 py-4">
-                                <p className="text-sm text-blue-600">{sale.email || sale.telegramUsername || '-'}</p>
-                              </td>
-                              <td className="px-4 py-4 text-right">
-                                <p className="text-sm text-gray-700">{formatPrice(grossCents).replace('€', '')}€</p>
-                              </td>
-                              <td className="px-4 py-4 text-right">
-                                <p className="text-sm text-gray-700">{formatPrice(grossCents).replace('€', '')}€</p>
-                              </td>
-                              <td className="px-4 py-4 text-right">
-                                <p className="text-sm text-gray-700">{formatPrice(netCents).replace('€', '')}€</p>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <p className="text-sm font-medium text-gray-900">{formatPrice(netCents).replace('€', '')}€</p>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                  )}
+                </>
+              )}
             </div>
-            )}
-          </>
+          </div>
         )}
 
         {activeView === 'referrals' && (
