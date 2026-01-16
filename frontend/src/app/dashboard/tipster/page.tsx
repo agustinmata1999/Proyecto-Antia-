@@ -1712,21 +1712,44 @@ function TipsterDashboardContent() {
               </div>
             </div>
 
-            {/* Productos Tab */}
+            {/* Tabs: Mis productos / Ventas */}
             <div className="flex items-center justify-between mb-6">
-              <div className="border-b-2 border-slate-800">
-                <span className="text-base font-semibold text-gray-900 pb-2 inline-block">Productos</span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setProductsSubView('productos')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+                    productsSubView === 'productos'
+                      ? 'bg-slate-800 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="tab-mis-productos"
+                >
+                  Mis productos
+                </button>
+                <button
+                  onClick={() => setProductsSubView('ventas')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+                    productsSubView === 'ventas'
+                      ? 'bg-slate-800 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="tab-ventas"
+                >
+                  Ventas
+                </button>
               </div>
-              <button 
-                onClick={handleCreateProduct}
-                className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition text-sm font-medium flex items-center gap-2"
-                data-testid="create-product-btn"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Crear Producto
-              </button>
+              {productsSubView === 'productos' && (
+                <button 
+                  onClick={handleCreateProduct}
+                  className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition text-sm font-medium flex items-center gap-2"
+                  data-testid="create-product-btn"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Crear Producto
+                </button>
+              )}
             </div>
 
             {/* Products List */}
