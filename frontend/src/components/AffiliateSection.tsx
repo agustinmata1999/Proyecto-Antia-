@@ -537,16 +537,21 @@ export default function AffiliateSection() {
   };
 
   const openSelectModal = () => {
-    setSelectedHouses([]);
-    setModalSearch('');
-    setShowSelectModal(true);
+    // Reset and open create campaign modal directly
+    setNewCampaign({
+      title: '',
+      description: '',
+      channel: 'Telegram',
+      countriesEnabled: [],
+      countryConfigs: [],
+    });
+    setNewCampaignAvailableHouses({});
+    setNewCampaignError('');
+    setShowCreateModal(true);
   };
 
   const confirmSelection = () => {
-    setNewCampaign(prev => ({
-      ...prev,
-      selectedHouseIds: selectedHouses,
-    }));
+    // This function is no longer used
     setShowSelectModal(false);
     setShowCreateModal(true);
   };
