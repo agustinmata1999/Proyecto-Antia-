@@ -48,11 +48,14 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
   - Campaign name resolution using multiple strategies:
     1. Extract clickId from tipsterTrackingId (format: tipsterId_clickId)
     2. Match by house_id from landing_click_events
-- **Sales Section as Tab in "Mis Productos" (Jan 16, 2026):** New "Ventas" tab added alongside "Mis productos"
-  - **Tabs system:** "Mis productos" (product list + create button) | "Ventas" (sales stats + table)
-  - Stats cards: Total ventas, Transacciones, Ventas netas (with +6.9% indicator)
-  - Table columns: Nombre (payment logo + product + ID), Fecha, Usuario, Precio, Bruto, Neto, Total
-  - Design styled to match AntiaPay reference
+- **Complete "Mis productos" Redesign (Jan 16, 2026):** Full redesign to match AntiaPay reference
+  - **Header:** "Productos" title with search bar and user info
+  - **Stats Cards (3):** Total ventas, Transacciones, Suscripciones with +6.9% indicators
+  - **Tabs:** "Mis productos" | "Ventas" with underline style
+  - **Products Table:** Columns: Nombre (logo+title+ID), Pago, Precio, Ventas, Total, Acciones
+  - **Actions:** Edit button, View stats button, Copy URL button (blue)
+  - **Create Product button** in the top-right corner
+  - **Sales Tab:** Displays sales table with payment logos, dates, user emails, pricing breakdown
     3. Fallback to single campaign if tipster has only one
 - **Campaign image save fix (Jan 16, 2026):** Fixed bug where campaign cover images weren't being saved
   - Root cause: MongoDB documents had `_id` stored as string instead of ObjectId
