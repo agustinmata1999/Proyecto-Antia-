@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { affiliateApi } from '@/lib/api';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { Search, Plus, Check, X, ChevronDown, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Search, Plus, Check, X, ChevronDown, Trash2, Upload, Image as ImageIcon, Users } from 'lucide-react';
 
 interface HouseWithLink {
   house: {
