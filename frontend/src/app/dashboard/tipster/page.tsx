@@ -1219,7 +1219,9 @@ function TipsterDashboardContent() {
   const closeModals = () => {
     setShowProductForm(false);
     setShowProductDetail(false);
+    setShowProductSuccess(false);
     setSelectedProduct(null);
+    setCreatedProduct(null);
     setFormError('');
   };
 
