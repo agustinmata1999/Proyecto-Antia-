@@ -1869,114 +1869,172 @@ function TipsterDashboardContent() {
               </div>
             )}
 
-            {/* Historial de Ventas */}
-            <div className="bg-white rounded-xl shadow-sm mt-8">
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900">Historial de Ventas</h2>
-                <p className="text-sm text-gray-500 mt-1">Todas las ventas realizadas a través de tus productos</p>
+            {/* Sección de Ventas - Estilo AntiaPay */}
+            <div className="mt-10">
+              {/* Stats Cards */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                  {/* Total ventas */}
+                  <div className="py-4 md:py-0 md:px-6 first:pt-0 md:first:pl-0 last:pb-0 md:last:pr-0">
+                    <div className="flex items-baseline justify-between md:block">
+                      <div>
+                        <p className="text-sm text-gray-500">Total ventas</p>
+                        <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} sold</p>
+                      </div>
+                      <div className="text-right md:text-left md:mt-1">
+                        <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.grossEarningsCents || 0).replace('€', '')}€</p>
+                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Transacciones */}
+                  <div className="py-4 md:py-0 md:px-6">
+                    <div className="flex items-baseline justify-between md:block">
+                      <div>
+                        <p className="text-sm text-gray-500">Transacciones</p>
+                        <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} Ventas</p>
+                      </div>
+                      <div className="text-right md:text-left md:mt-1">
+                        <p className="text-2xl font-bold text-gray-900">{salesStats?.totalSales || 0}</p>
+                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Ventas netas */}
+                  <div className="py-4 md:py-0 md:px-6 last:pb-0 md:last:pr-0">
+                    <div className="flex items-baseline justify-between md:block">
+                      <div>
+                        <p className="text-sm text-gray-500">Ventas netas</p>
+                        <p className="text-xs text-gray-400">venta netas</p>
+                      </div>
+                      <div className="text-right md:text-left md:mt-1">
+                        <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.netEarningsCents || 0).replace('€', '')}€</p>
+                        <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               
-              <div className="overflow-x-auto">
+              {/* Sales Table */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {recentSales.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-16">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
-                    <p className="text-gray-500">Aún no tienes ventas</p>
+                    <p className="text-gray-500 font-medium">Aún no tienes ventas</p>
                     <p className="text-sm text-gray-400 mt-1">Comparte tus productos para empezar a vender</p>
                   </div>
                 ) : (
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50">
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método de Pago</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Importe</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {recentSales.map((sale: any) => {
-                        const product = (products as any[]).find((p: any) => p.id === sale.productId);
-                        return (
-                          <tr key={sale.id} className="hover:bg-gray-50 transition">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {new Date(sale.paidAt || sale.createdAt).toLocaleDateString('es-ES', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(sale.paidAt || sale.createdAt).toLocaleTimeString('es-ES', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {product?.title || 'Producto eliminado'}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {product?.billingType === 'SUBSCRIPTION' ? 'Suscripción' : 'Pago único'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900">{sale.email || '-'}</div>
-                              {sale.telegramUsername && (
-                                <div className="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
-                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                  </svg>
-                                  @{sale.telegramUsername}
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[800px]">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Nombre</th>
+                          <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Fecha</th>
+                          <th className="px-4 py-4 text-left text-sm font-medium text-gray-700">Usuario</th>
+                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Precio</th>
+                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Bruto</th>
+                          <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Neto</th>
+                          <th className="px-6 py-4 text-right text-sm font-medium text-gray-700">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {recentSales.map((sale: any) => {
+                          const product = (products as any[]).find((p: any) => p.id === sale.productId);
+                          // Calculate net (assuming 10% platform fee for demo)
+                          const grossCents = sale.amountCents || 0;
+                          const netCents = Math.round(grossCents * 0.9);
+                          
+                          // Payment provider logo
+                          const getPaymentLogo = (provider: string) => {
+                            switch (provider) {
+                              case 'stripe':
+                                return (
+                                  <div className="w-12 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">Stripe</span>
+                                  </div>
+                                );
+                              case 'redsys':
+                                return (
+                                  <div className="w-12 h-8 bg-red-500 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">Redsys</span>
+                                  </div>
+                                );
+                              case 'bizum':
+                                return (
+                                  <div className="w-12 h-8 bg-teal-500 rounded flex items-center justify-center">
+                                    <span className="text-white text-[10px] font-bold">bizum</span>
+                                  </div>
+                                );
+                              case 'apple_pay':
+                                return (
+                                  <div className="w-12 h-8 bg-black rounded flex items-center justify-center">
+                                    <span className="text-white text-[10px] font-bold">Pay</span>
+                                  </div>
+                                );
+                              case 'visa':
+                                return (
+                                  <div className="w-12 h-8 bg-blue-700 rounded flex items-center justify-center">
+                                    <span className="text-white text-[10px] font-bold italic">VISA</span>
+                                  </div>
+                                );
+                              default:
+                                return (
+                                  <div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center">
+                                    <span className="text-gray-600 text-[10px] font-medium">Pago</span>
+                                  </div>
+                                );
+                            }
+                          };
+                          
+                          return (
+                            <tr key={sale.id} className="hover:bg-gray-50/50 transition">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  {getPaymentLogo(sale.paymentProvider)}
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-900">{product?.title || 'Producto'}</p>
+                                    <p className="text-xs text-gray-400">ID{sale.id?.slice(-5) || '00000'}</p>
+                                  </div>
                                 </div>
-                              )}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                sale.paymentProvider === 'stripe' 
-                                  ? 'bg-purple-100 text-purple-800' 
-                                  : sale.paymentProvider === 'redsys'
-                                  ? 'bg-orange-100 text-orange-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {sale.paymentProvider === 'stripe' && '💳 Stripe'}
-                                {sale.paymentProvider === 'redsys' && '🏦 Redsys'}
-                                {sale.paymentProvider === 'test_simulated' && '🧪 Test'}
-                                {!['stripe', 'redsys', 'test_simulated'].includes(sale.paymentProvider) && (sale.paymentProvider || 'Desconocido')}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <div className="text-sm font-semibold text-green-600">
-                                {formatPrice(sale.amountCents)}
-                              </div>
-                              <div className="text-xs text-gray-500">{sale.currency || 'EUR'}</div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                              </td>
+                              <td className="px-4 py-4">
+                                <p className="text-sm text-gray-700">
+                                  {new Date(sale.paidAt || sale.createdAt).toLocaleDateString('es-ES', {
+                                    day: 'numeric',
+                                    month: 'long'
+                                  }).replace(' de ', ' ').replace(/^(\d+)/, '$1')}
+                                </p>
+                              </td>
+                              <td className="px-4 py-4">
+                                <p className="text-sm text-blue-600">{sale.email || sale.telegramUsername || '-'}</p>
+                              </td>
+                              <td className="px-4 py-4 text-right">
+                                <p className="text-sm text-gray-700">{formatPrice(grossCents).replace('€', '')}€</p>
+                              </td>
+                              <td className="px-4 py-4 text-right">
+                                <p className="text-sm text-gray-700">{formatPrice(grossCents).replace('€', '')}€</p>
+                              </td>
+                              <td className="px-4 py-4 text-right">
+                                <p className="text-sm text-gray-700">{formatPrice(netCents).replace('€', '')}€</p>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <p className="text-sm font-medium text-gray-900">{formatPrice(netCents).replace('€', '')}€</p>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
-              
-              {recentSales.length > 0 && (
-                <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      Mostrando {recentSales.length} venta{recentSales.length !== 1 ? 's' : ''}
-                    </span>
-                    <div className="text-sm font-medium text-gray-900">
-                      Total: <span className="text-green-600">{formatPrice(recentSales.reduce((sum: number, s: any) => sum + (s.amountCents || 0), 0))}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </>
         )}
