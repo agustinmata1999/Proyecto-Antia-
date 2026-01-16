@@ -98,6 +98,8 @@ function TipsterDashboardContent() {
   });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [showProductSuccess, setShowProductSuccess] = useState(false);
+  const [createdProduct, setCreatedProduct] = useState<any>(null);
   
   // Telegram channels state (multi-canal)
   const [telegramChannels, setTelegramChannels] = useState<TelegramChannel[]>([]);
