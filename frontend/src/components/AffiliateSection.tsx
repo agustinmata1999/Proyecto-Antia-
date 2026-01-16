@@ -417,6 +417,72 @@ export default function AffiliateSection() {
     });
   };
 
+  // Upload campaign image for new campaign
+  const handleNewCampaignImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setNewCampaignUploading(true);
+    setNewCampaignError('');
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${getBaseUrl()}/api/upload/campaign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Error al subir imagen');
+      }
+
+      const data = await res.json();
+      setNewCampaign(prev => ({ ...prev, imageUrl: data.imageUrl }));
+    } catch (err: any) {
+      setNewCampaignError(err.message);
+    } finally {
+      setNewCampaignUploading(false);
+    }
+  };
+
+  // Upload campaign image for edit
+  const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setEditUploading(true);
+    setEditError('');
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${getBaseUrl()}/api/upload/campaign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Error al subir imagen');
+      }
+
+      const data = await res.json();
+      setEditForm(prev => ({ ...prev, imageUrl: data.imageUrl }));
+    } catch (err: any) {
+      setEditError(err.message);
+    } finally {
+      setEditUploading(false);
+    }
+  };
+
   const handleSaveEdit = async () => {
     if (!editingCampaign) return;
     setEditError('');
