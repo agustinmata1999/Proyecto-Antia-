@@ -618,6 +618,7 @@ export default function AffiliateSection() {
       title: '',
       description: '',
       channel: 'Telegram',
+      imageUrl: '',
       countriesEnabled: [],
       countryConfigs: [],
     });
