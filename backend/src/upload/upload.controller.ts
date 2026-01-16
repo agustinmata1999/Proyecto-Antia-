@@ -195,7 +195,7 @@ export class UploadController {
     }
 
     const baseUrl = process.env.APP_URL || 'http://localhost:8001';
-    const imageUrl = `${baseUrl}/uploads/campaigns/${file.filename}`;
+    const imageUrl = `${baseUrl}/api/uploads/campaigns/${file.filename}`;
 
     this.logger.log(`Campaign image uploaded by user ${req.user.id}: ${imageUrl}`);
 
