@@ -474,27 +474,30 @@ export default function AffiliateSection() {
   };
 
   const handleCreateCampaign = async () => {
+    setNewCampaignError('');
+    
     if (!newCampaign.title.trim()) {
-      alert('El nombre de la campaña es obligatorio');
+      setNewCampaignError('El nombre de la campaña es obligatorio');
       return;
     }
-    if (newCampaign.selectedHouseIds.length === 0) {
-      alert('Selecciona al menos una casa de apuestas');
+
+    if (newCampaign.countriesEnabled.length === 0) {
+      setNewCampaignError('Selecciona al menos un país');
       return;
+    }
+
+    // Validate that each country has at least one house
+    for (const country of newCampaign.countriesEnabled) {
+      const config = newCampaign.countryConfigs.find(c => c.country === country);
+      if (!config || config.items.length === 0) {
+        setNewCampaignError(`Añade al menos una casa de apuestas para ${COUNTRY_INFO[country]?.name || country}`);
+        return;
+      }
     }
 
     setSaving(true);
     try {
       const token = localStorage.getItem('access_token');
-      
-      // Create country configs from selected houses
-      const countryConfigs = newCampaign.countriesEnabled.map(country => ({
-        country,
-        items: newCampaign.selectedHouseIds.map((houseId, index) => ({
-          bettingHouseId: houseId,
-          orderIndex: index,
-        })),
-      }));
 
       const res = await fetch(`${getBaseUrl()}/api/tipster/landings`, {
         method: 'POST',
@@ -506,7 +509,7 @@ export default function AffiliateSection() {
           title: newCampaign.title,
           description: newCampaign.description || undefined,
           countriesEnabled: newCampaign.countriesEnabled,
-          countryConfigs,
+          countryConfigs: newCampaign.countryConfigs,
         }),
       });
 
@@ -521,11 +524,13 @@ export default function AffiliateSection() {
         title: '',
         description: '',
         channel: 'Telegram',
-        selectedHouseIds: [],
-        countriesEnabled: ['ES'],
+        countriesEnabled: [],
+        countryConfigs: [],
       });
+      setNewCampaignAvailableHouses({});
+      setNewCampaignError('');
     } catch (err: any) {
-      alert(err.message);
+      setNewCampaignError(err.message);
     } finally {
       setSaving(false);
     }
