@@ -98,6 +98,8 @@ interface Referral {
   clickedAt: string | null;
   convertedAt: string | null;
   createdAt: string;
+  campaignName: string | null;
+  campaignId: string | null;
 }
 
 interface ReferralsData {
