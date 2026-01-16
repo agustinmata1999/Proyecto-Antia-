@@ -1002,19 +1002,24 @@ export default function AffiliateSection() {
       {/* Create Campaign Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Nueva Campaña</h2>
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewCampaignError('');
+                  }}
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
+            </div>
 
-              <div className="space-y-4">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
                 {/* Campaign Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1029,41 +1034,32 @@ export default function AffiliateSection() {
                   />
                 </div>
 
-                {/* Channel */}
+                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Canal
+                    Descripción (opcional)
                   </label>
-                  <select
-                    value={newCampaign.channel}
-                    onChange={(e) => setNewCampaign(prev => ({ ...prev, channel: e.target.value }))}
+                  <textarea
+                    placeholder="Descripción de la campaña"
+                    value={newCampaign.description}
+                    onChange={(e) => setNewCampaign(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Telegram">Telegram</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Web">Web</option>
-                  </select>
+                    rows={2}
+                  />
                 </div>
 
-                {/* Countries */}
+                {/* Countries Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Países objetivo
+                    Seleccionar países
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(COUNTRY_INFO).slice(0, 6).map(([code, info]) => (
+                    {Object.entries(COUNTRY_INFO).map(([code, info]) => (
                       <button
                         key={code}
                         type="button"
-                        onClick={() => {
-                          setNewCampaign(prev => ({
-                            ...prev,
-                            countriesEnabled: prev.countriesEnabled.includes(code)
-                              ? prev.countriesEnabled.filter(c => c !== code)
-                              : [...prev.countriesEnabled, code]
-                          }));
-                        }}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        onClick={() => handleNewCampaignCountryToggle(code)}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                           newCampaign.countriesEnabled.includes(code)
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -1075,49 +1071,124 @@ export default function AffiliateSection() {
                   </div>
                 </div>
 
-                {/* Selected Houses */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Casas seleccionadas ({selectedHouses.length})
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedHouses.map(id => {
-                      const house = houses.find(h => h.house.id === id)?.house;
-                      return house ? (
-                        <span
-                          key={id}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                        >
-                          {house.name}
-                          <button
-                            onClick={() => setSelectedHouses(prev => prev.filter(hid => hid !== id))}
-                            className="hover:bg-blue-200 rounded-full p-0.5"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-              </div>
+                {/* Betting houses per country */}
+                {newCampaign.countriesEnabled.map(country => {
+                  const housesForCountry = newCampaignAvailableHouses[country] || [];
+                  const selectedHouseIds = newCampaign.countryConfigs
+                    .find(c => c.country === country)?.items.map(i => i.bettingHouseId) || [];
+                  
+                  return (
+                    <div key={country} className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <span className="text-xl">{COUNTRY_INFO[country]?.flag}</span>
+                        {COUNTRY_INFO[country]?.name || country}
+                      </h4>
+                      
+                      {/* Selected houses for this country */}
+                      <div className="space-y-2 mb-4">
+                        {newCampaign.countryConfigs
+                          .find(c => c.country === country)
+                          ?.items.map((item, index) => {
+                            const house = housesForCountry.find(h => h.id === item.bettingHouseId);
+                            if (!house) return null;
+                            
+                            return (
+                              <div
+                                key={item.bettingHouseId}
+                                className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg"
+                              >
+                                <span className="font-medium text-gray-400 w-5">{index + 1}.</span>
+                                {house.logoUrl && (
+                                  <div className="w-10 h-8 bg-[#1a1f2e] rounded flex items-center justify-center">
+                                    <img
+                                      src={house.logoUrl}
+                                      alt={house.name}
+                                      className="max-w-[90%] max-h-[90%] object-contain"
+                                    />
+                                  </div>
+                                )}
+                                <span className="flex-1 text-sm font-medium">{house.name}</span>
+                                <span className="text-sm text-green-600 font-medium">
+                                  €{house.commissionPerReferralEur}/ref
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleNewCampaignRemoveHouseFromCountry(country, item.bettingHouseId)}
+                                  className="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        
+                        {selectedHouseIds.length === 0 && (
+                          <p className="text-sm text-gray-400 italic">No hay casas de apuestas seleccionadas</p>
+                        )}
+                      </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleCreateCampaign}
-                  disabled={saving || !newCampaign.title.trim()}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {saving ? 'Creando...' : 'Crear Campaña'}
-                </button>
+                      {/* Add house dropdown */}
+                      <select
+                        onChange={e => {
+                          if (e.target.value) {
+                            handleNewCampaignAddHouseToCountry(country, e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">+ Añadir casa de apuestas...</option>
+                        {housesForCountry
+                          .filter(h => !selectedHouseIds.includes(h.id))
+                          .map(h => (
+                            <option key={h.id} value={h.id}>
+                              {h.name} (€{h.commissionPerReferralEur}/ref)
+                            </option>
+                          ))}
+                      </select>
+
+                      {housesForCountry.length === 0 && (
+                        <p className="text-sm text-yellow-600 mt-2">
+                          Cargando casas de apuestas...
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {newCampaign.countriesEnabled.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Selecciona al menos un país para configurar las casas de apuestas
+                  </p>
+                )}
+
+                {/* Error */}
+                {newCampaignError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {newCampaignError}
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewCampaignError('');
+                }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateCampaign}
+                disabled={saving || !newCampaign.title.trim()}
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {saving ? 'Creando...' : 'Crear Campaña'}
+              </button>
             </div>
           </div>
         </div>
