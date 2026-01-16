@@ -817,9 +817,71 @@ export class AffiliateService {
     const houses = await this.prisma.bettingHouse.findMany();
     const housesMap = new Map(houses.map((h) => [h.id, h]));
 
+    // Extract clickIds from tipsterTrackingId (format: tipsterId_clickId)
+    const clickIds: string[] = [];
+    for (const conv of conversions) {
+      if (conv.tipsterTrackingId && conv.tipsterTrackingId.includes('_')) {
+        const parts = conv.tipsterTrackingId.split('_');
+        if (parts.length >= 2) {
+          clickIds.push(parts[1]); // Extract clickId part
+        }
+      }
+    }
+
+    // Get landing_click_events to find landing_id for each clickId
+    let clickToLandingMap = new Map<string, string>();
+    if (clickIds.length > 0) {
+      const clickEventsResult = (await this.prisma.$runCommandRaw({
+        find: 'landing_click_events',
+        filter: { click_id: { $in: clickIds } },
+      })) as any;
+      const clickEvents = clickEventsResult.cursor?.firstBatch || [];
+      for (const event of clickEvents) {
+        if (event.click_id && event.landing_id) {
+          clickToLandingMap.set(event.click_id, event.landing_id);
+        }
+      }
+    }
+
+    // Get unique landing IDs
+    const landingIds = [...new Set(clickToLandingMap.values())];
+    
+    // Get landings (campaigns) for names
+    let landingsMap = new Map<string, any>();
+    if (landingIds.length > 0) {
+      const landingsResult = (await this.prisma.$runCommandRaw({
+        find: 'tipster_affiliate_landings',
+        filter: {},
+      })) as any;
+      const landings = landingsResult.cursor?.firstBatch || [];
+      for (const landing of landings) {
+        const landingId = landing._id?.$oid || landing._id?.toString() || landing._id;
+        landingsMap.set(landingId, landing);
+      }
+    }
+
     // Map to response format
     const referrals = conversions.map((conv) => {
       const house = housesMap.get(conv.houseId);
+      
+      // Extract clickId and find campaign name
+      let campaignName = null;
+      let campaignId = null;
+      if (conv.tipsterTrackingId && conv.tipsterTrackingId.includes('_')) {
+        const parts = conv.tipsterTrackingId.split('_');
+        if (parts.length >= 2) {
+          const clickId = parts[1];
+          const landingId = clickToLandingMap.get(clickId);
+          if (landingId) {
+            const landing = landingsMap.get(landingId);
+            if (landing) {
+              campaignName = landing.title || null;
+              campaignId = landingId;
+            }
+          }
+        }
+      }
+      
       return {
         id: conv.id,
         houseId: conv.houseId,
@@ -837,6 +899,8 @@ export class AffiliateService {
         clickedAt: conv.clickedAt?.toISOString() || null,
         convertedAt: conv.occurredAt?.toISOString() || null,
         createdAt: conv.createdAt.toISOString(),
+        campaignName,
+        campaignId,
       };
     });
 
