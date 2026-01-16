@@ -316,6 +316,13 @@ export class LandingService {
    * Actualizar una landing
    */
   async updateLanding(landingId: string, tipsterId: string, dto: UpdateLandingDto) {
+    // Log incoming data
+    console.log('[LandingService] updateLanding called with:', {
+      landingId,
+      tipsterId,
+      dto: JSON.stringify(dto),
+    });
+
     // Verificar propiedad
     const landing = await this.getLandingById(landingId);
     if (landing.tipsterId !== tipsterId) {
@@ -330,6 +337,8 @@ export class LandingService {
     if (dto.imageUrl !== undefined) updateFields.image_url = dto.imageUrl; // Imagen de portada
     if (dto.countriesEnabled) updateFields.countries_enabled = dto.countriesEnabled;
     if (dto.isActive !== undefined) updateFields.is_active = dto.isActive;
+
+    console.log('[LandingService] updateFields:', JSON.stringify(updateFields));
 
     await this.prisma.$runCommandRaw({
       update: 'tipster_affiliate_landings',
