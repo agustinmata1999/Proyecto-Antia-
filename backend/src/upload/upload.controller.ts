@@ -160,4 +160,54 @@ export class UploadController {
       })),
     };
   }
+
+  @Post('campaign')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload campaign cover image' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: campaignsDir,
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `campaign-${uniqueSuffix}${ext}`);
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB max for campaign image
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedMimes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Solo se permiten imágenes (JPG, PNG, GIF, WEBP)'), false);
+        }
+      },
+    }),
+  )
+  async uploadCampaignImage(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+    if (!file) {
+      throw new BadRequestException('No se recibió ningún archivo');
+    }
+
+    const baseUrl = process.env.APP_URL || 'http://localhost:8001';
+    const imageUrl = `${baseUrl}/uploads/campaigns/${file.filename}`;
+
+    this.logger.log(`Campaign image uploaded by user ${req.user.id}: ${imageUrl}`);
+
+    return {
+      success: true,
+      imageUrl,
+      file: {
+        filename: file.filename,
+        originalname: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+      },
+    };
+  }
 }
