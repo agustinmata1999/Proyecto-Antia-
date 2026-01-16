@@ -1894,20 +1894,23 @@ function TipsterDashboardContent() {
                 ))}
               </div>
             )}
+              </>
+            )}
 
-            {/* Sección de Ventas - Estilo AntiaPay */}
-            <div className="mt-10">
-              {/* Stats Cards */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                  {/* Total ventas */}
-                  <div className="py-4 md:py-0 md:px-6 first:pt-0 md:first:pl-0 last:pb-0 md:last:pr-0">
-                    <div className="flex items-baseline justify-between md:block">
-                      <div>
-                        <p className="text-sm text-gray-500">Total ventas</p>
-                        <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} sold</p>
-                      </div>
-                      <div className="text-right md:text-left md:mt-1">
+            {/* Sección de Ventas - Only shown when 'ventas' tab is active */}
+            {productsSubView === 'ventas' && (
+              <div>
+                {/* Stats Cards */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                    {/* Total ventas */}
+                    <div className="py-4 md:py-0 md:px-6 first:pt-0 md:first:pl-0 last:pb-0 md:last:pr-0">
+                      <div className="flex items-baseline justify-between md:block">
+                        <div>
+                          <p className="text-sm text-gray-500">Total ventas</p>
+                          <p className="text-xs text-gray-400">{salesStats?.totalSales || 0} sold</p>
+                        </div>
+                        <div className="text-right md:text-left md:mt-1">
                         <p className="text-2xl font-bold text-gray-900">{formatPrice(salesStats?.grossEarningsCents || 0).replace('€', '')}€</p>
                         <p className="text-xs text-emerald-500 mt-0.5">+ 6.9%</p>
                       </div>
