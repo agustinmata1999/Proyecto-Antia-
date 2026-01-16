@@ -817,41 +817,36 @@ export class AffiliateService {
     const houses = await this.prisma.bettingHouse.findMany();
     const housesMap = new Map(houses.map((h) => [h.id, h]));
 
-    // Extract clickIds from tipsterTrackingId (format: tipsterId_clickId)
-    const clickIds: string[] = [];
-    for (const conv of conversions) {
-      if (conv.tipsterTrackingId && conv.tipsterTrackingId.includes('_')) {
-        const parts = conv.tipsterTrackingId.split('_');
-        if (parts.length >= 2) {
-          clickIds.push(parts[1]); // Extract clickId part
-        }
+    // Get all landing_click_events for this tipster to map conversions to campaigns
+    const allClicksResult = (await this.prisma.$runCommandRaw({
+      find: 'landing_click_events',
+      filter: { tipster_id: tipsterId },
+    })) as any;
+    const allClicks = allClicksResult.cursor?.firstBatch || [];
+    
+    // Create a map of house_id -> landing_id (most recent click per house)
+    const houseToLandingMap = new Map<string, string>();
+    const clickIdToLandingMap = new Map<string, string>();
+    
+    for (const click of allClicks) {
+      if (click.click_id && click.landing_id) {
+        clickIdToLandingMap.set(click.click_id, click.landing_id);
+      }
+      // Map betting_house_id to landing_id (last click wins)
+      if (click.betting_house_id && click.landing_id) {
+        houseToLandingMap.set(click.betting_house_id, click.landing_id);
       }
     }
 
-    // Get landing_click_events to find landing_id for each clickId
-    let clickToLandingMap = new Map<string, string>();
-    if (clickIds.length > 0) {
-      const clickEventsResult = (await this.prisma.$runCommandRaw({
-        find: 'landing_click_events',
-        filter: { click_id: { $in: clickIds } },
-      })) as any;
-      const clickEvents = clickEventsResult.cursor?.firstBatch || [];
-      for (const event of clickEvents) {
-        if (event.click_id && event.landing_id) {
-          clickToLandingMap.set(event.click_id, event.landing_id);
-        }
-      }
-    }
-
-    // Get unique landing IDs
-    const landingIds = [...new Set(clickToLandingMap.values())];
+    // Get all landing IDs
+    const allLandingIds = [...new Set([...clickIdToLandingMap.values(), ...houseToLandingMap.values()])];
     
     // Get landings (campaigns) for names
     let landingsMap = new Map<string, any>();
-    if (landingIds.length > 0) {
+    if (allLandingIds.length > 0) {
       const landingsResult = (await this.prisma.$runCommandRaw({
         find: 'tipster_affiliate_landings',
-        filter: {},
+        filter: { tipster_id: tipsterId },
       })) as any;
       const landings = landingsResult.cursor?.firstBatch || [];
       for (const landing of landings) {
@@ -864,14 +859,16 @@ export class AffiliateService {
     const referrals = conversions.map((conv) => {
       const house = housesMap.get(conv.houseId);
       
-      // Extract clickId and find campaign name
+      // Try to find campaign name
       let campaignName = null;
       let campaignId = null;
+      
+      // Strategy 1: Extract clickId from tipsterTrackingId (format: tipsterId_clickId)
       if (conv.tipsterTrackingId && conv.tipsterTrackingId.includes('_')) {
         const parts = conv.tipsterTrackingId.split('_');
         if (parts.length >= 2) {
           const clickId = parts[1];
-          const landingId = clickToLandingMap.get(clickId);
+          const landingId = clickIdToLandingMap.get(clickId);
           if (landingId) {
             const landing = landingsMap.get(landingId);
             if (landing) {
@@ -880,6 +877,25 @@ export class AffiliateService {
             }
           }
         }
+      }
+      
+      // Strategy 2: If no clickId match, try to find by house_id
+      if (!campaignName && conv.houseId) {
+        const landingId = houseToLandingMap.get(conv.houseId);
+        if (landingId) {
+          const landing = landingsMap.get(landingId);
+          if (landing) {
+            campaignName = landing.title || null;
+            campaignId = landingId;
+          }
+        }
+      }
+      
+      // Strategy 3: If tipster has only one campaign, use that
+      if (!campaignName && landingsMap.size === 1) {
+        const [onlyLandingId, onlyLanding] = [...landingsMap.entries()][0];
+        campaignName = onlyLanding.title || null;
+        campaignId = onlyLandingId;
       }
       
       return {
