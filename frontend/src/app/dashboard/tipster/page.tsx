@@ -2065,6 +2065,7 @@ function TipsterDashboardContent() {
                 )}
               </div>
             </div>
+            )}
           </>
         )}
 
