@@ -280,6 +280,7 @@ export default function AffiliateSection() {
     setEditForm({
       title: campaign.title,
       description: campaign.description || '',
+      imageUrl: campaign.imageUrl || '',
       countriesEnabled: campaign.countriesEnabled || [],
       countryConfigs: campaign.countryConfigs || [],
     });
