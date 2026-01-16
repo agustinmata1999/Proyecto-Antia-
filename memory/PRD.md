@@ -49,6 +49,9 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
     1. Extract clickId from tipsterTrackingId (format: tipsterId_clickId)
     2. Match by house_id from landing_click_events
     3. Fallback to single campaign if tipster has only one
+- **Campaign image save fix (Jan 16, 2026):** Fixed bug where campaign cover images weren't being saved
+  - Root cause: MongoDB documents had `_id` stored as string instead of ObjectId
+  - Solution: Update query now tries ObjectId first, then falls back to string _id
 
 ## Architecture
 
