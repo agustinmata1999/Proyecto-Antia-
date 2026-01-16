@@ -518,6 +518,7 @@ export default function AffiliateSection() {
         body: JSON.stringify({
           title: editForm.title,
           description: editForm.description || undefined,
+          imageUrl: editForm.imageUrl || undefined,
           countriesEnabled: editForm.countriesEnabled,
           countryConfigs: editForm.countryConfigs,
         }),
