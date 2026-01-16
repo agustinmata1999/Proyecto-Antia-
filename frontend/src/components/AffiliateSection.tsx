@@ -245,6 +245,31 @@ export default function AffiliateSection() {
     }
   };
 
+  const loadReferrals = async () => {
+    setLoadingReferrals(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${getBaseUrl()}/api/affiliate/my-referrals`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setReferralsData(data);
+      }
+    } catch (err) {
+      console.error('Error loading referrals:', err);
+    } finally {
+      setLoadingReferrals(false);
+    }
+  };
+
+  // Load referrals when switching to affiliates tab
+  useEffect(() => {
+    if (activeTab === 'affiliates' && !referralsData) {
+      loadReferrals();
+    }
+  }, [activeTab]);
+
   const handleToggleCampaign = async (campaign: Campaign) => {
     try {
       const token = localStorage.getItem('access_token');
