@@ -145,7 +145,7 @@ export class UploadController {
     }
 
     const baseUrl = process.env.APP_URL || 'http://localhost:8001';
-    const urls = files.map((file) => `${baseUrl}/uploads/tickets/${file.filename}`);
+    const urls = files.map((file) => `${baseUrl}/api/uploads/tickets/${file.filename}`);
 
     this.logger.log(`Uploaded ${files.length} files for ticket`);
 
