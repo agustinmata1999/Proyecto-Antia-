@@ -12,7 +12,7 @@
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
       "static/chunks/117-577207c253b3da47.js",
       "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/css/0bf435828b781a5d.css",
+      "static/css/65b52d37d2e184ed.css",
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/120-13132d16c93c5f8b.js",
       "static/chunks/app/layout-c93cdcc360e448f3.js"
@@ -78,14 +78,6 @@
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/app/dashboard/client/page-bca30d14026dfd68.js"
     ],
-    "/go/[slug]/page": [
-      "static/chunks/webpack-63ff3dccb86087c7.js",
-      "static/chunks/fd9d1056-2ce1b21c64323804.js",
-      "static/chunks/117-577207c253b3da47.js",
-      "static/chunks/main-app-b5146d1b055dd54e.js",
-      "static/chunks/699-d9b0034a5a59d616.js",
-      "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
-    ],
     "/dashboard/admin/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -95,6 +87,14 @@
       "static/chunks/120-13132d16c93c5f8b.js",
       "static/chunks/app/dashboard/admin/page-f727284966f42dc9.js"
     ],
+    "/go/[slug]/page": [
+      "static/chunks/webpack-63ff3dccb86087c7.js",
+      "static/chunks/fd9d1056-2ce1b21c64323804.js",
+      "static/chunks/117-577207c253b3da47.js",
+      "static/chunks/main-app-b5146d1b055dd54e.js",
+      "static/chunks/699-d9b0034a5a59d616.js",
+      "static/chunks/app/go/[slug]/page-09c3462a9b72077a.js"
+    ],
     "/dashboard/tipster/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
       "static/chunks/fd9d1056-2ce1b21c64323804.js",
@@ -103,7 +103,7 @@
       "static/chunks/464-14a4a9243b7bb404.js",
       "static/chunks/507-d12b7e048c64a854.js",
       "static/chunks/120-13132d16c93c5f8b.js",
-      "static/chunks/app/dashboard/tipster/page-b899843e7e8d5fa5.js"
+      "static/chunks/app/dashboard/tipster/page-110424bbebaf06e4.js"
     ],
     "/login/page": [
       "static/chunks/webpack-63ff3dccb86087c7.js",
