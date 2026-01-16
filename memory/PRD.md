@@ -48,7 +48,8 @@ Platform for tipsters to sell access to Telegram channels with betting tips, fea
   - Campaign name resolution using multiple strategies:
     1. Extract clickId from tipsterTrackingId (format: tipsterId_clickId)
     2. Match by house_id from landing_click_events
-- **Sales Section in "Mis Productos" (Jan 16, 2026):** New sales section added to tipster's product page
+- **Sales Section as Tab in "Mis Productos" (Jan 16, 2026):** New "Ventas" tab added alongside "Mis productos"
+  - **Tabs system:** "Mis productos" (product list + create button) | "Ventas" (sales stats + table)
   - Stats cards: Total ventas, Transacciones, Ventas netas (with +6.9% indicator)
   - Table columns: Nombre (payment logo + product + ID), Fecha, Usuario, Precio, Bruto, Neto, Total
   - Design styled to match AntiaPay reference
