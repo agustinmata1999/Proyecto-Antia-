@@ -175,6 +175,7 @@ export class LandingService {
         promotionName: promotion?.name || null,
         title: l.title,
         description: l.description,
+        imageUrl: l.image_url || null, // Imagen de portada
         countriesEnabled: l.countries_enabled || [],
         isActive: l.is_active,
         totalClicks: realClicks,
