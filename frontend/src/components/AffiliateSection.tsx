@@ -1105,6 +1105,7 @@ export default function AffiliateSection() {
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Casa de Apuestas</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Nombre</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Campaña</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Fecha</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">País</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Estado</th>
@@ -1135,6 +1136,11 @@ export default function AffiliateSection() {
                           {referral.userEmail && (
                             <p className="text-xs text-gray-500 truncate max-w-[150px]">{referral.userEmail}</p>
                           )}
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-600">
+                            {referral.campaignName || <span className="text-gray-400 italic">Sin campaña</span>}
+                          </span>
                         </td>
                         <td className="py-4 px-4">
                           <span className="text-sm text-gray-600">
