@@ -118,8 +118,10 @@ export default function AffiliateSection() {
   const { formatPrice } = useCurrency();
   const [houses, setHouses] = useState<HouseWithLink[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [referralsData, setReferralsData] = useState<ReferralsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'campaigns' | 'houses'>('campaigns');
+  const [loadingReferrals, setLoadingReferrals] = useState(false);
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'houses' | 'affiliates'>('campaigns');
   const [error, setError] = useState<string | null>(null);
   
   // Filters
