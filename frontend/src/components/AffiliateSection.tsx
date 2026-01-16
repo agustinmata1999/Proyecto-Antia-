@@ -582,6 +582,7 @@ export default function AffiliateSection() {
         body: JSON.stringify({
           title: newCampaign.title,
           description: newCampaign.description || undefined,
+          imageUrl: newCampaign.imageUrl || undefined,
           countriesEnabled: newCampaign.countriesEnabled,
           countryConfigs: newCampaign.countryConfigs,
         }),
@@ -598,6 +599,7 @@ export default function AffiliateSection() {
         title: '',
         description: '',
         channel: 'Telegram',
+        imageUrl: '',
         countriesEnabled: [],
         countryConfigs: [],
       });
