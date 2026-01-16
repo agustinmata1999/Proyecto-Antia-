@@ -111,11 +111,14 @@ export default function AffiliateSection() {
     title: '',
     description: '',
     channel: 'Telegram',
+    imageUrl: '',
     countriesEnabled: [] as string[],
     countryConfigs: [] as CountryConfig[],
   });
   const [newCampaignAvailableHouses, setNewCampaignAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
   const [newCampaignError, setNewCampaignError] = useState('');
+  const [newCampaignUploading, setNewCampaignUploading] = useState(false);
+  const newCampaignFileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
 
   // Edit campaign modal
@@ -124,11 +127,14 @@ export default function AffiliateSection() {
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
+    imageUrl: '',
     countriesEnabled: [] as string[],
     countryConfigs: [] as CountryConfig[],
   });
   const [editAvailableHouses, setEditAvailableHouses] = useState<Record<string, BettingHouse[]>>({});
   const [editError, setEditError] = useState('');
+  const [editUploading, setEditUploading] = useState(false);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
