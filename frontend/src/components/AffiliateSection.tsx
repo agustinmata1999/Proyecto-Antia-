@@ -829,6 +829,17 @@ export default function AffiliateSection() {
           >
             Casas de apuestas
           </button>
+          <button
+            onClick={() => setActiveTab('affiliates')}
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'affiliates'
+                ? 'border-blue-500 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Afiliados
+          </button>
         </nav>
       </div>
 
