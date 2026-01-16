@@ -797,63 +797,75 @@ export default function AffiliateSection() {
                     key={campaign.id}
                     className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl"
                   >
-                    {/* Campaign Image - Shows countries and betting houses */}
-                    <div className="w-36 h-28 bg-gradient-to-br from-blue-800 via-blue-900 to-indigo-900 rounded-lg flex flex-col items-center justify-center overflow-hidden flex-shrink-0 p-3 relative">
-                      {/* Background pattern */}
-                      <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 left-0 w-full h-full" style={{
-                          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                          backgroundSize: '10px 10px'
-                        }} />
-                      </div>
-                      
-                      {campaign.bettingHouses && campaign.bettingHouses.length > 0 ? (
+                    {/* Campaign Image - Shows custom image or countries */}
+                    <div className="w-36 h-28 bg-gradient-to-br from-blue-800 via-blue-900 to-indigo-900 rounded-lg flex flex-col items-center justify-center overflow-hidden flex-shrink-0 relative">
+                      {campaign.imageUrl ? (
+                        // Show custom campaign image
+                        <img
+                          src={campaign.imageUrl}
+                          alt={campaign.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        // Show countries and betting houses fallback
                         <>
-                          {/* Country flags row */}
-                          <div className="flex gap-1 mb-2 relative z-10">
-                            {campaign.countriesEnabled.slice(0, 4).map(c => (
-                              <span key={c} className="text-lg drop-shadow-md">
-                                {COUNTRY_INFO[c]?.flag || '🏳️'}
-                              </span>
-                            ))}
+                          {/* Background pattern */}
+                          <div className="absolute inset-0 opacity-10">
+                            <div className="absolute top-0 left-0 w-full h-full" style={{
+                              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                              backgroundSize: '10px 10px'
+                            }} />
                           </div>
                           
-                          {/* Betting house logos */}
-                          <div className="flex flex-wrap gap-1 justify-center items-center relative z-10">
-                            {campaign.bettingHouses.slice(0, 3).map((house: any) => (
-                              <div key={house.id} className="w-10 h-7 bg-white rounded shadow-sm flex items-center justify-center">
-                                {house.logoUrl ? (
-                                  <img
-                                    src={house.logoUrl}
-                                    alt={house.name}
-                                    className="max-w-[90%] max-h-[90%] object-contain"
-                                  />
-                                ) : (
-                                  <span className="text-[7px] text-gray-700 font-bold truncate px-0.5">
-                                    {house.name}
+                          {campaign.bettingHouses && campaign.bettingHouses.length > 0 ? (
+                            <div className="p-3">
+                              {/* Country flags row */}
+                              <div className="flex gap-1 mb-2 relative z-10">
+                                {campaign.countriesEnabled.slice(0, 4).map(c => (
+                                  <span key={c} className="text-lg drop-shadow-md">
+                                    {COUNTRY_INFO[c]?.flag || '🏳️'}
                                   </span>
+                                ))}
+                              </div>
+                              
+                              {/* Betting house logos */}
+                              <div className="flex flex-wrap gap-1 justify-center items-center relative z-10">
+                                {campaign.bettingHouses.slice(0, 3).map((house: any) => (
+                                  <div key={house.id} className="w-10 h-7 bg-white rounded shadow-sm flex items-center justify-center">
+                                    {house.logoUrl ? (
+                                      <img
+                                        src={house.logoUrl}
+                                        alt={house.name}
+                                        className="max-w-[90%] max-h-[90%] object-contain"
+                                      />
+                                    ) : (
+                                      <span className="text-[7px] text-gray-700 font-bold truncate px-0.5">
+                                        {house.name}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                                {campaign.bettingHouses.length > 3 && (
+                                  <span className="text-white text-xs font-medium">+{campaign.bettingHouses.length - 3}</span>
                                 )}
                               </div>
-                            ))}
-                            {campaign.bettingHouses.length > 3 && (
-                              <span className="text-white text-xs font-medium">+{campaign.bettingHouses.length - 3}</span>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {/* Large country flags when no betting houses */}
-                          <div className="flex flex-wrap gap-2 justify-center items-center relative z-10">
-                            {campaign.countriesEnabled.slice(0, 4).map(c => (
-                              <span key={c} className="text-3xl drop-shadow-lg">
-                                {COUNTRY_INFO[c]?.flag || '🏳️'}
-                              </span>
-                            ))}
-                          </div>
-                          {campaign.countriesEnabled.length > 4 && (
-                            <span className="text-white text-xs mt-1 opacity-80 relative z-10">
-                              +{campaign.countriesEnabled.length - 4} más
-                            </span>
+                            </div>
+                          ) : (
+                            <div className="p-3">
+                              {/* Large country flags when no betting houses */}
+                              <div className="flex flex-wrap gap-2 justify-center items-center relative z-10">
+                                {campaign.countriesEnabled.slice(0, 4).map(c => (
+                                  <span key={c} className="text-3xl drop-shadow-lg">
+                                    {COUNTRY_INFO[c]?.flag || '🏳️'}
+                                  </span>
+                                ))}
+                              </div>
+                              {campaign.countriesEnabled.length > 4 && (
+                                <span className="text-white text-xs mt-1 opacity-80 relative z-10">
+                                  +{campaign.countriesEnabled.length - 4} más
+                                </span>
+                              )}
+                            </div>
                           )}
                         </>
                       )}
