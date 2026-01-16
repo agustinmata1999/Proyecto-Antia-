@@ -326,6 +326,7 @@ export class LandingService {
 
     if (dto.title !== undefined) updateFields.title = dto.title;
     if (dto.description !== undefined) updateFields.description = dto.description;
+    if (dto.imageUrl !== undefined) updateFields.image_url = dto.imageUrl; // Imagen de portada
     if (dto.countriesEnabled) updateFields.countries_enabled = dto.countriesEnabled;
     if (dto.isActive !== undefined) updateFields.is_active = dto.isActive;
 
