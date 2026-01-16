@@ -1836,7 +1836,7 @@ function TipsterDashboardContent() {
                             <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Precio</th>
                             <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Ventas</th>
                             <th className="px-4 py-4 text-right text-sm font-medium text-gray-700">Total</th>
-                            <th className="px-6 py-4 text-center text-sm font-medium text-blue-500">URL</th>
+                            <th className="px-6 py-4 text-center text-sm font-medium text-gray-700">Acciones</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
