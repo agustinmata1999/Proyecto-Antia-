@@ -119,7 +119,7 @@ interface ReferralsData {
 
 const getBaseUrl = () => '';
 
-export default function AffiliateSection() {
+export default function AffiliateSection({ userName = 'Usuario', userHandle = '@usuario', userAvatar }: AffiliateSectionProps) {
   const { formatPrice } = useCurrency();
   const [houses, setHouses] = useState<HouseWithLink[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
