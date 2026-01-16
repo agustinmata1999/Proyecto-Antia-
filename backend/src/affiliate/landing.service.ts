@@ -57,6 +57,7 @@ export class LandingService {
           slug,
           title: dto.title || null,
           description: dto.description || null,
+          image_url: dto.imageUrl || null, // Imagen de portada
           countries_enabled: dto.countriesEnabled,
           is_active: true,
           total_clicks: 0,
