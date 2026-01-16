@@ -268,6 +268,10 @@ export class UpdateLandingDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  imageUrl?: string; // URL de la imagen de portada
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   countriesEnabled?: string[];
