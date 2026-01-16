@@ -80,6 +80,37 @@ const COUNTRY_INFO: Record<string, { name: string; flag: string }> = {
 const CATEGORIES = ['Casinos', 'Deportes', 'Poker', 'Bingo'];
 const COMMISSION_TYPES = ['CPA', 'RevShare', 'Híbrido'];
 
+// Interface for referrals/affiliates
+interface Referral {
+  id: string;
+  houseId: string;
+  houseName: string;
+  houseSlug: string;
+  houseLogoUrl: string | null;
+  userName: string;
+  userEmail: string | null;
+  userTelegram: string | null;
+  country: string;
+  eventType: string;
+  status: string;
+  commissionCents: number;
+  commissionEur: number;
+  clickedAt: string | null;
+  convertedAt: string | null;
+  createdAt: string;
+}
+
+interface ReferralsData {
+  referrals: Referral[];
+  stats: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    totalEarningsEur: number;
+  };
+}
+
 // For client-side, use relative URL
 const getBaseUrl = () => '';
 
