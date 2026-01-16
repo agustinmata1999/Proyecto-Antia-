@@ -347,6 +347,69 @@ export default function AffiliateSection() {
     });
   };
 
+  // New Campaign - Country toggle
+  const handleNewCampaignCountryToggle = async (country: string) => {
+    const current = newCampaign.countriesEnabled;
+    
+    if (current.includes(country)) {
+      // Remove country
+      setNewCampaign(prev => ({
+        ...prev,
+        countriesEnabled: prev.countriesEnabled.filter(c => c !== country),
+        countryConfigs: prev.countryConfigs.filter(c => c.country !== country),
+      }));
+    } else {
+      // Add country
+      await loadNewCampaignHousesForCountry(country);
+      setNewCampaign(prev => ({
+        ...prev,
+        countriesEnabled: [...prev.countriesEnabled, country],
+        countryConfigs: [...prev.countryConfigs, { country, items: [] }],
+      }));
+    }
+  };
+
+  // New Campaign - Add house to country
+  const handleNewCampaignAddHouseToCountry = (country: string, houseId: string) => {
+    setNewCampaign(prev => {
+      const configs = [...prev.countryConfigs];
+      const configIndex = configs.findIndex(c => c.country === country);
+      
+      if (configIndex === -1) {
+        configs.push({
+          country,
+          items: [{ bettingHouseId: houseId, orderIndex: 0 }],
+        });
+      } else {
+        const items = configs[configIndex].items;
+        if (!items.find(i => i.bettingHouseId === houseId)) {
+          items.push({
+            bettingHouseId: houseId,
+            orderIndex: items.length,
+          });
+        }
+      }
+      
+      return { ...prev, countryConfigs: configs };
+    });
+  };
+
+  // New Campaign - Remove house from country
+  const handleNewCampaignRemoveHouseFromCountry = (country: string, houseId: string) => {
+    setNewCampaign(prev => {
+      const configs = [...prev.countryConfigs];
+      const configIndex = configs.findIndex(c => c.country === country);
+      
+      if (configIndex !== -1) {
+        configs[configIndex].items = configs[configIndex].items
+          .filter(i => i.bettingHouseId !== houseId)
+          .map((item, index) => ({ ...item, orderIndex: index }));
+      }
+      
+      return { ...prev, countryConfigs: configs };
+    });
+  };
+
   const handleSaveEdit = async () => {
     if (!editingCampaign) return;
     setEditError('');
